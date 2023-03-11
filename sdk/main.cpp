@@ -1,5 +1,6 @@
 #include <iostream>
-#include<vector>
+#include <vector>
+#include <cmath>
 using namespace std;
 struct  Ins
 {
@@ -93,6 +94,21 @@ vector<vector<double>>dis(50,vector<double>(50,0));
 vector<Studio> studios;
 vector<Robot> robots;
 void init();
+
+double calcuDis(pair<double, double> a, pair<double, double> b) {
+    return sqrt((a.first - b.first) * (a.first - b.first) + (a.second -b.second) * (a.second -b.second));
+}
+
+void calcuStudioDis() {
+    int num = studios.size();
+    int i,j;
+    for(i = 0; i < num; i++) {
+        for (j = 0; j < i; j++) {
+            dis[j][i] = dis[i][j] = calcuDis(studios[i].pos, studios[j].pos);
+        }
+    }
+}
+
 
 
 int main() {
