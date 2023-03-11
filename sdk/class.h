@@ -3,11 +3,22 @@
 #include <vector>
 #include<string>
 using namespace std;
+
+struct payLoad
+{
+    double angle;
+    double angular_acceleration;
+    double acceleration;
+    double distance;
+};
+
+
 struct  State
 {
     int FrameID; 
     int money;
 };
+
 struct Ins
 {
     int robID;
