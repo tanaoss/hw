@@ -106,31 +106,32 @@ vector<Studio> studios;
 vector<Robot> robots;
 State state;//当前帧数，全局可见
 void init();
-void getNums(string& line,vector<double>&tmp){
+void getNums(char line[],vector<double>&tmp){
         int cnt=0;
         int flag=0;//标识是整数还是小数部分
         int iBase=10;//乘基
-        double fBase=0.1;
-        int iNum=0;
-        double fNum=0.0;//小数部分
+        long long fBase=1;
+        long long iNum=0;
+        long long fNum=0.0;//小数部分
         int sign=1;//符号 
-        for(auto c:line){
+        for(int i=0;i<1024&&line[i]!='\0';i++){
+            char c=line[i];
             if(c>='0'&&c<='9'){
                 if(flag==0){
-                    iNum=iNum*10+int(c-'0');
+                    iNum=iNum*iBase+int(c-'0');
                 }else{
-                    fNum+=double(c-'0')*fBase;
-                    fBase*=fBase;
+                    fNum=fNum*iBase+int(c-'0');
+                    fBase*=10;
                 }
             }else if(c=='.'){
                 flag=1;
             }else if(c==' '){
-                tmp[cnt]=sign*(iNum+fNum);
+                tmp[cnt]=sign*(double)(iNum+(fNum/(fBase+0.0)));
                 cnt++;
                 flag=0;//标识是整数还是小数部分
                 iNum=0;
                 fNum=0.0;//小数部分
-                fBase=0.1;
+                fBase=1;
                 sign=1;//符号 
             }else if(c=='-'){
                 sign=-1;
@@ -138,7 +139,7 @@ void getNums(string& line,vector<double>&tmp){
                 sign=1;
             }
         }
-        tmp[cnt]=sign*(iNum+fNum);
+        tmp[cnt]=sign*(double)(iNum+(fNum/(fBase+0.0)));
 }
 bool readMapUntilOK() {
     char line[1024];
@@ -176,32 +177,35 @@ bool readMapUntilOK() {
     return false;
 }
 bool readStatusUntilOK() {
-    string line;
+     char line[1024];
     cin>>state.FrameID>>state.money;
+    cin.ignore();
     int K;
     int studio_id=0;
     int rob_id=0;
     cin>>K;
+    cin.ignore();
     while (K--)
     {
-        cin>>line;
+        cin.getline(line,1024);
         vector<double> tmp(6,0);
         getNums(line,tmp);
         studios[studio_id].set(studio_id,tmp[0],pair<double,double>(tmp[1],tmp[2]),tmp[3],tmp[4],tmp[5]);
         studio_id++;
     }
     for(int i=0;i<4;i++){
-        cin>>line;
+        cin.getline(line,1024);
         vector<double> tmp(10,0);
         getNums(line,tmp);
         robots[rob_id].set(rob_id,tmp[0],tmp[1],tmp[2],tmp[3],tmp[4],pair<double,double>(tmp[5],tmp[6]),tmp[7],
         pair<double,double>(tmp[8],tmp[9]));
         rob_id++;
     }
-    cin>>line;
-    if(line.compare(string("ok"))!=0)
-        return false;
-    return true;
+    cin.getline(line,1024);
+    if (line[0] == 'O' && line[1] == 'K') {
+            return true;
+        }
+    return false;
 }
 void out_put(vector<Ins>&out){
     for(auto ins:out){
