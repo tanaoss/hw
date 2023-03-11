@@ -198,7 +198,10 @@ bool readStatusUntilOK() {
         pair<double,double>(tmp[8],tmp[9]));
         rob_id++;
     }
-    return false;
+    cin>>line;
+    if(line.compare(string("ok"))!=0)
+        return false;
+    return true;
 }
 void out_put(vector<Ins>&out){
     for(auto ins:out){
