@@ -48,7 +48,7 @@ bool readMapUntilOK() {
 }
 bool readStatusUntilOK() {
     string line;
-    cin>>state.FrameID>>state.money;
+    cin>>state.money;
     cin.ignore();
     int K;
     int studio_id=0;
