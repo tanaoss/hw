@@ -96,7 +96,6 @@ void init();
 
 
 int main() {
-    Ins ins(0,0,0,0,0,0);
-    cout<<ins;
+
     return 0;
 }
