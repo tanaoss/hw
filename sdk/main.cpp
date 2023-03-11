@@ -9,7 +9,7 @@ struct  Ins
     int  buy;
     int sell;
     int destroy;
-    Ins(int _robID,double _forward, double _rotate,int  _buy=-1,int _sell=-1,int _destroy=1):
+    Ins(int _robID,double _forward, double _rotate,int  _buy=-1,int _sell=-1,int _destroy=-1):
     robID(_robID),forward(_forward),rotate(_rotate),buy(_buy),sell(_sell),destroy(_destroy){
 
     }
