@@ -157,7 +157,7 @@ PayLoad calPayload(int robortID) {
     Robot robort = robots[robortID];
     Studio studio = studios[robort.target_id];
 
-    cerr << robortID << "--"<< robort.target_id<<endl;
+    // cerr << robortID << "--"<< robort.target_id<<endl;
 
     double distance = calcuDis(robort.pos, studio.pos);
     double angular_acceleration = robort.get_type == 0? angular_acceleration_no :angular_acceleration_has;
@@ -181,9 +181,8 @@ PayLoad calPayload(int robortID) {
     angle  = gt(angle, Pi)? angle - Pi: angle;
 
 
-    cerr<<"**"<< angle1<<"**dir:"<<robort.direction<<"**"<<angle2<<endl;
-
-    cerr<<"**"<< angle << "**"<<distance<<"**"<<sign<<endl;
+    // cerr<<"**"<< angle1<<"**dir:"<<robort.direction<<"**"<<angle2<<endl;
+    // cerr<<"**"<< angle << "**"<<distance<<"**"<<sign<<endl;
 
     return PayLoad(angle, angular_acceleration, acceleration, distance, sign);
 }
@@ -521,4 +520,5 @@ pair<double,double> get_T_limits(pair<double,double>pos,int id){
     }else if(lt(pos.first-radius,0)&&gt(pos.second+radius,50)){//
 
     }
+    return tmp;
 }
