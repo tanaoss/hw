@@ -10,7 +10,7 @@ vector<Studio> studios;
 vector<Robot> robots;
 State state;//当前帧数，全局可见
 vector<Ins> ins(4);
-vector<vector<int>> material(7);
+vector<int> material[7];
 vector<vector<int>> product(8);
 double EPS=1e-7;
 double acceleration_no;
@@ -82,7 +82,7 @@ bool readStatusUntilOK() {
     int rob_id=0;
     cin>>K;
     cin.ignore();
-    material.clear();
+    for(int i=0;i<7;++i) material[i].clear();
     while (K--)
     {
         vector<double> tmp(6,0);
@@ -95,21 +95,22 @@ bool readStatusUntilOK() {
         }
         if(studios[studio_id].type > 3){
             if(studios[studio_id].type == 4){
-                if(studios[studio_id].bitSatus & 2 == 0) material[1].push_back(studio_id);
-                if(studios[studio_id].bitSatus & 4 == 0) material[2].push_back(studio_id);
+                cerr <<"aaaa"<<studios[studio_id].bitSatus<<endl;
+                if((studios[studio_id].bitSatus & 2) == 0) material[1].push_back(studio_id);
+                if((studios[studio_id].bitSatus & 4) == 0) material[2].push_back(studio_id);
             }
             if(studios[studio_id].type == 5){
-                if(studios[studio_id].bitSatus & 2 == 0) material[1].push_back(studio_id);
-                if(studios[studio_id].bitSatus & 8 == 0) material[3].push_back(studio_id);
+                if((studios[studio_id].bitSatus & 2) == 0) material[1].push_back(studio_id);
+                if((studios[studio_id].bitSatus & 8 )== 0) material[3].push_back(studio_id);
             }
             if(studios[studio_id].type == 6){
-                if(studios[studio_id].bitSatus & 4 == 0) material[2].push_back(studio_id);
-                if(studios[studio_id].bitSatus & 8 == 0) material[3].push_back(studio_id);
+                if((studios[studio_id].bitSatus & 4) == 0) material[2].push_back(studio_id);
+                if((studios[studio_id].bitSatus & 8) == 0) material[3].push_back(studio_id);
             }
             if(studios[studio_id].type == 7){
-                if(studios[studio_id].bitSatus & 16 == 0) material[4].push_back(studio_id);
-                if(studios[studio_id].bitSatus & 32 == 0) material[5].push_back(studio_id);
-                if(studios[studio_id].bitSatus & 64 == 0) material[6].push_back(studio_id);
+                if((studios[studio_id].bitSatus & 16) == 0) material[4].push_back(studio_id);
+                if((studios[studio_id].bitSatus & 32) == 0) material[5].push_back(studio_id);
+                if((studios[studio_id].bitSatus & 64 )== 0) material[6].push_back(studio_id);
             }
         }
         studio_id++;
@@ -181,6 +182,15 @@ void calcuStudioDis()
     }
 }
 
+void print_matr(){
+    int i = 0;
+    int j;
+    for(i = 1 ; i < 7; i++){
+        cerr << "kkkkkkk"<<material[i].size()<<endl;
+        for(j=0;j<material[i].size();j++) 
+            cerr<<"mater "<<i<<"studio "<<material[i][j]<<endl;
+    }
+}
 
 
 PayLoad calPayload(int robortID) {
@@ -328,7 +338,7 @@ void control(vector<PayLoad> payLoad){
             ins[i].forward=roat*6;
         }
         if(can_stop(robots[i].pos,studios[robots[i].target_id].pos,abs(payLoad[i].angle))){
-            
+            //cerr<<"----"<<endl;
             ins[i].rotate=0;
         }else{
             ins[i].rotate=Pi*payLoad[i].sign;
@@ -380,7 +390,7 @@ pair<int,double> pick_point(int robot_id, int state){
     else if(state == 2){
         for(i=0;i<studios.size();i++){
             if(studios[i].type >= 1 && studios[i].type <= 3 && studios[i].r_id==-1 && studios[i].pStatus == 1){  //123 and no robot choose ,get
-                if(studios[i].type <= material.size() && material[studios[i].type].size()>0){
+                if(studios[i].type <= 7 && material[studios[i].type].size()>0){
                     dist=calcuDis(robots[robot_id].pos,studios[i].pos);
                     if(dist<min){
                         min=dist;
