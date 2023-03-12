@@ -3,6 +3,9 @@
 *.bat
 *.exe
 *.dll
+*.sh
+*.txt
+Robot*
 
 # But not these files...
 !.gitignore

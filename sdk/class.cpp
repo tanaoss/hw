@@ -204,6 +204,21 @@ bool checkRobortsCollison(int robotA_id, int robotB_id) {
 }
 
 
+void solveRobortsCollison() {
+    int stopID;
+    for(int i = 0; i < 4; i++) {
+        for(int j = i + 1; j < 4; j++) {
+            if(checkRobortsCollison(i, j)) {
+                //优先级小的先停下来
+                stopID = robots[i] < robots[j] ? i: j;
+                ins[i].forward = 0;
+                //判断停下来的球是否会阻挡路线
+            }
+        }
+    }
+}
+
+
 
 void control(vector<PayLoad> payLoad){
     const double time=0.04;//预测的时间。
@@ -241,7 +256,11 @@ void control(vector<PayLoad> payLoad){
             ins[i].forward=5;
         }
   
-        ins[i].rotate=pie*payLoad[i].sign;
+        if(can_stop(robots[i].pos,studios[robots[i].target_id].pos,payLoad[i].angle)){
+            ins[i].rotate=0;
+        }else{
+            ins[i].rotate=pie*payLoad[i].sign;
+        }
         
         
     }
@@ -579,4 +598,12 @@ pair<double,double> get_T_limits(pair<double,double>pos,int id){
         tmp.second=pie;
     }
     return tmp;
+}
+bool can_stop(pair<double,double>p1,pair<double,double>p2,double angle){
+    double dis=calcuDis(p1,p2);
+    if(lt(sin(angle)*dis,0.4)){
+        return true;
+    }
+    return false;
+
 }
