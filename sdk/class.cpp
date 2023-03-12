@@ -183,7 +183,7 @@ void control(vector<PayLoad> payLoad){
     // }
     auto check=[&](int rid)->bool{
         double radius=robots[rid].get_type==0? 0.45:0.53;
-        double n_x=robots[rid].xy_pos.first*time,n_y=robots[rid].xy_pos.second*time;
+        double n_x=robots[rid].pos.first+robots[rid].xy_pos.first*time,n_y=robots[rid].pos.second+robots[rid].xy_pos.second*time;
         if(lt(n_x-radius,0)||lt(n_y-radius,0)||gt(n_x+radius,50)||gt(n_y+radius,50))
         return false;
         return true;
@@ -209,6 +209,7 @@ void control(vector<PayLoad> payLoad){
                 ins[i].rotate*=Dec_val_ra;
             }
         }
+        
     }
     sort(arr.begin(),arr.end(),cmp);
     for(int i=0;i<4;i++){
