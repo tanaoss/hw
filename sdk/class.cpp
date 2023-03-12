@@ -28,6 +28,7 @@ void initRobortInfo() {
     angular_acceleration_no = 50.0 / inertiaMin;
     angular_acceleration_has = 50.0 /inertiaMax;
 
+
 }
 
 bool readMapUntilOK() {
@@ -194,8 +195,8 @@ void control(vector<PayLoad> payLoad){
         double radius=robots[rid].get_type==0? 0.45:0.53;
         double n_x=robots[rid].pos.first+robots[rid].xy_pos.first*time,n_y=robots[rid].pos.second+robots[rid].xy_pos.second*time;
         if(lt(n_x-radius,0)||lt(n_y-radius,0)||gt(n_x+radius,50)||gt(n_y+radius,50))
-        return false;
         return true;
+        return false;
     };//判断是否有可能撞墙
     auto cmp=[&](int id1,int id2)->bool{
         return robots[id1].get_type>robots[id2].get_type;
@@ -224,7 +225,10 @@ void control(vector<PayLoad> payLoad){
     for(int i=0;i<4;i++){
         double dis_stop=ins[arr[i]].forward*ins[arr[i]].forward/2*payLoad[arr[i]].acceleration;
         for(int j=i+1;j<4;j++){
-            if(lt(calcuDis(robots[arr[i]].pos,robots[arr[j]].pos),dis_stop)){
+            if(lt(calcuDis(robots[arr[i]].pos,robots[arr[j]].pos),dis_stop)&&
+            !(robots[arr[i]].xy_pos.first*robots[arr[j]].xy_pos.first>0&&
+            robots[arr[i]].xy_pos.second*robots[arr[j]].xy_pos.second)
+            ){
                 ins[arr[j]].forward*=Dec_val;
             }
         }
@@ -467,4 +471,20 @@ void robot_action(){
     if(judge_full(2,0.5))full = 1;   //4,5,6 full threshold
     if(judge_full(3,0.5))full = 2;   //7 full threshold Higher priority
     robot_judge(full);
+}
+
+pair<double,double> get_T_limits(pair<double,double>pos,int id){
+    double radius=robots[id].get_type==0? 0.45:0.53;
+    const double pie=3.141592654;
+    pair<double,double>tmp(0.0,0.0);
+    double redundancy=0.2+radius;//冗余，避免频繁转向
+    if(lt(pos.first-radius,0)&&gt(pos.second-radius,0)){//只靠近下方x轴
+
+    }else if(lt(pos.first-radius,0)&&lt(pos.second-radius,0)){//靠近原点
+
+    }else if(lt(pos.first-radius,0)&&lt(pos.second+radius,50)){//只靠近左方的y轴
+
+    }else if(lt(pos.first-radius,0)&&gt(pos.second+radius,50)){//
+
+    }
 }
