@@ -128,12 +128,12 @@ bool lt(double a, double b);// <
 bool ge(double a, double b);// >=
 bool le(double a, double b);// <=
 void initRobortInfo();
-bool readMapUntilOK();
-bool readStatusUntilOK();
-void out_put();
+bool readMapUntilOK();//读地图
+bool readStatusUntilOK();//读判题器输出
+void out_put();//输出指令
 double calcuDis(pair<double, double> a, pair<double, double> b);
 void calcuStudioDis();
-void control(vector<PayLoad> payLoad);
+void control(vector<PayLoad> payLoad);//控制球体运行
 void first_pick_point();
 void robot_action();
 void process();
