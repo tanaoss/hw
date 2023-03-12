@@ -300,7 +300,7 @@ void control(vector<PayLoad> payLoad){
             cerr<<"----"<<endl;
             ins[i].rotate=0;
         }else{
-            ins[i].rotate=payLoad[i].sign;
+            ins[i].rotate=Pi*payLoad[i].sign;
         }
         
         
