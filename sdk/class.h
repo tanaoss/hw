@@ -131,3 +131,5 @@ void out_put(vector<Ins>&out);
 double calcuDis(pair<double, double> a, pair<double, double> b);
 void calcuStudioDis();
 void control(vector<PayLoad> payLoad);
+void first_pick_point();
+void robot_action();

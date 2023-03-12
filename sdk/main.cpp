@@ -17,8 +17,11 @@ int main()
     readMapUntilOK();
     cout<<"OK\n";
     cout.flush();
+    int count = 0;
     while (cin>>state.FrameID){
         readStatusUntilOK() ;
+        if(count == 0)first_pick_point();
+        else robot_action();
         cout<<state.FrameID<<endl;
         int lineSpeed = 3;
         double angleSpeed = 1.5;
