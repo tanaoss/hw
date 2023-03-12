@@ -24,7 +24,7 @@ int main()
     while (cin>>state.FrameID){
         readStatusUntilOK() ;
         cout<<state.FrameID<<endl;
-        if(count == 0)first_pick_point();
+        if(count == 0)first_action();
         else robot_action();
         payloads.clear();
         for(int i=0;i<4;++i){

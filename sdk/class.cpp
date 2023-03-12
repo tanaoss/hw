@@ -193,6 +193,18 @@ bool lt(double a, double b) { return a - b < -EPS; }     // <
 bool ge(double a, double b) { return a - b > -EPS; }     // >=
 bool le(double a, double b) { return a - b < EPS; }      // <=
 
+double getRobotRadius(int robort_id) {
+    return robots[robort_id].get_type == 0? 0.45: 0.53;
+}
+
+bool checkRobortsCollison(int robotA_id, int robotB_id) {
+    Robot robotA = robots[robotA_id];
+    Robot robortB = robots[robotB_id];
+    return lt(getRobotRadius(robotA_id) + getRobotRadius(robotB_id), calcuDis(robotA.pos, robortB.pos));
+}
+
+
+
 void control(vector<PayLoad> payLoad){
     const double time=0.04;//预测的时间。
     const double rateLim=0.24434609528;//14度
@@ -254,6 +266,8 @@ void control(vector<PayLoad> payLoad){
     }
     out_put();
 }
+
+
 /*
   control target_id
 */
@@ -315,7 +329,7 @@ pair<int,double> pick_point(int robot_id, int state){
     else if(state == 5){               //send
         if(item_type == 1){
             for(i=0;i<studios.size();i++){
-                if((studios[i].type == 4 || studios[i].type == 5 || studios[i].type == 9) && studios[i].r_id==-1 && studios[i].pStatus == 1){  //1 and no robot choose ,send
+                if((studios[i].type == 4 || studios[i].type == 5 || studios[i].type == 9) && studios[i].r_id==-1 && (studios[i].bitSatus & 2)==0 ){  //1 and no robot choose ,send
                     dist=calcuDis(robots[robot_id].pos,studios[i].pos);
                     if(dist<min){
                         min=dist;
@@ -326,7 +340,7 @@ pair<int,double> pick_point(int robot_id, int state){
         }
         else if(item_type == 2){
             for(i=0;i<studios.size();i++){
-                if((studios[i].type == 4 || studios[i].type == 6 || studios[i].type == 9) && studios[i].r_id==-1 && studios[i].pStatus == 1){  //2 and no robot choose ,send
+                if((studios[i].type == 4 || studios[i].type == 6 || studios[i].type == 9) && studios[i].r_id==-1 && (studios[i].bitSatus & 4)==0 ){  //2 and no robot choose ,send
                     dist=calcuDis(robots[robot_id].pos,studios[i].pos);
                     if(dist<min){
                         min=dist;
@@ -337,7 +351,7 @@ pair<int,double> pick_point(int robot_id, int state){
         }
         else if(item_type == 3){
             for(i=0;i<studios.size();i++){
-                if((studios[i].type == 5 || studios[i].type == 6 || studios[i].type == 9) && studios[i].r_id==-1 && studios[i].pStatus == 1){  //3 and no robot choose ,send
+                if((studios[i].type == 5 || studios[i].type == 6 || studios[i].type == 9) && studios[i].r_id==-1 && (studios[i].bitSatus & 8)==0 ){  //3 and no robot choose ,send
                     dist=calcuDis(robots[robot_id].pos,studios[i].pos);
                     if(dist<min){
                         min=dist;
@@ -348,7 +362,7 @@ pair<int,double> pick_point(int robot_id, int state){
         }
         else if(item_type == 4){
             for(i=0;i<studios.size();i++){
-                if((studios[i].type == 7 || studios[i].type == 9) && studios[i].r_id==-1 && studios[i].pStatus == 1){  //4 and no robot choose ,send
+                if((studios[i].type == 7 || studios[i].type == 9) && studios[i].r_id==-1 && (studios[i].bitSatus & 16)==0 ){  //4 and no robot choose ,send
                     dist=calcuDis(robots[robot_id].pos,studios[i].pos);
                     if(dist<min){
                         min=dist;
@@ -359,7 +373,7 @@ pair<int,double> pick_point(int robot_id, int state){
         }
         else if(item_type == 5){
             for(i=0;i<studios.size();i++){
-                if((studios[i].type == 7 ||studios[i].type == 9) && studios[i].r_id==-1 && studios[i].pStatus == 1){  //5 and no robot choose ,send
+                if((studios[i].type == 7 ||studios[i].type == 9) && studios[i].r_id==-1 && (studios[i].bitSatus & 32)==0 ){  //5 and no robot choose ,send
                     dist=calcuDis(robots[robot_id].pos,studios[i].pos);
                     if(dist<min){
                         min=dist;
@@ -370,7 +384,7 @@ pair<int,double> pick_point(int robot_id, int state){
         }
         else if(item_type == 6){
             for(i=0;i<studios.size();i++){
-                if((studios[i].type == 7 || studios[i].type == 9) && studios[i].r_id==-1 && studios[i].pStatus == 1){  //6 and no robot choose ,send
+                if((studios[i].type == 7 || studios[i].type == 9) && studios[i].r_id==-1 && (studios[i].bitSatus & 64)==0) {  //6 and no robot choose ,send
                     dist=calcuDis(robots[robot_id].pos,studios[i].pos);
                     if(dist<min){
                         min=dist;
@@ -381,7 +395,7 @@ pair<int,double> pick_point(int robot_id, int state){
         }
         else if(item_type == 7){
             for(i=0;i<studios.size();i++){
-                if((studios[i].type == 8 ||studios[i].type == 9)&&studios[i].r_id==-1 && studios[i].pStatus == 1){  //7 and no robot choose ,send
+                if((studios[i].type == 8 ||studios[i].type == 9)&&studios[i].r_id==-1 && (studios[i].bitSatus & 128)==0 ){  //7 and no robot choose ,send
                     dist=calcuDis(robots[robot_id].pos,studios[i].pos);
                     if(dist<min){
                         min=dist;
@@ -394,7 +408,7 @@ pair<int,double> pick_point(int robot_id, int state){
     return pair<int,double>(min_subscript,min);
 }
 
-void first_pick_point(){
+void first_action(){
     int i,j; 
     pair <int,double> p;
     pair <int,double> f;
@@ -419,7 +433,7 @@ void first_pick_point(){
             }
         }
         //studios[robots[i].target_id].r_id = i;
-        cerr<<"robot_choose"<<i<<' '<<robots[i].target_id<<endl;
+        cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
     }
 }
 
@@ -468,24 +482,25 @@ void robot_judge(int full){
                 robots[i].get_type = studios[robots[i].loc_id].type;
                 studios[robots[i].loc_id].r_id = -1;
                 robots[i].target_id = pick_point(i,5).first;
-                cerr<< "robots[i].target_id "<< i<<robots[i].target_id <<endl;
+                cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
             }
             else{
                 //dosomething sell
                 ins[i].sell = 1;
+                robots[i].get_type = 0;
                 if(full == 1){
                     robots[i].target_id = pick_point(i,3).first; //find near 456
-                    cerr<< "robots[i].target_id "<< i<<robots[i].target_id <<endl;
+                    cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
                     studios[robots[i].target_id].r_id = i;
                 }
                 else if(full == 2){
                     robots[i].target_id = pick_point(i,4).first; //find near 7
-                    cerr<< "robots[i].target_id "<< i<<robots[i].target_id <<endl;
+                    cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
                     studios[robots[i].target_id].r_id = i;
                 }
                 else{
                     robots[i].target_id = pick_point(i,2).first; //find near 123
-                    cerr<< "robots[i].target_id "<< i<<robots[i].target_id <<endl;
+                    cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
                     studios[robots[i].target_id].r_id = i;
                 }
             }
@@ -493,7 +508,7 @@ void robot_judge(int full){
         else{
             if(robots[i].target_id == -1){
                 robots[i].target_id = pick_point(i,1).first; //no target
-                cerr<< "robots[i].target_id "<< i<<robots[i].target_id <<endl;
+                cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
                 studios[robots[i].target_id].r_id = i;
                 //cerr<< "kkkkk"<<endl;
             }
