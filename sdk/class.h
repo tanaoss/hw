@@ -35,7 +35,7 @@ struct Ins
     int buy;
     int sell;
     int destroy;
-    Ins(int _robID, double _forward, double _rotate, int _buy = -1, int _sell = -1, int _destroy = -1) : robID(_robID), forward(_forward), rotate(_rotate), buy(_buy), sell(_sell), destroy(_destroy)
+    Ins(int _robID=-1, double _forward=-1, double _rotate=-1, int _buy = -1, int _sell = -1, int _destroy = -1) : robID(_robID), forward(_forward), rotate(_rotate), buy(_buy), sell(_sell), destroy(_destroy)
     {
     }
     friend std::ostream &operator<<(std::ostream &os, Ins ins)
@@ -125,4 +125,4 @@ bool readStatusUntilOK();
 void out_put(vector<Ins>&out);
 double calcuDis(pair<double, double> a, pair<double, double> b);
 void calcuStudioDis();
-vector<Ins> control(vector<PayLoad> payLoad);
+void control(vector<PayLoad> payLoad);

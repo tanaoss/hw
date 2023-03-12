@@ -8,6 +8,8 @@ vector<vector<double>> dis(50, vector<double>(50, 0));
 vector<Studio> studios;
 vector<Robot> robots;
 State state;//当前帧数，全局可见
+vector<Ins> ins(4);
+
 bool readMapUntilOK() {
     char line[1024];
     int count = 0;
@@ -102,8 +104,9 @@ void calcuStudioDis()
         }
     }
 }
-vector<Ins> control(vector<PayLoad> payLoad){
+void control(vector<PayLoad> payLoad){
+    
     for(int i=0;i<4;i++){
-
+        
     }
 }
