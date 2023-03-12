@@ -127,7 +127,8 @@ bool ge(double a, double b);// >=
 bool le(double a, double b);// <=
 bool readMapUntilOK();
 bool readStatusUntilOK();
-void out_put(vector<Ins>&out);
+void out_put();
 double calcuDis(pair<double, double> a, pair<double, double> b);
 void calcuStudioDis();
 void control(vector<PayLoad> payLoad);
+void process();

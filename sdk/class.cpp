@@ -2,6 +2,7 @@
 #include <vector>
 #include<string>
 #include <cmath>
+#include<algorithm>
 #include "class.h"
 using namespace std;
 vector<vector<double>> dis(50, vector<double>(50, 0));
@@ -81,10 +82,11 @@ bool readStatusUntilOK() {
         }
     return false;
 }
-void out_put(vector<Ins>&out){
-    for(auto ins:out){
-        cout<<ins;
+void out_put(){
+    for(auto tmp:ins){
+        cout<<tmp;
     }
+    cout<<"OK\n";
     cout.flush();
 }
 double calcuDis(pair<double, double> a, pair<double, double> b)
@@ -112,14 +114,48 @@ bool ge(double a, double b) { return a - b > -EPS; }     // >=
 bool le(double a, double b) { return a - b < EPS; }      // <=
 
 void control(vector<PayLoad> payLoad){
-    double time=0.02;//预测的时间。
+    const double time=0.04;//预测的时间。
+    const double rateLim=0.24434609528;//14度
+    const double pie=3.141592654;
+    const double Dec_val=0.4;//减速系数
+    const double Dec_val_ra=0.5;//角速度减速系数
+    vector<int> arr{0,1,2,3};
     auto check=[&](int rid)->bool{
+        double radius=robots[rid].get_type==0? 0.45:0.53;
         double n_x=robots[rid].xy_pos.first*time,n_y=robots[rid].xy_pos.second*time;
-        
-
+        if(lt(n_x-radius,0)||lt(n_y-radius,0)||gt(n_x+radius,50)||gt(n_y+radius,50))
+        return false;
         return true;
     };//判断是否有可能撞墙
+    auto cmp=[&](int id1,int id2)->bool{
+        return robots[id1].get_type>robots[id2].get_type;
+    };
     for(int i=0;i<4;i++){
         int robID=robots[i].id;
+        double Dev_val=robots[i].angular_velocity*robots[i].angular_velocity/2*payLoad[i].angular_acceleration;
+        if(check(robID)){
+            ins[i].forward*=Dec_val;
+        }else{
+            ins[i].forward=6;
+        }
+        if(gt(Dev_val,payLoad[i].angle)){
+            ins[i].rotate=0;
+        }else{
+            if(gt(payLoad[i].angle,rateLim)){
+                ins[i].rotate=pie*payLoad[i].sign;
+            }else{
+                ins[i].rotate*=Dec_val_ra;
+            }
+        }
     }
+    sort(arr.begin(),arr.end());
+    for(int i=0;i<4;i++){
+        double dis_stop=ins[arr[i]].forward*ins[arr[i]].forward/2*payLoad[arr[i]].acceleration;
+        for(int j=i+1;j<4;j++){
+            if(lt(calcuDis(robots[arr[i]].pos,robots[arr[j]].pos),dis_stop)){
+                ins[arr[j]].forward*=Dec_val;
+            }
+        }
+    }
+    out_put();
 }

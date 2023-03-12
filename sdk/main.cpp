@@ -20,14 +20,14 @@ int main()
     while (cin>>state.FrameID){
         readStatusUntilOK() ;
         cout<<state.FrameID<<endl;
-        int lineSpeed = 3;
-        double angleSpeed = 1.5;
-        for(int robotId = 0; robotId < 4; robotId++){
-            cout<<"forward "<<robotId<<" "<<lineSpeed<<"\n"
-            <<"rotate "<<robotId<<" "<<angleSpeed<<"\n";
-        }
-        cout<<"OK\n";
-        cout.flush();
+        // int lineSpeed = 3;
+        // double angleSpeed = 1.5;
+        // for(int robotId = 0; robotId < 4; robotId++){
+        //     cout<<"forward "<<robotId<<" "<<lineSpeed<<"\n"
+        //     <<"rotate "<<robotId<<" "<<angleSpeed<<"\n";
+        // }
+        // cout<<"OK\n";
+        // cout.flush();
     }
     return 0;
    
