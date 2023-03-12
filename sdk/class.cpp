@@ -479,14 +479,17 @@ void robot_judge(int full){
             if(robots[i].get_type == 0){
                 //dosomething buy ,next send
                 ins[i].buy = 1;
+                cerr<<"robots "<< i<<" buy "<<endl;
                 robots[i].get_type = studios[robots[i].loc_id].type;
                 studios[robots[i].loc_id].r_id = -1;
                 robots[i].target_id = pick_point(i,5).first;
+                studios[robots[i].target_id].r_id = i;
                 cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
             }
             else{
                 //dosomething sell
                 ins[i].sell = 1;
+                cerr<<"robots "<< i<<" sell "<<endl;
                 robots[i].get_type = 0;
                 if(full == 1){
                     robots[i].target_id = pick_point(i,3).first; //find near 456
