@@ -156,6 +156,8 @@ PayLoad calPayload(int robortID) {
     Robot robort = robots[robortID];
     Studio studio = studios[robort.target_id];
 
+    cerr << robortID << "--"<< robort.target_id<<endl;
+
     double distance = calcuDis(robort.pos, studio.pos);
     double angular_acceleration = robort.get_type == 0? angular_acceleration_no :angular_acceleration_has;
     double acceleration = robort.get_type == 0? acceleration_no: acceleration_has;
@@ -163,13 +165,24 @@ PayLoad calPayload(int robortID) {
     // 计算机器人与目标点构成的向量与x轴正方向夹角
     pair<double, double> robortToStudio = subVector(studio.pos, robort.pos);
     double angle1 = acos(robortToStudio.first / calVectorSize(robortToStudio));
-    angle1 = gt(robortToStudio.second, 0.0) ? 2 * Pi - angle1: angle1;
+    angle1 = lt(robortToStudio.second, 0.0) ? 2 * Pi- angle1: angle1;
 
-    double angle = fabs(robort.direction - angle);
+    double angle2 = ge(robort.direction, 0.0) ? robort.direction: 2 * Pi + robort.direction;
+    double angle = angle2 - angle1;
 
-    int sign = gt(robort.direction, angle) ? 1: -1;
+    int sign;
 
-    //cerr<<"-"<< angle << "-"<<angular_acceleration<<"-"<<acceleration<<"-"<<distance<<"-"<<sign<<endl;
+    if(ge(angle, 0) && lt(angle, Pi) || lt(angle, -Pi))
+        sign = -1;
+    else
+        sign = 1;
+    angle = fabs(angle);
+    angle  = gt(angle, Pi)? angle - Pi: angle;
+
+
+    cerr<<"**"<< angle1<<"**dir:"<<robort.direction<<"**"<<angle2<<endl;
+
+    cerr<<"**"<< angle << "**"<<distance<<"**"<<sign<<endl;
 
     return PayLoad(angle, angular_acceleration, acceleration, distance, sign);
 }
