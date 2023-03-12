@@ -4,7 +4,7 @@
 #include<string>
 using namespace std;
 
-struct payLoad
+struct PayLoad
 {
     double angle;
     double angular_acceleration;
@@ -118,3 +118,5 @@ bool readStatusUntilOK();
 void out_put(vector<Ins>&out);
 double calcuDis(pair<double, double> a, pair<double, double> b);
 void calcuStudioDis();
+
+Ins Control(PayLoad payLoad);
