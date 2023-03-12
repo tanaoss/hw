@@ -132,10 +132,17 @@ bool readMapUntilOK();
 bool readStatusUntilOK();
 void out_put();
 double calcuDis(pair<double, double> a, pair<double, double> b);
-void calcuStudioDis();
+void calcuStudioDis();//计算工作台之间的距离
 void control(vector<PayLoad> payLoad);
 void first_pick_point();
 void robot_action();
 void process();
-PayLoad calPayload(int robortID);
+PayLoad calPayload(int robortID);//计算机器人与目标之间的夹角、距离等信息
 pair<double,double> get_T_limits(pair<double,double>pos,int id);//靠近墙体时，需要把方向转到那个范围才能加速
+pair<double, double> subVector(pair<double, double> a, pair<double, double> b);//向量减（a-b）
+double calVectorProduct(pair<double, double> a, pair<double, double> b);//向量乘
+double calVectorSize(pair<double, double> a);//计算向量大小
+double calcuDis(pair<double, double> a, pair<double, double> b);//计算点之间的距离
+double getRobotRadius(int robort_id);//获取机器人当前的半径
+bool checkRobortsCollison(int robotA_id, int robotB_id);//判断机器人a，b是否相撞
+

@@ -193,6 +193,18 @@ bool lt(double a, double b) { return a - b < -EPS; }     // <
 bool ge(double a, double b) { return a - b > -EPS; }     // >=
 bool le(double a, double b) { return a - b < EPS; }      // <=
 
+double getRobotRadius(int robort_id) {
+    return robots[robort_id].get_type == 0? 0.45: 0.53;
+}
+
+bool checkRobortsCollison(int robotA_id, int robotB_id) {
+    Robot robotA = robots[robotA_id];
+    Robot robortB = robots[robotB_id];
+    return lt(getRobotRadius(robotA_id) + getRobotRadius(robotB_id), calcuDis(robotA.pos, robortB.pos));
+}
+
+
+
 void control(vector<PayLoad> payLoad){
     const double time=0.04;//预测的时间。
     const double rateLim=0.24434609528;//14度
@@ -248,6 +260,8 @@ void control(vector<PayLoad> payLoad){
     }
     out_put();
 }
+
+
 /*
   control target_id
 */
