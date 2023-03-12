@@ -102,6 +102,8 @@ void calcuStudioDis()
         }
     }
 }
-Ins control(PayLoad payLoad){
+vector<Ins>control(vector<Robot> payLoad){
+    for(int i=0;i<4;i++){
 
+    }
 }
