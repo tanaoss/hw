@@ -118,5 +118,4 @@ bool readStatusUntilOK();
 void out_put(vector<Ins>&out);
 double calcuDis(pair<double, double> a, pair<double, double> b);
 void calcuStudioDis();
-
-Ins Control(PayLoad payLoad);
+Ins control(PayLoad payLoad);
