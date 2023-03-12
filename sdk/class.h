@@ -134,8 +134,11 @@ void out_put();
 double calcuDis(pair<double, double> a, pair<double, double> b);
 void calcuStudioDis();
 void control(vector<PayLoad> payLoad);
-void first_pick_point();
-void robot_action();
+void first_action();                                                 //The robot selects the point for the first time
+void robot_action();                                                 //The robot selects the point for the second time and afterward
 void process();
 PayLoad calPayload(int robortID);
-pair<double,double> get_T_limits(pair<double,double>pos,int id);//靠近墙体时，需要把方向转到那个范围才能加速
+pair<double,double> get_T_limits(pair<double,double>pos,int id);     //靠近墙体时，需要把方向转到那个范围才能加速
+pair<int,double> pick_point(int robot_id, int state);                //Robot selection point
+bool judge_full(int level, double threshold);                         //Set the load factor to determine whether the 4567 product is full
+void robot_judge(int full);                                          //The robot makes buy and sell judgments based on the current state
