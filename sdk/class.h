@@ -100,7 +100,7 @@ struct Robot
 
     bool operator< (const Robot& a) const {
         if (get_type == get_type) 
-            return lt(time_val * collision_val, a.time_val * a.collision_val);
+            return time_val * collision_val - a.time_val * a.collision_val < -1e-7;
         return get_type < a.get_type;
     }
 };
