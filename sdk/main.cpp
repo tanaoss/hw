@@ -17,6 +17,7 @@ int main()
     readMapUntilOK();
     cout<<"OK\n";
     cout.flush();
+    
     //int count = 0;
     vector<PayLoad> payloads;
     initRobortInfo();
