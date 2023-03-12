@@ -38,6 +38,7 @@ bool readMapUntilOK() {
     int i;
     while (cin.getline(line,sizeof(line))) {
         if (line[0] == 'O' && line[1] == 'K') {
+            calcuStudioDis();
             return true;
         }
         //do something
@@ -146,6 +147,12 @@ void calcuStudioDis()
 
 
 PayLoad calPayload(int robortID) {
+    
+    //int target = rand() % ((int)studios.size());
+    //robots[robortID].target_id = target;
+
+    //cerr << robortID << target<<endl;
+
     Robot robort = robots[robortID];
     Studio studio = studios[robort.target_id];
 
@@ -161,6 +168,8 @@ PayLoad calPayload(int robortID) {
     double angle = fabs(robort.direction - angle);
 
     int sign = gt(robort.direction, angle) ? 1: -1;
+
+    //cerr<<"-"<< angle << "-"<<angular_acceleration<<"-"<<acceleration<<"-"<<distance<<"-"<<sign<<endl;
 
     return PayLoad(angle, angular_acceleration, acceleration, distance, sign);
 }
@@ -183,7 +192,7 @@ void control(vector<PayLoad> payLoad){
     // }
     auto check=[&](int rid)->bool{
         double radius=robots[rid].get_type==0? 0.45:0.53;
-        double n_x=robots[rid].xy_pos.first*time,n_y=robots[rid].xy_pos.second*time;
+        double n_x=robots[rid].pos.first+robots[rid].xy_pos.first*time,n_y=robots[rid].pos.second+robots[rid].xy_pos.second*time;
         if(lt(n_x-radius,0)||lt(n_y-radius,0)||gt(n_x+radius,50)||gt(n_y+radius,50))
         return false;
         return true;
@@ -209,6 +218,7 @@ void control(vector<PayLoad> payLoad){
                 ins[i].rotate*=Dec_val_ra;
             }
         }
+        
     }
     sort(arr.begin(),arr.end(),cmp);
     for(int i=0;i<4;i++){
