@@ -193,6 +193,18 @@ bool lt(double a, double b) { return a - b < -EPS; }     // <
 bool ge(double a, double b) { return a - b > -EPS; }     // >=
 bool le(double a, double b) { return a - b < EPS; }      // <=
 
+double getRobotRadius(int robort_id) {
+    return robots[robort_id].get_type == 0? 0.45: 0.53;
+}
+
+bool checkRobortsCollison(int robotA_id, int robotB_id) {
+    Robot robotA = robots[robotA_id];
+    Robot robortB = robots[robotB_id];
+    return lt(getRobotRadius(robotA_id) + getRobotRadius(robotB_id), calcuDis(robotA.pos, robortB.pos));
+}
+
+
+
 void control(vector<PayLoad> payLoad){
     const double time=0.04;//预测的时间。
     const double rateLim=0.24434609528;//14度
@@ -248,6 +260,8 @@ void control(vector<PayLoad> payLoad){
     }
     out_put();
 }
+
+
 /*
   control target_id
 */
@@ -509,16 +523,25 @@ void robot_action(){
 
 pair<double,double> get_T_limits(pair<double,double>pos,int id){
     double radius=robots[id].get_type==0? 0.45:0.53;
-    const double pie=3.141592654;
-    pair<double,double>tmp(0.0,0.0);
-    double redundancy=0.2+radius;//冗余，避免频繁转向
-    if(lt(pos.first-radius,0)&&gt(pos.second-radius,0)){//只靠近下方x轴
+    const double pie=3.141592655;
+    pair<double,double>tmp(-7,-7);
+    double redundancy=0.1+radius;//冗余，避免频繁转向
+    if(lt(pos.first-redundancy,0)&&gt(pos.second-redundancy,0)){//只靠近下方x轴
+        tmp.first=0;
+        
+    }else if(lt(pos.first-redundancy,0)&&lt(pos.second-redundancy,0)){//靠近原点
 
-    }else if(lt(pos.first-radius,0)&&lt(pos.second-radius,0)){//靠近原点
+    }else if(lt(pos.first-redundancy,0)&&lt(pos.second+redundancy,50)){//只靠近左方的y轴
 
-    }else if(lt(pos.first-radius,0)&&lt(pos.second+radius,50)){//只靠近左方的y轴
+    }else if(lt(pos.first-redundancy,0)&&gt(pos.second+redundancy,50)){//靠近左上角
 
-    }else if(lt(pos.first-radius,0)&&gt(pos.second+radius,50)){//
+    }else if(gt(pos.first-redundancy,0)&&gt(pos.second+redundancy,50)){////靠近上方的x轴
+
+    }else if(gt(pos.first+redundancy,50)&&gt(pos.second+redundancy,50)){//靠近右上角
+
+    }else if(gt(pos.first+redundancy,50)&&lt(pos.second+redundancy,50)){//靠近右边的y轴
+
+    }else if(gt(pos.first+redundancy,50)&&lt(pos.second-redundancy,0)){
 
     }
     return tmp;
