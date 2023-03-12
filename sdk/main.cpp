@@ -19,6 +19,7 @@ int main()
     cout.flush();
     //int count = 0;
     vector<PayLoad> payloads;
+    initRobortInfo();
     while (cin>>state.FrameID){
         readStatusUntilOK() ;
         cout<<state.FrameID<<endl;

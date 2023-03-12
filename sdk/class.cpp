@@ -38,6 +38,7 @@ bool readMapUntilOK() {
     int i;
     while (cin.getline(line,sizeof(line))) {
         if (line[0] == 'O' && line[1] == 'K') {
+            calcuStudioDis();
             return true;
         }
         //do something
@@ -146,6 +147,12 @@ void calcuStudioDis()
 
 
 PayLoad calPayload(int robortID) {
+    
+    //int target = rand() % ((int)studios.size());
+    //robots[robortID].target_id = target;
+
+    //cerr << robortID << target<<endl;
+
     Robot robort = robots[robortID];
     Studio studio = studios[robort.target_id];
 
@@ -161,6 +168,8 @@ PayLoad calPayload(int robortID) {
     double angle = fabs(robort.direction - angle);
 
     int sign = gt(robort.direction, angle) ? 1: -1;
+
+    //cerr<<"-"<< angle << "-"<<angular_acceleration<<"-"<<acceleration<<"-"<<distance<<"-"<<sign<<endl;
 
     return PayLoad(angle, angular_acceleration, acceleration, distance, sign);
 }
