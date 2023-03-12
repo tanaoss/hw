@@ -10,6 +10,7 @@ struct payLoad
     double angular_acceleration;
     double acceleration;
     double distance;
+    int sign;//当前角速度是在贴合目标点的夹角还是远离目标点的夹角
 };
 
 
