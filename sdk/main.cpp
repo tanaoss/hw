@@ -1,6 +1,6 @@
 #include <iostream>
 #include <vector>
-#include<string>
+#include <string>
 #include <cmath>
 #include "class.h"
 using namespace std;
