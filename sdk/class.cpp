@@ -15,6 +15,7 @@ double acceleration_no;
 double acceleration_has;
 double angular_acceleration_no;
 double angular_acceleration_has;
+vector<bool> need_stop(4,false);
 
 void initRobortInfo() {
     double weightMin = 0.45 * 0.45 * Pi * 20.0;
@@ -220,12 +221,14 @@ void solveRobortsCollison() {
 
 
 
+
 void control(vector<PayLoad> payLoad){
     const double time=0.04;//预测的时间。
     const double rateLim=0.24434609528;//14度
     const double pie=3.141592654;
     const double Dec_val=0.4;//减速系数
     const double Dec_val_ra=0.5;//角速度减速系数
+    const double p1=1;//机器人距离多近时开始减速
     vector<int> arr{0,1,2,3};
     // for(int i=0;i<4;i++){
     //     cerr<<i<<"号机器人"<<payLoad[i].angle<<" "<<endl;
@@ -243,7 +246,7 @@ void control(vector<PayLoad> payLoad){
     for(int i=0;i<4;i++){
         int robID=robots[i].id;
         ins[i].robID=robots[i].id;
-        double Dev_val=robots[i].angular_velocity*robots[i].angular_velocity/2*payLoad[i].angular_acceleration;
+        //double Dev_val=robots[i].angular_velocity*robots[i].angular_velocity/2*payLoad[i].angular_acceleration;
         pair<double,double>tmp=get_T_limits(robots[i].pos,i);
         if(!eq(tmp.first,-7)&&(!(ge(robots[i].direction,tmp.first)&&le(robots[i].direction,tmp.second)))){
             ins[i].rotate=pie*payLoad[i].sign;
@@ -251,21 +254,28 @@ void control(vector<PayLoad> payLoad){
             continue;
         }
         double dis=calcuDis(robots[i].pos,studios[robots[i].target_id].pos);
-        if(payLoad[i].angle>=1&&dis<10){
-            ins[i].rotate=pie*payLoad[i].sign;
-            ins[i].forward=0;
-            continue;           
+        double roat=min(1.0,(dis/p1));
+        if(payLoad[i].angle>=1||(need_stop[i]||dis<2)){
+            if(can_stop(robots[i].pos,studios[robots[i].target_id].pos,abs(payLoad[i].angle))){
+                need_stop[i]=false;
+            }else{
+                ins[i].rotate=pie*payLoad[i].sign;
+                ins[i].forward=0;
+                need_stop[i]=true;
+                continue;     
+            }      
         }
         if(check(robID)){
             ins[i].forward*=Dec_val;
         }else{
-            ins[i].forward=5;
+            ins[i].forward=roat*6;
         }
-  
-        if(can_stop(robots[i].pos,studios[robots[i].target_id].pos,payLoad[i].angle)){
+      
+        if(can_stop(robots[i].pos,studios[robots[i].target_id].pos,abs(payLoad[i].angle))){
+            cerr<<"----"<<endl;
             ins[i].rotate=0;
         }else{
-            ins[i].rotate=pie*payLoad[i].sign;
+            ins[i].rotate=payLoad[i].sign;
         }
         
         
