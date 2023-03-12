@@ -178,6 +178,9 @@ void control(vector<PayLoad> payLoad){
     const double Dec_val=0.4;//减速系数
     const double Dec_val_ra=0.5;//角速度减速系数
     vector<int> arr{0,1,2,3};
+    // for(int i=0;i<4;i++){
+    //     cerr<<i<<"号机器人"<<payLoad[i].angle<<" "<<endl;
+    // }
     auto check=[&](int rid)->bool{
         double radius=robots[rid].get_type==0? 0.45:0.53;
         double n_x=robots[rid].xy_pos.first*time,n_y=robots[rid].xy_pos.second*time;
@@ -190,6 +193,7 @@ void control(vector<PayLoad> payLoad){
     };
     for(int i=0;i<4;i++){
         int robID=robots[i].id;
+        ins[i].robID=robots[i].id;
         double Dev_val=robots[i].angular_velocity*robots[i].angular_velocity/2*payLoad[i].angular_acceleration;
         if(check(robID)){
             ins[i].forward*=Dec_val;
@@ -206,7 +210,7 @@ void control(vector<PayLoad> payLoad){
             }
         }
     }
-    sort(arr.begin(),arr.end());
+    sort(arr.begin(),arr.end(),cmp);
     for(int i=0;i<4;i++){
         double dis_stop=ins[arr[i]].forward*ins[arr[i]].forward/2*payLoad[arr[i]].acceleration;
         for(int j=i+1;j<4;j++){
