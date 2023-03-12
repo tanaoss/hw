@@ -1,6 +1,6 @@
 #include <iostream>
 #include <vector>
-#include<string>
+#include <string>
 #include <cmath>
 #include<algorithm>
 #include "class.h"
@@ -11,6 +11,25 @@ vector<Robot> robots;
 State state;//当前帧数，全局可见
 vector<Ins> ins(4);
 double EPS=1e-7;
+double acceleration_no;
+double acceleration_has;
+double angular_acceleration_no;
+double angular_acceleration_has;
+
+void initRobortInfo() {
+    double weightMin = 0.45 * 0.45 * Pi * 20.0;
+    double weightMax = 0.53 * 0.53 * Pi * 20.0;
+    double inertiaMin = weightMin * 0.45 * 0.45;
+    double inertiaMax = weightMax * 0.53 * 0.53;
+
+    acceleration_no = 250.0 / weightMin;
+    acceleration_has = 250.0 / weightMax;
+
+    angular_acceleration_no = 50.0 / inertiaMin;
+    angular_acceleration_has = 50.0 /inertiaMax;
+
+}
+
 bool readMapUntilOK() {
     char line[1024];
     int count = 0;
@@ -82,6 +101,7 @@ bool readStatusUntilOK() {
         }
     return false;
 }
+
 void out_put(){
     for(auto tmp:ins){
         cout<<tmp;
@@ -89,10 +109,26 @@ void out_put(){
     cout<<"OK\n";
     cout.flush();
 }
+
+pair<double, double> subVector(pair<double, double> a, pair<double, double> b) {
+    return make_pair(a.first - b.first, a.second - b.second);
+}
+
+
+double calVectorProduct(pair<double, double> a, pair<double, double> b) {
+    return a.first * b.first + a.second * b.second;
+}
+
+double calVectorSize(pair<double, double> a) {
+    return sqrt(a.first * a.first + a.second * a.second);
+}
+
 double calcuDis(pair<double, double> a, pair<double, double> b)
 {
     return sqrt((a.first - b.first) * (a.first - b.first) + (a.second - b.second) * (a.second - b.second));
 }
+
+
 
 void calcuStudioDis()
 {
@@ -105,6 +141,28 @@ void calcuStudioDis()
             dis[j][i] = dis[i][j] = calcuDis(studios[i].pos, studios[j].pos);
         }
     }
+}
+
+
+
+PayLoad calPayload(int robortID) {
+    Robot robort = robots[robortID];
+    Studio studio = studios[robort.target_id];
+
+    double distance = calcuDis(robort.pos, studio.pos);
+    double angular_acceleration = robort.get_type == 0? angular_acceleration_no :angular_acceleration_has;
+    double acceleration = robort.get_type == 0? acceleration_no: acceleration_has;
+
+    // 计算机器人与目标点构成的向量与x轴正方向夹角
+    pair<double, double> robortToStudio = subVector(studio.pos, robort.pos);
+    double angle1 = acos(robortToStudio.first / calVectorSize(robortToStudio));
+    angle1 = gt(robortToStudio.second, 0.0) ? 2 * Pi - angle1: angle1;
+
+    double angle = fabs(robort.direction - angle);
+
+    int sign = gt(robort.direction, angle) ? 1: -1;
+
+    return PayLoad(angle, angular_acceleration, acceleration, distance, sign);
 }
 
 bool eq(double a, double b) { return abs(a - b) < EPS; } // ==
