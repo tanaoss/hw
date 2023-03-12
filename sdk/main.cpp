@@ -15,17 +15,17 @@ int main()
     std::ios::sync_with_stdio(false);   
     std::cin.tie(0);    // IO
     readMapUntilOK();
+    calcuStudioDis();
     cout<<"OK\n";
     cout.flush();
-    
-    //int count = 0;
+    int count = 0;
     vector<PayLoad> payloads;
     initRobortInfo();
     while (cin>>state.FrameID){
         readStatusUntilOK() ;
         cout<<state.FrameID<<endl;
-        //if(count == 0)first_pick_point();
-        robot_action();
+        if(count == 0)first_pick_point();
+        else robot_action();
         payloads.clear();
         for(int i=0;i<4;++i){
             payloads.push_back(calPayload(i));
@@ -39,6 +39,7 @@ int main()
         // }
         // cout<<"OK\n";
         // cout.flush();
+        count++;
     }
     return 0;
    
