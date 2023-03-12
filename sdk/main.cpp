@@ -1,6 +1,6 @@
 #include <iostream>
 #include <vector>
-#include<string>
+#include <string>
 #include <cmath>
 #include "class.h"
 using namespace std;
@@ -17,17 +17,26 @@ int main()
     readMapUntilOK();
     cout<<"OK\n";
     cout.flush();
+    //int count = 0;
+    vector<PayLoad> payloads;
     while (cin>>state.FrameID){
         readStatusUntilOK() ;
         cout<<state.FrameID<<endl;
-        int lineSpeed = 3;
-        double angleSpeed = 1.5;
-        for(int robotId = 0; robotId < 4; robotId++){
-            cout<<"forward "<<robotId<<" "<<lineSpeed<<"\n"
-            <<"rotate "<<robotId<<" "<<angleSpeed<<"\n";
+        //if(count == 0)first_pick_point();
+        robot_action();
+        payloads.clear();
+        for(int i=0;i<4;++i){
+            payloads.push_back(calPayload(i));
         }
-        cout<<"OK\n";
-        cout.flush();
+        control(payloads);
+        // int lineSpeed = 3;
+        // double angleSpeed = 1.5;
+        // for(int robotId = 0; robotId < 4; robotId++){
+        //     cout<<"forward "<<robotId<<" "<<lineSpeed<<"\n"
+        //     <<"rotate "<<robotId<<" "<<angleSpeed<<"\n";
+        // }
+        // cout<<"OK\n";
+        // cout.flush();
     }
     return 0;
    

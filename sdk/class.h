@@ -4,13 +4,22 @@
 #include<string>
 using namespace std;
 
-struct payLoad
+#define Pi 3.1415926
+
+struct PayLoad
 {
-    double angle;
-    double angular_acceleration;
-    double acceleration;
+    double angle;//角度
+    double angular_acceleration;//角加速度
+    double acceleration;//加速度
     double distance;
     int sign;//当前角速度是在贴合目标点的夹角还是远离目标点的夹角
+    PayLoad(double _angle,double _angular_acceleration,double _acceleration,double _distance,int _sign){
+        angle=_angle;
+        angular_acceleration=_angular_acceleration;
+        acceleration=_acceleration;
+        distance=_distance;
+        sign=_sign;
+    }
 };
 
 
@@ -28,7 +37,7 @@ struct Ins
     int buy;
     int sell;
     int destroy;
-    Ins(int _robID, double _forward, double _rotate, int _buy = -1, int _sell = -1, int _destroy = -1) : robID(_robID), forward(_forward), rotate(_rotate), buy(_buy), sell(_sell), destroy(_destroy)
+    Ins(int _robID=-1, double _forward=-1, double _rotate=-1, int _buy = -1, int _sell = -1, int _destroy = -1) : robID(_robID), forward(_forward), rotate(_rotate), buy(_buy), sell(_sell), destroy(_destroy)
     {
     }
     friend std::ostream &operator<<(std::ostream &os, Ins ins)
@@ -113,8 +122,18 @@ struct Studio
         pStatus = _pStatus;
     }
 };
+bool eq(double a, double b);// ==
+bool gt(double a, double b);// >
+bool lt(double a, double b);// <
+bool ge(double a, double b);// >=
+bool le(double a, double b);// <=
 bool readMapUntilOK();
 bool readStatusUntilOK();
-void out_put(vector<Ins>&out);
+void out_put();
 double calcuDis(pair<double, double> a, pair<double, double> b);
 void calcuStudioDis();
+void control(vector<PayLoad> payLoad);
+void first_pick_point();
+void robot_action();
+void process();
+PayLoad calPayload(int robortID);
