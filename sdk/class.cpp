@@ -9,7 +9,7 @@ vector<Studio> studios;
 vector<Robot> robots;
 State state;//当前帧数，全局可见
 vector<Ins> ins(4);
-
+double EPS=1e-7;
 bool readMapUntilOK() {
     char line[1024];
     int count = 0;
@@ -104,9 +104,22 @@ void calcuStudioDis()
         }
     }
 }
+
+bool eq(double a, double b) { return abs(a - b) < EPS; } // ==
+bool gt(double a, double b) { return a - b > EPS; }      // >
+bool lt(double a, double b) { return a - b < -EPS; }     // <
+bool ge(double a, double b) { return a - b > -EPS; }     // >=
+bool le(double a, double b) { return a - b < EPS; }      // <=
+
 void control(vector<PayLoad> payLoad){
-    
-    for(int i=0;i<4;i++){
+    double time=0.02;//预测的时间。
+    auto check=[&](int rid)->bool{
+        double n_x=robots[rid].xy_pos.first*time,n_y=robots[rid].xy_pos.second*time;
         
+
+        return true;
+    };//判断是否有可能撞墙
+    for(int i=0;i<4;i++){
+        int robID=robots[i].id;
     }
 }

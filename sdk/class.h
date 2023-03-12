@@ -120,6 +120,11 @@ struct Studio
         pStatus = _pStatus;
     }
 };
+bool eq(double a, double b);// ==
+bool gt(double a, double b);// >
+bool lt(double a, double b);// <
+bool ge(double a, double b);// >=
+bool le(double a, double b);// <=
 bool readMapUntilOK();
 bool readStatusUntilOK();
 void out_put(vector<Ins>&out);
