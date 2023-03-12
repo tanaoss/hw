@@ -236,6 +236,7 @@ void control(vector<PayLoad> payLoad){
     }
     sort(arr.begin(),arr.end(),cmp);
     for(int i=0;i<4;i++){
+        if(robots[arr[i]].get_type==0)continue;
         double dis_stop=ins[arr[i]].forward*ins[arr[i]].forward/2*payLoad[arr[i]].acceleration;
         for(int j=i+1;j<4;j++){
             if(lt(calcuDis(robots[arr[i]].pos,robots[arr[j]].pos),dis_stop)&&
