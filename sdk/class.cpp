@@ -230,7 +230,7 @@ void control(vector<PayLoad> payLoad){
         ins[i].robID=robots[i].id;
         double Dev_val=robots[i].angular_velocity*robots[i].angular_velocity/2*payLoad[i].angular_acceleration;
         pair<double,double>tmp=get_T_limits(robots[i].pos,i);
-        if(!eq(tmp.first,7)&&(!(ge(robots[i].direction,tmp.first)&&ge(robots[i].direction,tmp.second)))){
+        if(!eq(tmp.first,-7)&&(!(ge(robots[i].direction,tmp.first)&&le(robots[i].direction,tmp.second)))){
             ins[i].rotate=pie*payLoad[i].sign;
             ins[i].forward=0;
             continue;
