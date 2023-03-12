@@ -217,3 +217,236 @@ void control(vector<PayLoad> payLoad){
     }
     out_put();
 }
+/*
+  control target_id
+*/
+pair<int,double> pick_point(int robot_id, int state){
+    pair<double,double> pos = robots[robot_id].pos;
+    int min = 10000;
+    int min_subscript = -1;
+    int i;
+    int dist;
+    int item_type = robots[robot_id].get_type;
+    if(state == 1){
+        for(i=0;i<studios.size();i++){
+            if(studios[i].type >= 1 && studios[i].type <= 3 && studios[i].r_id==-1){  //123 and no robot choose ,first choose ,get
+                dist = dis[robots[robot_id].target_id][i];
+                if(dist<min){
+                    min=dist;
+                    min_subscript=i;
+                }
+            }
+        }
+    }
+    else if(state == 2){
+        for(i=0;i<studios.size();i++){
+            if(studios[i].type >= 1 && studios[i].type <= 3 && studios[i].r_id==-1 && studios[i].pStatus == 1){  //123 and no robot choose ,get
+                dist = dis[robots[robot_id].target_id][i];
+                if(dist<min){
+                    min=dist;
+                    min_subscript=i;
+                }
+            }
+        }
+    }
+    else if(state == 3){
+        for(i=0;i<studios.size();i++){
+            if(studios[i].type >= 4 && studios[i].type <= 6 && studios[i].r_id==-1 && studios[i].pStatus == 1){  //456 and no robot choose ,get
+                dist = dis[robots[robot_id].target_id][i];
+                if(dist<min){
+                    min=dist;
+                    min_subscript=i;
+                }
+            }
+        }
+    }
+    else if(state == 4){
+        for(i=0;i<studios.size();i++){
+            if(studios[i].type ==7 && studios[i].r_id==-1 && studios[i].pStatus == 1){  //7 and no robot choose ,get
+                dist = dis[robots[robot_id].target_id][i];
+                if(dist < min){
+                    min=dist;
+                    min_subscript=i;
+                }
+            }
+        }
+    }
+    else if(state == 5){               //send
+        if(item_type == 1){
+            for(i=0;i<studios.size();i++){
+                if((studios[i].type == 4 || studios[i].type == 5 || studios[i].type == 9) && studios[i].r_id==-1 && studios[i].pStatus == 1){  //1 and no robot choose ,send
+                    dist = dis[robots[robot_id].target_id][i];
+                    if(dist<min){
+                        min=dist;
+                        min_subscript=i;
+                    }
+                }
+            }
+        }
+        else if(item_type == 2){
+            for(i=0;i<studios.size();i++){
+                if((studios[i].type == 4 || studios[i].type == 6 || studios[i].type == 9) && studios[i].r_id==-1 && studios[i].pStatus == 1){  //2 and no robot choose ,send
+                    dist = dis[robots[robot_id].target_id][i];
+                    if(dist<min){
+                        min=dist;
+                        min_subscript=i;
+                    }
+                }
+            }
+        }
+        else if(item_type == 3){
+            for(i=0;i<studios.size();i++){
+                if((studios[i].type == 5 || studios[i].type == 6 || studios[i].type == 9) && studios[i].r_id==-1 && studios[i].pStatus == 1){  //3 and no robot choose ,send
+                    dist = dis[robots[robot_id].target_id][i];
+                    if(dist<min){
+                        min=dist;
+                        min_subscript=i;
+                    }
+                }
+            }
+        }
+        else if(item_type == 4){
+            for(i=0;i<studios.size();i++){
+                if((studios[i].type == 7 || studios[i].type == 9) && studios[i].r_id==-1 && studios[i].pStatus == 1){  //4 and no robot choose ,send
+                    dist = dis[robots[robot_id].target_id][i];
+                    if(dist<min){
+                        min=dist;
+                        min_subscript=i;
+                    }
+                }
+            }
+        }
+        else if(item_type == 5){
+            for(i=0;i<studios.size();i++){
+                if((studios[i].type == 7 ||studios[i].type == 9) && studios[i].r_id==-1 && studios[i].pStatus == 1){  //5 and no robot choose ,send
+                    dist = dis[robots[robot_id].target_id][i];
+                    if(dist<min){
+                        min=dist;
+                        min_subscript=i;
+                    }
+                }
+            }
+        }
+        else if(item_type == 6){
+            for(i=0;i<studios.size();i++){
+                if((studios[i].type == 7 || studios[i].type == 9) && studios[i].r_id==-1 && studios[i].pStatus == 1){  //6 and no robot choose ,send
+                    dist = dis[robots[robot_id].target_id][i];
+                    if(dist<min){
+                        min=dist;
+                        min_subscript=i;
+                    }
+                }
+            }
+        }
+        else if(item_type == 7){
+            for(i=0;i<studios.size();i++){
+                if((studios[i].type == 8 ||studios[i].type == 9)&&studios[i].r_id==-1 && studios[i].pStatus == 1){  //7 and no robot choose ,send
+                    dist = dis[robots[robot_id].target_id][i];
+                    if(dist<min){
+                        min=dist;
+                        min_subscript=i;
+                    }
+                }
+            }
+        }
+    }
+    return pair<int,double>(min_subscript,min);
+}
+
+void first_pick_point(){
+    int i,j; 
+    pair <int,double> p;
+    pair <int,double> f;
+    for(i = 0; i < robots.size(); i++){
+        robots[i].target_id = pick_point(i, 1).first;
+    }
+    for(i = 0; i < robots.size(); i++)
+    {
+        for(j = i + 1; j < robots.size(); j++){
+            if(robots[i].target_id == robots[j].target_id){
+                p = pick_point(i,1);
+                f = pick_point(j,1);
+                if(gt(p.second,f.second)){
+                    robots[j].target_id = f.first;
+                }else robots[i].target_id = p.first;
+            }
+        }
+        studios[robots[i].target_id].r_id = i;
+    }
+}
+
+bool judge_full(int level, double threshold){
+    int i;
+    int count = 0;
+    int full_count = 0;
+    if(level == 2){
+        for(i = 0;i < studios.size();i++){
+            if(studios[i].type >= 4 && studios[i].type <= 6){
+                count++;
+                if(studios[i].pStatus == 1){
+                    full_count++;
+                }
+            }
+        }
+        if(full_count/count >= threshold){
+            return true;
+        }
+    }
+    if(level == 3){
+        for(i = 0;i < studios.size();i++){
+            if(studios[i].type == 7){
+                count++;
+                if(studios[i].pStatus == 1){
+                    full_count++;
+                }
+            }
+        }
+        if(full_count/count >= threshold){
+            return true;
+        }
+    }
+    return false;
+}
+
+void robot_judge(int full){
+    int i;
+    for(i = 0; i < robots.size(); i++){
+        if(robots[i].loc_id == robots[i].target_id){
+            if(robots[i].get_type == 0){
+                //dosomething buy ,next send
+                ins[i].buy = 1;
+                robots[i].get_type = studios[robots[i].loc_id].type;
+                studios[robots[i].loc_id].r_id = -1;
+                robots[i].target_id = pick_point(i,5).first;
+            }
+            else{
+                //dosomething sell
+                ins[i].sell = -1;
+                if(full == 1){
+                    robots[i].target_id = pick_point(i,3).first; //find near 456
+                    studios[robots[i].target_id].r_id = i;
+                }
+                else if(full == 2){
+                    robots[i].target_id = pick_point(i,4).first; //find near 7
+                    studios[robots[i].target_id].r_id = i;
+                }
+                else{
+                    robots[i].target_id = pick_point(i,2).first; //find near 123
+                    studios[robots[i].target_id].r_id = i;
+                }
+            }
+        }
+        else{
+            ins[i].buy = -1;
+            ins[i].sell = -1;
+            ins[i].destroy = -1;
+        }
+    }
+}
+
+void robot_action(){
+    int full = 0;
+    if(judge_full(2,0.5))full = 1;   //4,5,6 full threshold
+    if(judge_full(3,0.5))full = 2;   //7 full threshold Higher priority
+    robot_judge(full);
+}
