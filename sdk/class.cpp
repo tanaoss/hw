@@ -501,6 +501,7 @@ bool judge_full(int level, double threshold){
 
 void robot_judge(int full){
     int i;
+
     //cerr<<robots.size()<<endl;
     for(i = 0; i < robots.size(); i++){
         //cerr<<i<<robots[i].target_id<<endl;
@@ -512,42 +513,65 @@ void robot_judge(int full){
                 robots[i].get_type = studios[robots[i].loc_id].type;
                 studios[robots[i].loc_id].r_id = -1;
                 robots[i].target_id = pick_point(i,5).first;
-                studios[robots[i].target_id].r_id = i;
-                cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
+                if(robots[i].target_id!= -1){
+                    studios[robots[i].target_id].r_id = i;
+                    cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
+                }
             }
             else{
                 //dosomething sell
                 ins[i].sell = 1;
                 cerr<<"robots "<< i<<" sell "<<endl;
+                studios[robots[i].loc_id].r_id = -1;
                 robots[i].get_type = 0;
                 if(full == 1){
                     robots[i].target_id = pick_point(i,3).first; //find near 456
-                    cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
-                    studios[robots[i].target_id].r_id = i;
+                    if(robots[i].target_id!= -1){
+                        cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
+                        studios[robots[i].target_id].r_id = i;
+                    }
                 }
                 else if(full == 2){
                     robots[i].target_id = pick_point(i,4).first; //find near 7
-                    cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
-                    studios[robots[i].target_id].r_id = i;
+                    if(robots[i].target_id!= -1){
+                        cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
+                        studios[robots[i].target_id].r_id = i;
+                    }
                 }
                 else{
                     robots[i].target_id = pick_point(i,2).first; //find near 123
-                    cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
-                    studios[robots[i].target_id].r_id = i;
+                    if(robots[i].target_id!= -1){
+                        cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
+                        studios[robots[i].target_id].r_id = i;
+                    }
                 }
             }
         }
         else{
             if(robots[i].target_id == -1){
-                robots[i].target_id = pick_point(i,1).first; //no target
-                cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
-                studios[robots[i].target_id].r_id = i;
-                //cerr<< "kkkkk"<<endl;
+                if(robots[i].get_type ==0){
+                    robots[i].target_id = pick_point(i,1).first; //no target
+                    if(robots[i].target_id!= -1){
+                        cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
+                        studios[robots[i].target_id].r_id = i;
+                    //cerr<< "kkkkk"<<endl;
+                    }
+                }
+                else{
+                    robots[i].target_id = pick_point(i,5).first;
+                    if(robots[i].target_id!= -1){
+                        studios[robots[i].target_id].r_id = i;
+                        cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
+                    }
+                }
             }
             ins[i].buy = -1;
             ins[i].sell = -1;
             ins[i].destroy = -1;
         }
+        // if(i==2 && robots[i].target_id != -1){
+        //     cerr<<" robot 2 dis "<<calcuDis(robots[i].pos,studios[robots[i].target_id].pos)<<endl;
+        // }
     }
 }
 
