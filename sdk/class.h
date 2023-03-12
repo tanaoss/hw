@@ -125,4 +125,4 @@ bool readStatusUntilOK();
 void out_put(vector<Ins>&out);
 double calcuDis(pair<double, double> a, pair<double, double> b);
 void calcuStudioDis();
-vector<Ins>control(vector<Robot> payLoad);
+vector<Ins>control(vector<PayLoad> payLoad);
