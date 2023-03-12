@@ -640,7 +640,7 @@ void robot_action(){
 
 pair<double,double> get_T_limits(pair<double,double>pos,int id){
     double radius=robots[id].get_type==0? 0.45:0.53;
-    const double Pi=3.141592654;
+   
     pair<double,double>tmp(-7,-7);
     double redundancy=0.1+radius;//冗余，避免频繁转向
     if(gt(pos.first-redundancy,0)&&lt(pos.second-redundancy,0)){//只靠近下方x轴
