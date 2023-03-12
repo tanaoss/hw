@@ -116,6 +116,14 @@ pair<double, double> subVector(pair<double, double> a, pair<double, double> b) {
     return make_pair(a.first - b.first, a.second - b.second);
 }
 
+pair<double, double> addVector(pair<double, double> a, pair<double, double> b) {
+    return make_pair(a.first + b.first, a.second + b.second);
+}
+
+pair<double, double> calVectorProduct(pair<double, double> a, double x) {
+    return make_pair(a.first * x, a.second * x);
+}
+
 
 double calVectorProduct(pair<double, double> a, pair<double, double> b) {
     return a.first * b.first + a.second * b.second;
@@ -129,6 +137,8 @@ double calcuDis(pair<double, double> a, pair<double, double> b)
 {
     return sqrt((a.first - b.first) * (a.first - b.first) + (a.second - b.second) * (a.second - b.second));
 }
+
+
 
 
 
@@ -197,22 +207,41 @@ double getRobotRadius(int robort_id) {
     return robots[robort_id].get_type == 0? 0.45: 0.53;
 }
 
+
 bool checkRobortsCollison(int robotA_id, int robotB_id) {
     Robot robotA = robots[robotA_id];
     Robot robortB = robots[robotB_id];
     return lt(getRobotRadius(robotA_id) + getRobotRadius(robotB_id), calcuDis(robotA.pos, robortB.pos));
 }
 
+bool checkRobortsCollison(int robotA_id, pair<double, double> next_pos, int robotB_id) {
+    Robot robotA = robots[robotA_id];
+    Robot robortB = robots[robotB_id];
+    return lt(getRobotRadius(robotA_id) + getRobotRadius(robotB_id), calcuDis(next_pos, robortB.pos));
+}
+
+pair<double, double> getNextPos(int robot_id) {
+    return addVector(robots[robot_id].pos, calVectorProduct(robots[robot_id].pos, 0.02));
+}
+
 
 void solveRobortsCollison() {
-    int stopID;
+    int stopID, goID;
+    pair<double, double> next_pos;
     for(int i = 0; i < 4; i++) {
         for(int j = i + 1; j < 4; j++) {
             if(checkRobortsCollison(i, j)) {
                 //优先级小的先停下来
                 stopID = robots[i] < robots[j] ? i: j;
+                goID = robots[i] < robots[j] ? j: i;
                 ins[i].forward = 0;
                 //判断停下来的球是否会阻挡路线
+                next_pos = getNextPos(goID);
+                if(checkRobortsCollison(goID, next_pos, stopID)) {
+                    if(eq(ins[goID].rotate, 0)) {
+                        ins[goID].rotate = Pi;
+                    }
+                }
             }
         }
     }
@@ -223,7 +252,6 @@ void solveRobortsCollison() {
 void control(vector<PayLoad> payLoad){
     const double time=0.04;//预测的时间。
     const double rateLim=0.24434609528;//14度
-    const double pie=3.141592654;
     const double Dec_val=0.4;//减速系数
     const double Dec_val_ra=0.5;//角速度减速系数
     vector<int> arr{0,1,2,3};
@@ -246,7 +274,7 @@ void control(vector<PayLoad> payLoad){
         double Dev_val=robots[i].angular_velocity*robots[i].angular_velocity/2*payLoad[i].angular_acceleration;
         pair<double,double>tmp=get_T_limits(robots[i].pos,i);
         if(!eq(tmp.first,-7)&&(!(ge(robots[i].direction,tmp.first)&&le(robots[i].direction,tmp.second)))){
-            ins[i].rotate=pie*payLoad[i].sign;
+            ins[i].rotate=Pi*payLoad[i].sign;
             ins[i].forward=0;
             continue;
         }
@@ -259,7 +287,7 @@ void control(vector<PayLoad> payLoad){
         if(can_stop(robots[i].pos,studios[robots[i].target_id].pos,payLoad[i].angle)){
             ins[i].rotate=0;
         }else{
-            ins[i].rotate=pie*payLoad[i].sign;
+            ins[i].rotate=Pi*payLoad[i].sign;
         }
         
         
@@ -569,33 +597,33 @@ void robot_action(){
 
 pair<double,double> get_T_limits(pair<double,double>pos,int id){
     double radius=robots[id].get_type==0? 0.45:0.53;
-    const double pie=3.141592654;
+    const double Pi=3.141592654;
     pair<double,double>tmp(-7,-7);
     double redundancy=0.1+radius;//冗余，避免频繁转向
     if(gt(pos.first-redundancy,0)&&lt(pos.second-redundancy,0)){//只靠近下方x轴
         tmp.first=0;
-        tmp.second=pie;
+        tmp.second=Pi;
     }else if(lt(pos.first-redundancy,0)&&lt(pos.second-redundancy,0)){//靠近原点
         tmp.first=0; 
-        tmp.second=pie/2;
+        tmp.second=Pi/2;
     }else if(lt(pos.first-redundancy,0)&&gt(pos.second-redundancy,0)){//只靠近左方的y轴
-        tmp.first=-pie/2;
-        tmp.second=pie;
+        tmp.first=-Pi/2;
+        tmp.second=Pi;
     }else if(lt(pos.first-redundancy,0)&&gt(pos.second+redundancy,50)){//靠近左上角
-        tmp.first=-pie/2;
+        tmp.first=-Pi/2;
         tmp.second=0;
     }else if(gt(pos.first-redundancy,0)&&gt(pos.second+redundancy,50)){////靠近上方的x轴
-        tmp.first=-pie;
+        tmp.first=-Pi;
         tmp.second=0;
     }else if(gt(pos.first+redundancy,50)&&gt(pos.second+redundancy,50)){//靠近右上角
-        tmp.first=-pie;
-        tmp.second=-pie/2;
+        tmp.first=-Pi;
+        tmp.second=-Pi/2;
     }else if(gt(pos.first+redundancy,50)&&lt(pos.second-redundancy,0)){//靠近右边的y轴
-        tmp.first=-pie/2;
-        tmp.second=pie/2;
+        tmp.first=-Pi/2;
+        tmp.second=Pi/2;
     }else if(gt(pos.first+redundancy,50)&&lt(pos.second-redundancy,0)){//靠近右下角
-        tmp.first=pie/2;
-        tmp.second=pie;
+        tmp.first=Pi/2;
+        tmp.second=Pi;
     }
     return tmp;
 }
