@@ -10,6 +10,8 @@ vector<Studio> studios;
 vector<Robot> robots;
 State state;//当前帧数，全局可见
 vector<Ins> ins(4);
+vector<vector<int>> material(7);
+vector<vector<int>> product(8);
 double EPS=1e-7;
 double acceleration_no;
 double acceleration_has;
@@ -79,6 +81,7 @@ bool readStatusUntilOK() {
     int rob_id=0;
     cin>>K;
     cin.ignore();
+    material.clear();
     while (K--)
     {
         vector<double> tmp(6,0);
@@ -86,6 +89,28 @@ bool readStatusUntilOK() {
             cin>>tmp[i];
         }
         studios[studio_id].set(studio_id,tmp[0],pair<double,double>(tmp[1],tmp[2]),tmp[3],tmp[4],tmp[5]);
+        if(studios[studio_id].pStatus == 1){
+            product[studios[studio_id].type].push_back(studio_id);
+        }
+        if(studios[studio_id].type > 3){
+            if(studios[studio_id].type == 4){
+                if(studios[studio_id].bitSatus & 2 == 0) material[1].push_back(studio_id);
+                if(studios[studio_id].bitSatus & 4 == 0) material[2].push_back(studio_id);
+            }
+            if(studios[studio_id].type == 5){
+                if(studios[studio_id].bitSatus & 2 == 0) material[1].push_back(studio_id);
+                if(studios[studio_id].bitSatus & 8 == 0) material[3].push_back(studio_id);
+            }
+            if(studios[studio_id].type == 6){
+                if(studios[studio_id].bitSatus & 4 == 0) material[2].push_back(studio_id);
+                if(studios[studio_id].bitSatus & 8 == 0) material[3].push_back(studio_id);
+            }
+            if(studios[studio_id].type == 7){
+                if(studios[studio_id].bitSatus & 16 == 0) material[4].push_back(studio_id);
+                if(studios[studio_id].bitSatus & 32 == 0) material[5].push_back(studio_id);
+                if(studios[studio_id].bitSatus & 64 == 0) material[6].push_back(studio_id);
+            }
+        }
         studio_id++;
     }
     for(int i=0;i<4;i++){
@@ -292,7 +317,7 @@ pair<int,double> pick_point(int robot_id, int state){
     int dist;
     int item_type = robots[robot_id].get_type;
     if(state == 1){
-        for(i=0;i<studios.size();i++){
+        for(i=0;i<=studios.size();i++){
             //cerr<<studios.size()<<endl;
             if(studios[i].type >= 1 && studios[i].type <= 3 && studios[i].r_id==-1){  //123 and no robot choose ,first choose ,get
                 //cerr<<i<<endl;
@@ -309,10 +334,12 @@ pair<int,double> pick_point(int robot_id, int state){
     else if(state == 2){
         for(i=0;i<studios.size();i++){
             if(studios[i].type >= 1 && studios[i].type <= 3 && studios[i].r_id==-1 && studios[i].pStatus == 1){  //123 and no robot choose ,get
-                dist=calcuDis(robots[robot_id].pos,studios[i].pos);
-                if(dist<min){
-                    min=dist;
-                    min_subscript=i;
+                if(studios[i].type <= material.size() && material[studios[i].type].size()>0){
+                    dist=calcuDis(robots[robot_id].pos,studios[i].pos);
+                    if(dist<min){
+                        min=dist;
+                        min_subscript=i;
+                    }
                 }
             }
         }
@@ -562,7 +589,7 @@ void robot_judge(int full){
 void robot_action(){
     //cerr<<"start"<<endl;
     int full = 0;
-    if(judge_full(2,0.5))full = 1;   //4,5,6 full threshold
+    if(judge_full(2,0.1))full = 1;   //4,5,6 full threshold
     if(judge_full(3,0.5))full = 2;   //7 full threshold Higher priority
     robot_judge(full);
 }
