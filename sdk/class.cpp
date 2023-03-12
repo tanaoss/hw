@@ -250,6 +250,12 @@ void control(vector<PayLoad> payLoad){
             ins[i].forward=0;
             continue;
         }
+        double dis=calcuDis(robots[i].pos,studios[robots[i].target_id].pos);
+        if(payLoad[i].angle>=1&&dis<10){
+            ins[i].rotate=pie*payLoad[i].sign;
+            ins[i].forward=0;
+            continue;           
+        }
         if(check(robID)){
             ins[i].forward*=Dec_val;
         }else{
