@@ -127,6 +127,7 @@ bool gt(double a, double b);// >
 bool lt(double a, double b);// <
 bool ge(double a, double b);// >=
 bool le(double a, double b);// <=
+void initRobortInfo();
 bool readMapUntilOK();
 bool readStatusUntilOK();
 void out_put();
