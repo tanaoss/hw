@@ -102,3 +102,6 @@ void calcuStudioDis()
         }
     }
 }
+Ins control(PayLoad payLoad){
+
+}
