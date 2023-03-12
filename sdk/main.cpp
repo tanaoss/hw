@@ -17,12 +17,18 @@ int main()
     readMapUntilOK();
     cout<<"OK\n";
     cout.flush();
-    int count = 0;
+    //int count = 0;
+    vector<PayLoad> payloads;
     while (cin>>state.FrameID){
         readStatusUntilOK() ;
-        if(count == 0)first_pick_point();
-        else robot_action();
         cout<<state.FrameID<<endl;
+        //if(count == 0)first_pick_point();
+        robot_action();
+        payloads.clear();
+        for(int i=0;i<4;++i){
+            payloads.push_back(calPayload(i));
+        }
+        control(payloads);
         // int lineSpeed = 3;
         // double angleSpeed = 1.5;
         // for(int robotId = 0; robotId < 4; robotId++){

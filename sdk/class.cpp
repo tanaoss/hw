@@ -437,6 +437,10 @@ void robot_judge(int full){
             }
         }
         else{
+            if(robots[i].target_id == -1){
+                robots[i].target_id = pick_point(i,1).first; //no target
+                studios[robots[i].target_id].r_id = i;
+            }
             ins[i].buy = -1;
             ins[i].sell = -1;
             ins[i].destroy = -1;

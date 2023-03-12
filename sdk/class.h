@@ -136,3 +136,4 @@ void control(vector<PayLoad> payLoad);
 void first_pick_point();
 void robot_action();
 void process();
+PayLoad calPayload(int robortID);
