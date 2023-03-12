@@ -150,3 +150,4 @@ void robot_action();                                                 //The robot
 pair<int,double> pick_point(int robot_id, int state);                //Robot selection point
 bool judge_full(int level, double threshold);                         //Set the load factor to determine whether the 4567 product is full
 void robot_judge(int full);                                          //The robot makes buy and sell judgments based on the current state
+bool can_stop(pair<double,double>p1,pair<double,double>p2,double angle);//能够停止转动

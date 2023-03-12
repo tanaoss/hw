@@ -241,7 +241,11 @@ void control(vector<PayLoad> payLoad){
             ins[i].forward=5;
         }
   
-        ins[i].rotate=pie*payLoad[i].sign;
+        if(can_stop(robots[i].pos,studios[robots[i].target_id].pos,payLoad[i].angle)){
+            ins[i].rotate=0;
+        }else{
+            ins[i].rotate=pie*payLoad[i].sign;
+        }
         
         
     }
@@ -555,4 +559,12 @@ pair<double,double> get_T_limits(pair<double,double>pos,int id){
         tmp.second=pie;
     }
     return tmp;
+}
+bool can_stop(pair<double,double>p1,pair<double,double>p2,double angle){
+    double dis=calcuDis(p1,p2);
+    if(lt(sin(angle)*dis,0.4)){
+        return true;
+    }
+    return false;
+
 }
