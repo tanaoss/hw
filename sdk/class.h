@@ -152,3 +152,8 @@ double getRobotRadius(int robort_id);//获取机器人当前的半径
 bool checkRobortsCollison(int robotA_id, int robotB_id);//判断机器人a，b是否相撞
 void solveRobortsCollison();//解决机器人相撞
 
+void first_action();                                                 //The robot selects the point for the first time
+void robot_action();                                                 //The robot selects the point for the second time and afterward
+pair<int,double> pick_point(int robot_id, int state);                //Robot selection point
+bool judge_full(int level, double threshold);                         //Set the load factor to determine whether the 4567 product is full
+void robot_judge(int full);                                          //The robot makes buy and sell judgments based on the current state
