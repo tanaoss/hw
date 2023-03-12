@@ -282,6 +282,7 @@ void control(vector<PayLoad> payLoad){
     const double Dec_val=0.4;//减速系数
     const double Dec_val_ra=0.5;//角速度减速系数
     const double p1=1;//机器人距离多近时开始减速
+    const int max_dis=5;
     vector<int> arr{0,1,2,3};
     // for(int i=0;i<4;i++){
     //     cerr<<i<<"号机器人"<<payLoad[i].angle<<" "<<endl;
@@ -308,13 +309,16 @@ void control(vector<PayLoad> payLoad){
         }
         double dis=calcuDis(robots[i].pos,studios[robots[i].target_id].pos);
         double roat=min(1.0,(dis/p1));
-        if(payLoad[i].angle>=1||(need_stop[i]||dis<2)){
-            if(can_stop(robots[i].pos,studios[robots[i].target_id].pos,abs(payLoad[i].angle))){
+        if(payLoad[i].angle>=0.9||(need_stop[i]||dis<1.5)){
+            if(dis>max_dis||can_stop(robots[i].pos,studios[robots[i].target_id].pos,abs(payLoad[i].angle))){
                 need_stop[i]=false;
             }else{
                 ins[i].rotate=Pi*payLoad[i].sign;
                 ins[i].forward=0;
                 need_stop[i]=true;
+                      if(i==0&&ins[i].forward<2){
+        //cerr<<robots[i].target_id<<" "<<robots[i].pos.first<<" "<<robots[i].pos.second<<endl;
+      }
                 continue;     
             }      
         }
@@ -323,9 +327,8 @@ void control(vector<PayLoad> payLoad){
         }else{
             ins[i].forward=roat*6;
         }
-      
         if(can_stop(robots[i].pos,studios[robots[i].target_id].pos,abs(payLoad[i].angle))){
-            cerr<<"----"<<endl;
+            
             ins[i].rotate=0;
         }else{
             ins[i].rotate=Pi*payLoad[i].sign;
@@ -348,7 +351,6 @@ void control(vector<PayLoad> payLoad){
     // }
     out_put();
 }
-
 
 /*
   control target_id
