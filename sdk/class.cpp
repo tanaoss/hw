@@ -48,7 +48,7 @@ bool readMapUntilOK() {
                 pair<double,double>pos_robot(x,y);
                 pair<double,double>xy_pos_robot(0,0);
                 // cout<<x<<" "<<y<<endl;
-                Robot  robot(count_robot,0,0,0,1,1,xy_pos_robot,0,pos_robot,0);
+                Robot  robot(count_robot,0,0,0,1,1,xy_pos_robot,0,pos_robot,-1);
                 robots.push_back(robot);
                 count_robot++;
             }
@@ -57,7 +57,7 @@ bool readMapUntilOK() {
                 y = (100-count)*0.5-0.25;
                 pair<double,double>pos_studio(x,y);
                 // cout<<x<<" "<<y<<endl;
-                Studio studio(count_studio,0,0,pos_studio,0,0,0);
+                Studio studio(count_studio,0,-1,pos_studio,0,0,0);
                 studio.type = (int)line[i]-48;
                 studios.push_back(studio);
                 count_studio++;
@@ -233,8 +233,12 @@ pair<int,double> pick_point(int robot_id, int state){
     int item_type = robots[robot_id].get_type;
     if(state == 1){
         for(i=0;i<studios.size();i++){
+            //cerr<<studios.size()<<endl;
             if(studios[i].type >= 1 && studios[i].type <= 3 && studios[i].r_id==-1){  //123 and no robot choose ,first choose ,get
-                dist = dis[robots[robot_id].target_id][i];
+                //cerr<<i<<endl;
+                dist=calcuDis(robots[robot_id].pos,studios[i].pos);
+                //cerr<<"dist="<<dist<<endl;
+                //cerr<<"studio_id"<<i<<endl;
                 if(dist<min){
                     min=dist;
                     min_subscript=i;
@@ -245,7 +249,7 @@ pair<int,double> pick_point(int robot_id, int state){
     else if(state == 2){
         for(i=0;i<studios.size();i++){
             if(studios[i].type >= 1 && studios[i].type <= 3 && studios[i].r_id==-1 && studios[i].pStatus == 1){  //123 and no robot choose ,get
-                dist = dis[robots[robot_id].target_id][i];
+                dist=calcuDis(robots[robot_id].pos,studios[i].pos);
                 if(dist<min){
                     min=dist;
                     min_subscript=i;
@@ -256,7 +260,7 @@ pair<int,double> pick_point(int robot_id, int state){
     else if(state == 3){
         for(i=0;i<studios.size();i++){
             if(studios[i].type >= 4 && studios[i].type <= 6 && studios[i].r_id==-1 && studios[i].pStatus == 1){  //456 and no robot choose ,get
-                dist = dis[robots[robot_id].target_id][i];
+                dist=calcuDis(robots[robot_id].pos,studios[i].pos);
                 if(dist<min){
                     min=dist;
                     min_subscript=i;
@@ -267,7 +271,7 @@ pair<int,double> pick_point(int robot_id, int state){
     else if(state == 4){
         for(i=0;i<studios.size();i++){
             if(studios[i].type ==7 && studios[i].r_id==-1 && studios[i].pStatus == 1){  //7 and no robot choose ,get
-                dist = dis[robots[robot_id].target_id][i];
+                dist=calcuDis(robots[robot_id].pos,studios[i].pos);
                 if(dist < min){
                     min=dist;
                     min_subscript=i;
@@ -279,7 +283,7 @@ pair<int,double> pick_point(int robot_id, int state){
         if(item_type == 1){
             for(i=0;i<studios.size();i++){
                 if((studios[i].type == 4 || studios[i].type == 5 || studios[i].type == 9) && studios[i].r_id==-1 && studios[i].pStatus == 1){  //1 and no robot choose ,send
-                    dist = dis[robots[robot_id].target_id][i];
+                    dist=calcuDis(robots[robot_id].pos,studios[i].pos);
                     if(dist<min){
                         min=dist;
                         min_subscript=i;
@@ -290,7 +294,7 @@ pair<int,double> pick_point(int robot_id, int state){
         else if(item_type == 2){
             for(i=0;i<studios.size();i++){
                 if((studios[i].type == 4 || studios[i].type == 6 || studios[i].type == 9) && studios[i].r_id==-1 && studios[i].pStatus == 1){  //2 and no robot choose ,send
-                    dist = dis[robots[robot_id].target_id][i];
+                    dist=calcuDis(robots[robot_id].pos,studios[i].pos);
                     if(dist<min){
                         min=dist;
                         min_subscript=i;
@@ -301,7 +305,7 @@ pair<int,double> pick_point(int robot_id, int state){
         else if(item_type == 3){
             for(i=0;i<studios.size();i++){
                 if((studios[i].type == 5 || studios[i].type == 6 || studios[i].type == 9) && studios[i].r_id==-1 && studios[i].pStatus == 1){  //3 and no robot choose ,send
-                    dist = dis[robots[robot_id].target_id][i];
+                    dist=calcuDis(robots[robot_id].pos,studios[i].pos);
                     if(dist<min){
                         min=dist;
                         min_subscript=i;
@@ -312,7 +316,7 @@ pair<int,double> pick_point(int robot_id, int state){
         else if(item_type == 4){
             for(i=0;i<studios.size();i++){
                 if((studios[i].type == 7 || studios[i].type == 9) && studios[i].r_id==-1 && studios[i].pStatus == 1){  //4 and no robot choose ,send
-                    dist = dis[robots[robot_id].target_id][i];
+                    dist=calcuDis(robots[robot_id].pos,studios[i].pos);
                     if(dist<min){
                         min=dist;
                         min_subscript=i;
@@ -323,7 +327,7 @@ pair<int,double> pick_point(int robot_id, int state){
         else if(item_type == 5){
             for(i=0;i<studios.size();i++){
                 if((studios[i].type == 7 ||studios[i].type == 9) && studios[i].r_id==-1 && studios[i].pStatus == 1){  //5 and no robot choose ,send
-                    dist = dis[robots[robot_id].target_id][i];
+                    dist=calcuDis(robots[robot_id].pos,studios[i].pos);
                     if(dist<min){
                         min=dist;
                         min_subscript=i;
@@ -334,7 +338,7 @@ pair<int,double> pick_point(int robot_id, int state){
         else if(item_type == 6){
             for(i=0;i<studios.size();i++){
                 if((studios[i].type == 7 || studios[i].type == 9) && studios[i].r_id==-1 && studios[i].pStatus == 1){  //6 and no robot choose ,send
-                    dist = dis[robots[robot_id].target_id][i];
+                    dist=calcuDis(robots[robot_id].pos,studios[i].pos);
                     if(dist<min){
                         min=dist;
                         min_subscript=i;
@@ -345,7 +349,7 @@ pair<int,double> pick_point(int robot_id, int state){
         else if(item_type == 7){
             for(i=0;i<studios.size();i++){
                 if((studios[i].type == 8 ||studios[i].type == 9)&&studios[i].r_id==-1 && studios[i].pStatus == 1){  //7 and no robot choose ,send
-                    dist = dis[robots[robot_id].target_id][i];
+                    dist=calcuDis(robots[robot_id].pos,studios[i].pos);
                     if(dist<min){
                         min=dist;
                         min_subscript=i;
@@ -371,11 +375,18 @@ void first_pick_point(){
                 p = pick_point(i,1);
                 f = pick_point(j,1);
                 if(gt(p.second,f.second)){
+                    studios[robots[i].target_id].r_id = i;
                     robots[j].target_id = f.first;
-                }else robots[i].target_id = p.first;
+                    studios[robots[j].target_id].r_id = j;
+                }else {
+                    studios[robots[j].target_id].r_id = j;
+                    robots[i].target_id = p.first;
+                    studios[robots[i].target_id].r_id = i;
+                }
             }
         }
-        studios[robots[i].target_id].r_id = i;
+        //studios[robots[i].target_id].r_id = i;
+        cerr<<"robot_choose"<<i<<' '<<robots[i].target_id<<endl;
     }
 }
 
@@ -414,28 +425,34 @@ bool judge_full(int level, double threshold){
 
 void robot_judge(int full){
     int i;
+    //cerr<<robots.size()<<endl;
     for(i = 0; i < robots.size(); i++){
-        if(robots[i].loc_id == robots[i].target_id){
+        //cerr<<i<<robots[i].target_id<<endl;
+        if(robots[i].loc_id == robots[i].target_id && robots[i].target_id != -1){
             if(robots[i].get_type == 0){
                 //dosomething buy ,next send
                 ins[i].buy = 1;
                 robots[i].get_type = studios[robots[i].loc_id].type;
                 studios[robots[i].loc_id].r_id = -1;
                 robots[i].target_id = pick_point(i,5).first;
+                cerr<< "robots[i].target_id "<< i<<robots[i].target_id <<endl;
             }
             else{
                 //dosomething sell
-                ins[i].sell = -1;
+                ins[i].sell = 1;
                 if(full == 1){
                     robots[i].target_id = pick_point(i,3).first; //find near 456
+                    cerr<< "robots[i].target_id "<< i<<robots[i].target_id <<endl;
                     studios[robots[i].target_id].r_id = i;
                 }
                 else if(full == 2){
                     robots[i].target_id = pick_point(i,4).first; //find near 7
+                    cerr<< "robots[i].target_id "<< i<<robots[i].target_id <<endl;
                     studios[robots[i].target_id].r_id = i;
                 }
                 else{
                     robots[i].target_id = pick_point(i,2).first; //find near 123
+                    cerr<< "robots[i].target_id "<< i<<robots[i].target_id <<endl;
                     studios[robots[i].target_id].r_id = i;
                 }
             }
@@ -443,7 +460,9 @@ void robot_judge(int full){
         else{
             if(robots[i].target_id == -1){
                 robots[i].target_id = pick_point(i,1).first; //no target
+                cerr<< "robots[i].target_id "<< i<<robots[i].target_id <<endl;
                 studios[robots[i].target_id].r_id = i;
+                //cerr<< "kkkkk"<<endl;
             }
             ins[i].buy = -1;
             ins[i].sell = -1;
@@ -453,6 +472,7 @@ void robot_judge(int full){
 }
 
 void robot_action(){
+    //cerr<<"start"<<endl;
     int full = 0;
     if(judge_full(2,0.5))full = 1;   //4,5,6 full threshold
     if(judge_full(3,0.5))full = 2;   //7 full threshold Higher priority
