@@ -204,6 +204,21 @@ bool checkRobortsCollison(int robotA_id, int robotB_id) {
 }
 
 
+void solveRobortsCollison() {
+    int stopID;
+    for(int i = 0; i < 4; i++) {
+        for(int j = i + 1; j < 4; j++) {
+            if(checkRobortsCollison(i, j)) {
+                //优先级小的先停下来
+                stopID = robots[i] < robots[j] ? i: j;
+                ins[i].forward = 0;
+                //判断停下来的球是否会阻挡路线
+            }
+        }
+    }
+}
+
+
 
 void control(vector<PayLoad> payLoad){
     const double time=0.04;//预测的时间。

@@ -97,6 +97,12 @@ struct Robot
         xy_pos = _xy_pos;
         pos = _pos;
     }
+
+    bool operator< (const Robot& a) const {
+        if (get_type == get_type) 
+            return lt(time_val * collision_val, a.time_val * a.collision_val);
+        return get_type < a.get_type;
+    }
 };
 
 struct Studio
@@ -131,7 +137,6 @@ void initRobortInfo();
 bool readMapUntilOK();//读地图
 bool readStatusUntilOK();//读判题器输出
 void out_put();//输出指令
-double calcuDis(pair<double, double> a, pair<double, double> b);
 void calcuStudioDis();//计算工作台之间的距离
 void control(vector<PayLoad> payLoad);//控制球体运行
 void first_pick_point();
@@ -145,4 +150,5 @@ double calVectorSize(pair<double, double> a);//计算向量大小
 double calcuDis(pair<double, double> a, pair<double, double> b);//计算点之间的距离
 double getRobotRadius(int robort_id);//获取机器人当前的半径
 bool checkRobortsCollison(int robotA_id, int robotB_id);//判断机器人a，b是否相撞
+void solveRobortsCollison();//解决机器人相撞
 
