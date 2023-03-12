@@ -238,32 +238,26 @@ void control(vector<PayLoad> payLoad){
         if(check(robID)){
             ins[i].forward*=Dec_val;
         }else{
-            ins[i].forward=6;
+            ins[i].forward=5;
         }
-        if(gt(Dev_val,payLoad[i].angle)){
-            ins[i].rotate=0;
-        }else{
-            if(gt(payLoad[i].angle,rateLim)){
-                ins[i].rotate=pie*payLoad[i].sign;
-            }else{
-                ins[i].rotate*=Dec_val_ra;
-            }
-        }
+  
+        ins[i].rotate=pie*payLoad[i].sign;
+        
         
     }
-    sort(arr.begin(),arr.end(),cmp);
-    for(int i=0;i<4;i++){
-        if(robots[arr[i]].get_type==0)continue;
-        double dis_stop=ins[arr[i]].forward*ins[arr[i]].forward/2*payLoad[arr[i]].acceleration;
-        for(int j=i+1;j<4;j++){
-            if(lt(calcuDis(robots[arr[i]].pos,robots[arr[j]].pos),dis_stop)&&
-            !(robots[arr[i]].xy_pos.first*robots[arr[j]].xy_pos.first>0&&
-            robots[arr[i]].xy_pos.second*robots[arr[j]].xy_pos.second)
-            ){
-                ins[arr[j]].forward*=Dec_val;
-            }
-        }
-    }
+    // sort(arr.begin(),arr.end(),cmp);
+    // for(int i=0;i<4;i++){
+    //     if(robots[arr[i]].get_type==0)continue;
+    //     double dis_stop=ins[arr[i]].forward*ins[arr[i]].forward/2*payLoad[arr[i]].acceleration;
+    //     for(int j=i+1;j<4;j++){
+    //         if(lt(calcuDis(robots[arr[i]].pos,robots[arr[j]].pos),dis_stop)&&
+    //         !(robots[arr[i]].xy_pos.first*robots[arr[j]].xy_pos.first>0&&
+    //         robots[arr[i]].xy_pos.second*robots[arr[j]].xy_pos.second)
+    //         ){
+    //             ins[arr[j]].forward*=Dec_val;
+    //         }
+    //     }
+    // }
     out_put();
 }
 
