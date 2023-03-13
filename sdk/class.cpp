@@ -200,11 +200,11 @@ void calcuStudioDis()
 void print_matr(){
     int i = 0;
     int j;
-    // for(i = 1 ; i < 7; i++){
-    //     cerr << "kkkkkkk"<<material[i].size()<<endl;
-    //     for(j=0;j<material[i].size();j++) 
-    //         cerr<<"mater "<<i<<"studio "<<material[i][j]<<endl;
-    // }
+    for(i = 1 ; i <= 7; i++){
+        cerr << "kkkkkkk"<<material[i].size()<<endl;
+        for(j=0;j<material[i].size();j++) 
+            cerr<<"mater "<<i<<"studio "<<material[i][j]<<endl;
+    }
 }
 
 double calAngle(pair<double, double> a, pair<double, double> b) {
@@ -317,12 +317,12 @@ void solveRobortsCollision() {
 
                 ins[stopID].forward = -2;
 
-                cerr << "stopID:" <<stopID <<"-"<<robots[stopID].target_id<<endl;
-                cerr << "speed"<<calVectorSize(robots[stopID].xy_pos)<<" cv:"<<robots[stopID].collision_val<<endl;
-                cerr << "rate:"<<ins[stopID].rotate<<endl;
-                cerr<<" goID:"<<goID<<"-"<<robots[goID].target_id<<endl;
-                cerr << "speed"<<calVectorSize(robots[goID].xy_pos)<<" cv:"<<robots[goID].collision_val<<endl<<endl;
-                cerr << "rate:"<<ins[goID].rotate<<endl;
+                // cerr << "stopID:" <<stopID <<"-"<<robots[stopID].target_id<<endl;
+                // cerr << "speed"<<calVectorSize(robots[stopID].xy_pos)<<" cv:"<<robots[stopID].collision_val<<endl;
+                // cerr << "rate:"<<ins[stopID].rotate<<endl;
+                // cerr<<" goID:"<<goID<<"-"<<robots[goID].target_id<<endl;
+                // cerr << "speed"<<calVectorSize(robots[goID].xy_pos)<<" cv:"<<robots[goID].collision_val<<endl<<endl;
+                // cerr << "rate:"<<ins[goID].rotate<<endl;
                 
                 //判断停下来的球是否会阻挡路线
                 // next_pos = getNextPos(goID);
@@ -373,23 +373,23 @@ void control(vector<PayLoad> payLoad){
         double Dev_val=robots[i].angular_velocity*robots[i].angular_velocity/2*payLoad[i].angular_acceleration;
         bool can_st=can_stop(robots[i].pos,studios[robots[i].target_id].pos,payLoad[i].angle*payLoad[i].sign);
         if(state.FrameID>=610&&will_impact(i)&&i==3){
-            cerr<<"---"<<endl;
-            cerr<<state.FrameID<<endl;
-            cerr<<check(robID)<<endl;
-            cerr<<robots[i].target_id<<" "<<i<<endl;
-            cerr<<robots[i].collision_val<<"-"<<i<<" "<<robots[i].pos.first<<" "<<robots[i].pos.second<<endl; 
-            cerr<<" "<<robots[i].xy_pos.first<<" "<<robots[i].xy_pos.second<<endl;
-            cerr<<can_st<<" "<<payLoad[i].angle<<endl;
-            cerr<<return_cal(robots[i].pos,studios[robots[i].target_id].pos,fabs(payLoad[i].angle))<<endl;
+            // cerr<<"---"<<endl;
+            // cerr<<state.FrameID<<endl;
+            // cerr<<check(robID)<<endl;
+            // cerr<<robots[i].target_id<<" "<<i<<endl;
+            // cerr<<robots[i].collision_val<<"-"<<i<<" "<<robots[i].pos.first<<" "<<robots[i].pos.second<<endl; 
+            // cerr<<" "<<robots[i].xy_pos.first<<" "<<robots[i].xy_pos.second<<endl;
+            // cerr<<can_st<<" "<<payLoad[i].angle<<endl;
+            // cerr<<return_cal(robots[i].pos,studios[robots[i].target_id].pos,fabs(payLoad[i].angle))<<endl;
             
-            cerr<<studios[robots[i].target_id].pos.first<<" "<<studios[robots[i].target_id].pos.second<<endl;
-            cerr<<"---"<<endl; 
+            // cerr<<studios[robots[i].target_id].pos.first<<" "<<studios[robots[i].target_id].pos.second<<endl;
+            // cerr<<"---"<<endl; 
         }
         if(state.FrameID>=610&&robots[i].collision_val!=0&&lt(robots[i].collision_val,1)&&i==3){
-            cerr<<"~~~~~"<<endl;
-            cerr<<state.FrameID<<endl;
-            cerr<<robots[i].collision_val<<"-"<<i<<" "<<robots[i].pos.first<<" "<<robots[i].pos.second<<endl;
-            cerr<<"~~~~~"<<endl;
+            // cerr<<"~~~~~"<<endl;
+            // cerr<<state.FrameID<<endl;
+            // cerr<<robots[i].collision_val<<"-"<<i<<" "<<robots[i].pos.first<<" "<<robots[i].pos.second<<endl;
+            // cerr<<"~~~~~"<<endl;
             
         }
         vector<double> tmp=get_T_limits(robots[i].pos,i);
@@ -726,7 +726,7 @@ void robot_judge(int full){
         }
         if(robots[i].target_id == -1){
             if(robots[i].get_type ==0){
-                robots[i].target_id = pick_point(i,1).first; //no target
+                robots[i].target_id = pick_point(i,2).first; //no target
                 if(robots[i].target_id!= -1){
                         cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
                     studios[robots[i].target_id].r_id = i;
@@ -751,11 +751,14 @@ void robot_judge(int full){
 
 void robot_action(){
     //cerr<<"start"<<endl;
+    //print_matr();
     for(int i =0;i<=7;i++)robot_get_type[i]=0;
     for(int i = 0;i<4;i++){
         if(robots[i].get_type != 0)robot_get_type[robots[i].get_type]++;
         else if(robots[i].target_id != -1)robot_get_type[studios[robots[i].target_id].type]++;
     }
+    //for(int i =0;i<=7;i++)cerr<<"type "<<i<<" has "<<robot_get_type[i];
+    cerr <<endl;
     int full = 0;
     if(judge_full(2,0.1))full = 1;   //4,5,6 full threshold
     if(judge_full(3,0.5))full = 2;   //7 full threshold Higher priority
@@ -860,10 +863,10 @@ bool isWall(int stuID){
 bool will_impact(int robID){
     vector<double> tmp=get_T_limits(robots[robID].pos,robID,1);
     if(state.FrameID>=610 &&robID==3){
-        cerr<<state.FrameID<<endl;
-        cerr<<"__"<<is_range(robots[robID].direction,tmp)<<" "<<(fabs(robots[robID].xy_pos.first)>0.5||fabs(robots[robID].xy_pos.second)>0.5)<<endl;
-    cerr<<tmp[0]<<" "<<tmp[1]<<endl;
-    cerr<<robots[robID].direction<<endl;
+    //     cerr<<state.FrameID<<endl;
+    //     cerr<<"__"<<is_range(robots[robID].direction,tmp)<<" "<<(fabs(robots[robID].xy_pos.first)>0.5||fabs(robots[robID].xy_pos.second)>0.5)<<endl;
+    // cerr<<tmp[0]<<" "<<tmp[1]<<endl;
+    // cerr<<robots[robID].direction<<endl;
     
     }
     if(!eq(tmp[0],-7)&&(!is_range(robots[robID].direction,tmp))&&
