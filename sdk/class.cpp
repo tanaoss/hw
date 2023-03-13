@@ -4,6 +4,8 @@
 #include <cmath>
 #include<algorithm>
 #include "class.h"
+#include "line.h"
+
 using namespace std;
 vector<vector<double>> dis(50, vector<double>(50, 0));
 vector<Studio> studios;
@@ -279,11 +281,22 @@ pair<double, double> getNextPos(int robot_id) {
 }
 
 
-bool predictCollision(int a, int b) {
+void predictCollision(int a, int b) {
     Robot robotA = robots[a];
     Robot robotB = robots[b];
-    
-    return false;
+    LLine lineA = LLine(robotA.pos, studios[robotA.target_id].pos);
+    LLine lineB = LLine(robotB.pos, studios[robotB.target_id].pos);
+    pair<int,Point> corss = lineA&lineB;
+    int stopID = robots[a] < robots[b] ? a: b;
+    int goID = robots[a] < robots[b] ? a: b;
+    if(corss.first == 0 | corss.first == 1) {
+        if(checkRobortsCollison(a, b)){
+
+        }
+    }
+    else {
+        // if(robotA.target_id != robotB.target_id)
+    }
 }
 
 
@@ -293,7 +306,7 @@ void solveRobortsCollision() {
     for(int i = 0; i < 4; i++) {
         for(int j = i + 1; j < 4; j++) {
             if(checkRobortsCollison(i, j)) {
-                //优先级小的先
+                //优先级小的先减速
                 stopID = robots[i] < robots[j] ? i: j;
                 goID = robots[i] < robots[j] ? j: i;
 
