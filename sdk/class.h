@@ -150,7 +150,7 @@ void first_pick_point();
 void robot_action();
 void process();
 PayLoad calPayload(int robortID);//计算机器人与目标之间的夹角、距离等信息
-vector<double> get_T_limits(pair<double,double>pos,int id,int ctr=-1);//靠近墙体时，需要把方向转到那个范围才能加速
+vector<double> get_T_limits(pair<double,double>pos,int id,int ctr=-1,double dis=0.0);//靠近墙体时，需要把方向转到那个范围才能加速
 pair<double, double> subVector(pair<double, double> a, pair<double, double> b);//向量减（a-b）
 double calVectorProduct(pair<double, double> a, pair<double, double> b);//向量乘
 double calVectorSize(pair<double, double> a);//计算向量大小
@@ -176,6 +176,6 @@ pair<double,double> set_af(int robID);//给出机器人的速度和角度
 bool can_speed_z(int stuID,pair<double,double>xy_pos,pair<double,double>pos,double acceleration);
 double get_dis(pair<double, double> P, Line l) ;
 bool isWall(int stuID);
-bool will_impact(int robID);
+bool will_impact(int robID,double dis=0.0);
 double return_cal(pair<double,double>p1,pair<double,double>p2,double angle);
 void init_studio_r_id();
