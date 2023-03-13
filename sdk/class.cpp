@@ -369,12 +369,13 @@ void solveRobortsCollision() {
                 double angle2 = ge(robots[goID].direction, 0.0) ? robots[goID].direction: 2 * Pi + robots[goID].direction;
                 double angle3 = angle2 - angle1;
 
-                int sign;
-
-                if(ge(angle3, 0) && lt(angle3, Pi) || lt(angle3, -Pi))
-                    sign = -1; //ni
-                else
-                    sign = 1;//shun
+                //如果stopID-goID方向与goTD前进方向是锐角，go旋转
+                if(lt(fabs(angle3), Pi)){
+                    if(ge(angle3, 0) && lt(angle3, Pi) || lt(angle3, -Pi))
+                        ins[goID].rotate = -Pi; //ni
+                    else
+                        ins[goID].rotate = Pi;//shun
+                }
                 
                 // todo
 
