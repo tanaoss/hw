@@ -23,13 +23,12 @@ int main()
     initRobortInfo();
     while (cin>>state.FrameID){
         readStatusUntilOK() ;
-        //print_matr();
         cout<<state.FrameID<<endl;
         if(count == 0)first_action();
         else robot_action();
         payloads.clear();
         for(int i=0;i<4;++i){
-            payloads.push_back(calPayload(i, robots[i].target_id));
+            payloads.push_back(calPayload(i));
         }
         control(payloads);
         // int lineSpeed = 3;
