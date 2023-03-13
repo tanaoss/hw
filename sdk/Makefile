@@ -150,6 +150,33 @@ class.cpp.s:
 	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/class.cpp.s
 .PHONY : class.cpp.s
 
+line.o: line.cpp.o
+
+.PHONY : line.o
+
+# target to build an object file
+line.cpp.o:
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/line.cpp.o
+.PHONY : line.cpp.o
+
+line.i: line.cpp.i
+
+.PHONY : line.i
+
+# target to preprocess a source file
+line.cpp.i:
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/line.cpp.i
+.PHONY : line.cpp.i
+
+line.s: line.cpp.s
+
+.PHONY : line.s
+
+# target to generate assembly for a file
+line.cpp.s:
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/line.cpp.s
+.PHONY : line.cpp.s
+
 main.o: main.cpp.o
 
 .PHONY : main.o
@@ -189,6 +216,9 @@ help:
 	@echo "... class.o"
 	@echo "... class.i"
 	@echo "... class.s"
+	@echo "... line.o"
+	@echo "... line.i"
+	@echo "... line.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"

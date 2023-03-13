@@ -734,8 +734,6 @@ void robot_judge(int full){
         if(robots[i].loc_id == robots[i].target_id && robots[i].target_id != -1){
             if(robots[i].get_type == 0){
                 //dosomething buy ,next send
-                ins[i].buy = 1;
-                ins[i].sell = -1;
                 robots[i].lastSign=0;
                 robots[i].isTurn=0;
                 robots[i].get_type = studios[robots[i].loc_id].type;
@@ -747,7 +745,11 @@ void robot_judge(int full){
                     if(studios[robots[i].target_id].type!=8&&studios[robots[i].target_id].type!=9)studios_rid[robots[i].target_id][robots[i].get_type] = i;
                     //cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<" flag "<<studios_rid[robots[i].target_id][robots[i].get_type]<<endl;
                 }
-
+                ins[i].buy = 1;
+                ins[i].sell = -1;
+                if(state.FrameID>8500){
+                    if(!checkeTimeEnough(i,robots[i].target_id,9000-state.FrameID))ins[i].buy = -1;
+                }
             }
             else{
                 //dosomething sell
@@ -805,7 +807,7 @@ void robot_judge(int full){
                 }
             }
         }
-        
+        cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<studios[robots[i].target_id].type<<endl;
         // if(i==2 && robots[i].target_id != -1){
         //     cerr<<" robot 2 dis "<<calcuDis(robots[i].pos,studios[robots[i].target_id].pos)<<endl;
         // }
@@ -823,8 +825,8 @@ void robot_action(){
     //for(int i =0;i<=7;i++)cerr<<"type "<<i<<" has "<<robot_get_type[i];
     // cerr <<endl;
     int full = 0;
-    if(judge_full(2,0.1))full = 1;   //4,5,6 full threshold
-    if(judge_full(3,0.5))full = 2;   //7 full threshold Higher priority
+    if(judge_full(2,0.15))full = 1;   //4,5,6 full threshold
+    if(judge_full(3,0.1))full = 2;   //7 full threshold Higher priority
     //cerr<<" full = "<<full<<endl;
     robot_judge(full);
 }
