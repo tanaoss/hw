@@ -4,6 +4,8 @@
 #include <cmath>
 #include<algorithm>
 #include "class.h"
+#include "line.h"
+
 using namespace std;
 vector<vector<double>> dis(50, vector<double>(50, 0));
 vector<Studio> studios;
@@ -205,8 +207,12 @@ void print_matr(){
     }
 }
 
+double calAngle(pair<double, double> a, pair<double, double> b) {
+    return acos(calVectorProduct(a, b) / calVectorSize(a) / calVectorSize(b));
+}
 
-PayLoad calPayload(int robortID) {
+
+PayLoad calPayload(int robortID, int targetID) {
     
     //int target = rand() % ((int)studios.size());
     //robots[robortID].target_id = target;
@@ -214,7 +220,7 @@ PayLoad calPayload(int robortID) {
     //cerr << robortID << target<<endl;
 
     Robot robort = robots[robortID];
-    Studio studio = studios[robort.target_id];
+    Studio studio = studios[targetID];
 
     // cerr << robortID << "--"<< robort.target_id<<endl;
 
@@ -260,13 +266,13 @@ double getRobotRadius(int robort_id) {
 bool checkRobortsCollison(int robotA_id, int robotB_id) {
     Robot robotA = robots[robotA_id];
     Robot robortB = robots[robotB_id];
-    return lt(getRobotRadius(robotA_id) + getRobotRadius(robotB_id), calcuDis(robotA.pos, robortB.pos));
+    return gt(getRobotRadius(robotA_id) + getRobotRadius(robotB_id), calcuDis(robotA.pos, robortB.pos));
 }
 
 bool checkRobortsCollison(int robotA_id, pair<double, double> next_pos, int robotB_id) {
     Robot robotA = robots[robotA_id];
     Robot robortB = robots[robotB_id];
-    return lt(getRobotRadius(robotA_id) + getRobotRadius(robotB_id), calcuDis(next_pos, robortB.pos));
+    return gt(getRobotRadius(robotA_id) + getRobotRadius(robotB_id), calcuDis(next_pos, robortB.pos));
 }
 
 bool checkeTimeEnough(int robot_id, int target_id, int frame) {
@@ -280,23 +286,57 @@ pair<double, double> getNextPos(int robot_id) {
 }
 
 
-void solveRobortsCollison() {
+void predictCollision(int a, int b) {
+    Robot robotA = robots[a];
+    Robot robotB = robots[b];
+    LLine lineA = LLine(robotA.pos, studios[robotA.target_id].pos);
+    LLine lineB = LLine(robotB.pos, studios[robotB.target_id].pos);
+    pair<int,Point> corss = lineA&lineB;
+    int stopID = robots[a] < robots[b] ? a: b;
+    int goID = robots[a] < robots[b] ? a: b;
+    if(corss.first == 0 | corss.first == 1) {
+        if(checkRobortsCollison(a, b)){
+
+        }
+    }
+    else {
+        // if(robotA.target_id != robotB.target_id)
+    }
+}
+
+
+void solveRobortsCollision() {
     int stopID, goID;
     pair<double, double> next_pos;
     for(int i = 0; i < 4; i++) {
         for(int j = i + 1; j < 4; j++) {
             if(checkRobortsCollison(i, j)) {
-                //优先级小的先停下来
+                //优先级小的先减速
                 stopID = robots[i] < robots[j] ? i: j;
                 goID = robots[i] < robots[j] ? j: i;
-                ins[i].forward = 0;
+
+                ins[stopID].forward = -2;
+
+                cerr << "stopID:" <<stopID <<"-"<<robots[stopID].target_id<<endl;
+                cerr << "speed"<<calVectorSize(robots[stopID].xy_pos)<<" cv:"<<robots[stopID].collision_val<<endl;
+                cerr << "rate:"<<ins[stopID].rotate<<endl;
+                cerr<<" goID:"<<goID<<"-"<<robots[goID].target_id<<endl;
+                cerr << "speed"<<calVectorSize(robots[goID].xy_pos)<<" cv:"<<robots[goID].collision_val<<endl<<endl;
+                cerr << "rate:"<<ins[goID].rotate<<endl;
+                
                 //判断停下来的球是否会阻挡路线
-                next_pos = getNextPos(goID);
-                if(checkRobortsCollison(goID, next_pos, stopID)) {
-                    if(eq(ins[goID].rotate, 0)) {
-                        ins[goID].rotate = Pi;
-                    }
-                }
+                // next_pos = getNextPos(goID);
+                // if(checkRobortsCollison(goID, next_pos, stopID)) {
+
+                //     ins[goID].rotate = - Pi * robots[goID].lastSign;
+
+                //     if(lt(robots[stopID].lastSign * robots[goID].lastSign, 0)) {
+                //         ins[stopID].rotate = - Pi * robots[stopID].lastSign;
+                //     }
+                //     else {
+                //         ins[stopID].rotate = Pi * robots[stopID].lastSign;
+                //     }
+                // }
             }
         }
     }
@@ -356,9 +396,13 @@ void control(vector<PayLoad> payLoad){
                 robots[i].lastRate=ins[i].rotate;   
                 continue;         
         }
-        if(can_st){
+        // int can_st_flag=1;
+        if(can_st&&ins[i].rotate==0){
             if(can_speed_z(robots[i].target_id,robots[i].xy_pos,robots[i].pos,payLoad[i].acceleration)){
+            //cerr<<"~"<<payLoad[i].angle<<" "<<robots[i].direction<<" "<<i
+            //<<"~"<<robots[i].target_id<<" "<<robots[i].xy_pos.first<<" "<<robots[i].xy_pos.second<<endl;
                 ins[i].forward=0;
+                // can_st_flag=0;
             }else{
                 ins[i].forward=6;
             }
@@ -382,6 +426,7 @@ void control(vector<PayLoad> payLoad){
         }
         
     }
+    solveRobortsCollision();
     out_put();
 }
 
@@ -763,7 +808,7 @@ double get_dis(pair<double, double> P, Line l) {
     auto get_v=[&](pair<double, double> P,pair<double, double> v)->double{
         return P.first*v.second-v.first*P.second;
     };
-    double distance=get_v(P,l.v)-get_v(l.P,l.v)/(sqrt(l.v.first * l.v.first  + 
+    double distance=abs(get_v(P,l.v)-get_v(l.P,l.v))/(sqrt(l.v.first * l.v.first  + 
     l.v.second* l.v.second));
     return distance; 
 }
@@ -777,6 +822,7 @@ bool can_speed_z(int stuID,pair<double,double>xy_pos,pair<double,double>pos,doub
     double dis3=totalV*totalV/(2*acceleration);//速度减为0的滑行距离
     double dis4=sqrt(0.4*0.4-dis1*dis1);//圆截线的长度
     double dis5=sqrt(dis2*dis2-dis1*dis1);//射线的长度
+    //cerr<<stuID<<" "<<dis3<<" "<<dis4<<" "<<dis5<<" "<<dis1<<endl;
     if(ge(dis3,dis5-dis4))return true;
     return false;
 }
