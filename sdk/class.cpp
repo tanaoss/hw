@@ -391,14 +391,13 @@ void control(vector<PayLoad> payLoad){
             // cerr<<studios[robots[i].target_id].pos.first<<" "<<studios[robots[i].target_id].pos.second<<endl;
             // cerr<<"---"<<endl; 
         // }
-        if(state.FrameID>=610&&robots[i].collision_val!=0&&lt(robots[i].collision_val,1)&&i==3){
-            // cerr<<"~~~~~"<<endl;
-            // cerr<<state.FrameID<<endl;
-            // cerr<<robots[i].collision_val<<"-"<<i<<" "<<robots[i].pos.first<<" "<<robots[i].pos.second<<endl;
-            // cerr<<"~~~~~"<<endl;
->>>>>>> 036262f074cafc3eb9a16fb8f61ebc18c4781194
+        // if(state.FrameID>=610&&robots[i].collision_val!=0&&lt(robots[i].collision_val,1)&&i==3){
+        //     // cerr<<"~~~~~"<<endl;
+        //     // cerr<<state.FrameID<<endl;
+        //     // cerr<<robots[i].collision_val<<"-"<<i<<" "<<robots[i].pos.first<<" "<<robots[i].pos.second<<endl;
+        //     // cerr<<"~~~~~"<<endl;
             
-        }
+        // }
         vector<double> tmp=get_T_limits(robots[i].pos,i);
         if(!eq(tmp[0],-7)&&(!is_range(robots[i].direction,tmp))){
             // if(i==2)
@@ -885,10 +884,9 @@ bool will_impact(int robID,double dis){
     // // cerr<<tmp[0]<<" "<<tmp[1]<<endl;
     // // cerr<<robots[robID].direction<<endl;
     
-    }
-    if(!eq(tmp[0],-7)&&(!is_range(robots[robID].direction,tmp))
-   
-    ){//在墙附件，并且会撞上
+    // }
+    if(!eq(tmp[0],-7)&&(!is_range(robots[robID].direction,tmp)))
+    {//在墙附件，并且会撞上
         return true;
     }
     return false;
