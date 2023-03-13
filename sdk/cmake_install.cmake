@@ -1,4 +1,4 @@
-# Install script for directory: /home/tan/LinuxRelease/sdk
+# Install script for directory: /home/tan/LinuxRelease/hw/hw/sdk
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -45,5 +45,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/tan/LinuxRelease/sdk/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/tan/LinuxRelease/hw/hw/sdk/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
