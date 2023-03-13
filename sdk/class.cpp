@@ -4,7 +4,7 @@
 #include <cmath>
 #include<algorithm>
 #include "class.h"
-#include "line.h"
+// #include "line.h"
 
 using namespace std;
 vector<vector<double>> dis(50, vector<double>(50, 0));
@@ -286,23 +286,23 @@ pair<double, double> getNextPos(int robot_id) {
 }
 
 
-void predictCollision(int a, int b) {
-    Robot robotA = robots[a];
-    Robot robotB = robots[b];
-    LLine lineA = LLine(robotA.pos, studios[robotA.target_id].pos);
-    LLine lineB = LLine(robotB.pos, studios[robotB.target_id].pos);
-    pair<int,Point> corss = lineA&lineB;
-    int stopID = robots[a] < robots[b] ? a: b;
-    int goID = robots[a] < robots[b] ? a: b;
-    if(corss.first == 0 | corss.first == 1) {
-        if(checkRobortsCollison(a, b)){
+// void predictCollision(int a, int b) {
+//     Robot robotA = robots[a];
+//     Robot robotB = robots[b];
+//     LLine lineA = LLine(robotA.pos, studios[robotA.target_id].pos);
+//     LLine lineB = LLine(robotB.pos, studios[robotB.target_id].pos);
+//     pair<int,Point> corss = lineA&lineB;
+//     int stopID = robots[a] < robots[b] ? a: b;
+//     int goID = robots[a] < robots[b] ? a: b;
+//     if(corss.first == 0 | corss.first == 1) {
+//         if(checkRobortsCollison(a, b)){
 
-        }
-    }
-    else {
-        // if(robotA.target_id != robotB.target_id)
-    }
-}
+//         }
+//     }
+//     else {
+//         // if(robotA.target_id != robotB.target_id)
+//     }
+// }
 
 
 void solveRobortsCollision() {
