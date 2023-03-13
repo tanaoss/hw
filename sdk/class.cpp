@@ -201,7 +201,7 @@ void print_matr(){
 }
 
 
-PayLoad calPayload(int robortID, int targetID) {
+PayLoad calPayload(int robortID) {
     
     //int target = rand() % ((int)studios.size());
     //robots[robortID].target_id = target;
@@ -209,7 +209,7 @@ PayLoad calPayload(int robortID, int targetID) {
     //cerr << robortID << target<<endl;
 
     Robot robort = robots[robortID];
-    Studio studio = studios[targetID];
+    Studio studio = studios[robort.target_id];
 
     // cerr << robortID << "--"<< robort.target_id<<endl;
 
@@ -262,12 +262,6 @@ bool checkRobortsCollison(int robotA_id, pair<double, double> next_pos, int robo
     Robot robotA = robots[robotA_id];
     Robot robortB = robots[robotB_id];
     return lt(getRobotRadius(robotA_id) + getRobotRadius(robotB_id), calcuDis(next_pos, robortB.pos));
-}
-
-bool checkeTimeEnough(int robot_id, int target_id, int frame) {
-    double dis = calcuDis(robots[robot_id].pos, studios[target_id].pos);
-    double time = (9000.0 - frame) * 0.02;//剩余秒数
-    
 }
 
 pair<double, double> getNextPos(int robot_id) {
@@ -328,11 +322,12 @@ void control(vector<PayLoad> payLoad){
         robots[i].lastSign=payLoad[i].sign;
         double lastRate=fabs(robots[i].lastRate);
         double Dev_val=robots[i].angular_velocity*robots[i].angular_velocity/2*payLoad[i].angular_acceleration;
+        bool can_st=can_stop(robots[i].pos,studios[robots[i].target_id].pos,fabs(payLoad[i].angle));
         vector<double> tmp=get_T_limits(robots[i].pos,i);
         if(!eq(tmp[0],-7)&&(!is_range(robots[i].direction,tmp))){
             // if(i==2)
-            cerr<<"~"<<payLoad[i].angle<<" "<<robots[i].direction<<" "<<robots[i].lastRate
-            <<"~"<<robots[i].target_id<<endl;
+            // cerr<<"~"<<payLoad[i].angle<<" "<<robots[i].direction<<" "<<robots[i].lastRate
+            // <<"~"<<robots[i].target_id<<endl;
 
             ins[i].rotate=((isSame==1)?Pi*payLoad[i].sign:max(0.5,Dec_val_ra*lastRate)*payLoad[i].sign);
             robots[i].lastRate=ins[i].rotate;
@@ -340,7 +335,7 @@ void control(vector<PayLoad> payLoad){
             continue;
         }
         double dis=calcuDis(robots[i].pos,studios[robots[i].target_id].pos);
-        if(dis<3&&!can_stop(robots[i].pos,studios[robots[i].target_id].pos,fabs(payLoad[i].angle))){
+        if(dis<3&&!can_st){
                 ins[i].rotate=((isSame==1&&isTurn==0)?Pi*payLoad[i].sign:max(0.5,Dec_val_ra*lastRate)*payLoad[i].sign);
                 // if(i==0)
                 // cerr<<"~"<<ins[i].rotate<<" "<<isSame<<"+"<<payLoad[i].angle<<"+" <<Dec_val_ra*lastRate*payLoad[i].sign<<endl;
@@ -350,12 +345,18 @@ void control(vector<PayLoad> payLoad){
                 robots[i].lastRate=ins[i].rotate;   
                 continue;         
         }
-        if(check(robID)){
+        if(can_st){
+            if(can_speed_z(robots[i].target_id,robots[i].xy_pos,robots[i].pos,payLoad[i].acceleration)){
+                ins[i].forward=0;
+            }else{
+                ins[i].forward=6;
+            }
+        }else if(check(robID)){
             ins[i].forward=0.5;
         }else{
             ins[i].forward=6;
         }
-        if(can_stop(robots[i].pos,studios[robots[i].target_id].pos,fabs(payLoad[i].angle))){
+        if(can_st){
             // if(i==0)
             // cerr<<"----"<<endl;
             ins[i].rotate=0;
