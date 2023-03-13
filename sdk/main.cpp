@@ -21,7 +21,7 @@ int main()
     int count = 0;
     vector<PayLoad> payloads;
     initRobortInfo();
-    init_studio_r_id();
+    init_studio_parameter();
     while (cin>>state.FrameID){
         //cerr<<" time "<<state.FrameID;
         readStatusUntilOK() ;

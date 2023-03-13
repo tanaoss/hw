@@ -4,8 +4,6 @@
 #include <cmath>
 #include<algorithm>
 #include "class.h"
-// #include "line.h"
-
 using namespace std;
 vector<vector<double>> dis(50, vector<double>(50, 0));
 vector<Studio> studios;
@@ -13,7 +11,7 @@ vector<Robot> robots;
 State state;//当前帧数，全局可见
 vector<Ins> ins(4);
 vector<int> material[8];
-vector<vector<int>> product(8);
+vector<int> product[8];
 double EPS=1e-7;
 double acceleration_no;
 double acceleration_has;
@@ -22,6 +20,7 @@ double angular_acceleration_has;
 vector<bool> need_stop(4,false);
 int robot_get_type[8];
 int studios_rid[50][8];
+int studio_material[4][4];
 void initRobortInfo() {
     double weightMin = 0.45 * 0.45 * Pi * 20.0;
     double weightMax = 0.53 * 0.53 * Pi * 20.0;
@@ -36,10 +35,23 @@ void initRobortInfo() {
 
 
 }
-void init_studio_r_id(){
+void init_studio_parameter(){
     for(int i=0;i<50;i++){
         for(int j=0;j<8;j++)studios_rid[i][j]=-1;
     }
+    studio_material[0][0]=2;
+    studio_material[0][1]=1;
+    studio_material[0][2]=2;
+    studio_material[1][0]=2;
+    studio_material[1][1]=1;
+    studio_material[1][2]=3;
+    studio_material[2][0]=2;
+    studio_material[2][1]=2;
+    studio_material[2][2]=3;
+    studio_material[3][0]=3;
+    studio_material[3][1]=4;
+    studio_material[3][2]=5;
+    studio_material[3][3]=6;
 }
 bool readMapUntilOK() {
     char line[1024];
@@ -89,7 +101,10 @@ bool readStatusUntilOK() {
     int rob_id=0;
     cin>>K;
     cin.ignore();
-    for(int i=0;i<7;++i) material[i].clear();
+    for(int i=0;i<7;++i) {
+        material[i].clear();
+        product[i].clear();
+    }
     while (K--)
     {
         vector<double> tmp(6,0);
@@ -101,23 +116,16 @@ bool readStatusUntilOK() {
             product[studios[studio_id].type].push_back(studio_id);
         }
         if(studios[studio_id].type > 3){
-            if(studios[studio_id].type == 4){
-                //cerr <<"aaaa"<<studios[studio_id].bitSatus<<endl;
-                if((studios[studio_id].bitSatus & 2) == 0 && (studios_rid[studio_id][1] == -1)) material[1].push_back(studio_id);
-                if((studios[studio_id].bitSatus & 4) == 0 && (studios_rid[studio_id][2] == -1)) material[2].push_back(studio_id);
-            }
-            if(studios[studio_id].type == 5){
-                if((studios[studio_id].bitSatus & 2) == 0 && (studios_rid[studio_id][1] == -1)) material[1].push_back(studio_id);
-                if((studios[studio_id].bitSatus & 8) == 0 && (studios_rid[studio_id][3] == -1)) material[3].push_back(studio_id);
-            }
-            if(studios[studio_id].type == 6){
-                if((studios[studio_id].bitSatus & 4) == 0 && (studios_rid[studio_id][2] == -1)) material[2].push_back(studio_id);
-                if((studios[studio_id].bitSatus & 8) == 0 && (studios_rid[studio_id][3] == -1)) material[3].push_back(studio_id);
-            }
-            if(studios[studio_id].type == 7){
-                if((studios[studio_id].bitSatus & 16) == 0 && (studios_rid[studio_id][4] == -1)) material[4].push_back(studio_id);
-                if((studios[studio_id].bitSatus & 32) == 0 && (studios_rid[studio_id][5] == -1)) material[5].push_back(studio_id);
-                if((studios[studio_id].bitSatus & 64) == 0 && (studios_rid[studio_id][6] == -1)) material[6].push_back(studio_id);
+            if(studios[studio_id].type < 8){
+                for(int i = 0;i < 4;i++){
+                    if(studios[studio_id].type == i+4){
+                        for(int j = 0;j<studio_material[i][0];j++){
+                            if((studios[studio_id].bitSatus & (int)pow(2,studio_material[i][j+1])) == 0){
+                                if(studios_rid[studio_id][studio_material[i][j+1]] == -1)material[studio_material[i][j+1]].push_back(studio_id);
+                            }
+                        }
+                    }
+                }
             }
             if(studios[studio_id].type == 8){
                 material[7].push_back(studio_id);
@@ -266,13 +274,13 @@ double getRobotRadius(int robort_id) {
 bool checkRobortsCollison(int robotA_id, int robotB_id) {
     Robot robotA = robots[robotA_id];
     Robot robortB = robots[robotB_id];
-    return lt(getRobotRadius(robotA_id) + getRobotRadius(robotB_id), calcuDis(robotA.pos, robortB.pos));
+    return gt(getRobotRadius(robotA_id) + getRobotRadius(robotB_id), calcuDis(robotA.pos, robortB.pos));
 }
 
 bool checkRobortsCollison(int robotA_id, pair<double, double> next_pos, int robotB_id) {
     Robot robotA = robots[robotA_id];
     Robot robortB = robots[robotB_id];
-    return lt(getRobotRadius(robotA_id) + getRobotRadius(robotB_id), calcuDis(next_pos, robortB.pos));
+    return gt(getRobotRadius(robotA_id) + getRobotRadius(robotB_id), calcuDis(next_pos, robortB.pos));
 }
 
 bool checkIsTrySeparate(int robotA_id, int robotB_id) {
@@ -280,7 +288,7 @@ bool checkIsTrySeparate(int robotA_id, int robotB_id) {
     Robot robortB = robots[robotB_id];
     pair<double, double> next_posA = getNextPos(robotA_id);
     pair<double, double> next_posB = getNextPos(robotB_id);
-    return lt(getRobotRadius(robotA_id) + getRobotRadius(robotB_id), calcuDis(next_posA, next_posB));
+    return gt(getRobotRadius(robotA_id) + getRobotRadius(robotB_id), calcuDis(next_posA, next_posB));
 }
 
 double calNextTimeDistance(double speed, double time, double  acceleration) {
@@ -633,7 +641,32 @@ pair<int,double> pick_point(int robot_id, int state){
     }
     return pair<int,double>(min_subscript,min);
 }
-
+pair<int,double> choose_lack(int studio_id ,int threshold){
+    int dist ;
+    int min =100;
+    int min_subscript = -1;
+    if(studios[studio_id].type >3 &&studios[studio_id].type < 8){
+        for(int i = 0;i < 4;i++){
+            if(studios[studio_id].type == i+4){
+                for(int j = 0;j<studio_material[i][0];j++){
+                    if((studios[studio_id].bitSatus & (int)pow(2,studio_material[i][j+1])) == 0){
+                        if(studios_rid[studio_id][studio_material[i][j+1]] == -1){
+                            for(int k;k<product[studio_material[i][j+1]].size();k++){
+                                dist=calcuDis(studios[studio_id].pos,studios[product[studio_material[i][j+1]][k]].pos);
+                                if(dist<min){
+                                    min=dist;
+                                    min_subscript=i;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    if(min < threshold)return pair<int,double>(min_subscript,min);
+    return pair<int,double>(-1,-1);
+}
 void first_action(){
     int i,j; 
     pair <int,double> p;
@@ -703,6 +736,7 @@ bool judge_full(int level, double threshold){
 
 void robot_judge(int full){
     int i;
+    int target;
     //cerr<<robots.size()<<endl;
     for(i = 0; i < robots.size(); i++){
         //cerr<<i<<robots[i].target_id<<endl;
@@ -736,25 +770,32 @@ void robot_judge(int full){
                 //studios[robots[i].loc_id].r_id = -1;
                 studios_rid[robots[i].loc_id][robots[i].get_type] = -1;
                 robots[i].get_type = 0;
-                if(full == 1){
-                    robots[i].target_id = pick_point(i,3).first; //find near 456
-                    if(robots[i].target_id!= -1){
-                        //cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
-                        studios[robots[i].target_id].r_id = i;
-                    }
-                }
-                else if(full == 2){
-                    robots[i].target_id = pick_point(i,4).first; //find near 7
-                    if(robots[i].target_id!= -1){
-                        //cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
-                        studios[robots[i].target_id].r_id = i;
-                    }
+                target = choose_lack(robots[i].loc_id,1.0).first;
+                if(target != -1){
+                    robots[i].target_id = target ;
+                     studios[robots[i].target_id].r_id = i;
                 }
                 else{
-                    robots[i].target_id = pick_point(i,2).first; //find near 123
-                    if(robots[i].target_id!= -1){
-                        //cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
-                        studios[robots[i].target_id].r_id = i;
+                    if(full == 1){
+                        robots[i].target_id = pick_point(i,3).first; //find near 456
+                        if(robots[i].target_id!= -1){
+                            //cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
+                            studios[robots[i].target_id].r_id = i;
+                        }
+                    }
+                    else if(full == 2){
+                        robots[i].target_id = pick_point(i,4).first; //find near 7
+                        if(robots[i].target_id!= -1){
+                            //cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
+                            studios[robots[i].target_id].r_id = i;
+                        }
+                    }
+                    else{
+                        robots[i].target_id = pick_point(i,2).first; //find near 123
+                        if(robots[i].target_id!= -1){
+                            //cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
+                            studios[robots[i].target_id].r_id = i;
+                        }
                     }
                 }
             }
