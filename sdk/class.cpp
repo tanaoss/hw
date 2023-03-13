@@ -200,6 +200,10 @@ void print_matr(){
     // }
 }
 
+double calAngle(pair<double, double> a, pair<double, double> b) {
+    return acos(calVectorProduct(a, b) / calVectorSize(a) / calVectorSize(b));
+}
+
 
 PayLoad calPayload(int robortID) {
     
@@ -281,17 +285,32 @@ void solveRobortsCollison() {
     for(int i = 0; i < 4; i++) {
         for(int j = i + 1; j < 4; j++) {
             if(checkRobortsCollison(i, j)) {
-                //优先级小的先停下来
+                //优先级小的先
                 stopID = robots[i] < robots[j] ? i: j;
                 goID = robots[i] < robots[j] ? j: i;
-                ins[i].forward = 0;
+
+                ins[stopID].forward = -2;
+
+                cerr << "stopID:" <<stopID <<"-"<<robots[stopID].target_id<<endl;
+                cerr << "speed"<<calVectorSize(robots[stopID].xy_pos)<<" cv:"<<robots[stopID].collision_val<<endl;
+                cerr << "rate:"<<ins[stopID].rotate<<endl;
+                cerr<<" goID:"<<goID<<"-"<<robots[goID].target_id<<endl;
+                cerr << "speed"<<calVectorSize(robots[goID].xy_pos)<<" cv:"<<robots[goID].collision_val<<endl<<endl;
+                cerr << "rate:"<<ins[goID].rotate<<endl;
+                
                 //判断停下来的球是否会阻挡路线
-                next_pos = getNextPos(goID);
-                if(checkRobortsCollison(goID, next_pos, stopID)) {
-                    if(eq(ins[goID].rotate, 0)) {
-                        ins[goID].rotate = Pi;
-                    }
-                }
+                // next_pos = getNextPos(goID);
+                // if(checkRobortsCollison(goID, next_pos, stopID)) {
+
+                //     ins[goID].rotate = - Pi * robots[goID].lastSign;
+
+                //     if(lt(robots[stopID].lastSign * robots[goID].lastSign, 0)) {
+                //         ins[stopID].rotate = - Pi * robots[stopID].lastSign;
+                //     }
+                //     else {
+                //         ins[stopID].rotate = Pi * robots[stopID].lastSign;
+                //     }
+                // }
             }
         }
     }
@@ -326,7 +345,7 @@ void control(vector<PayLoad> payLoad){
         robots[i].lastSign=payLoad[i].sign;
         double lastRate=fabs(robots[i].lastRate);
         double Dev_val=robots[i].angular_velocity*robots[i].angular_velocity/2*payLoad[i].angular_acceleration;
-        bool can_st=can_stop(robots[i].pos,studios[robots[i].target_id].pos,fabs(payLoad[i].angle));
+        bool can_st=can_stop(robots[i].pos,studios[robots[i].target_id].pos,payLoad[i].angle*payLoad[i].sign);
         if(state.FrameID>=610&&will_impact(i)&&i==3){
             cerr<<"---"<<endl;
             cerr<<state.FrameID<<endl;
@@ -746,6 +765,7 @@ vector<double>  get_T_limits(pair<double,double>pos,int id,int ctr){
     return tmp;
 }
 bool can_stop(pair<double,double>p1,pair<double,double>p2,double angle){
+    if(lt(angle,0.0))return false;
     double dis=calcuDis(p1,p2);
     if(lt(sin(angle)*dis,0.4)){
         return true;
