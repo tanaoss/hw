@@ -82,3 +82,5 @@ bool inter(LLine l1,LLine l2)
     sgn((l2.s-l1.e)^(l1.s-l1.e))*sgn((l2.e-l1.e)^(l1.s-l1.e)) <= 0 &&
     sgn((l1.s-l2.e)^(l2.s-l2.e))*sgn((l1.e-l2.e)^(l2.s-l2.e)) <= 0;
 }
+
+bool checkLineCross(LLine l1, LLine l2);
