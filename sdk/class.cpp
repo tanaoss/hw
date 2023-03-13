@@ -246,6 +246,12 @@ bool checkRobortsCollison(int robotA_id, pair<double, double> next_pos, int robo
     return lt(getRobotRadius(robotA_id) + getRobotRadius(robotB_id), calcuDis(next_pos, robortB.pos));
 }
 
+bool checkeTimeEnough(int robot_id, int target_id, int frame) {
+    double dis = calcuDis(robots[robot_id].pos, studios[target_id].pos);
+    double time = (9000.0 - frame) * 0.02;//剩余秒数
+    
+}
+
 pair<double, double> getNextPos(int robot_id) {
     return addVector(robots[robot_id].pos, calVectorProduct(robots[robot_id].pos, 0.02));
 }
