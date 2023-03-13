@@ -267,7 +267,7 @@ bool checkRobortsCollison(int robotA_id, pair<double, double> next_pos, int robo
 bool checkeTimeEnough(int robot_id, int target_id, int frame) {
     double dis = calcuDis(robots[robot_id].pos, studios[target_id].pos);
     double time = (9000.0 - frame) * 0.02;//剩余秒数
-    
+    return true;
 }
 
 pair<double, double> getNextPos(int robot_id) {
