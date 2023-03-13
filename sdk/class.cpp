@@ -193,15 +193,15 @@ void calcuStudioDis()
 void print_matr(){
     int i = 0;
     int j;
-    for(i = 1 ; i < 7; i++){
-        cerr << "kkkkkkk"<<material[i].size()<<endl;
-        for(j=0;j<material[i].size();j++) 
-            cerr<<"mater "<<i<<"studio "<<material[i][j]<<endl;
-    }
+    // for(i = 1 ; i < 7; i++){
+    //     cerr << "kkkkkkk"<<material[i].size()<<endl;
+    //     for(j=0;j<material[i].size();j++) 
+    //         cerr<<"mater "<<i<<"studio "<<material[i][j]<<endl;
+    // }
 }
 
 
-PayLoad calPayload(int robortID, int targetID) {
+PayLoad calPayload(int robortID) {
     
     //int target = rand() % ((int)studios.size());
     //robots[robortID].target_id = target;
@@ -209,7 +209,7 @@ PayLoad calPayload(int robortID, int targetID) {
     //cerr << robortID << target<<endl;
 
     Robot robort = robots[robortID];
-    Studio studio = studios[targetID];
+    Studio studio = studios[robort.target_id];
 
     // cerr << robortID << "--"<< robort.target_id<<endl;
 
@@ -314,9 +314,7 @@ void control(vector<PayLoad> payLoad){
         return true;
         return false;
     };//判断是否有可能撞墙
-    auto cmp=[&](int id1,int id2)->bool{
-        return robots[id1].get_type>robots[id2].get_type;
-    };
+
     for(int i=0;i<4;i++){
         int robID=robots[i].id;
         ins[i].robID=robots[i].id;
@@ -329,6 +327,26 @@ void control(vector<PayLoad> payLoad){
         double lastRate=fabs(robots[i].lastRate);
         double Dev_val=robots[i].angular_velocity*robots[i].angular_velocity/2*payLoad[i].angular_acceleration;
         bool can_st=can_stop(robots[i].pos,studios[robots[i].target_id].pos,fabs(payLoad[i].angle));
+        if(state.FrameID>=610&&will_impact(i)&&i==3){
+            cerr<<"---"<<endl;
+            cerr<<state.FrameID<<endl;
+            cerr<<check(robID)<<endl;
+            cerr<<robots[i].target_id<<" "<<i<<endl;
+            cerr<<robots[i].collision_val<<"-"<<i<<" "<<robots[i].pos.first<<" "<<robots[i].pos.second<<endl; 
+            cerr<<" "<<robots[i].xy_pos.first<<" "<<robots[i].xy_pos.second<<endl;
+            cerr<<can_st<<" "<<payLoad[i].angle<<endl;
+            cerr<<return_cal(robots[i].pos,studios[robots[i].target_id].pos,fabs(payLoad[i].angle))<<endl;
+            
+            cerr<<studios[robots[i].target_id].pos.first<<" "<<studios[robots[i].target_id].pos.second<<endl;
+            cerr<<"---"<<endl; 
+        }
+        if(state.FrameID>=610&&robots[i].collision_val!=0&&lt(robots[i].collision_val,1)&&i==3){
+            cerr<<"~~~~~"<<endl;
+            cerr<<state.FrameID<<endl;
+            cerr<<robots[i].collision_val<<"-"<<i<<" "<<robots[i].pos.first<<" "<<robots[i].pos.second<<endl;
+            cerr<<"~~~~~"<<endl;
+            
+        }
         vector<double> tmp=get_T_limits(robots[i].pos,i);
         if(!eq(tmp[0],-7)&&(!is_range(robots[i].direction,tmp))){
             // if(i==2)
@@ -340,6 +358,7 @@ void control(vector<PayLoad> payLoad){
             ins[i].forward=0;
             continue;
         }
+      
         double dis=calcuDis(robots[i].pos,studios[robots[i].target_id].pos);
         if(dis<3&&!can_st){
                 ins[i].rotate=((isSame==1&&isTurn==0)?Pi*payLoad[i].sign:max(0.5,Dec_val_ra*lastRate)*payLoad[i].sign);
@@ -352,10 +371,8 @@ void control(vector<PayLoad> payLoad){
                 continue;         
         }
         // int can_st_flag=1;
-        if(can_st&&ins[i].rotate==0){
+        if( isWall(robots[i].target_id)&&can_st&&ins[i].rotate==0){
             if(can_speed_z(robots[i].target_id,robots[i].xy_pos,robots[i].pos,payLoad[i].acceleration)){
-            cerr<<"~"<<payLoad[i].angle<<" "<<robots[i].direction<<" "<<i
-            <<"~"<<robots[i].target_id<<" "<<robots[i].xy_pos.first<<" "<<robots[i].xy_pos.second<<endl;
                 ins[i].forward=0;
                 // can_st_flag=0;
             }else{
@@ -363,7 +380,10 @@ void control(vector<PayLoad> payLoad){
             }
         }else if(check(robID)){
             ins[i].forward=0.5;
-        }else{
+        }else if(will_impact(robID)&&robots[i].get_type!=0){
+            ins[i].forward*=0.5;
+        }
+        else{
             ins[i].forward=6;
         }
         if(can_st){
@@ -381,7 +401,6 @@ void control(vector<PayLoad> payLoad){
         }
         
     }
-    solveRobortsCollison();
     out_put();
 }
 
@@ -691,11 +710,11 @@ void robot_action(){
     robot_judge(full);
 }
 
-vector<double>  get_T_limits(pair<double,double>pos,int id){
+vector<double>  get_T_limits(pair<double,double>pos,int id,int ctr){
     double radius=robots[id].get_type==0? 0.45:0.53;
    
     vector<double> tmp{-7,-7};
-    double redundancy=0.1+radius;//冗余，避免频繁转向
+    double redundancy= (ctr==-1?0.1:1)+radius;//冗余，避免频繁转向
     if(gt(pos.first-redundancy,0)&&lt(pos.second-redundancy,0)){//只靠近下方x轴
         tmp[0]=0;
         tmp[1]=Pi;
@@ -734,6 +753,11 @@ bool can_stop(pair<double,double>p1,pair<double,double>p2,double angle){
     return false;
 
 }
+double return_cal(pair<double,double>p1,pair<double,double>p2,double angle){
+    double dis=calcuDis(p1,p2);
+    // cerr<<dis<<"--"<<sin(angle)*dis<<endl;
+    return sin(angle)*dis-0.4;
+}
 bool is_range(double dire,vector<double>&tmp){
     if(tmp.size()==2){
         if(ge(dire,tmp[0])&&le(dire,tmp[1])){
@@ -769,7 +793,29 @@ bool can_speed_z(int stuID,pair<double,double>xy_pos,pair<double,double>pos,doub
     double dis3=totalV*totalV/(2*acceleration);//速度减为0的滑行距离
     double dis4=sqrt(0.4*0.4-dis1*dis1);//圆截线的长度
     double dis5=sqrt(dis2*dis2-dis1*dis1);//射线的长度
-    cerr<<stuID<<" "<<dis3<<" "<<dis4<<" "<<dis5<<" "<<dis1<<endl;
-    if(ge(dis3,dis5-dis4))return true;
+    //cerr<<stuID<<" "<<dis3<<" "<<dis4<<" "<<dis5<<" "<<dis1<<endl;
+    if(gt(dis3,dis5-dis4))return true;
+    return false;
+}
+bool isWall(int stuID){
+    int i=studios[stuID].pos.first;
+    int j=studios[stuID].pos.second;
+    if(i-1<=0||j-2<=0||i+2>=50||j+2>=50)return true;
+    return false;
+}
+bool will_impact(int robID){
+    vector<double> tmp=get_T_limits(robots[robID].pos,robID,1);
+    if(state.FrameID>=610 &&robID==3){
+        cerr<<state.FrameID<<endl;
+        cerr<<"__"<<is_range(robots[robID].direction,tmp)<<" "<<(fabs(robots[robID].xy_pos.first)>0.5||fabs(robots[robID].xy_pos.second)>0.5)<<endl;
+    cerr<<tmp[0]<<" "<<tmp[1]<<endl;
+    cerr<<robots[robID].direction<<endl;
+    
+    }
+    if(!eq(tmp[0],-7)&&(!is_range(robots[robID].direction,tmp))&&
+    (fabs(robots[robID].xy_pos.first)>0.5||fabs(robots[robID].xy_pos.second)>0.5)
+    ){//在墙附件，并且会撞上
+        return true;
+    }
     return false;
 }
