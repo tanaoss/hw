@@ -4,7 +4,7 @@
 #include<string>
 using namespace std;
 
-#define Pi 3.141592654
+#define Pi 3.1415926
 
 struct PayLoad
 {
@@ -72,8 +72,11 @@ struct Robot
     double direction;
     pair<double, double> pos;
     int target_id; // 正在赶往的工作台；
+    int lastSign;//
+    double lastRate;
+    double isTurn;
     Robot(int _id, int _loc_id,int _get_type, double _time_val, double _collision_val, double _angular_velocity, pair<double, double> &_xy_pos,
-          double _direction, pair<double, double> &_pos, int _target_id = -1) : xy_pos(_xy_pos), pos(_pos)
+          double _direction, pair<double, double> &_pos, int _target_id = -1,int _lastSign=0,int _isTurn=0) : xy_pos(_xy_pos), pos(_pos)
     {
         id = _id;
         loc_id=_loc_id;
@@ -83,6 +86,8 @@ struct Robot
         angular_velocity = _angular_velocity;
         direction = _direction;
         target_id = _target_id;
+        lastSign=_lastSign;
+        isTurn=_isTurn;
     }
     void set(int _id,  int _loc_id,int _get_type, double _time_val, double _collision_val, double _angular_velocity, pair<double, double> &&_xy_pos,
              double _direction, pair<double, double> &&_pos)
@@ -143,7 +148,7 @@ void first_pick_point();
 void robot_action();
 void process();
 PayLoad calPayload(int robortID);//计算机器人与目标之间的夹角、距离等信息
-pair<double,double> get_T_limits(pair<double,double>pos,int id);//靠近墙体时，需要把方向转到那个范围才能加速
+vector<double> get_T_limits(pair<double,double>pos,int id);//靠近墙体时，需要把方向转到那个范围才能加速
 pair<double, double> subVector(pair<double, double> a, pair<double, double> b);//向量减（a-b）
 pair<double, double> addVector(pair<double, double> a, pair<double, double> b);//向量加
 double calVectorProduct(pair<double, double> a, pair<double, double> b);//向量乘
@@ -162,3 +167,4 @@ pair<int,double> pick_point(int robot_id, int state);                //Robot sel
 bool judge_full(int level, double threshold);                         //Set the load factor to determine whether the 4567 product is full
 void robot_judge(int full);                                          //The robot makes buy and sell judgments based on the current state
 bool can_stop(pair<double,double>p1,pair<double,double>p2,double angle);//能够停止转动
+bool is_range(double dire,vector<double>&tmp);//判断角度是否在范围内

@@ -23,6 +23,7 @@ int main()
     initRobortInfo();
     while (cin>>state.FrameID){
         readStatusUntilOK() ;
+        //print_matr();
         cout<<state.FrameID<<endl;
         if(count == 0)first_action();
         else robot_action();
