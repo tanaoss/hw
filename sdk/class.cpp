@@ -95,7 +95,7 @@ bool readStatusUntilOK() {
         }
         if(studios[studio_id].type > 3){
             if(studios[studio_id].type == 4){
-                cerr <<"aaaa"<<studios[studio_id].bitSatus<<endl;
+                //cerr <<"aaaa"<<studios[studio_id].bitSatus<<endl;
                 if((studios[studio_id].bitSatus & 2) == 0) material[1].push_back(studio_id);
                 if((studios[studio_id].bitSatus & 4) == 0) material[2].push_back(studio_id);
             }
@@ -310,38 +310,45 @@ void control(vector<PayLoad> payLoad){
     for(int i=0;i<4;i++){
         int robID=robots[i].id;
         ins[i].robID=robots[i].id;
-        //double Dev_val=robots[i].angular_velocity*robots[i].angular_velocity/2*payLoad[i].angular_acceleration;
-        pair<double,double>tmp=get_T_limits(robots[i].pos,i);
-        if(!eq(tmp.first,-7)&&(!(ge(robots[i].direction,tmp.first)&&le(robots[i].direction,tmp.second)))){
-            ins[i].rotate=Pi*payLoad[i].sign;
+        int isSame=robots[i].lastSign!=0?robots[i].lastSign*payLoad[i].sign:1;
+        robots[i].lastSign=payLoad[i].sign;
+        double lastRate=fabs(robots[i].lastRate);
+        double Dev_val=robots[i].angular_velocity*robots[i].angular_velocity/2*payLoad[i].angular_acceleration;
+        vector<double> tmp=get_T_limits(robots[i].pos,i);
+        if(!eq(tmp[0],-7)&&(!is_range(robots[i].direction,tmp))){
+            ins[i].rotate=(isSame==1?Pi*payLoad[i].sign:Dec_val_ra*lastRate*payLoad[i].sign);
+            robots[i].lastRate=ins[i].rotate;
             ins[i].forward=0;
+            cerr<<i<<" "<<robots[i].target_id<<" "<<robots[i].pos.first<<" "<<robots[i].pos.second<<
+            " "<<is_range(robots[i].direction,tmp)<<" "<<robots[i].direction<<endl;
             continue;
         }
         double dis=calcuDis(robots[i].pos,studios[robots[i].target_id].pos);
-        double roat=min(1.0,(dis/p1));
         if(payLoad[i].angle>=0.9||(need_stop[i]||dis<1.5)){
-            if(dis>max_dis||can_stop(robots[i].pos,studios[robots[i].target_id].pos,abs(payLoad[i].angle))){
+            if(dis>max_dis||can_stop(robots[i].pos,studios[robots[i].target_id].pos,fabs(payLoad[i].angle-Dev_val))){
                 need_stop[i]=false;
             }else{
-                ins[i].rotate=Pi*payLoad[i].sign;
+                ins[i].rotate=(isSame==1?Pi*payLoad[i].sign:Dec_val_ra*lastRate*payLoad[i].sign);
                 ins[i].forward=0;
+
+                robots[i].lastRate=ins[i].rotate;
                 need_stop[i]=true;
-                      if(i==0&&ins[i].forward<2){
-        //cerr<<robots[i].target_id<<" "<<robots[i].pos.first<<" "<<robots[i].pos.second<<endl;
-      }
+
                 continue;     
             }      
         }
         if(check(robID)){
             ins[i].forward*=Dec_val;
         }else{
-            ins[i].forward=roat*6;
+            ins[i].forward=6;
         }
-        if(can_stop(robots[i].pos,studios[robots[i].target_id].pos,abs(payLoad[i].angle))){
+        if(can_stop(robots[i].pos,studios[robots[i].target_id].pos,fabs(payLoad[i].angle-Dev_val))){
             //cerr<<"----"<<endl;
             ins[i].rotate=0;
+            robots[i].lastRate=ins[i].rotate;
         }else{
-            ins[i].rotate=Pi*payLoad[i].sign;
+            ins[i].rotate=(isSame==1?Pi*payLoad[i].sign:Dec_val_ra*lastRate*payLoad[i].sign);
+            robots[i].lastRate=ins[i].rotate;
         }
         
         
@@ -529,7 +536,7 @@ void first_action(){
             }
         }
         //studios[robots[i].target_id].r_id = i;
-        cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
+        //cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
     }
 }
 
@@ -576,39 +583,39 @@ void robot_judge(int full){
             if(robots[i].get_type == 0){
                 //dosomething buy ,next send
                 ins[i].buy = 1;
-                cerr<<"robots "<< i<<" buy "<<endl;
+                //cerr<<"robots "<< i<<" buy "<<endl;
                 robots[i].get_type = studios[robots[i].loc_id].type;
                 studios[robots[i].loc_id].r_id = -1;
                 robots[i].target_id = pick_point(i,5).first;
                 if(robots[i].target_id!= -1){
                     studios[robots[i].target_id].r_id = i;
-                    cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
+                    //cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
                 }
             }
             else{
                 //dosomething sell
                 ins[i].sell = 1;
-                cerr<<"robots "<< i<<" sell "<<endl;
+                //cerr<<"robots "<< i<<" sell "<<endl;
                 studios[robots[i].loc_id].r_id = -1;
                 robots[i].get_type = 0;
                 if(full == 1){
                     robots[i].target_id = pick_point(i,3).first; //find near 456
                     if(robots[i].target_id!= -1){
-                        cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
+                        //cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
                         studios[robots[i].target_id].r_id = i;
                     }
                 }
                 else if(full == 2){
                     robots[i].target_id = pick_point(i,4).first; //find near 7
                     if(robots[i].target_id!= -1){
-                        cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
+                        //cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
                         studios[robots[i].target_id].r_id = i;
                     }
                 }
                 else{
                     robots[i].target_id = pick_point(i,2).first; //find near 123
                     if(robots[i].target_id!= -1){
-                        cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
+                        //cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
                         studios[robots[i].target_id].r_id = i;
                     }
                 }
@@ -619,7 +626,7 @@ void robot_judge(int full){
                 if(robots[i].get_type ==0){
                     robots[i].target_id = pick_point(i,1).first; //no target
                     if(robots[i].target_id!= -1){
-                        cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
+                        //cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
                         studios[robots[i].target_id].r_id = i;
                     //cerr<< "kkkkk"<<endl;
                     }
@@ -628,7 +635,7 @@ void robot_judge(int full){
                     robots[i].target_id = pick_point(i,5).first;
                     if(robots[i].target_id!= -1){
                         studios[robots[i].target_id].r_id = i;
-                        cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
+                        //cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
                     }
                 }
             }
@@ -650,35 +657,37 @@ void robot_action(){
     robot_judge(full);
 }
 
-pair<double,double> get_T_limits(pair<double,double>pos,int id){
+vector<double>  get_T_limits(pair<double,double>pos,int id){
     double radius=robots[id].get_type==0? 0.45:0.53;
    
-    pair<double,double>tmp(-7,-7);
+    vector<double> tmp{-7,-7};
     double redundancy=0.1+radius;//冗余，避免频繁转向
     if(gt(pos.first-redundancy,0)&&lt(pos.second-redundancy,0)){//只靠近下方x轴
-        tmp.first=0;
-        tmp.second=Pi;
+        tmp[0]=0;
+        tmp[1]=Pi;
     }else if(lt(pos.first-redundancy,0)&&lt(pos.second-redundancy,0)){//靠近原点
-        tmp.first=0; 
-        tmp.second=Pi/2;
+        tmp[0]=0; 
+        tmp[1]=Pi/2;
     }else if(lt(pos.first-redundancy,0)&&gt(pos.second-redundancy,0)){//只靠近左方的y轴
-        tmp.first=-Pi/2;
-        tmp.second=Pi;
+        tmp[0]=-Pi/2;
+        tmp[1]=Pi/2;
     }else if(lt(pos.first-redundancy,0)&&gt(pos.second+redundancy,50)){//靠近左上角
-        tmp.first=-Pi/2;
-        tmp.second=0;
+        tmp[0]=-Pi/2;
+        tmp[1]=0;
     }else if(gt(pos.first-redundancy,0)&&gt(pos.second+redundancy,50)){////靠近上方的x轴
-        tmp.first=-Pi;
-        tmp.second=0;
+        tmp[0]=-Pi;
+        tmp[1]=0;
     }else if(gt(pos.first+redundancy,50)&&gt(pos.second+redundancy,50)){//靠近右上角
-        tmp.first=-Pi;
-        tmp.second=-Pi/2;
-    }else if(gt(pos.first+redundancy,50)&&lt(pos.second-redundancy,0)){//靠近右边的y轴
-        tmp.first=-Pi/2;
-        tmp.second=Pi/2;
+        tmp[0]=-Pi;
+        tmp[1]=-Pi/2;
+    }else if(gt(pos.first+redundancy,50)&&gt(pos.second-redundancy,0)){//靠近右边的y轴
+        tmp[0]=Pi/2;
+        tmp[1]=Pi;
+        tmp.push_back(-Pi);
+        tmp.push_back(-Pi/2);
     }else if(gt(pos.first+redundancy,50)&&lt(pos.second-redundancy,0)){//靠近右下角
-        tmp.first=Pi/2;
-        tmp.second=Pi;
+        tmp[0]=Pi/2;
+        tmp[1]=Pi;
     }
     return tmp;
 }
@@ -689,4 +698,21 @@ bool can_stop(pair<double,double>p1,pair<double,double>p2,double angle){
     }
     return false;
 
+}
+bool is_range(double dire,vector<double>&tmp){
+    if(tmp.size()==2){
+        if(ge(dire,tmp[0])&&le(dire,tmp[1])){
+            return true;
+        }else{
+            return false;
+        }
+    }else{
+        if((ge(dire,tmp[0])&&le(dire,tmp[1]))||
+        (ge(dire,tmp[2])&&le(dire,tmp[3]))){
+            return true;
+        }else{
+            return false;
+        } 
+    }
+    
 }

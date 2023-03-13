@@ -4,7 +4,7 @@
 #include<string>
 using namespace std;
 
-#define Pi 3.141592654
+#define Pi 3.1415926
 
 struct PayLoad
 {
@@ -72,8 +72,10 @@ struct Robot
     double direction;
     pair<double, double> pos;
     int target_id; // 正在赶往的工作台；
+    int lastSign;//
+    double lastRate;
     Robot(int _id, int _loc_id,int _get_type, double _time_val, double _collision_val, double _angular_velocity, pair<double, double> &_xy_pos,
-          double _direction, pair<double, double> &_pos, int _target_id = -1) : xy_pos(_xy_pos), pos(_pos)
+          double _direction, pair<double, double> &_pos, int _target_id = -1,int lastSign=0) : xy_pos(_xy_pos), pos(_pos)
     {
         id = _id;
         loc_id=_loc_id;
@@ -143,16 +145,13 @@ void first_pick_point();
 void robot_action();
 void process();
 PayLoad calPayload(int robortID);//计算机器人与目标之间的夹角、距离等信息
-pair<double,double> get_T_limits(pair<double,double>pos,int id);//靠近墙体时，需要把方向转到那个范围才能加速
+vector<double> get_T_limits(pair<double,double>pos,int id);//靠近墙体时，需要把方向转到那个范围才能加速
 pair<double, double> subVector(pair<double, double> a, pair<double, double> b);//向量减（a-b）
-pair<double, double> addVector(pair<double, double> a, pair<double, double> b);//
 double calVectorProduct(pair<double, double> a, pair<double, double> b);//向量乘
-pair<double, double> calVectorProduct(pair<double, double> a, double x);//
 double calVectorSize(pair<double, double> a);//计算向量大小
 double calcuDis(pair<double, double> a, pair<double, double> b);//计算点之间的距离
 double getRobotRadius(int robort_id);//获取机器人当前的半径
 bool checkRobortsCollison(int robotA_id, int robotB_id);//判断机器人a，b是否相撞
-bool checkRobortsCollison(int robotA_id, pair<double, double> next_pos, int robotB_id);//
 void solveRobortsCollison();//解决机器人相撞
 
 void first_action();                                                 //The robot selects the point for the first time
@@ -161,4 +160,4 @@ pair<int,double> pick_point(int robot_id, int state);                //Robot sel
 bool judge_full(int level, double threshold);                         //Set the load factor to determine whether the 4567 product is full
 void robot_judge(int full);                                          //The robot makes buy and sell judgments based on the current state
 bool can_stop(pair<double,double>p1,pair<double,double>p2,double angle);//能够停止转动
-//void print_matr();
+bool is_range(double dire,vector<double>&tmp);//判断角度是否在范围内
