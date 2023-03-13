@@ -133,6 +133,8 @@ struct Studio
         pStatus = _pStatus;
     }
 };
+struct Line { pair<double, double>  P; pair<double, double> v; };      // 直线（点向式）
+
 bool eq(double a, double b);// ==
 bool gt(double a, double b);// >
 bool lt(double a, double b);// <
@@ -165,3 +167,5 @@ void robot_judge(int full);                                          //The robot
 bool can_stop(pair<double,double>p1,pair<double,double>p2,double angle);//能够停止转动
 bool is_range(double dire,vector<double>&tmp);//判断角度是否在范围内123
 pair<double,double> set_af(Robot robot);//给出机器人的速度和角度
+bool can_speed_z(int stuID,pair<double,double>xy_pos,pair<double,double>pos,double acceleration );//做直线运动时，机器人完全
+double get_dis(pair<double, double> P, Line l) ;
