@@ -178,3 +178,4 @@ double get_dis(pair<double, double> P, Line l) ;
 bool isWall(int stuID);
 bool will_impact(int robID);
 double return_cal(pair<double,double>p1,pair<double,double>p2,double angle);
+void init_studio_r_id();
