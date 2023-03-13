@@ -351,9 +351,13 @@ void control(vector<PayLoad> payLoad){
                 robots[i].lastRate=ins[i].rotate;   
                 continue;         
         }
-        if(can_st){
+        // int can_st_flag=1;
+        if(can_st&&ins[i].rotate==0){
             if(can_speed_z(robots[i].target_id,robots[i].xy_pos,robots[i].pos,payLoad[i].acceleration)){
+            cerr<<"~"<<payLoad[i].angle<<" "<<robots[i].direction<<" "<<i
+            <<"~"<<robots[i].target_id<<" "<<robots[i].xy_pos.first<<" "<<robots[i].xy_pos.second<<endl;
                 ins[i].forward=0;
+                // can_st_flag=0;
             }else{
                 ins[i].forward=6;
             }
@@ -751,7 +755,7 @@ double get_dis(pair<double, double> P, Line l) {
     auto get_v=[&](pair<double, double> P,pair<double, double> v)->double{
         return P.first*v.second-v.first*P.second;
     };
-    double distance=get_v(P,l.v)-get_v(l.P,l.v)/(sqrt(l.v.first * l.v.first  + 
+    double distance=abs(get_v(P,l.v)-get_v(l.P,l.v))/(sqrt(l.v.first * l.v.first  + 
     l.v.second* l.v.second));
     return distance; 
 }
@@ -765,6 +769,7 @@ bool can_speed_z(int stuID,pair<double,double>xy_pos,pair<double,double>pos,doub
     double dis3=totalV*totalV/(2*acceleration);//速度减为0的滑行距离
     double dis4=sqrt(0.4*0.4-dis1*dis1);//圆截线的长度
     double dis5=sqrt(dis2*dis2-dis1*dis1);//射线的长度
+    cerr<<stuID<<" "<<dis3<<" "<<dis4<<" "<<dis5<<" "<<dis1<<endl;
     if(ge(dis3,dis5-dis4))return true;
     return false;
 }
