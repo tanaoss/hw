@@ -201,7 +201,7 @@ void print_matr(){
 }
 
 
-PayLoad calPayload(int robortID) {
+PayLoad calPayload(int robortID, int targetID) {
     
     //int target = rand() % ((int)studios.size());
     //robots[robortID].target_id = target;
@@ -209,7 +209,7 @@ PayLoad calPayload(int robortID) {
     //cerr << robortID << target<<endl;
 
     Robot robort = robots[robortID];
-    Studio studio = studios[robort.target_id];
+    Studio studio = studios[targetID];
 
     // cerr << robortID << "--"<< robort.target_id<<endl;
 
@@ -262,6 +262,12 @@ bool checkRobortsCollison(int robotA_id, pair<double, double> next_pos, int robo
     Robot robotA = robots[robotA_id];
     Robot robortB = robots[robotB_id];
     return lt(getRobotRadius(robotA_id) + getRobotRadius(robotB_id), calcuDis(next_pos, robortB.pos));
+}
+
+bool checkeTimeEnough(int robot_id, int target_id, int frame) {
+    double dis = calcuDis(robots[robot_id].pos, studios[target_id].pos);
+    double time = (9000.0 - frame) * 0.02;//剩余秒数
+    
 }
 
 pair<double, double> getNextPos(int robot_id) {
