@@ -173,3 +173,4 @@ bool is_range(double dire,vector<double>&tmp);//判断角度是否在范围内12
 pair<double,double> set_af(int robID);//给出机器人的速度和角度
 bool can_speed_z(int stuID,pair<double,double>xy_pos,pair<double,double>pos,double acceleration);
 double get_dis(pair<double, double> P, Line l) ;
+void init_studio_r_id();

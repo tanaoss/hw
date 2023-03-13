@@ -19,6 +19,7 @@ double angular_acceleration_no;
 double angular_acceleration_has;
 vector<bool> need_stop(4,false);
 int robot_get_type[8];
+int studios_rid[50][8];
 void initRobortInfo() {
     double weightMin = 0.45 * 0.45 * Pi * 20.0;
     double weightMax = 0.53 * 0.53 * Pi * 20.0;
@@ -33,7 +34,11 @@ void initRobortInfo() {
 
 
 }
-
+void init_studio_r_id(){
+    for(int i=0;i<50;i++){
+        for(int j=0;j<8;j++)studios_rid[i][j]=-1;
+    }
+}
 bool readMapUntilOK() {
     char line[1024];
     int count = 0;
@@ -96,21 +101,21 @@ bool readStatusUntilOK() {
         if(studios[studio_id].type > 3){
             if(studios[studio_id].type == 4){
                 //cerr <<"aaaa"<<studios[studio_id].bitSatus<<endl;
-                if((studios[studio_id].bitSatus & 2) == 0 && (studios[studio_id].r_id == -1 ||(studios[studio_id].r_id != -1 && robots[studios[studio_id].r_id].get_type != 1))) material[1].push_back(studio_id);
-                if((studios[studio_id].bitSatus & 4) == 0 && (studios[studio_id].r_id == -1 ||(studios[studio_id].r_id != -1 && robots[studios[studio_id].r_id].get_type != 2))) material[2].push_back(studio_id);
+                if((studios[studio_id].bitSatus & 2) == 0 && (studios_rid[studio_id][1] == -1)) material[1].push_back(studio_id);
+                if((studios[studio_id].bitSatus & 4) == 0 && (studios_rid[studio_id][2] == -1)) material[2].push_back(studio_id);
             }
             if(studios[studio_id].type == 5){
-                if((studios[studio_id].bitSatus & 2) == 0 && (studios[studio_id].r_id == -1 ||(studios[studio_id].r_id != -1 && robots[studios[studio_id].r_id].get_type != 1))) material[1].push_back(studio_id);
-                if((studios[studio_id].bitSatus & 8) == 0 && (studios[studio_id].r_id == -1 ||(studios[studio_id].r_id != -1 && robots[studios[studio_id].r_id].get_type != 3))) material[3].push_back(studio_id);
+                if((studios[studio_id].bitSatus & 2) == 0 && (studios_rid[studio_id][1] == -1)) material[1].push_back(studio_id);
+                if((studios[studio_id].bitSatus & 8) == 0 && (studios_rid[studio_id][3] == -1)) material[3].push_back(studio_id);
             }
             if(studios[studio_id].type == 6){
-                if((studios[studio_id].bitSatus & 4) == 0 && (studios[studio_id].r_id == -1 ||(studios[studio_id].r_id != -1 && robots[studios[studio_id].r_id].get_type != 2))) material[2].push_back(studio_id);
-                if((studios[studio_id].bitSatus & 8) == 0 && (studios[studio_id].r_id == -1 ||(studios[studio_id].r_id != -1 && robots[studios[studio_id].r_id].get_type != 3))) material[3].push_back(studio_id);
+                if((studios[studio_id].bitSatus & 4) == 0 && (studios_rid[studio_id][2] == -1)) material[2].push_back(studio_id);
+                if((studios[studio_id].bitSatus & 8) == 0 && (studios_rid[studio_id][3] == -1)) material[3].push_back(studio_id);
             }
             if(studios[studio_id].type == 7){
-                if((studios[studio_id].bitSatus & 16) == 0 && (studios[studio_id].r_id == -1 ||(studios[studio_id].r_id != -1 && robots[studios[studio_id].r_id].get_type != 4))) material[4].push_back(studio_id);
-                if((studios[studio_id].bitSatus & 32) == 0 && (studios[studio_id].r_id == -1 ||(studios[studio_id].r_id != -1 && robots[studios[studio_id].r_id].get_type != 5))) material[5].push_back(studio_id);
-                if((studios[studio_id].bitSatus & 64) == 0 && (studios[studio_id].r_id == -1 ||(studios[studio_id].r_id != -1 && robots[studios[studio_id].r_id].get_type != 6))) material[6].push_back(studio_id);
+                if((studios[studio_id].bitSatus & 16) == 0 && (studios_rid[studio_id][4] == -1)) material[4].push_back(studio_id);
+                if((studios[studio_id].bitSatus & 32) == 0 && (studios_rid[studio_id][5] == -1)) material[5].push_back(studio_id);
+                if((studios[studio_id].bitSatus & 64) == 0 && (studios_rid[studio_id][6] == -1)) material[6].push_back(studio_id);
             }
             if(studios[studio_id].type == 8){
                 material[7].push_back(studio_id);
@@ -448,7 +453,7 @@ pair<int,double> pick_point(int robot_id, int state){
     else if(state == 5){               //send
         if(item_type == 1){
             for(i=0;i<studios.size();i++){
-                if((studios[i].type == 4 || studios[i].type == 5 || studios[i].type == 9) && (studios[i].r_id==-1 || ((studios[i].r_id !=-1) && (robots[studios[i].r_id].get_type != item_type))) && (studios[i].bitSatus & 2)==0 ){  //1 and no robot choose ,send
+                if(((studios[i].type == 4 || studios[i].type == 5 ) && (studios_rid[i][item_type] == -1) && (studios[i].bitSatus & 2)==0 )|| studios[i].type == 9){  //1 and no robot choose ,send
                     dist=calcuDis(robots[robot_id].pos,studios[i].pos);
                     if(dist<min){
                         min=dist;
@@ -459,7 +464,7 @@ pair<int,double> pick_point(int robot_id, int state){
         }
         else if(item_type == 2){
             for(i=0;i<studios.size();i++){
-                if((studios[i].type == 4 || studios[i].type == 6 || studios[i].type == 9) && (studios[i].r_id==-1 || ((studios[i].r_id !=-1) && (robots[studios[i].r_id].get_type != item_type))) && (studios[i].bitSatus & 4)==0 ){  //2 and no robot choose ,send
+                if(((studios[i].type == 4 || studios[i].type == 6 ) && (studios_rid[i][item_type] == -1) && (studios[i].bitSatus & 4)==0) || studios[i].type == 9){  //2 and no robot choose ,send
                     dist=calcuDis(robots[robot_id].pos,studios[i].pos);
                     if(dist<min){
                         min=dist;
@@ -470,7 +475,7 @@ pair<int,double> pick_point(int robot_id, int state){
         }
         else if(item_type == 3){
             for(i=0;i<studios.size();i++){
-                if((studios[i].type == 5 || studios[i].type == 6 || studios[i].type == 9) && (studios[i].r_id==-1 || ((studios[i].r_id !=-1) && (robots[studios[i].r_id].get_type != item_type))) && (studios[i].bitSatus & 8)==0 ){  //3 and no robot choose ,send
+                if(((studios[i].type == 5 || studios[i].type == 6) && (studios_rid[i][item_type] == -1) && (studios[i].bitSatus & 8)==0 )|| studios[i].type == 9){  //3 and no robot choose ,send
                     dist=calcuDis(robots[robot_id].pos,studios[i].pos);
                     if(dist<min){
                         min=dist;
@@ -481,7 +486,7 @@ pair<int,double> pick_point(int robot_id, int state){
         }
         else if(item_type == 4){
             for(i=0;i<studios.size();i++){
-                if((studios[i].type == 7 || studios[i].type == 9) && (studios[i].r_id==-1 || ((studios[i].r_id !=-1) && (robots[studios[i].r_id].get_type != item_type))) && (studios[i].bitSatus & 16)==0 ){  //4 and no robot choose ,send
+                if((studios[i].type == 7 && (studios_rid[i][item_type] == -1) && (studios[i].bitSatus & 16)==0 )|| studios[i].type == 9){  //4 and no robot choose ,send
                     dist=calcuDis(robots[robot_id].pos,studios[i].pos);
                     if(dist<min){
                         min=dist;
@@ -492,7 +497,7 @@ pair<int,double> pick_point(int robot_id, int state){
         }
         else if(item_type == 5){
             for(i=0;i<studios.size();i++){
-                if((studios[i].type == 7 ||studios[i].type == 9) && (studios[i].r_id==-1 || ((studios[i].r_id !=-1) && (robots[studios[i].r_id].get_type != item_type))) && (studios[i].bitSatus & 32)==0 ){  //5 and no robot choose ,send
+                if((studios[i].type == 7 && (studios_rid[i][item_type] == -1) && (studios[i].bitSatus & 32)==0 ) || studios[i].type == 9){  //5 and no robot choose ,send
                     dist=calcuDis(robots[robot_id].pos,studios[i].pos);
                     if(dist<min){
                         min=dist;
@@ -503,7 +508,7 @@ pair<int,double> pick_point(int robot_id, int state){
         }
         else if(item_type == 6){
             for(i=0;i<studios.size();i++){
-                if((studios[i].type == 7 || studios[i].type == 9) && (studios[i].r_id==-1 || ((studios[i].r_id !=-1) && (robots[studios[i].r_id].get_type != item_type))) && (studios[i].bitSatus & 64)==0) {  //6 and no robot choose ,send
+                if(((studios[i].type == 7) && (studios_rid[i][item_type] == -1) && (studios[i].bitSatus & 64)==0)|| studios[i].type == 9) {  //6 and no robot choose ,send
                     dist=calcuDis(robots[robot_id].pos,studios[i].pos);
                     if(dist<min){
                         min=dist;
@@ -514,7 +519,7 @@ pair<int,double> pick_point(int robot_id, int state){
         }
         else if(item_type == 7){
             for(i=0;i<studios.size();i++){
-                if((studios[i].type == 8 ||studios[i].type == 9)&&(studios[i].r_id==-1 || ((studios[i].r_id !=-1) && (robots[studios[i].r_id].get_type != item_type))) && (studios[i].bitSatus & 128)==0 ){  //7 and no robot choose ,send
+                if((studios[i].type == 8 ||studios[i].type == 9)){  //7 and no robot choose ,send
                     dist=calcuDis(robots[robot_id].pos,studios[i].pos);
                     if(dist<min){
                         min=dist;
@@ -565,12 +570,13 @@ bool judge_full(int level, double threshold){
         for(i = 0;i < studios.size();i++){
             if(studios[i].type >= 4 && studios[i].type <= 6){
                 count++;
-                if(studios[i].pStatus == 1 && studios[i].r_id != -1){
+                if(studios[i].pStatus == 1 && studios[i].r_id == -1){
                     full_count++;
                 }
             }
         }
         v = (double)full_count/(double)count;
+        //cerr<<" full_count = "<<full_count<<" count = "<<count<<" bilu "<<v<<endl;
         if(v >= threshold){
             return true;
         }
@@ -579,12 +585,13 @@ bool judge_full(int level, double threshold){
         for(i = 0;i < studios.size();i++){
             if(studios[i].type == 7){
                 count++;
-                if(studios[i].pStatus == 1 && studios[i].r_id != -1){
+                if(studios[i].pStatus == 1 && studios[i].r_id == -1){
                     full_count++;
                 }
             }
         }
         v = (double)full_count/(double)count;
+        //cerr<<" full_count = "<<full_count<<" count = "<<count<<" bilu "<<v<<endl;
         if(v >= threshold){
             return true;
         }
@@ -601,44 +608,48 @@ void robot_judge(int full){
             if(robots[i].get_type == 0){
                 //dosomething buy ,next send
                 ins[i].buy = 1;
+                ins[i].sell = -1;
                 robots[i].lastSign=0;
                 robots[i].isTurn=0;
-                //cerr<<"robots "<< i<<" buy "<<endl;
                 robots[i].get_type = studios[robots[i].loc_id].type;
+                cerr<<"robots "<< i<<" buy "<<studios[robots[i].target_id].type<<endl;
                 studios[robots[i].loc_id].r_id = -1;
                 robots[i].target_id = pick_point(i,5).first;
                 if(robots[i].target_id!= -1){
-                    studios[robots[i].target_id].r_id = i;
-                    //cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
+                    //studios[robots[i].target_id].r_id = i;
+                    if(studios[robots[i].target_id].type!=8&&studios[robots[i].target_id].type!=9)studios_rid[robots[i].target_id][robots[i].get_type] = i;
+                    cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<" flag "<<studios_rid[robots[i].target_id][robots[i].get_type]<<endl;
                 }
+
             }
             else{
                 //dosomething sell
                 ins[i].sell = 1;
+                ins[i].buy = -1;
                 robots[i].lastSign=0;
                 robots[i].isTurn=0;
-                
-                //cerr<<"robots "<< i<<" sell "<<endl;
-                studios[robots[i].loc_id].r_id = -1;
+                cerr<<"robots "<< i<<" sell "<<robots[i].get_type<<endl;
+                //studios[robots[i].loc_id].r_id = -1;
+                studios_rid[robots[i].loc_id][robots[i].get_type] = -1;
                 robots[i].get_type = 0;
                 if(full == 1){
                     robots[i].target_id = pick_point(i,3).first; //find near 456
                     if(robots[i].target_id!= -1){
-                        //cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
+                        cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
                         studios[robots[i].target_id].r_id = i;
                     }
                 }
                 else if(full == 2){
                     robots[i].target_id = pick_point(i,4).first; //find near 7
                     if(robots[i].target_id!= -1){
-                        //cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
+                        cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
                         studios[robots[i].target_id].r_id = i;
                     }
                 }
                 else{
                     robots[i].target_id = pick_point(i,2).first; //find near 123
                     if(robots[i].target_id!= -1){
-                        //cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
+                        cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
                         studios[robots[i].target_id].r_id = i;
                     }
                 }
@@ -653,7 +664,7 @@ void robot_judge(int full){
             if(robots[i].get_type ==0){
                 robots[i].target_id = pick_point(i,1).first; //no target
                 if(robots[i].target_id!= -1){
-                        //cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
+                        cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
                     studios[robots[i].target_id].r_id = i;
                     //cerr<< "kkkkk"<<endl;
                 }
@@ -661,8 +672,9 @@ void robot_judge(int full){
             else{
                 robots[i].target_id = pick_point(i,5).first;
                 if(robots[i].target_id!= -1){
-                    studios[robots[i].target_id].r_id = i;
-                        //cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
+                    //studios[robots[i].target_id].r_id = i;
+                    if(studios[robots[i].target_id].type!=8&&studios[robots[i].target_id].type!=9)studios_rid[robots[i].target_id][robots[i].get_type] = i;
+                    cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
                 }
             }
         }
@@ -683,6 +695,7 @@ void robot_action(){
     int full = 0;
     if(judge_full(2,0.1))full = 1;   //4,5,6 full threshold
     if(judge_full(3,0.5))full = 2;   //7 full threshold Higher priority
+    //cerr<<" full = "<<full<<endl;
     robot_judge(full);
 }
 
