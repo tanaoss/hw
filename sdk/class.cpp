@@ -10,7 +10,7 @@ vector<Studio> studios;
 vector<Robot> robots;
 State state;//当前帧数，全局可见
 vector<Ins> ins(4);
-vector<int> material[7];
+vector<int> material[8];
 vector<vector<int>> product(8);
 double EPS=1e-7;
 double acceleration_no;
@@ -111,6 +111,14 @@ bool readStatusUntilOK() {
                 if((studios[studio_id].bitSatus & 16) == 0) material[4].push_back(studio_id);
                 if((studios[studio_id].bitSatus & 32) == 0) material[5].push_back(studio_id);
                 if((studios[studio_id].bitSatus & 64 )== 0) material[6].push_back(studio_id);
+            }
+            if(studios[studio_id].type == 8){
+                material[7].push_back(studio_id);
+            }
+            if(studios[studio_id].type == 9){
+                for(int h = 1;h <=7;h++){
+                    material[h].push_back(studio_id);
+                }
             }
         }
         studio_id++;
@@ -322,10 +330,11 @@ void control(vector<PayLoad> payLoad){
         double Dev_val=robots[i].angular_velocity*robots[i].angular_velocity/2*payLoad[i].angular_acceleration;
         vector<double> tmp=get_T_limits(robots[i].pos,i);
         if(!eq(tmp[0],-7)&&(!is_range(robots[i].direction,tmp))){
-            if(i==2)
-            cerr<<"~"<<payLoad[i].angle<<" "<<robots[i].direction<<" "<<robots[i].lastRate<<endl;
+            // if(i==2)
+            // cerr<<"~"<<payLoad[i].angle<<" "<<robots[i].direction<<" "<<robots[i].lastRate
+            // <<"~"<<robots[i].target_id<<endl;
 
-            ins[i].rotate=((isSame==1&&isTurn==0)?Pi*payLoad[i].sign:max(0.5,Dec_val_ra*lastRate)*payLoad[i].sign);
+            ins[i].rotate=((isSame==1)?Pi*payLoad[i].sign:max(0.5,Dec_val_ra*lastRate)*payLoad[i].sign);
             robots[i].lastRate=ins[i].rotate;
             ins[i].forward=0;
             continue;
@@ -537,6 +546,7 @@ bool judge_full(int level, double threshold){
     int i;
     int count = 0;
     int full_count = 0;
+    double v;
     if(level == 2){
         for(i = 0;i < studios.size();i++){
             if(studios[i].type >= 4 && studios[i].type <= 6){
@@ -546,7 +556,8 @@ bool judge_full(int level, double threshold){
                 }
             }
         }
-        if(full_count/count >= threshold){
+        v = (double)full_count/(double)count;
+        if(v >= threshold){
             return true;
         }
     }
@@ -559,7 +570,8 @@ bool judge_full(int level, double threshold){
                 }
             }
         }
-        if(full_count/count >= threshold){
+        v = (double)full_count/(double)count;
+        if(v >= threshold){
             return true;
         }
     }
