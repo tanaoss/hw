@@ -201,7 +201,7 @@ void print_matr(){
 }
 
 
-PayLoad calPayload(int robortID) {
+PayLoad calPayload(int robortID, int targetID) {
     
     //int target = rand() % ((int)studios.size());
     //robots[robortID].target_id = target;
@@ -209,7 +209,7 @@ PayLoad calPayload(int robortID) {
     //cerr << robortID << target<<endl;
 
     Robot robort = robots[robortID];
-    Studio studio = studios[robort.target_id];
+    Studio studio = studios[targetID];
 
     // cerr << robortID << "--"<< robort.target_id<<endl;
 
@@ -377,6 +377,7 @@ void control(vector<PayLoad> payLoad){
         }
         
     }
+    solveRobortsCollison();
     out_put();
 }
 
