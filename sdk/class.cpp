@@ -609,6 +609,7 @@ void control(vector<PayLoad> payLoad){
 
                     }else{
                         ins[arr[j]].forward=ins[arr[j]].forward*0.5;   
+                        
                     }
                 }else{
                        
