@@ -256,7 +256,7 @@ PayLoad calPayload(int robortID) {
     else
         sign = 1;
     angle = fabs(angle);
-    angle  = gt(angle, Pi)? angle - Pi: angle;
+    angle  = gt(angle, Pi)? 2 * Pi - angle: angle;
 
 
     // cerr<<"**"<< angle1<<"**dir:"<<robort.direction<<"**"<<angle2<<endl;
