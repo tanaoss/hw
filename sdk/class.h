@@ -108,14 +108,18 @@ struct Robot
             return false;
         if (a.get_type == 0 && get_type != 0)
             return true;
-        double speed2 = xy_pos.first * xy_pos.first;
-        double speed2_a = a.xy_pos.first * a.xy_pos.first;
-        if(speed2 - speed2_a > 1e-5)
+        // double speed2 = xy_pos.first * xy_pos.first;
+        // double speed2_a = a.xy_pos.first * a.xy_pos.first;
+        // if(speed2 - speed2_a > 1e-5)
+        //     return false;
+        // if(speed2_a - speed2 > 1e-5)
+        //     return true;
+        if(angular_velocity - a.angular_velocity > 1e-10)
             return false;
-        if(speed2_a - speed2 > 1e-5)
+        if(a.angular_velocity - angular_velocity > 1e-10)
             return true;
         if (get_type == get_type) 
-            return time_val * collision_val - a.time_val * a.collision_val < -1e-7;
+            return time_val * collision_val - a.time_val * a.collision_val < -1e-10;
         return get_type < a.get_type;
     }
 };
