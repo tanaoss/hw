@@ -811,12 +811,12 @@ void robot_judge(int full){
                 //studios[robots[i].loc_id].r_id = -1;
                 studios_rid[robots[i].loc_id][robots[i].get_type] = -1;
                 robots[i].get_type = 0;
-                target = choose_lack(robots[i].loc_id,2.0).first;
-                if(target != -1){
-                    robots[i].target_id = target ;
-                     studios[robots[i].target_id].r_id = i;
-                }
-                else{
+                // target = choose_lack(robots[i].loc_id,4.5).first;
+                // if(target != -1){
+                //     robots[i].target_id = target ;
+                //      studios[robots[i].target_id].r_id = i;
+                // }
+                // else{
                 if(full == 1){
                     robots[i].target_id = pick_point(i,3).first; //find near 456
                     if(robots[i].target_id!= -1){
@@ -838,7 +838,7 @@ void robot_judge(int full){
                         studios[robots[i].target_id].r_id = i;
                         }
                     }
-                }
+               // }
             }
         }
         else{
@@ -882,7 +882,7 @@ void robot_action(){
     //for(int i =0;i<=7;i++)cerr<<"type "<<i<<" has "<<robot_get_type[i];
     // cerr <<endl;
     int full = 0;
-    if(judge_full(2,0.15))full = 1;   //4,5,6 full threshold
+    if(judge_full(2,0.3))full = 1;   //4,5,6 full threshold
     if(judge_full(3,0.1))full = 2;   //7 full threshold Higher priority
     //cerr<<" full = "<<full<<endl;
     robot_judge(full);
