@@ -539,12 +539,18 @@ void control(vector<PayLoad> payLoad){
         
     }
     // solveRobortsCollision();
+    
     sort(arr.begin(),arr.end(),cmp);
+    vector<bool>vis(4,false);
     for(int i=0;i<4;i++){
+        
         if(robots[arr[i]].get_type==0)break;
         for(int j=i+1;j<4;j++){
-            if(special_test(arr[i],arr[j])){
-                    ins[arr[j]].forward*=0.5;
+            int tmp=special_test(arr[i],arr[j]);
+            if(vis[j])continue;
+            if(tmp){
+                ins[arr[j]].forward*=0.5;
+                vis[j]=true;
                 
             }
         }
@@ -1041,16 +1047,20 @@ bool will_impact(int robID,double dis){
     }
     return false;
 }
-bool special_test(int i1,int i2){
-    int time=5*0.02;
+int special_test(int i1,int i2){
+    int cnt=5;
+    int base=0.02;
     double radius=robots[i1].get_type==0? 0.45:0.53;
-    auto p1=make_pair<double,double>(robots[i1].pos.first+robots[i1].xy_pos.first*time,
-    robots[i1].pos.second+robots[i1].xy_pos.second*time
-    );
-    auto p2=make_pair<double,double>(robots[i2].pos.first+robots[i2].xy_pos.first*time,
-    robots[i2].pos.second+robots[i2].xy_pos.second*time
-    );
-    double dis=calcuDis(p1,p2);
-    if(lt(dis,radius*2))return true;
-    return false;
+    for(int i=1;i<=cnt;i++){
+        double time=i*base;
+        auto p1=make_pair<double,double>(robots[i1].pos.first+robots[i1].xy_pos.first*time,
+        robots[i1].pos.second+robots[i1].xy_pos.second*time
+        );
+        auto p2=make_pair<double,double>(robots[i2].pos.first+robots[i2].xy_pos.first*time,
+        robots[i2].pos.second+robots[i2].xy_pos.second*time
+        );
+        double dis=calcuDis(p1,p2);   
+        if(lt(dis,radius*2))return i;     
+    }
+    return 0;
 }
