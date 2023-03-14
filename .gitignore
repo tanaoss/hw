@@ -10,5 +10,6 @@ Robot*
 # But not these files...
 !.gitignore
 !maps/
-!sdk/
+!sdk/*.cpp
+!sdk/*.h
 !README.md
