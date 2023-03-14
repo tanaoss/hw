@@ -144,7 +144,6 @@ struct Studio
     }
 };
 struct Line { pair<double, double>  P; pair<double, double> v; };      // 直线（点向式）
-
 bool eq(double a, double b);// ==
 bool gt(double a, double b);// >
 bool lt(double a, double b);// <
@@ -192,3 +191,5 @@ double return_cal(pair<double,double>p1,pair<double,double>p2,double angle);
 void init_studio_parameter();
 bool isWall_r(int robID,double angle);
 int special_test(int robID1,int robID2);
+double get_angle_1(double s1,double s2);
+double get_angle_1(pair<double,double> p1,pair<double,double> p2);
