@@ -23,7 +23,7 @@ int main()
     initRobortInfo();
     init_studio_parameter();
     while (cin>>state.FrameID){
-        //cerr<<" time "<<state.FrameID;
+        cerr<<" time "<<state.FrameID<<endl;
         readStatusUntilOK() ;
         cout<<state.FrameID<<endl;
         if(count == 0)first_action();
