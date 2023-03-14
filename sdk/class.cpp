@@ -1000,10 +1000,10 @@ void robot_action(){
     //for(int i =0;i<=7;i++)cerr<<"type "<<i<<" has "<<robot_get_type[i];
     // cerr <<endl;
     int full = 0;
-    if(judge_full(2,0.105))full = 1;   //4,5,6 full threshold
+    if(judge_full(2,0.1))full = 1;   //4,5,6 full threshold
     if(judge_full(3,0.2))full = 2;   //7 full threshold Higher priority
     //cerr<<" full = "<<full<<endl;
-    robot_judge(full,4,5);
+    robot_judge(full,1.5,5);
 }
 
 vector<double>  get_T_limits(pair<double,double>pos,int id,int ctr,double dis){
