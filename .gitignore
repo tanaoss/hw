@@ -11,8 +11,6 @@ Robot*
 !.gitignore
 !maps/
 !sdk/
-!sdk/*.cpp
-!sdk/*.h
 !README.md
 
 sdk/main
