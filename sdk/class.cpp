@@ -315,7 +315,7 @@ bool checkeTimeEnough(int robot_id, int target_id, int frame) {
     double speed = calVectorSize(robots[robot_id].xy_pos);
     double acceleration = robots[robot_id].get_type == 0? acceleration_no: acceleration_has;
     
-    if(lt(calNextTimeDistance(speed, time, acceleration), dis))
+    if(lt(calNextTimeDistance(speed, time, acceleration), dis*1.3))
         return false;
         
     return true;
@@ -919,10 +919,10 @@ void robot_action(){
     //for(int i =0;i<=7;i++)cerr<<"type "<<i<<" has "<<robot_get_type[i];
     // cerr <<endl;
     int full = 0;
-    if(judge_full(2,0.1))full = 1;   //4,5,6 full threshold
+    if(judge_full(2,0.105))full = 1;   //4,5,6 full threshold
     if(judge_full(3,0.2))full = 2;   //7 full threshold Higher priority
     //cerr<<" full = "<<full<<endl;
-    robot_judge(full,1.5,5);
+    robot_judge(full,4,5);
 }
 
 vector<double>  get_T_limits(pair<double,double>pos,int id,int ctr,double dis){
