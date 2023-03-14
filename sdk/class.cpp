@@ -211,11 +211,11 @@ void calcuStudioDis()
 void print_matr(){
     int i = 0;
     int j;
-    // for(i = 1 ; i <= 7; i++){
-    //     cerr << "kkkkkkk"<<material[i].size()<<endl;
-    //     for(j=0;j<material[i].size();j++) 
-    //         cerr<<"mater "<<i<<"studio "<<material[i][j]<<endl;
-    // }
+    for(i = 1 ; i <= 7; i++){
+        cerr << "kkkkkkk"<<material[i].size()<<endl;
+        for(j=0;j<material[i].size();j++) 
+            cerr<<"mater "<<i<<"studio "<<material[i][j]<<endl;
+    }
 }
 
 double calAngle(pair<double, double> a, pair<double, double> b) {
