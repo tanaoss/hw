@@ -3,6 +3,7 @@
 #include <string>
 #include <cmath>
 #include<algorithm>
+#include"vec.h"
 #include "class.h"
 // #include "line.h"
 
@@ -210,11 +211,11 @@ void calcuStudioDis()
 void print_matr(){
     int i = 0;
     int j;
-    for(i = 1 ; i <= 7; i++){
-        cerr << "kkkkkkk"<<material[i].size()<<endl;
-        for(j=0;j<material[i].size();j++) 
-            cerr<<"mater "<<i<<"studio "<<material[i][j]<<endl;
-    }
+    // for(i = 1 ; i <= 7; i++){
+    //     cerr << "kkkkkkk"<<material[i].size()<<endl;
+    //     for(j=0;j<material[i].size();j++) 
+    //         cerr<<"mater "<<i<<"studio "<<material[i][j]<<endl;
+    // }
 }
 
 double calAngle(pair<double, double> a, pair<double, double> b) {
@@ -423,7 +424,10 @@ void control(vector<PayLoad> payLoad){
     const int max_dis=5;
     vector<int>arr{0,1,2,3};
     auto cmp=[&](int i1,int i2){
+        if(robots[i1].get_type!=robots[i1].get_type)
         return robots[i1].get_type>robots[i1].get_type;
+        else
+        return who_isFirst(i1,i2);
     };
     auto check=[&](int rid)->bool{
         double radius=robots[rid].get_type==0? 0.45:0.53;
@@ -540,22 +544,66 @@ void control(vector<PayLoad> payLoad){
     }
     // solveRobortsCollision();
     
-    sort(arr.begin(),arr.end(),cmp);
-    vector<bool>vis(4,false);
-    for(int i=0;i<4;i++){
+    // sort(arr.begin(),arr.end(),cmp);
+    // vector<bool>vis(4,false);
+    // for(int i=0;i<4;i++){
         
-        if(robots[arr[i]].get_type==0)break;
-        for(int j=i+1;j<4;j++){
-            int tmp=special_test(arr[i],arr[j]);
-            if(vis[j])continue;
-            if(tmp){
-                ins[arr[j]].forward*=0.5;
-                vis[j]=true;
+    //     if(robots[arr[i]].get_type==0)break;
+    //     for(int j=i+1;j<4;j++){
+    //         int tmp=special_test(arr[i],arr[j]);
+    //         if(vis[j])continue;
+    //         if(tmp){
+    //             ins[arr[j]].forward*=0.5;
+    //             vis[j]=true;
                 
+    //         }
+    //     }
+    // }
+    sort(arr.begin(),arr.end(),cmp);
+if(state.FrameID>=150&&state.FrameID<=450){
+    cerr<<"---";
+    cerr<<state.FrameID<<endl;
+ for(int i=0;i<4;i++)cerr<<arr[i]<<" ";
+ cerr<<endl;
+  cerr<<"---";
+}
+   
+        for(int i=0;i<4;i++){
+        
+            Studio studio=studios[robots[i].target_id];
+            Robot robort=robots[i];
+            pair<double, double> robortToStudio = subVector(studio.pos, robort.pos);
+        for(int j=i+1;j<4;j++){
+           
+            Studio studio1=studios[robots[i].target_id];
+            Robot robort1=robots[i];
+            pair<double, double> robortToStudio1 = subVector(studio1.pos, robort1.pos);
+            double tmpAngle1=get_angle(robort.direction,robort1.direction);
+            double tmpAngle2=get_angle(robortToStudio,robortToStudio1);
+            if(state.FrameID>=150&&state.FrameID<=450)
+            cerr<<i<<"-"<<j<<" "<<tmpAngle1<<" "<<tmpAngle2<<endl;
+            double dis_stop=ins[arr[i]].forward*ins[arr[i]].forward/2*payLoad[arr[i]].acceleration;
+            double tmpDis=calcuDis(robots[arr[i]].pos,robots[arr[j]].pos);
+            if(lt(tmpDis,5)&&
+            (gt(tmpAngle1,0.7)||gt(tmpAngle2,0.7))){
+                if(lt(tmpDis,1.2)){
+                    ins[arr[j]].forward=0.5;
+                    ins[arr[j]].rotate=payLoad[j].sign*Pi;
+                }else
+                    ins[arr[j]].forward=ins[i].forward*0.9;
+            }
+            if(lt(calcuDis(robots[arr[i]].pos,robots[arr[j]].pos),5)&&is_less(i,j)&&(lt(tmpAngle1,-0.7)&&lt(tmpAngle2,-0.7))
+            ){
+                ins[arr[j]].forward=0;
+                // ins[arr[j]].rotate=payLoad[j].sign*Pi;
             }
         }
+    if(state.FrameID>=150&&state.FrameID<=450){
+        cerr<<ins[arr[i]].forward<<" "<<ins[arr[i]].rotate<<endl;
+        cerr<<"~~~~";
+}
     }
-    
+   
     out_put();
 }
 
@@ -1063,4 +1111,42 @@ int special_test(int i1,int i2){
         if(lt(dis,radius*2))return i;     
     }
     return 0;
+}
+double get_angle(double s1,double s2){
+    Vec v1(make_pair<double ,double>(cos(s1),sin(s1)));
+    Vec v2(make_pair<double ,double>(cos(s2),sin(s2)));
+    return (cos_t(v1,v2));
+}
+double get_angle(pair<double,double> p1,pair<double,double> p2){
+    Vec v1(p1);
+    Vec v2(p2);
+    return cos_t(v1,v2);
+}
+bool is_less(int i1,int i2){
+        int base=0.02;
+        double time=2*base;
+        auto p1=make_pair<double,double>(robots[i1].pos.first+robots[i1].xy_pos.first*time,
+        robots[i1].pos.second+robots[i1].xy_pos.second*time
+        );
+        auto p2=make_pair<double,double>(robots[i2].pos.first+robots[i2].xy_pos.first*time,
+        robots[i2].pos.second+robots[i2].xy_pos.second*time
+        );
+        double dis=calcuDis(p1,p2);   
+
+        auto p3=make_pair<double,double>(robots[i1].pos.first+robots[i1].xy_pos.first,
+        robots[i1].pos.second+robots[i1].xy_pos.second
+        );
+        auto p4=make_pair<double,double>(robots[i2].pos.first+robots[i2].xy_pos.first,
+        robots[i2].pos.second+robots[i2].xy_pos.second
+        );
+        double dis1=calcuDis(p3,p4);   
+    
+        return lt(dis1,dis);
+}
+bool who_isFirst(int i1,int i2){
+    pair<double, double> p1 = subVector(robots[i1].pos, robots[i2].pos);
+    double s1=robots[i1].direction;
+    pair<double, double> p2=make_pair<double ,double>(cos(s1),sin(s1));
+    double tmpCos=get_angle(p1,p2);
+    return gt(tmpCos,0.0);
 }
