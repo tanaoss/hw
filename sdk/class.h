@@ -150,6 +150,7 @@ bool gt(double a, double b);// >
 bool lt(double a, double b);// <
 bool ge(double a, double b);// >=
 bool le(double a, double b);// <=
+void init_studio_parameter();
 void initRobortInfo();
 bool readMapUntilOK();//读地图
 bool readStatusUntilOK();//读判题器输出
