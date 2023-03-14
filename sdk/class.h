@@ -191,3 +191,4 @@ bool will_impact(int robID,double dis=0.0);
 double return_cal(pair<double,double>p1,pair<double,double>p2,double angle);
 void init_studio_parameter();
 bool isWall_r(int robID,double angle);
+bool special_test(int robID1,int robID2);

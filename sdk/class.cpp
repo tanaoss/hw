@@ -421,6 +421,10 @@ void control(vector<PayLoad> payLoad){
     const double Dec_val_ra=1;//角速度减速系数
     const double p1=1;//机器人距离多近时开始减速
     const int max_dis=5;
+    vector<int>arr{0,1,2,3};
+    auto cmp=[&](int i1,int i2){
+        return robots[i1].get_type>robots[i1].get_type;
+    };
     auto check=[&](int rid)->bool{
         double radius=robots[rid].get_type==0? 0.45:0.53;
         double n_x=robots[rid].pos.first+robots[rid].xy_pos.first*time,n_y=robots[rid].pos.second+robots[rid].xy_pos.second*time;
@@ -508,6 +512,9 @@ void control(vector<PayLoad> payLoad){
                 ins[i].forward=6;
             }
         }else if(check(robID)){
+            if(can_st)
+            ins[i].forward=4;
+            else
             ins[i].forward=0.5;
         }else if(will_impact(robID,stop_dis)&&can_st&&robots[i].get_type!=0){
             // cerr<<stop_dis<<"~"<<endl;
@@ -531,7 +538,18 @@ void control(vector<PayLoad> payLoad){
         }
         
     }
-    solveRobortsCollision();
+    // solveRobortsCollision();
+    sort(arr.begin(),arr.end(),cmp);
+    for(int i=0;i<4;i++){
+        if(robots[arr[i]].get_type==0)break;
+        for(int j=i+1;j<4;j++){
+            if(special_test(arr[i],arr[j])){
+                    ins[arr[j]].forward*=0.5;
+                
+            }
+        }
+    }
+    
     out_put();
 }
 
@@ -1008,5 +1026,18 @@ bool will_impact(int robID,double dis){
     {//在墙附件，并且会撞上
         return true;
     }
+    return false;
+}
+bool special_test(int i1,int i2){
+    int time=5*0.02;
+    double radius=robots[i1].get_type==0? 0.45:0.53;
+    auto p1=make_pair<double,double>(robots[i1].pos.first+robots[i1].xy_pos.first*time,
+    robots[i1].pos.second+robots[i1].xy_pos.second*time
+    );
+    auto p2=make_pair<double,double>(robots[i2].pos.first+robots[i2].xy_pos.first*time,
+    robots[i2].pos.second+robots[i2].xy_pos.second*time
+    );
+    double dis=calcuDis(p1,p2);
+    if(lt(dis,radius*2))return true;
     return false;
 }
