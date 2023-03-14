@@ -150,6 +150,7 @@ bool gt(double a, double b);// >
 bool lt(double a, double b);// <
 bool ge(double a, double b);// >=
 bool le(double a, double b);// <=
+void init_studio_parameter();
 void initRobortInfo();
 bool readMapUntilOK();//读地图
 bool readStatusUntilOK();//读判题器输出
@@ -189,3 +190,4 @@ bool isWall(int stuID);
 bool will_impact(int robID,double dis=0.0);
 double return_cal(pair<double,double>p1,pair<double,double>p2,double angle);
 void init_studio_parameter();
+bool isWall_r(int robID,double angle);

@@ -4,6 +4,8 @@
 #include <cmath>
 #include<algorithm>
 #include "class.h"
+// #include "line.h"
+
 using namespace std;
 vector<vector<double>> dis(50, vector<double>(50, 0));
 vector<Studio> studios;
@@ -119,9 +121,9 @@ bool readStatusUntilOK() {
                         for(int j = 0;j<studio_material[i][0];j++){
                             if((studios[studio_id].bitSatus & (int)pow(2,studio_material[i][j+1])) == 0){
                                 if(studios_rid[studio_id][studio_material[i][j+1]] == -1)material[studio_material[i][j+1]].push_back(studio_id);
-                            }
-                        }
-                    }
+            }
+            }
+            }
                 }
             }
             if(studios[studio_id].type == 8){
@@ -261,7 +263,7 @@ PayLoad calPayload(int robortID) {
     else
         sign = 1;
     angle = fabs(angle);
-    angle  = gt(angle, Pi)? angle - Pi: angle;
+    angle  = gt(angle, Pi)? 2 * Pi - angle: angle;
 
 
     // cerr<<"**"<< angle1<<"**dir:"<<robort.direction<<"**"<<angle2<<endl;
@@ -344,8 +346,8 @@ void predictCollision(int a, int b) {
     // if(corss.first == 0 | corss.first == 1) {
     //     if(checkRobortsCollison(a, b)){
             
-    //     }
-    // }
+//     }
+// }
     // else {
     //     // if(robotA.target_id != robotB.target_id)
     // }
@@ -374,12 +376,13 @@ void solveRobortsCollision() {
                 double angle2 = ge(robots[goID].direction, 0.0) ? robots[goID].direction: 2 * Pi + robots[goID].direction;
                 double angle3 = angle2 - angle1;
 
-                int sign;
-
-                if(ge(angle3, 0) && lt(angle3, Pi) || lt(angle3, -Pi))
-                    sign = -1; //ni
-                else
-                    sign = 1;//shun
+                //如果stopID-goID方向与goTD前进方向是锐角，go旋转
+                if(lt(fabs(angle3), Pi)){
+                    if(ge(angle3, 0) && lt(angle3, Pi) || lt(angle3, -Pi))
+                        ins[goID].rotate = -Pi; //ni
+                    else
+                        ins[goID].rotate = Pi;//shun
+                }
                 
                 // todo
 
@@ -442,19 +445,21 @@ void control(vector<PayLoad> payLoad){
         robots[i].lastSign=payLoad[i].sign;
         double lastRate=fabs(robots[i].lastRate);
         double Dev_val=robots[i].angular_velocity*robots[i].angular_velocity/2*payLoad[i].angular_acceleration;
-        bool can_st=can_stop(robots[i].pos,studios[robots[i].target_id].pos,payLoad[i].angle*payLoad[i].sign);
-        // if(state.FrameID>=134&&will_impact(i)&&i==1){
-        //     // cerr<<"---"<<endl;
-        //     // cerr<<state.FrameID<<endl;
-        //     // cerr<<check(robID)<<endl;
-        //     // cerr<<robots[i].target_id<<" "<<i<<endl;
-        //     // cerr<<robots[i].collision_val<<"-"<<i<<" "<<robots[i].pos.first<<" "<<robots[i].pos.second<<endl; 
-        //     // cerr<<" "<<robots[i].xy_pos.first<<" "<<robots[i].xy_pos.second<<endl;
-        //     // cerr<<can_st<<" "<<payLoad[i].angle<<endl;
-        //     // cerr<<return_cal(robots[i].pos,studios[robots[i].target_id].pos,fabs(payLoad[i].angle))<<endl;
+        bool can_st=can_stop(robots[i].pos,studios[robots[i].target_id].pos,payLoad[i].angle);
+        // if(state.FrameID>=470&&i==3){
+        //     cerr<<"---"<<endl;
+        //     cerr<<state.FrameID<<endl;
+        //     cerr<<check(robID)<<endl;
+        //     cerr<<robots[i].target_id<<" "<<i<<endl;
+        //     cerr<<robots[i].collision_val<<"-"<<i<<" "<<robots[i].pos.first<<" "<<robots[i].pos.second<<endl; 
+        //     cerr<<" "<<robots[i].xy_pos.first<<" "<<robots[i].xy_pos.second<<endl;
+        //     cerr<<can_st<<" angle "<<"--"<<payLoad[i].angle<<"--"<<payLoad[i].sign<<
+        //     " direction "<<robots[i].direction <<endl;
+        //     cerr<<return_cal(robots[i].pos,studios[robots[i].target_id].pos,fabs(payLoad[i].angle))<<endl;
             
-            // cerr<<studios[robots[i].target_id].pos.first<<" "<<studios[robots[i].target_id].pos.second<<endl;
-            // cerr<<"---"<<endl; 
+        //     cerr<<"tar pos"<<studios[robots[i].target_id].pos.first<<" "<<studios[robots[i].target_id].pos.second<<endl;
+        //     cerr<<"rob pos"<<robots[i].pos.first<<" "<<robots[i].pos.second<<endl;
+        //     cerr<<"---"<<endl; 
         // }
         // if(state.FrameID>=610&&robots[i].collision_val!=0&&lt(robots[i].collision_val,1)&&i==3){
         //     // cerr<<"~~~~~"<<endl;
@@ -485,6 +490,16 @@ void control(vector<PayLoad> payLoad){
                 ins[i].forward=0;
                 robots[i].lastRate=ins[i].rotate;   
                 continue;         
+        }
+        if(isWall_r(i,payLoad[i].angle)){
+                ins[i].rotate=((isSame==1&&isTurn==0)?Pi*payLoad[i].sign:max(0.5,Dec_val_ra*lastRate)*payLoad[i].sign);
+                // if(i==0)
+                // cerr<<"~"<<ins[i].rotate<<" "<<isSame<<"+"<<payLoad[i].angle<<"+" <<Dec_val_ra*lastRate*payLoad[i].sign<<endl;
+                // if(robots[i]..forward>=3)
+                // ins[i].forward=-2;
+                ins[i].forward=0.5;
+                robots[i].lastRate=ins[i].rotate;   
+                continue;     
         }
         // int can_st_flag=1;
         double stop_dis=(robots[i].xy_pos.first*robots[i].xy_pos.first+robots[i].xy_pos.second*robots[i].xy_pos.second)
@@ -524,6 +539,7 @@ void control(vector<PayLoad> payLoad){
     solveRobortsCollision();
     out_put();
 }
+
 
 /*
   control target_id
@@ -812,25 +828,25 @@ void robot_judge(int full){
                      studios[robots[i].target_id].r_id = i;
                 }
                 else{
-                    if(full == 1){
-                        robots[i].target_id = pick_point(i,3).first; //find near 456
-                        if(robots[i].target_id!= -1){
-                            //cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
-                            studios[robots[i].target_id].r_id = i;
-                        }
+                if(full == 1){
+                    robots[i].target_id = pick_point(i,3).first; //find near 456
+                    if(robots[i].target_id!= -1){
+                        //cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
+                        studios[robots[i].target_id].r_id = i;
                     }
-                    else if(full == 2){
-                        robots[i].target_id = pick_point(i,4).first; //find near 7
-                        if(robots[i].target_id!= -1){
-                            //cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
-                            studios[robots[i].target_id].r_id = i;
-                        }
+                }
+                else if(full == 2){
+                    robots[i].target_id = pick_point(i,4).first; //find near 7
+                    if(robots[i].target_id!= -1){
+                        //cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
+                        studios[robots[i].target_id].r_id = i;
                     }
-                    else{
-                        robots[i].target_id = pick_point(i,2).first; //find near 123
-                        if(robots[i].target_id!= -1){
-                            //cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
-                            studios[robots[i].target_id].r_id = i;
+                }
+                else{
+                    robots[i].target_id = pick_point(i,2).first; //find near 123
+                    if(robots[i].target_id!= -1){
+                        //cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
+                        studios[robots[i].target_id].r_id = i;
                         }
                     }
                 }
@@ -982,6 +998,13 @@ bool isWall(int stuID){
     int j=studios[stuID].pos.second;
     if(i-1<=0||j-2<=0||i+2>=50||j+2>=50)return true;
     return false;
+}
+bool isWall_r(int robID,double angle){
+    if(lt(angle,(double)Pi/6.0))return false;
+    int i=robots[robID].pos.first;
+    int j=robots[robID].pos.second;
+    if(i-1<=0||j-2<=0||i+2>=50||j+2>=50)return true;
+    return false;   
 }
 bool will_impact(int robID,double dis){
     vector<double> tmp=get_T_limits(robots[robID].pos,robID,1,dis);
