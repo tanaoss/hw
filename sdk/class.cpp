@@ -595,7 +595,7 @@ pair<int,double> pick_point(int robot_id, int state){
     else if(state == 3){
         for(i=0;i<studios.size();i++){
             if(studios[i].type >= 4 && studios[i].type <= 6 && studios[i].r_id==-1 && studios[i].pStatus == 1){  //456 and no robot choose ,get
-                if(material[studios[i].type].size()>0&& robot_get_type[studios[i].type]< material[studios[i].type].size()){
+                if(material[studios[i].tgiype].size()>0&& robot_get_type[studios[i].type]< material[studios[i].type].size()){
                     //&& robot_get_type[studios[i].type]< material[studios[i].type].size()
                     dist=calcuDis(robots[robot_id].pos,studios[i].pos);
                     if(dist<min){
