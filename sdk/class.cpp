@@ -692,7 +692,7 @@ void control(vector<PayLoad> payLoad){
             double adjustAng2=(Flag_line2==true?fabs(return_maxAng(id2)):fabs(ins[id2].rotate));
             pair<int,int> tmp(0,0);
     
-            if(!Flag_line2){goto tag1;}
+            if(!Flag_line1||!Flag_line2){goto tag1;}
             ret_Flg=Calculate_root(id1,id2); 
             if(ret_Flg==0){
                 continue;
@@ -716,8 +716,7 @@ void control(vector<PayLoad> payLoad){
                     ins[id2].rotate=max(fabs(ins[id2].rotate),fabs(adjustAng2))*tmp.second;
                     ins[id1].rotate=max(fabs(ins[id1].rotate),fabs(adjustAng1))*tmp.second;;
                 }else{
-                    if(robots[id2].get_type==0||robots[id1].get_type==6
-                    ||robots[id1].get_type==7){
+                    if(robots[id2].get_type==0){
                         ins[id2].rotate=(Pi)*tmp.second;
                         ins[id2].forward=6;
                     }else{
@@ -750,14 +749,14 @@ void control(vector<PayLoad> payLoad){
        
 
 //     }   
-    // for(int i=0;i<4;i++){
-    //     for(int j=i+1;j<4;j++){
-    //         double tmpDis=calcuDis(robots[i].pos,robots[j].pos);
-    //         cerr<<i<<"-"<<j<<" "<<tmpDis<<" "<<will_collision(i,j)<< " "<<Calculate_root(i,j)
-    //         <<endl;
-    //     }
-    // }
-    // cerr<<"~~~~"<<endl;;     
+//     for(int i=0;i<4;i++){
+//         for(int j=i+1;j<4;j++){
+//             double tmpDis=calcuDis(robots[i].pos,robots[j].pos);
+//             cerr<<i<<"-"<<j<<" "<<tmpDis<<" "<<will_collision(i,j)<< " "<<Calculate_root(i,j)
+//             <<endl;
+//         }
+//     }
+//     cerr<<"~~~~"<<endl;;     
 // }
 
   
