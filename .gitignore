@@ -10,6 +10,10 @@ Robot*
 # But not these files...
 !.gitignore
 !maps/
-!sdk/*.cpp
-!sdk/*.h
+!sdk/
 !README.md
+
+sdk/main
+sdk/*.cmake
+sdk/*cache.txt
+sdk/Makefile
