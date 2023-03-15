@@ -460,17 +460,17 @@ void solveRobortsCollision() {
                 
                 // todo
 
-                if(true) {
-                    cerr<<"time:"<<state.FrameID<<endl;
-                    cerr << "stopID:" <<stopID <<"-"<<robots[stopID].target_id<<endl;
-                    cerr<<"**"<<robots[stopID].get_type<<endl;
-                    cerr << "speed"<<calVectorSize(robots[stopID].xy_pos)<<" cv:"<<robots[stopID].angular_velocity<<endl;
-                    cerr << "rate:"<<ins[stopID].rotate<<endl;
-                    cerr<<" goID:"<<goID<<"-"<<robots[goID].target_id<<endl;
-                    cerr<<"**"<<robots[goID].get_type<<endl;
-                    cerr << "speed"<<calVectorSize(robots[goID].xy_pos)<<" cv:"<<robots[goID].angular_velocity<<endl;
-                    cerr << "rate:"<<ins[goID].rotate<<endl<<endl;
-                }
+                // if(true) {
+                //     cerr<<"time:"<<state.FrameID<<endl;
+                //     cerr << "stopID:" <<stopID <<"-"<<robots[stopID].target_id<<endl;
+                //     cerr<<"**"<<robots[stopID].get_type<<endl;
+                //     cerr << "speed"<<calVectorSize(robots[stopID].xy_pos)<<" cv:"<<robots[stopID].angular_velocity<<endl;
+                //     cerr << "rate:"<<ins[stopID].rotate<<endl;
+                //     cerr<<" goID:"<<goID<<"-"<<robots[goID].target_id<<endl;
+                //     cerr<<"**"<<robots[goID].get_type<<endl;
+                //     cerr << "speed"<<calVectorSize(robots[goID].xy_pos)<<" cv:"<<robots[goID].angular_velocity<<endl;
+                //     cerr << "rate:"<<ins[goID].rotate<<endl<<endl;
+                // }
                 
                 //判断停下来的球是否会阻挡路线
                 // next_pos = getNextPos(goID);
@@ -696,9 +696,10 @@ if(state.FrameID>=15){
             }
         tag1:if(lt(tmpDis,5)&&(robots[id2].get_type==0&&
         robots[id1].get_type!=0)){
-            tmp=far_away(id1,id2,0,1);
-            ins[id2].rotate=(Pi)*tmp.second;
+            // tmp=far_away(id1,id2,0,1);
+            // ins[id2].rotate=(Pi)*tmp.second;
         }
+
 
 
         }
@@ -715,7 +716,8 @@ if(state.FrameID>=15){
     for(int i=0;i<4;i++){
         for(int j=i+1;j<4;j++){
             double tmpDis=calcuDis(robots[i].pos,robots[j].pos);
-            cerr<<i<<"-"<<j<<" "<<tmpDis<<" "<<return_collision(i,j)<< endl;
+            cerr<<i<<"-"<<j<<" "<<tmpDis<<" "<<will_collision(i,j)<< " "<<Calculate_root(i,j)
+            <<endl;
         }
     }
     cerr<<"~~~~"<<endl;;     
@@ -1282,13 +1284,13 @@ bool will_collision(int i1,int i2){
         );
         pair<double,double>pos_tmp_s1=studios[robots[i1].target_id].pos;
         double dis1=calcuDis(pos_tmp_r1,pos_tmp_s1);
-        double dis3=calcuDis(pos_tmp_r1,pos_tmp_s1);
+        double dis3=calcuDis(pos_tmp_r1,pos_tmp_r_c);
 
         pair<double,double>pos_tmp_r2=robots[i2].pos;
         pair<double,double>pos_tmp_s2=studios[robots[i2].target_id].pos;
         double dis2=calcuDis(pos_tmp_r2,pos_tmp_s2);
-        double dis4=calcuDis(pos_tmp_r2,pos_tmp_s1);
-        if(lt(dis3,dis1)&&lt(dis4,dis2))return true;
+        double dis4=calcuDis(pos_tmp_r2,pos_tmp_r_c);
+        if(le(dis3,dis1)&&le(dis4,dis2))return true;
         return false;
 
     }else if(gt(cla,0)){
@@ -1299,13 +1301,26 @@ bool will_collision(int i1,int i2){
         );
         pair<double,double>pos_tmp_s1=studios[robots[i1].target_id].pos;
         double dis1=calcuDis(pos_tmp_r1,pos_tmp_s1);
-        double dis3=calcuDis(pos_tmp_r1,pos_tmp_s1);
+        double dis3=calcuDis(pos_tmp_r1,pos_tmp_r_c);
 
         pair<double,double>pos_tmp_r2=robots[i2].pos;
         pair<double,double>pos_tmp_s2=studios[robots[i2].target_id].pos;
         double dis2=calcuDis(pos_tmp_r2,pos_tmp_s2);
-        double dis4=calcuDis(pos_tmp_r2,pos_tmp_s1);
-        if(lt(dis3,dis1)&&lt(dis4,dis2))return true;
+        double dis4=calcuDis(pos_tmp_r2,pos_tmp_r_c);
+        if(le(dis3,dis1)&&le(dis4,dis2))return true;
+
+        // tmp.second=(-1*b-sqrt(cla))/2*a;
+        
+        // pair<double,double>pos_tmp_r_c1(pos_tmp_r1.first+robots[i1].xy_pos.first*tmp.second,
+        // pos_tmp_r1.second+robots[i1].xy_pos.second*tmp.second
+        // );
+        // double dis11=calcuDis(pos_tmp_r1,pos_tmp_s1);
+        // double dis31=calcuDis(pos_tmp_r1,pos_tmp_r_c1);
+
+
+        // double dis21=calcuDis(pos_tmp_r2,pos_tmp_s2);
+        // double dis41=calcuDis(pos_tmp_r2,pos_tmp_r_c1);
+        // if(le(dis31,dis11)&&le(dis41,dis21))return true;
         return false;       
     }
     if(eq(a,0))return true;
