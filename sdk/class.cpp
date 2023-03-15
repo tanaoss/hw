@@ -360,6 +360,20 @@ bool checkTimeEnough(int robot_id, int target_id, int frame) {
     return true;
 }
 
+bool checkEnough(int robot_id, int target_id, int frame)
+{
+    double dis = calcuDis(robots[robot_id].pos, studios[target_id].pos) - 0.4;
+    if (dis > 0)
+    {
+        double time = (dis / 6.0) / 0.02; // 剩余秒数
+        // cerr<<"time = "<<time<<" least time = "<<frame<<endl;
+        if (time > frame)
+            return true;
+        else
+            return false;
+    }
+    return false;
+}
 
 pair<double, double> transformVector(double direction) {
     direction = gt(direction, 0)? direction: Pi - direction;
@@ -755,7 +769,7 @@ pair<int,double> pick_point(int robot_id, int state){
     else if(state == 2){
         for(i=0;i<studios.size();i++){
             if(studios[i].type >= 1 && studios[i].type <= 3 && studios[i].r_id==-1 ){  //123 and no robot choose ,get
-                if(studios[i].pStatus == 1 ||(studios[i].r_time>0&&(!checkTimeEnough(robot_id,i,studios[i].r_time)))){
+                if(studios[i].pStatus == 1 ||(studios[i].r_time>0&&(checkEnough(robot_id,i,studios[i].r_time)))){
                     if(material[studios[i].type].size()>0 && robot_get_type[studios[i].type]< material[studios[i].type].size()){
                         dist=calcuDis(robots[robot_id].pos,studios[i].pos);
                         if(dist<min){
@@ -770,7 +784,7 @@ pair<int,double> pick_point(int robot_id, int state){
     else if(state == 3){
         for(i=0;i<studios.size();i++){
             if(studios[i].type >= 4 && studios[i].type <= 6 && studios[i].r_id==-1){  //456 and no robot choose ,get
-                if(studios[i].pStatus == 1 ||(studios[i].r_time>0&&(!checkTimeEnough(robot_id,i,studios[i].r_time)))){
+                if(studios[i].pStatus == 1 ||(studios[i].r_time>0&&(checkEnough(robot_id,i,studios[i].r_time)))){
                     if(material[studios[i].type].size()>0&& robot_get_type[studios[i].type]< material[studios[i].type].size()){
                         //&& robot_get_type[studios[i].type]< material[studios[i].type].size()
                         dist=calcuDis(robots[robot_id].pos,studios[i].pos);
@@ -786,7 +800,7 @@ pair<int,double> pick_point(int robot_id, int state){
     else if(state == 4){
         for(i=0;i<studios.size();i++){
             if(studios[i].type ==7 && studios[i].r_id==-1 ){  //7 and no robot choose ,get
-                if(studios[i].pStatus == 1 ||(studios[i].r_time>0&&(!checkTimeEnough(robot_id,i,studios[i].r_time)))){
+                if(studios[i].pStatus == 1 ||(studios[i].r_time>0&&(checkEnough(robot_id,i,studios[i].r_time)))){
                     if(material[studios[i].type].size()>0){
                         dist=calcuDis(robots[robot_id].pos,studios[i].pos);
                         if(dist < min){
@@ -1034,7 +1048,102 @@ void robot_judge(int full,int threshold_near,int threshold_lack){
         // }
     }
 }
+void robot_judge_sol(int threshold_lack){
+    int i;
+    int target;
+    int min_dist,dist,min_subscript;
+    pair<int,double> temp1;
+    pair<int,double> temp2;
+    //cerr<<robots.size()<<endl;
+    for(i = 0; i < robots.size(); i++){
+        //cerr<<i<<robots[i].target_id<<endl;
+        if(robots[i].loc_id == robots[i].target_id && robots[i].target_id != -1){
+            if(robots[i].get_type == 0){
+                //dosomething buy ,next send
+                robots[i].lastSign=0;
+                robots[i].isTurn=0;
+                robots[i].get_type = studios[robots[i].loc_id].type;
+                //cerr<<"robots "<< i<<" buy "<<studios[robots[i].target_id].type<<endl;
+                studios[robots[i].loc_id].r_id = -1;
+                robots[i].target_id = pick_point(i,5).first;
+                if(robots[i].target_id!= -1){
+                    //studios[robots[i].target_id].r_id = i;
+                    if(studios[robots[i].target_id].type!=8&&studios[robots[i].target_id].type!=9)studios_rid[robots[i].target_id][robots[i].get_type] = i;
+                    //cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<" flag "<<studios_rid[robots[i].target_id][robots[i].get_type]<<endl;
+                }
+                ins[i].buy = 1;
+                ins[i].sell = -1;
+                if(state.FrameID>8500){
+                    cerr <<"***";
+                    if(!checkTimeEnough(i,robots[i].target_id,9000-state.FrameID))ins[i].buy = -1;
+                }
+            }
+            else{
+                //dosomething sell
+                ins[i].sell = 1;
+                ins[i].buy = -1;
+                robots[i].lastSign=0;
+                robots[i].isTurn=0;
+                ////cerr<<"robots "<< i<<" sell "<<robots[i].get_type<<endl;
+                studios[robots[i].loc_id].bitSatus += (int)pow(2,robots[i].get_type);
+                //studios[robots[i].loc_id].r_id = -1;
+                studios_rid[robots[i].loc_id][robots[i].get_type] = -1;
+                robots[i].get_type = 0;
+                target = choose_lack(robots[i].loc_id,threshold_lack).first;
+                //cerr<<"robots[i].loc_id "<<robots[i].loc_id<<"target = "<<target<<endl;
+                if(target != -1){
+                    robots[i].target_id = target ;
+                     studios[robots[i].target_id].r_id = i;
+                }
+                else{
+                    min_subscript = -1;
+                    min_dist = 100;
+                    for(int j=2;j<=4;j++){
+                        temp1=pick_point(i,j);
+                        dist = temp1.second;
+                        if(min_dist>dist){
+                            min_dist=dist;
+                            min_subscript=temp1.first;
+                        }
+                    }
+                    if(min_subscript != -1){
+                    robots[i].target_id = min_subscript;
+                     studios[robots[i].target_id].r_id = i;
+                    }
+                }
+            }
+        }
+        else{
+            ins[i].buy = -1;
+            ins[i].sell = -1;
+            ins[i].destroy = -1;
+        }
+        if(robots[i].target_id == -1){
+            if(robots[i].get_type ==0){
+                robots[i].target_id = pick_point(i,2).first; //no target
+                if(robots[i].target_id!= -1){
+                        //cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
+                    studios[robots[i].target_id].r_id = i;
+                    //cerr<< "kkkkk"<<endl;
+                }
+            }
+            else{
+                robots[i].target_id = pick_point(i,5).first;
+                if(robots[i].target_id!= -1){
+                    //studios[robots[i].target_id].r_id = i;
+                    if(studios[robots[i].target_id].type!=8&&studios[robots[i].target_id].type!=9)studios_rid[robots[i].target_id][robots[i].get_type] = i;
+                    //cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
+                }
+            }
+        }
+        //if(robots[i].get_type==0)cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<studios[robots[i].target_id].type<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
+        //else cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
+        // if(i==2 && robots[i].target_id != -1){
+        //     cerr<<" robot 2 dis "<<calcuDis(robots[i].pos,studios[robots[i].target_id].pos)<<endl;
+        // }
+    }
 
+}
 void robot_action(){
     //cerr<<"start"<<endl;
     //print_matr();
@@ -1050,7 +1159,8 @@ void robot_action(){
     if(judge_full(2,0.08))full = 1;   //4,5,6 full threshold
     if(judge_full(3,0.3))full = 2;   //7 full threshold Higher priority
     //cerr<<" full = "<<full<<endl;
-    robot_judge(full,1.3,4.5);
+    //robot_judge(full,1.3,4.5);
+    robot_judge_sol(4.5);
 }
 
 vector<double>  get_T_limits(pair<double,double>pos,int id,int ctr,double dis){
