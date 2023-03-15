@@ -1131,8 +1131,9 @@ void robot_judge_sol(int threshold_lack){
                             min_subscript=temp1.first;
                         }
                     }
-                    if(min_subscript != -1){
                     robots[i].target_id = min_subscript;
+                    if(min_subscript != -1){
+                    
                      studios[robots[i].target_id].r_id = i;
                     }
                 }
