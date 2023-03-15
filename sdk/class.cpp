@@ -577,7 +577,7 @@ void control(vector<PayLoad> payLoad){
       
         double dis=calcuDis(robots[i].pos,studios[robots[i].target_id].pos);
         if(dis<3&&!can_st){
-                ins[i].rotate=((isSame==1&&isTurn==0)?Pi*payLoad[i].sign:max(0.5,Dec_val_ra*lastRate)*payLoad[i].sign);
+                ins[i].rotate=((isSame==1&&isTurn==0)?Pi*payLoad[i].sign:max(0.8,Dec_val_ra*lastRate)*payLoad[i].sign);
                 // if(i==0)
                 // cerr<<"~"<<ins[i].rotate<<" "<<isSame<<"+"<<payLoad[i].angle<<"+" <<Dec_val_ra*lastRate*payLoad[i].sign<<endl;
                 // if(robots[i]..forward>=3)
@@ -587,12 +587,12 @@ void control(vector<PayLoad> payLoad){
                 continue;         
         }
         if(isWall_r(i,payLoad[i].angle)){
-                ins[i].rotate=((isSame==1&&isTurn==0)?Pi*payLoad[i].sign:max(0.5,Dec_val_ra*lastRate)*payLoad[i].sign);
+                ins[i].rotate=((isSame==1&&isTurn==0)?Pi*payLoad[i].sign:max(0.8,Dec_val_ra*lastRate)*payLoad[i].sign);
                 // if(i==0)
                 // cerr<<"~"<<ins[i].rotate<<" "<<isSame<<"+"<<payLoad[i].angle<<"+" <<Dec_val_ra*lastRate*payLoad[i].sign<<endl;
                 // if(robots[i]..forward>=3)
                 // ins[i].forward=-2;
-                ins[i].forward=0.5;
+                ins[i].forward=2;
                 robots[i].lastRate=ins[i].rotate;   
                 continue;     
         }
@@ -611,7 +611,7 @@ void control(vector<PayLoad> payLoad){
             if(can_st)
             ins[i].forward=4;
             else
-            ins[i].forward=0.5;
+            ins[i].forward=1;
         }else if(will_impact(robID,stop_dis)&&can_st&&robots[i].get_type!=0){
             // cerr<<stop_dis<<"~"<<endl;
             ins[i].forward=0;
@@ -626,7 +626,7 @@ void control(vector<PayLoad> payLoad){
             robots[i].isTurn=0;
             robots[i].lastRate=ins[i].rotate;
         }else{
-            ins[i].rotate=((isSame==1&&isTurn==0)?Pi*payLoad[i].sign:max(0.5,Dec_val_ra*lastRate)*payLoad[i].sign);
+            ins[i].rotate=((isSame==1&&isTurn==0)?Pi*payLoad[i].sign:max(0.8,Dec_val_ra*lastRate)*payLoad[i].sign);
                             // if(i==0)
                 // if(i==0)
                 // cerr<<"+"<<ins[i].rotate<<" "<<isSame<<"+"<<payLoad[i].angle<<"+" <<Dec_val_ra*lastRate*payLoad[i].sign<<endl;
@@ -684,13 +684,14 @@ if(state.FrameID>=15){
             if(vis[j])continue;
             int id2=arr[j];
             double tmpDis=calcuDis(robots[id1].pos,robots[id2].pos);
-            bool Flag_line1=lt(fabs(payLoad[id1].angle),tmpDis/(double)Pi)||can_stop(robots[id1].pos,studios[robots[id1].target_id].pos,payLoad[id1].angle);
-            bool Flag_line2=lt(fabs(payLoad[id1].angle),tmpDis/(double)Pi)||can_stop(robots[id2].pos,studios[robots[id2].target_id].pos,payLoad[id2].angle);
+            bool Flag_line1=lt(fabs(payLoad[id1].angle),(double)Pi/tmpDis)||can_stop(robots[id1].pos,studios[robots[id1].target_id].pos,payLoad[id1].angle);
+            bool Flag_line2=lt(fabs(payLoad[id1].angle),(double)Pi/tmpDis)||can_stop(robots[id2].pos,studios[robots[id2].target_id].pos,payLoad[id2].angle);
             double v2=return_v(id2);
             int ret_Flg=-2;
             double adjustAng1=(Flag_line1==true?fabs(return_maxAng(id1)):fabs(ins[id1].rotate));
             double adjustAng2=(Flag_line2==true?fabs(return_maxAng(id2)):fabs(ins[id2].rotate));
             pair<int,int> tmp(0,0);
+    
             if(!Flag_line2){goto tag1;}
             ret_Flg=Calculate_root(id1,id2); 
             if(ret_Flg==0){
@@ -706,24 +707,24 @@ if(state.FrameID>=15){
             // }
             if(will_collision(id1,id2)){
                 tmp=far_away(id1,id2,1,1);
-                if(lt(tmpDis,2)){
+                if(lt(tmpDis,2)&&(gt(max(v1,v2),3.0))){
                     ins[id2].rotate=(Pi)*tmp.second;
                     ins[id1].rotate=(Pi)*tmp.first;
                     ins[id2].forward=0; 
-                    ins[id2].forward=0;   
+                    ins[id1].forward=0;   
                 }else if(lt(tmpDis,5)){
-                    ins[id2].rotate=adjustAng2*tmp.second;
-                    ins[id1].rotate=adjustAng1*tmp.first;
+                    ins[id2].rotate=max(fabs(ins[id2].rotate),fabs(adjustAng2))*tmp.second;
+                    ins[id1].rotate=max(fabs(ins[id1].rotate),fabs(adjustAng1))*tmp.second;;
                 }else{
                     if(robots[id2].get_type==0||robots[id1].get_type==6
                     ||robots[id1].get_type==7){
                         ins[id2].rotate=(Pi)*tmp.second;
                         ins[id2].forward=6;
                     }else{
-                        ins[id2].rotate=(Pi/2)*tmp.second;
-                        ins[id2].forward=3;   
+                        ins[id2].rotate=max(fabs(ins[id2].rotate),fabs(Pi/2))*tmp.second;
+                          
                     }
-                    ins[id1].rotate=(Pi/2.0)*tmp.first;
+                    ins[id1].rotate=max(fabs(ins[id1].rotate),fabs(Pi/2))*tmp.first;
                 }
                 vis[id2]=true;
                 
@@ -1401,7 +1402,7 @@ bool will_collision(int i1,int i2){
     Vec x2(robots[i2].pos);
     Vec c_t=x1-x2;
     Vec v_t=v1-v2;
-    double r=1.5;
+    double r=getRobotRadius(i1)+getRobotRadius(i2)+0.2;
     double a=v_t*v_t;
     double b=2*(v_t*c_t);
     double c=c_t*c_t-r*r;
