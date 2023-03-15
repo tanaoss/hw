@@ -1227,10 +1227,10 @@ void robot_judge_sol(int threshold_lack){
                 }
                 ins[i].buy = 1;
                 ins[i].sell = -1;
-                if(state.FrameID>8500){
-                    cerr <<"***";
-                    if(!checkTimeEnough(i,robots[i].target_id,9000-state.FrameID))ins[i].buy = -1;
-                }
+                // if(state.FrameID>8500){
+                //     cerr <<"***";
+                //     if(!checkTimeEnough(i,robots[i].target_id,9000-state.FrameID))ins[i].buy = -1;
+                // }
             }
             else{
                 //dosomething sell
