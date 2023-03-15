@@ -67,6 +67,7 @@ struct Robot
     int get_type; // 携带物品类型
     double time_val;
     double collision_val;
+    double collision_val_pre;
     double angular_velocity;
     pair<double, double> xy_pos;
     double direction;
@@ -193,3 +194,13 @@ bool isWall_r(int robID,double angle);
 int special_test(int robID1,int robID2);
 double get_angle_1(double s1,double s2);
 double get_angle_1(pair<double,double> p1,pair<double,double> p2);
+double get_angle(double s1,double s2);
+double get_angle(pair<double,double> p1,pair<double,double> p2);
+bool is_less(int i1,int i2);
+bool who_isFirst(int i1,int i2);
+double return_v(int id);
+int Calculate_root(int i1,int i2);
+bool will_collision(int i1,int i2);
+bool return_collision(int i1,int i2);
+pair<int,int> far_away(int i1,int i2,int base1,int base2);
+double return_maxAng(int id1);
