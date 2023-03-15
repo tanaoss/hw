@@ -348,12 +348,12 @@ bool checkTimeEnough(int robot_id, int target_id, int frame) {
     double time = frame * 0.02;//剩余秒数
     double speed = calVectorSize(robots[robot_id].xy_pos);
     double acceleration = robots[robot_id].get_type == 0? acceleration_no: acceleration_has;
-    if((state.FrameID > 8500 )){
-        cerr<<"FrameID "<<state.FrameID<<endl;
-        cerr<<robot_id<<"-"<<target_id<<endl;
-        cerr<<"dis:"<<dis<<" speed:"<<speed<<endl;
-        cerr<<calNextTimeDistance(speed, time, acceleration)<<endl;
-    }
+    // if((state.FrameID > 8500 )){
+    //     cerr<<"FrameID "<<state.FrameID<<endl;
+    //     cerr<<robot_id<<"-"<<target_id<<endl;
+    //     cerr<<"dis:"<<dis<<" speed:"<<speed<<endl;
+    //     cerr<<calNextTimeDistance(speed, time, acceleration)<<endl;
+    // }
     if(lt(calNextTimeDistance(speed, time, acceleration), dis))
         return false;
         
@@ -677,14 +677,15 @@ if(state.FrameID>=15){
     vector<bool>vis(4,false);
     for(int i=0;i<4;i++){
         int id1=arr[i];
-        bool Flag_line1=can_stop(robots[id1].pos,studios[robots[id1].target_id].pos,payLoad[id1].angle);
+        //bool Flag_line1=lt(fabs(payLoad[id1].angle),0.08)||can_stop(robots[id1].pos,studios[robots[id1].target_id].pos,payLoad[id1].angle);
         double v1=return_v(id1);
-        if(!Flag_line1)continue;
+        
         for(int j=i+1;j<4;j++){
             if(vis[j])continue;
             int id2=arr[j];
             double tmpDis=calcuDis(robots[id1].pos,robots[id2].pos);
-            bool Flag_line2=can_stop(robots[id2].pos,studios[robots[id2].target_id].pos,payLoad[id2].angle);
+            bool Flag_line1=lt(fabs(payLoad[id1].angle),tmpDis/(double)Pi)||can_stop(robots[id1].pos,studios[robots[id1].target_id].pos,payLoad[id1].angle);
+            bool Flag_line2=lt(fabs(payLoad[id1].angle),tmpDis/(double)Pi)||can_stop(robots[id2].pos,studios[robots[id2].target_id].pos,payLoad[id2].angle);
             double v2=return_v(id2);
             int ret_Flg=-2;
             double adjustAng1=(Flag_line1==true?fabs(return_maxAng(id1)):fabs(ins[id1].rotate));
@@ -695,21 +696,40 @@ if(state.FrameID>=15){
             if(ret_Flg==0){
                 continue;
             }
-                if(state.FrameID==2931&&id2==3){
-                    cerr<<id2<<"+"<<(Flag_line2&&Flag_line1)<<" "<<tmpDis<<" "<<ret_Flg<<
-                    " "<<fabs(ins[id2].rotate)<<endl;
-                }
+                // if(state.FrameID==2931&&id2==3){
+                //     cerr<<id2<<"+"<<(Flag_line2&&Flag_line1)<<" "<<tmpDis<<" "<<ret_Flg<<
+                //     " "<<fabs(ins[id2].rotate)<<endl;
+                // }
                 
             // if(state.FrameID==471&&id1==3&&id2==1){
             //     cerr<<tmp.first<<" "<<tmp.second<<endl;
             // }
             if(will_collision(id1,id2)){
                 tmp=far_away(id1,id2,1,1);
-                ins[id2].rotate=adjustAng2*tmp.second;
-                ins[id1].rotate=adjustAng1*tmp.second;
+                if(lt(tmpDis,2)){
+                    ins[id2].rotate=(Pi)*tmp.second;
+                    ins[id1].rotate=(Pi)*tmp.first;
+                    ins[id2].forward=0; 
+                    ins[id2].forward=0;   
+                }else if(lt(tmpDis,5)){
+                    ins[id2].rotate=adjustAng2*tmp.second;
+                    ins[id1].rotate=adjustAng1*tmp.first;
+                }else{
+                    if(robots[id2].get_type==0||robots[id1].get_type==6
+                    ||robots[id1].get_type==7){
+                        ins[id2].rotate=(Pi)*tmp.second;
+                        ins[id2].forward=6;
+                    }else{
+                        ins[id2].rotate=(Pi/2)*tmp.second;
+                        ins[id2].forward=3;   
+                    }
+                    ins[id1].rotate=(Pi/2.0)*tmp.first;
+                }
+                vis[id2]=true;
+                
             }
-        tag1:if(lt(tmpDis,5)&&(robots[id2].get_type==0&&
-        robots[id1].get_type!=0)){
+        tag1:if(lt(tmpDis,2)&&((robots[id2].get_type==0&&
+        robots[id1].get_type!=0))){
             // tmp=far_away(id1,id2,0,1);
             // ins[id2].rotate=(Pi)*tmp.second;
         }
@@ -721,9 +741,11 @@ if(state.FrameID>=15){
 if(state.FrameID>=15){
     cerr<<state.FrameID<<endl;
     for(int i=0;i<4;i++) {
-    
+                double adjustAng1=fabs(return_maxAng(i));
+           bool f= can_stop(robots[i].pos,studios[robots[i].target_id].pos,payLoad[i].angle);
         cerr<<arr[i]<<" "<<ins[arr[i]].forward<<" "<<ins[arr[i]].rotate
-        <<" tar "<<robots[arr[i]].target_id<<endl;
+        <<" tar "<<robots[arr[i]].target_id<<" ang "<<payLoad[i].angle
+        <<" "<<f<<endl;
        
 
     }   
@@ -1377,17 +1399,17 @@ bool will_collision(int i1,int i2){
     Vec v2(robots[i2].xy_pos);
     Vec x1(robots[i1].pos);
     Vec x2(robots[i2].pos);
-    Vec x_t=x1-x2;
+    Vec c_t=x1-x2;
     Vec v_t=v1-v2;
-    double r=1.4;
+    double r=1.5;
     double a=v_t*v_t;
-    double b=2*v_t*x_t;
-    double c=x_t*x_t-r*r;
+    double b=2*(v_t*c_t);
+    double c=c_t*c_t-r*r;
     double cla=b*b-4*a*c;   
     pair<double ,double>tmp(-7,-7);
     if(cla<0)return false;
     if(eq(cla,0)){
-        tmp.first=-1*b/2*a;
+        tmp.first=-1*b/(2*a);
         pair<double,double>pos_tmp_r1=robots[i1].pos;
         pair<double,double>pos_tmp_r_c(pos_tmp_r1.first+robots[i1].xy_pos.first*tmp.first,
         pos_tmp_r1.second+robots[i1].xy_pos.second*tmp.first
@@ -1400,11 +1422,13 @@ bool will_collision(int i1,int i2){
         pair<double,double>pos_tmp_s2=studios[robots[i2].target_id].pos;
         double dis2=calcuDis(pos_tmp_r2,pos_tmp_s2);
         double dis4=calcuDis(pos_tmp_r2,pos_tmp_r_c);
+        if(gt(tmp.first,0.0))
         if(le(dis3,dis1)&&le(dis4,dis2))return true;
         return false;
 
     }else if(gt(cla,0)){
-        tmp.first=(-1*b+sqrt(cla))/2*a;
+        tmp.first=(-1*b+sqrt(cla))/(2*a);
+        tmp.second=(-1*b-sqrt(cla))/(2*a);
         pair<double,double>pos_tmp_r1=robots[i1].pos;
         pair<double,double>pos_tmp_r_c(pos_tmp_r1.first+robots[i1].xy_pos.first*tmp.first,
         pos_tmp_r1.second+robots[i1].xy_pos.second*tmp.first
@@ -1417,20 +1441,36 @@ bool will_collision(int i1,int i2){
         pair<double,double>pos_tmp_s2=studios[robots[i2].target_id].pos;
         double dis2=calcuDis(pos_tmp_r2,pos_tmp_s2);
         double dis4=calcuDis(pos_tmp_r2,pos_tmp_r_c);
+        // if(state.FrameID==1354&&i1==0&&i2==3){
+        //     cerr<<"---\n"<<endl;
+        //     cerr<<robots[i1].pos.first<<"-"<<robots[i1].pos.second<<" "
+        //     <<robots[i2].pos.first<<"-"<<robots[i2].pos.second<<endl;
+        //     cerr<<robots[i1].xy_pos.first<<"-"<<robots[i1].xy_pos.second<<" "
+        //     <<robots[i2].xy_pos.first<<"-"<<robots[i2].xy_pos.second<<endl;
+        //     cerr<<v_t.x<<"-"<<v_t.y<<endl;
+        //     cerr<<c_t.x<<"-"<<c_t.y<<endl;
+        //     cerr<<a<<"-"<<b<<"-"<<c<<" "<<sqrt(cla)<<" "<<(-1*b+sqrt(cla))<<" "<<
+        //     (-1*b+sqrt(cla))/(2*a)<<endl;
+        //     cerr<<tmp.first<<"-"<<tmp.second<<endl;
+        //     cerr<<dis1<<" "<<dis2<<" "<<dis3<<" "<<dis4<<" "<<pos_tmp_r_c.first<<"-"<<pos_tmp_r_c.second<<endl;
+        //     cerr<<"---\n"<<endl;
+        // }
+        if(gt(tmp.first,0.0))
         if(le(dis3,dis1)&&le(dis4,dis2))return true;
 
-        // tmp.second=(-1*b-sqrt(cla))/2*a;
+        tmp.second=(-1*b-sqrt(cla))/(2*a);
         
-        // pair<double,double>pos_tmp_r_c1(pos_tmp_r1.first+robots[i1].xy_pos.first*tmp.second,
-        // pos_tmp_r1.second+robots[i1].xy_pos.second*tmp.second
-        // );
-        // double dis11=calcuDis(pos_tmp_r1,pos_tmp_s1);
-        // double dis31=calcuDis(pos_tmp_r1,pos_tmp_r_c1);
+        pair<double,double>pos_tmp_r_c1(pos_tmp_r1.first+robots[i1].xy_pos.first*tmp.second,
+        pos_tmp_r1.second+robots[i1].xy_pos.second*tmp.second
+        );
+        double dis11=calcuDis(pos_tmp_r1,pos_tmp_s1);
+        double dis31=calcuDis(pos_tmp_r1,pos_tmp_r_c1);
 
 
-        // double dis21=calcuDis(pos_tmp_r2,pos_tmp_s2);
-        // double dis41=calcuDis(pos_tmp_r2,pos_tmp_r_c1);
-        // if(le(dis31,dis11)&&le(dis41,dis21))return true;
+        double dis21=calcuDis(pos_tmp_r2,pos_tmp_s2);
+        double dis41=calcuDis(pos_tmp_r2,pos_tmp_r_c1);
+        if(gt(tmp.second,0.0))
+        if(le(dis31,dis11)&&le(dis41,dis21))return true;
         return false;       
     }
     if(eq(a,0))return true;
@@ -1469,5 +1509,5 @@ pair<int,int> far_away(int i1,int i2,int base1,int base2){
 double return_maxAng(int id1){
     double dis=calcuDis(robots[id1].pos,studios[robots[id1].target_id].pos);
     if(lt(dis,0.4))return Pi;
-    return acos(0.4/dis);
+    return asin(0.4/dis);
 }
