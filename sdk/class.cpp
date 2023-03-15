@@ -659,20 +659,20 @@ void control(vector<PayLoad> payLoad){
 //  cerr<<endl;
 //   cerr<<"---";
 // }
-if(state.FrameID>=15){
-    cerr<<"-----"<<endl;;
-    cerr<<"id:"<<state.FrameID<<endl;
-    for(int i=0;i<4;i++) {
-        int id1=arr[i];
-    int Flag_line1=can_stop(robots[id1].pos,studios[robots[id1].target_id].pos,payLoad[id1].angle);
-        cerr<<arr[i]<<" "<<ins[arr[i]].forward<<" "<<ins[arr[i]].rotate
-        <<" tar "<<robots[arr[i]].target_id<<" "<<Flag_line1<<" "<<
-        payLoad[arr[i]].angle<<" "<<payLoad[arr[i]].sign<<endl;
+// if(state.FrameID>=15){
+//     cerr<<"-----"<<endl;;
+//     cerr<<"id:"<<state.FrameID<<endl;
+//     for(int i=0;i<4;i++) {
+//         int id1=arr[i];
+//     int Flag_line1=can_stop(robots[id1].pos,studios[robots[id1].target_id].pos,payLoad[id1].angle);
+//         cerr<<arr[i]<<" "<<ins[arr[i]].forward<<" "<<ins[arr[i]].rotate
+//         <<" tar "<<robots[arr[i]].target_id<<" "<<Flag_line1<<" "<<
+//         payLoad[arr[i]].angle<<" "<<payLoad[arr[i]].sign<<endl;
        
 
-    }   
+//     }   
       
-}
+// }
     sort(arr.begin(),arr.end(),cmp);
     vector<bool>vis(4,false);
     for(int i=0;i<4;i++){
@@ -739,26 +739,26 @@ if(state.FrameID>=15){
 
         }
     }
-if(state.FrameID>=15){
-    cerr<<state.FrameID<<endl;
-    for(int i=0;i<4;i++) {
-                double adjustAng1=fabs(return_maxAng(i));
-           bool f= can_stop(robots[i].pos,studios[robots[i].target_id].pos,payLoad[i].angle);
-        cerr<<arr[i]<<" "<<ins[arr[i]].forward<<" "<<ins[arr[i]].rotate
-        <<" tar "<<robots[arr[i]].target_id<<" ang "<<payLoad[i].angle
-        <<" "<<f<<endl;
+// if(state.FrameID>=15){
+//     cerr<<state.FrameID<<endl;
+//     for(int i=0;i<4;i++) {
+//                 double adjustAng1=fabs(return_maxAng(i));
+//            bool f= can_stop(robots[i].pos,studios[robots[i].target_id].pos,payLoad[i].angle);
+//         cerr<<arr[i]<<" "<<ins[arr[i]].forward<<" "<<ins[arr[i]].rotate
+//         <<" tar "<<robots[arr[i]].target_id<<" ang "<<payLoad[i].angle
+//         <<" "<<f<<endl;
        
 
-    }   
-    for(int i=0;i<4;i++){
-        for(int j=i+1;j<4;j++){
-            double tmpDis=calcuDis(robots[i].pos,robots[j].pos);
-            cerr<<i<<"-"<<j<<" "<<tmpDis<<" "<<will_collision(i,j)<< " "<<Calculate_root(i,j)
-            <<endl;
-        }
-    }
-    cerr<<"~~~~"<<endl;;     
-}
+//     }   
+    // for(int i=0;i<4;i++){
+    //     for(int j=i+1;j<4;j++){
+    //         double tmpDis=calcuDis(robots[i].pos,robots[j].pos);
+    //         cerr<<i<<"-"<<j<<" "<<tmpDis<<" "<<will_collision(i,j)<< " "<<Calculate_root(i,j)
+    //         <<endl;
+    //     }
+    // }
+    // cerr<<"~~~~"<<endl;;     
+// }
 
   
     out_put();
@@ -1098,10 +1098,10 @@ void robot_judge_sol(int threshold_lack){
                 }
                 ins[i].buy = 1;
                 ins[i].sell = -1;
-                if(state.FrameID>8500){
-                    cerr <<"***";
-                    if(!checkTimeEnough(i,robots[i].target_id,9000-state.FrameID))ins[i].buy = -1;
-                }
+                // if(state.FrameID>8500){
+                //     cerr <<"***";
+                //     if(!checkTimeEnough(i,robots[i].target_id,9000-state.FrameID))ins[i].buy = -1;
+                // }
             }
             else{
                 //dosomething sell
