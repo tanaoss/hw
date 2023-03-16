@@ -342,19 +342,19 @@ bool checkRobortsCollison(int robotA_id, int robotB_id, double k)
     pair<double, double> next_posA = getNextPos(robotA_id);
     pair<double, double> next_posB = getNextPos(robotB_id);
 
-    if ((state.FrameID >= 1555 && state.FrameID <= 1557) && robotA_id == 2 && robotB_id == 3)
-    {
-        cerr << "time" << state.FrameID << endl;
-        cerr << "robot" << robotA_id << " ";
-        printPair(robotA.pos);
-        printPair(next_posA);
-        cerr << "robot" << robotB_id << " ";
-        printPair(robotB.pos);
-        printPair(next_posB);
-        cerr << "dis:" << calcuDis(robotA.pos, robotB.pos) << "**" << calcuDis(next_posA, next_posB) << endl;
-        cerr << "ra+" << getRobotRadius(robotA_id) + getRobotRadius(robotB_id) << endl
-             << endl;
-    }
+    // if ((state.FrameID >= 1555 && state.FrameID <= 1557) && robotA_id == 2 && robotB_id == 3)
+    // {
+    //     cerr << "time" << state.FrameID << endl;
+    //     cerr << "robot" << robotA_id << " ";
+    //     printPair(robotA.pos);
+    //     printPair(next_posA);
+    //     cerr << "robot" << robotB_id << " ";
+    //     printPair(robotB.pos);
+    //     printPair(next_posB);
+    //     cerr << "dis:" << calcuDis(robotA.pos, robotB.pos) << "**" << calcuDis(next_posA, next_posB) << endl;
+    //     cerr << "ra+" << getRobotRadius(robotA_id) + getRobotRadius(robotB_id) << endl
+    //          << endl;
+    // }
 
     return le(calcuDis(next_posA, next_posB), getRobotRadius(robotA_id) + getRobotRadius(robotB_id) + k);
 }
@@ -619,63 +619,59 @@ void control(vector<PayLoad> payLoad){
         if(robots[i1].get_type!=robots[i2].get_type)
         return robots[i1].get_type>robots[i2].get_type;
         else
-            return who_isFirst(i1, i2);
+        return who_isFirst(i1,i2);
     };
-    auto check = [&](int rid) -> bool
-    {
-        double radius = robots[rid].get_type == 0 ? 0.45 : 0.53;
-        double n_x = robots[rid].pos.first + robots[rid].xy_pos.first * time, n_y = robots[rid].pos.second + robots[rid].xy_pos.second * time;
-        if (lt(n_x - radius, 0) || lt(n_y - radius, 0) || gt(n_x + radius, 50) || gt(n_y + radius, 50))
-            return true;
+    auto check=[&](int rid)->bool{
+        double radius=robots[rid].get_type==0? 0.45:0.53;
+        double n_x=robots[rid].pos.first+robots[rid].xy_pos.first*time,n_y=robots[rid].pos.second+robots[rid].xy_pos.second*time;
+        if(lt(n_x-radius,0)||lt(n_y-radius,0)||gt(n_x+radius,50)||gt(n_y+radius,50))
+        return true;
         return false;
-    }; // 判断是否有可能撞墙
+    };//判断是否有可能撞墙
 
-    for (int i = 0; i < 4; i++)
-    {
-        int robID = robots[i].id;
-        ins[i].robID = robots[i].id;
-        int isSame = robots[i].lastSign != 0 ? robots[i].lastSign * payLoad[i].sign : 1;
-        if (isSame == -1)
-        {
-            robots[i].isTurn = -1;
+    for(int i=0;i<4;i++){
+        int robID=robots[i].id;
+        ins[i].robID=robots[i].id;
+        int isSame=robots[i].lastSign!=0?robots[i].lastSign*payLoad[i].sign:1;
+        if(isSame==-1){
+            robots[i].isTurn=-1;
         }
-        int isTurn = robots[i].isTurn;
-        robots[i].lastSign = payLoad[i].sign;
-        double lastRate = fabs(robots[i].lastRate);
-        double Dev_val = robots[i].angular_velocity * robots[i].angular_velocity / 2 * payLoad[i].angular_acceleration;
-        bool can_st = can_stop(robots[i].pos, studios[robots[i].target_id].pos, payLoad[i].angle);
+        int isTurn=robots[i].isTurn;
+        robots[i].lastSign=payLoad[i].sign;
+        double lastRate=fabs(robots[i].lastRate);
+        double Dev_val=robots[i].angular_velocity*robots[i].angular_velocity/2*payLoad[i].angular_acceleration;
+        bool can_st=can_stop(robots[i].pos,studios[robots[i].target_id].pos,payLoad[i].angle);
         // if(state.FrameID>=470&&i==3){
         //     cerr<<"---"<<endl;
         //     cerr<<state.FrameID<<endl;
         //     cerr<<check(robID)<<endl;
         //     cerr<<robots[i].target_id<<" "<<i<<endl;
-        //     cerr<<robots[i].collision_val<<"-"<<i<<" "<<robots[i].pos.first<<" "<<robots[i].pos.second<<endl;
+        //     cerr<<robots[i].collision_val<<"-"<<i<<" "<<robots[i].pos.first<<" "<<robots[i].pos.second<<endl; 
         //     cerr<<" "<<robots[i].xy_pos.first<<" "<<robots[i].xy_pos.second<<endl;
         //     cerr<<can_st<<" angle "<<"--"<<payLoad[i].angle<<"--"<<payLoad[i].sign<<
         //     " direction "<<robots[i].direction <<endl;
         //     cerr<<return_cal(robots[i].pos,studios[robots[i].target_id].pos,fabs(payLoad[i].angle))<<endl;
-
+            
         //     cerr<<"tar pos"<<studios[robots[i].target_id].pos.first<<" "<<studios[robots[i].target_id].pos.second<<endl;
         //     cerr<<"rob pos"<<robots[i].pos.first<<" "<<robots[i].pos.second<<endl;
-        //     cerr<<"---"<<endl;
+        //     cerr<<"---"<<endl; 
         // }
         // if(state.FrameID>=610&&robots[i].collision_val!=0&&lt(robots[i].collision_val,1)&&i==3){
         //     // cerr<<"~~~~~"<<endl;
         //     // cerr<<state.FrameID<<endl;
         //     // cerr<<robots[i].collision_val<<"-"<<i<<" "<<robots[i].pos.first<<" "<<robots[i].pos.second<<endl;
         //     // cerr<<"~~~~~"<<endl;
-
+            
         // }
-        vector<double> tmp = get_T_limits(robots[i].pos, i);
-        if (!eq(tmp[0], -7) && (!is_range(robots[i].direction, tmp)))
-        {
+        vector<double> tmp=get_T_limits(robots[i].pos,i);
+        if(!eq(tmp[0],-7)&&(!is_range(robots[i].direction,tmp))){
             // if(i==2)
             // cerr<<"~"<<payLoad[i].angle<<" "<<robots[i].direction<<" "<<robots[i].lastRate
             // <<"~"<<robots[i].target_id<<endl;
 
-            ins[i].rotate = ((isSame == 1) ? Pi * payLoad[i].sign : max(0.5, Dec_val_ra * lastRate) * payLoad[i].sign);
-            // robots[i].lastRate=ins[i].rotate;
-            ins[i].forward = 0;
+            ins[i].rotate=((isSame==1)?Pi*payLoad[i].sign:max(0.5,Dec_val_ra*lastRate)*payLoad[i].sign);
+            robots[i].lastRate=ins[i].rotate;
+            ins[i].forward=0;
             continue;
         }
       
@@ -776,7 +772,7 @@ void control(vector<PayLoad> payLoad){
 
 //     }   
       
-// }
+    //}
     sort(arr.begin(),arr.end(),cmp);
     vector<bool>vis(4,false);
     for(int i=0;i<4;i++){
@@ -1308,8 +1304,8 @@ void robot_action(){
         if(robots[i].get_type != 0)robot_get_type[robots[i].get_type]++;
         else if(robots[i].target_id != -1)robot_get_type[studios[robots[i].target_id].type]++;
     }
-    // for(int i =0;i<=7;i++)cerr<<"type "<<i<<" has "<<robot_get_type[i];
-    //  cerr <<endl;
+    //for(int i =0;i<=7;i++)cerr<<"type "<<i<<" has "<<robot_get_type[i];
+    // cerr <<endl;
     int full = 0;
     if(judge_full(2,0.08))full = 1;   //4,5,6 full threshold
     if(judge_full(3,0.3))full = 2;   //7 full threshold Higher priority
@@ -1318,198 +1314,154 @@ void robot_action(){
     robot_judge_sol(4.5);
 }
 
-vector<double> get_T_limits(pair<double, double> pos, int id, int ctr, double dis)
-{
-    double radius = robots[id].get_type == 0 ? 0.45 : 0.53;
-    double tmpA = robots[id].direction;
-    double x_t = robots[id].pos.first + dis * cos(tmpA), y_t = robots[id].pos.second + dis * sin(tmpA);
-    if (x_t < 0 || x_t > 50 || y_t < 0 || y_t > 50)
-    {
-        dis = 50;
+vector<double>  get_T_limits(pair<double,double>pos,int id,int ctr,double dis){
+    double radius=robots[id].get_type==0? 0.45:0.53;
+    double tmpA=robots[id].direction;
+    double x_t=robots[id].pos.first+dis*cos(tmpA),y_t=robots[id].pos.second+dis*sin(tmpA);
+    if(x_t<0||x_t>50||y_t<0||y_t>50){
+        dis=50;
+    }else{
+        dis=0.0;
     }
-    else
-    {
-        dis = 0.0;
-    }
-    vector<double> tmp{-7, -7};
-    double redundancy = (ctr == -1 ? 0.2 : dis) + radius; // 冗余，避免频繁转向
-    if (gt(pos.first - redundancy, 0) && lt(pos.second - redundancy, 0))
-    { // 只靠近下方x轴
-        tmp[0] = 0;
-        tmp[1] = Pi;
-    }
-    else if (lt(pos.first - redundancy, 0) && lt(pos.second - redundancy, 0))
-    { // 靠近原点
-        tmp[0] = 0;
-        tmp[1] = Pi / 2;
-    }
-    else if (lt(pos.first - redundancy, 0) && gt(pos.second - redundancy, 0))
-    { // 只靠近左方的y轴
-        tmp[0] = -Pi / 2;
-        tmp[1] = Pi / 2;
-    }
-    else if (lt(pos.first - redundancy, 0) && gt(pos.second + redundancy, 50))
-    { // 靠近左上角
-        tmp[0] = -Pi / 2;
-        tmp[1] = 0;
-    }
-    else if (gt(pos.first - redundancy, 0) && gt(pos.second + redundancy, 50))
-    { ////靠近上方的x轴
-
-        tmp[0] = -Pi;
-        tmp[1] = 0;
-    }
-    else if (gt(pos.first + redundancy, 50) && gt(pos.second + redundancy, 50))
-    { // 靠近右上角
-        tmp[0] = -Pi;
-        tmp[1] = -Pi / 2;
-    }
-    else if (gt(pos.first + redundancy, 50) && gt(pos.second - redundancy, 0))
-    { // 靠近右边的y轴
-        tmp[0] = Pi / 2;
-        tmp[1] = Pi;
+    vector<double> tmp{-7,-7};
+    double redundancy= (ctr==-1?0.2:dis)+radius;//冗余，避免频繁转向
+    if(gt(pos.first-redundancy,0)&&lt(pos.second-redundancy,0)){//只靠近下方x轴
+        tmp[0]=0;
+        tmp[1]=Pi;
+    }else if(lt(pos.first-redundancy,0)&&lt(pos.second-redundancy,0)){//靠近原点
+        tmp[0]=0; 
+        tmp[1]=Pi/2;
+    }else if(lt(pos.first-redundancy,0)&&gt(pos.second-redundancy,0)){//只靠近左方的y轴
+        tmp[0]=-Pi/2;
+        tmp[1]=Pi/2;
+    }else if(lt(pos.first-redundancy,0)&&gt(pos.second+redundancy,50)){//靠近左上角
+        tmp[0]=-Pi/2;
+        tmp[1]=0;
+    }else if(gt(pos.first-redundancy,0)&&gt(pos.second+redundancy,50)){////靠近上方的x轴
+    
+        tmp[0]=-Pi;
+        tmp[1]=0;
+    }else if(gt(pos.first+redundancy,50)&&gt(pos.second+redundancy,50)){//靠近右上角
+        tmp[0]=-Pi;
+        tmp[1]=-Pi/2;
+    }else if(gt(pos.first+redundancy,50)&&gt(pos.second-redundancy,0)){//靠近右边的y轴
+        tmp[0]=Pi/2;
+        tmp[1]=Pi;
         tmp.push_back(-Pi);
-        tmp.push_back(-Pi / 2);
-    }
-    else if (gt(pos.first + redundancy, 50) && lt(pos.second - redundancy, 0))
-    { // 靠近右下角
-        tmp[0] = Pi / 2;
-        tmp[1] = Pi;
+        tmp.push_back(-Pi/2);
+    }else if(gt(pos.first+redundancy,50)&&lt(pos.second-redundancy,0)){//靠近右下角
+        tmp[0]=Pi/2;
+        tmp[1]=Pi;
     }
     return tmp;
 }
-bool can_stop(pair<double, double> p1, pair<double, double> p2, double angle)
-{
-    if (gt(angle, Pi / 2))
-        return false;
-    double dis = calcuDis(p1, p2);
-    if (lt(sin(angle) * dis, 0.4))
-    {
+bool can_stop(pair<double,double>p1,pair<double,double>p2,double angle){
+    if(gt(angle,Pi/2))return false;
+    double dis=calcuDis(p1,p2);
+    if(lt(sin(angle)*dis,0.4)){
         return true;
     }
     return false;
+
 }
-double return_cal(pair<double, double> p1, pair<double, double> p2, double angle)
-{
-    double dis = calcuDis(p1, p2);
+double return_cal(pair<double,double>p1,pair<double,double>p2,double angle){
+    double dis=calcuDis(p1,p2);
     // cerr<<dis<<"--"<<sin(angle)*dis<<endl;
-    return sin(angle) * dis - 0.4;
+    return sin(angle)*dis-0.4;
 }
-bool is_range(double dire, vector<double> &tmp)
-{
-    if (tmp.size() == 2)
-    {
-        if (ge(dire, tmp[0]) && le(dire, tmp[1]))
-        {
+bool is_range(double dire,vector<double>&tmp){
+    if(tmp.size()==2){
+        if(ge(dire,tmp[0])&&le(dire,tmp[1])){
             return true;
-        }
-        else
-        {
+        }else{
             return false;
         }
-    }
-    else
-    {
-        if ((ge(dire, tmp[0]) && le(dire, tmp[1])) ||
-            (ge(dire, tmp[2]) && le(dire, tmp[3])))
-        {
+    }else{
+        if((ge(dire,tmp[0])&&le(dire,tmp[1]))||
+        (ge(dire,tmp[2])&&le(dire,tmp[3]))){
             return true;
-        }
-        else
-        {
+        }else{
             return false;
-        }
+        } 
     }
+    
 }
-double get_dis(pair<double, double> P, Line l)
-{
-    auto get_v = [&](pair<double, double> P, pair<double, double> v) -> double
-    {
-        return P.first * v.second - v.first * P.second;
+double get_dis(pair<double, double> P, Line l) { 
+    auto get_v=[&](pair<double, double> P,pair<double, double> v)->double{
+        return P.first*v.second-v.first*P.second;
     };
-    double distance = abs(get_v(P, l.v) - get_v(l.P, l.v)) / (sqrt(l.v.first * l.v.first +
-                                                                   l.v.second * l.v.second));
-    return distance;
+    double distance=abs(get_v(P,l.v)-get_v(l.P,l.v))/(sqrt(l.v.first * l.v.first  + 
+    l.v.second* l.v.second));
+    return distance; 
 }
-bool can_speed_z(int stuID, pair<double, double> xy_pos, pair<double, double> pos, double acceleration)
-{
+bool can_speed_z(int stuID,pair<double,double>xy_pos,pair<double,double>pos,double acceleration ){
     Line line;
-    line.v = xy_pos;
-    line.P = pos;
-    double totalV = sqrt(xy_pos.first * xy_pos.first + xy_pos.second * xy_pos.second); // 合速度
-    double dis1 = get_dis(studios[stuID].pos, line);                                   // 点到直线的距离
-    double dis2 = calcuDis(studios[stuID].pos, pos);                                   // 点之间的距离
-    double dis3 = totalV * totalV / (2 * acceleration);                                // 速度减为0的滑行距离
-    double dis4 = sqrt(0.4 * 0.4 - dis1 * dis1);                                       // 圆截线的长度
-    double dis5 = sqrt(dis2 * dis2 - dis1 * dis1);                                     // 射线的长度
-    // cerr<<stuID<<" "<<dis3<<" "<<dis4<<" "<<dis5<<" "<<dis1<<endl;
-    if (gt(dis3, dis5 - dis4))
-        return true;
+    line.v=xy_pos;
+    line.P=pos;
+    double totalV=sqrt(xy_pos.first*xy_pos.first+xy_pos.second*xy_pos.second);//合速度
+    double dis1=get_dis(studios[stuID].pos,line);//点到直线的距离
+    double dis2=calcuDis(studios[stuID].pos,pos);//点之间的距离
+    double dis3=totalV*totalV/(2*acceleration);//速度减为0的滑行距离
+    double dis4=sqrt(0.4*0.4-dis1*dis1);//圆截线的长度
+    double dis5=sqrt(dis2*dis2-dis1*dis1);//射线的长度
+    //cerr<<stuID<<" "<<dis3<<" "<<dis4<<" "<<dis5<<" "<<dis1<<endl;
+    if(gt(dis3,dis5-dis4))return true;
     return false;
 }
-bool isWall(int stuID)
-{
-    int i = studios[stuID].pos.first;
-    int j = studios[stuID].pos.second;
-    if (i - 1 <= 0 || j - 2 <= 0 || i + 2 >= 50 || j + 2 >= 50)
-        return true;
+bool isWall(int stuID){
+    int i=studios[stuID].pos.first;
+    int j=studios[stuID].pos.second;
+    if(i-1<=0||j-2<=0||i+2>=50||j+2>=50)return true;
     return false;
 }
-bool isWall_r(int robID, double angle)
-{
-    if (lt(angle, (double)Pi / 6.0))
-        return false;
-    int i = robots[robID].pos.first;
-    int j = robots[robID].pos.second;
-    if (i - 1 <= 0 || j - 2 <= 0 || i + 2 >= 50 || j + 2 >= 50)
-        return true;
-    return false;
+bool isWall_r(int robID,double angle){
+    if(lt(angle,(double)Pi/6.0))return false;
+    int i=robots[robID].pos.first;
+    int j=robots[robID].pos.second;
+    if(i-1<=0||j-2<=0||i+2>=50||j+2>=50)return true;
+    return false;   
 }
-bool will_impact(int robID, double dis)
-{
-    vector<double> tmp = get_T_limits(robots[robID].pos, robID, 1, dis);
+bool will_impact(int robID,double dis){
+    vector<double> tmp=get_T_limits(robots[robID].pos,robID,1,dis);
     // if(state.FrameID>=610 &&robID==3){
     // //     cerr<<state.FrameID<<endl;
     // //     cerr<<"__"<<is_range(robots[robID].direction,tmp)<<" "<<(fabs(robots[robID].xy_pos.first)>1||fabs(robots[robID].xy_pos.second)>1)<<endl;
     // // cerr<<tmp[0]<<" "<<tmp[1]<<endl;
     // // cerr<<robots[robID].direction<<endl;
-
+    
     // }
-    if (!eq(tmp[0], -7) && (!is_range(robots[robID].direction, tmp)))
-    { // 在墙附件，并且会撞上
+    if(!eq(tmp[0],-7)&&(!is_range(robots[robID].direction,tmp)))
+    {//在墙附件，并且会撞上
         return true;
     }
     return false;
 }
-int special_test(int i1, int i2)
-{
-    int cnt = 5;
-    int base = 0.02;
-    double radius = robots[i1].get_type == 0 ? 0.45 : 0.53;
-    for (int i = 1; i <= cnt; i++)
-    {
-        double time = i * base;
-        auto p1 = make_pair<double, double>(robots[i1].pos.first + robots[i1].xy_pos.first * time,
-                                            robots[i1].pos.second + robots[i1].xy_pos.second * time);
-        auto p2 = make_pair<double, double>(robots[i2].pos.first + robots[i2].xy_pos.first * time,
-                                            robots[i2].pos.second + robots[i2].xy_pos.second * time);
-        double dis = calcuDis(p1, p2);
-        if (lt(dis, radius * 2))
-            return i;
+int special_test(int i1,int i2){
+    int cnt=5;
+    int base=0.02;
+    double radius=robots[i1].get_type==0? 0.45:0.53;
+    for(int i=1;i<=cnt;i++){
+        double time=i*base;
+        auto p1=make_pair<double,double>(robots[i1].pos.first+robots[i1].xy_pos.first*time,
+        robots[i1].pos.second+robots[i1].xy_pos.second*time
+        );
+        auto p2=make_pair<double,double>(robots[i2].pos.first+robots[i2].xy_pos.first*time,
+        robots[i2].pos.second+robots[i2].xy_pos.second*time
+        );
+        double dis=calcuDis(p1,p2);   
+        if(lt(dis,radius*2))return i;     
     }
     return 0;
 }
-double get_angle(double s1, double s2)
-{
-    Vec v1(make_pair<double, double>(cos(s1), sin(s1)));
-    Vec v2(make_pair<double, double>(cos(s2), sin(s2)));
-    return (cos_t(v1, v2));
+double get_angle(double s1,double s2){
+    Vec v1(make_pair<double ,double>(cos(s1),sin(s1)));
+    Vec v2(make_pair<double ,double>(cos(s2),sin(s2)));
+    return (cos_t(v1,v2));
 }
-double get_angle(pair<double, double> p1, pair<double, double> p2)
-{
+double get_angle(pair<double,double> p1,pair<double,double> p2){
     Vec v1(p1);
     Vec v2(p2);
-    return cos_t(v1, v2);
+    return cos_t(v1,v2);
 }
 double get_angle_1(double s1,double s2){
     Vec v1(make_pair<double ,double>(cos(s1),sin(s1)));
@@ -1542,8 +1494,7 @@ bool is_less(int i1,int i2){
     
         return lt(dis,dis1);
 }
-bool who_isFirst(int i1, int i2)
-{
+bool who_isFirst(int i1,int i2){
     pair<double, double> p1 = subVector(robots[i1].pos, robots[i2].pos);
     double s1=robots[i1].direction;
     pair<double, double> p2=make_pair<double ,double>(cos(s1),sin(s1));
