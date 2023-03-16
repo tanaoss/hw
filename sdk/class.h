@@ -203,3 +203,4 @@ bool will_collision(int i1,int i2);
 bool return_collision(int i1,int i2);
 pair<int,int> far_away(int i1,int i2,int base1,int base2);
 double return_maxAng(int id1);
+bool Check_for_balls_around(int i);
