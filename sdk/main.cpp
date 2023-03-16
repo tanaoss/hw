@@ -8,7 +8,7 @@ extern vector<vector<double>> dis;
 extern vector<Studio> studios;
 extern vector<Robot> robots;
 extern State state;//当前帧数，全局可见
-
+extern vector<PayLoad> pl_g;;
 
 int main()
 {
@@ -30,8 +30,9 @@ int main()
         else robot_action();
         payloads.clear();
         for(int i=0;i<4;++i){
-            payloads.push_back(calPayload(i));
+            payloads.push_back(calPayload(i,robots[i].target_id));
         }
+        pl_g=payloads;
         control(payloads);
         // int lineSpeed = 3;
         // double angleSpeed = 1.5;

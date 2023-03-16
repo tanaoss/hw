@@ -166,7 +166,7 @@ void control(vector<PayLoad> payLoad); // 控制球体运行
 void first_pick_point();
 void robot_action();
 void process();
-PayLoad calPayload(int robortID);                                                              // 计算机器人与目标之间的夹角、距离等信息
+PayLoad calPayload(int robortID,int studioID);                                                              // 计算机器人与目标之间的夹角、距离等信息
 vector<double> get_T_limits(pair<double, double> pos, int id, int ctr = -1, double dis = 0.0); // 靠近墙体时，需要把方向转到那个范围才能加速
 pair<double, double> subVector(pair<double, double> a, pair<double, double> b);                // 向量减（a-b）
 double calVectorProduct(pair<double, double> a, pair<double, double> b);                       // 向量乘
@@ -215,4 +215,4 @@ bool will_collision(int i1,int i2);
 bool return_collision(int i1,int i2);
 pair<int,int> far_away(int i1,int i2,int base1,int base2);
 double return_maxAng(int id1);
-pair<double,double> Detection_of_torsion_angle(int i1,int i2,int base1,int base2);
+bool Check_for_balls_around(int i);
