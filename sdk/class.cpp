@@ -990,14 +990,15 @@ void first_action(){
     pair <int,double> p;
     pair <int,double> f;
     for(i = 0; i < robots.size(); i++){
-        robots[i].target_id = pick_point(i, 1).first;
+        robots[i].target_id = pick_point(i, 2).first;
     }
     for(i = 0; i < robots.size(); i++)
     {
         for(j = i + 1; j < robots.size(); j++){
             if(robots[i].target_id == robots[j].target_id){
-                p = pick_point(i,1);
-                f = pick_point(j,1);
+                studios[robots[i].target_id].r_id = i;
+                p = pick_point(i,2);
+                f = pick_point(j,2);
                 if(gt(p.second,f.second)){
                     studios[robots[i].target_id].r_id = i;
                     robots[j].target_id = f.first;
@@ -1009,7 +1010,7 @@ void first_action(){
                 }
             }
         }
-        //studios[robots[i].target_id].r_id = i;
+        studios[robots[i].target_id].r_id = i;
         //cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
     }
 }
