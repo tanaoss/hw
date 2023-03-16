@@ -707,41 +707,23 @@ if(state.FrameID>=15){
             // }
             if(will_collision(id1,id2)){
                 tmp=far_away(id1,id2,1,1);
-                auto tmp_angle=Detection_of_torsion_angle(id1,id2,1,1);
-                if(lt(tmpDis,2)){
-                    ins[id2].rotate=tmp_angle.second;
-                    ins[id1].rotate=tmp_angle.first;
-                    ins[id2].forward/=max(1.0,fabs(ins[id2].rotate)/2); 
-                    ins[id1].forward/=max(1.0,fabs(ins[id1].rotate)/2);   
-                    robots[id1].isTurn=0;
-                    robots[id2].isTurn=0;
-                }else if(lt(tmpDis,3)){
-                    ins[id2].rotate=tmp_angle.second;
-                    ins[id1].rotate=tmp_angle.first;
-                    ins[id2].forward/=max(1.0,fabs(ins[id2].rotate)/2); 
-                    ins[id1].forward/=max(1.0,fabs(ins[id1].rotate)/2);  
-                    robots[id1].isTurn=0;
-                    robots[id2].isTurn=0;
+                if(lt(tmpDis,2)&&(gt(max(v1,v2),3.0))){
+                    ins[id2].rotate=(Pi)*tmp.second;
+                    ins[id1].rotate=(Pi)*tmp.first;
+                    ins[id2].forward=0; 
+                    ins[id1].forward=0;   
                 }else if(lt(tmpDis,5)){
-                    // ins[id2].rotate=max(fabs(ins[id2].rotate),min(fabs(adjustAng2),fabs(tmp_angle.first)))*tmp.second;
-                    // ins[id1].rotate=max(fabs(ins[id1].rotate),min(fabs(adjustAng1),fabs(tmp_angle.second)))*tmp.first;
-                    ins[id2].forward/=max(1.0,fabs(ins[id2].rotate)/2); 
-                    ins[id1].forward/=max(1.0,fabs(ins[id1].rotate)/2);  
-                    robots[id1].isTurn=0;
-                    robots[id2].isTurn=0;
+                    ins[id2].rotate=max(fabs(ins[id2].rotate),fabs(adjustAng2))*tmp.second;
+                    ins[id1].rotate=max(fabs(ins[id1].rotate),fabs(adjustAng1))*tmp.second;;
                 }else{
                     if(robots[id2].get_type==0){
-                        
-                        ins[id2].rotate=tmp_angle.second;
+                        ins[id2].rotate=(Pi)*tmp.second;
                         ins[id2].forward=6;
                     }else{
-                       
-                        ins[id2].rotate=max(fabs(ins[id2].rotate),fabs(tmp_angle.second))*tmp.second;
+                        ins[id2].rotate=max(fabs(ins[id2].rotate),fabs(Pi/2))*tmp.second;
                           
                     }
-                    ins[id1].rotate=max(fabs(ins[id1].rotate),fabs(tmp_angle.first))*tmp.first;
-                    robots[id1].isTurn=0;
-                    robots[id2].isTurn=0;
+                    ins[id1].rotate=max(fabs(ins[id1].rotate),fabs(Pi/2))*tmp.first;
                 }
                 vis[id2]=true;
                 
@@ -1501,18 +1483,18 @@ bool return_collision(int i1,int i2){
 }
 pair<int,int> far_away(int i1,int i2,int base1,int base2){
     int arr[][2]{{-1*base1,1*base2},{1*base1,1*base2},{-1*base1,-1*base2},{1*base1,-1*base2}};
-    double time=0.2;
+    double time=0.02;
     pair<int,int>tmp(0,0);
     double mmax=0.0;
     int pos=0;
     for(int i=0;i<4;i++){
-        Vec v1(make_pair<double ,double>(cos(Pi*arr[i][0]),sin(Pi*arr[i][0])));
-        Vec v2(make_pair<double ,double>(cos(Pi*arr[i][1]),sin(Pi*arr[i][1])));
-        auto p1=make_pair<double,double>(robots[i1].pos.first+(robots[i1].xy_pos.first+(time*v1.x))*time,
-        robots[i1].pos.second+(robots[i1].xy_pos.second+(time*v1.y))*time
+        Vec v1(make_pair<double ,double>(cos(Pi),sin(Pi)));
+        Vec v2(make_pair<double ,double>(cos(Pi),sin(Pi)));
+        auto p1=make_pair<double,double>(robots[i1].pos.first+(robots[i1].xy_pos.first+(time*v1.x*arr[i][0]))*time,
+        robots[i1].pos.second+(robots[i1].xy_pos.second+(time*v1.y*arr[i][0]))*time
         );
-        auto p2=make_pair<double,double>(robots[i2].pos.first+(robots[i2].xy_pos.first+(time*v2.x))*time,
-        robots[i2].pos.second+(robots[i2].xy_pos.second+(time*v2.y))*time
+        auto p2=make_pair<double,double>(robots[i2].pos.first+(robots[i2].xy_pos.first+(time*v2.x*arr[i][1]))*time,
+        robots[i2].pos.second+(robots[i2].xy_pos.second+(time*v2.y*arr[i][1]))*time
         );
         double dis=calcuDis(p1,p2);   
         if(state.FrameID==798&&i1==0&&i2==2){
@@ -1550,13 +1532,13 @@ pair<double,double> Detection_of_torsion_angle(int i1,int i2,int base1,int base2
                 i=1;
                 break;
         }
-        Vec v1(make_pair<double ,double>(cos(((double)Pi/i)*tmp.first),sin(((double)Pi/i)*tmp.first)));
-        Vec v2(make_pair<double ,double>(cos(((double)Pi/i)*tmp.second),sin(((double)Pi/i)*tmp.second)));
-        robots[i1].xy_pos=make_pair<double,double>((robots[i1].xy_pos.first+(time*v1.x)),
-        (robots[i1].xy_pos.second+(time*v1.y))
+        Vec v1(make_pair<double ,double>(cos(((double)Pi/i)),sin(((double)Pi/i))));
+        Vec v2(make_pair<double ,double>(cos(((double)Pi/i)),sin(((double)Pi/i)*tmp.second)));
+        robots[i1].xy_pos=make_pair<double,double>((robots[i1].xy_pos.first+(time*v1.x*tmp.first)),
+        (robots[i1].xy_pos.second+(time*v1.y)*tmp.first)
         );
-        robots[i2].xy_pos=make_pair<double,double>((robots[i2].xy_pos.first+(time*v2.x)),
-        (robots[i2].xy_pos.second+(time*v2.y))
+        robots[i2].xy_pos=make_pair<double,double>((robots[i2].xy_pos.first+(time*v2.x*tmp.second)),
+        (robots[i2].xy_pos.second+(time*v2.y*tmp.second))
         );
         if(!will_collision(i1,i2)){
             break;
