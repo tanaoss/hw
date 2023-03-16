@@ -313,15 +313,27 @@ double getRobotRadius(int robort_id) {
 }
 
 
-bool checkRobortsCollison(int robotA_id, int robotB_id) {
+bool checkRobortsCollison(int robotA_id, int robotB_id, double k) {
     Robot robotA = robots[robotA_id];
-    Robot robortB = robots[robotB_id];
-    // if(state.FrameID >= 6318 && robotA_id == 2 && robotB_id == 3) {
-    //     cerr<<"time:"<<state.FrameID<<endl;
-    //     cerr<< getRobotRadius(robotA_id) + getRobotRadius(robotB_id) <<endl;
-    //     cerr<<"dis:"<<calcuDis(robotA.pos, robortB.pos)<<endl;
+    Robot robotB = robots[robotB_id];
+    pair<double, double> next_posA = getNextPos(robotA_id);
+    pair<double, double> next_posB = getNextPos(robotB_id);
+
+    // if ((state.FrameID >= 1555 && state.FrameID <= 1557) && robotA_id == 2 && robotB_id == 3)
+    // {
+    //     cerr << "time" << state.FrameID << endl;
+    //     cerr << "robot" << robotA_id << " ";
+    //     printPair(robotA.pos);
+    //     printPair(next_posA);
+    //     cerr << "robot" << robotB_id << " ";
+    //     printPair(robotB.pos);
+    //     printPair(next_posB);
+    //     cerr << "dis:" << calcuDis(robotA.pos, robotB.pos) << "**" << calcuDis(next_posA, next_posB) << endl;
+    //     cerr << "ra+" << getRobotRadius(robotA_id) + getRobotRadius(robotB_id) << endl
+    //          << endl;
     // }
-    return ge(getRobotRadius(robotA_id) + getRobotRadius(robotB_id), calcuDis(robotA.pos, robortB.pos));
+
+    return le(calcuDis(next_posA, next_posB), getRobotRadius(robotA_id) + getRobotRadius(robotB_id) + k);
 }
 
 bool checkRobortsCollison(int robotA_id, pair<double, double> next_pos, int robotB_id) {
@@ -377,26 +389,31 @@ bool checkEnough(int robot_id, int target_id, int frame)
 }
 
 pair<double, double> transformVector(double direction) {
-    direction = gt(direction, 0)? direction: Pi - direction;
+    direction = gt(direction, 0)? direction: Pi * 2 + direction;
     return make_pair(cos(direction), sin(direction));
 }
 
-pair<double, double> getNextSpeed(double direction, pair<double, double> speed) {
-    direction = gt(direction, 0)? direction: Pi - direction;
+pair<double, double> getNextSpeed(double direction, pair<double, double> speed)
+{
+    direction = gt(direction, 0) ? direction : 2 * Pi + direction;
     double val = calVectorSize(speed);
     return make_pair(cos(direction) * val, sin(direction) * val);
 }
 
-pair<double, double> getNextPos(int robot_id) {
-    return addVector(robots[robot_id].pos, calVectorProduct(robots[robot_id].pos, 0.02));
+pair<double, double> getNextPos(int robot_id)
+{
+    return addVector(robots[robot_id].pos, calVectorProduct(robots[robot_id].xy_pos, 0.02));
 }
 
-pair<double, double> getNextPos(pair<double, double> pos, pair<double, double> speed) {
+pair<double, double> getNextPos(pair<double, double> pos, pair<double, double> speed)
+{
     return addVector(pos, calVectorProduct(speed, 0.02));
 }
 
-pair<double, double> getNextTimePos(int time, pair<double, double> pos, pair<double, double> speed, double direction, double angular_velocity) {
-    while(time--) {
+pair<double, double> getNextTimePos(int time, pair<double, double> pos, pair<double, double> speed, double direction, double angular_velocity)
+{
+    while (time--)
+    {
         pos = getNextPos(pos, speed);
         speed = getNextSpeed(direction, speed);
         direction = direction + angular_velocity * 0.02;
@@ -404,107 +421,157 @@ pair<double, double> getNextTimePos(int time, pair<double, double> pos, pair<dou
     return pos;
 }
 
-
-void predictCollision(int a, int b) {
-    Robot robotA = robots[a];
-    Robot robotB = robots[b];
-
-    if(robotA.target_id == 0 && robotB.target_id == 0)
-        return;
-    
-    // LLine lineA = LLine(robotA.pos, studios[robotA.target_id].pos);
-    // LLine lineB = LLine(robotB.pos, studios[robotB.target_id].pos);
-    // pair<int,Point> corss = lineA&lineB;
-    // int stopID = robots[a] < robots[b] ? a: b;
-    // int goID = robots[a] < robots[b] ? a: b;
-    // if(corss.first == 0 | corss.first == 1) {
-    //     if(checkRobortsCollison(a, b)){
-            
-//     }
-// }
-    // else {
-    //     // if(robotA.target_id != robotB.target_id)
-    // }
-}
-
-void getAvoidDirection(int goID, int stopID) {
-    double angle1 = calAngle(subVector(robots[stopID].pos , robots[goID].pos));
-    double angle2 = ge(robots[goID].direction, 0.0) ? robots[goID].direction: 2 * Pi + robots[goID].direction;
+bool getAvoidDirection(int goID, int stopID)
+{
+    double angle1 = calAngle(subVector(robots[stopID].pos, robots[goID].pos));
+    double angle2 = ge(robots[goID].direction, 0.0) ? robots[goID].direction : 2 * Pi + robots[goID].direction;
     double angle3 = angle2 - angle1;
 
     double included_angle = fabs(angle3);
-    included_angle = gt(angle3, Pi)? 2 * Pi - angle3: angle3;
+    included_angle = gt(angle3, Pi) ? 2 * Pi - angle3 : angle3;
 
-    //如果stopID-goID方向与goTD前进方向是锐角，go旋转
-    if(lt(fabs(included_angle), Pi / 2)){
-        if(ge(angle3, 0) && lt(angle3, Pi) || lt(angle3, -Pi))
+    if (state.FrameID == 965)
+        cerr << "angle" << included_angle << "angle3:" << angle3 << endl;
+
+    // 如果stopID-goID方向与goTD前进方向是锐角，go旋转
+    if (lt(fabs(included_angle), Pi / 2))
+    {
+        if (ge(angle3, 0) && lt(angle3, Pi) || lt(angle3, -Pi))
             ins[goID].rotate = Pi;
         else
             ins[goID].rotate = -Pi;
+        // if(lt(included_angle, robots[goID].angular_velocity * 0.05)) {
+        //     ins[goID].rotate = gt(robots[goID].angular_velocity, 0)? Pi: -Pi;
+        // }
+        return true;
     }
+    return false;
 }
 
+bool isAcuteAngle(pair<double, double> a, pair<double, double> b)
+{
+    return gt(calVectorProduct(a, b), 0);
+}
 
-void solveRobortsCollision() {
+bool isAcuteAngle(pair<double, double> a, double x)
+{
+    return gt(calVectorProduct(a, make_pair(cos(x), sin(x))), 0);
+}
+
+void printPair(pair<double,double> a) {
+    cerr<<"pos:("<<a.first<<", "<<a.second<<")"<<endl;
+}
+
+void printRobotInfo(int i)
+{
+    Robot r = robots[i];
+
+    cerr << "id:" << r.id << " dir:" << r.direction
+         << "speed:" << calVectorSize(r.xy_pos)
+         << "/n cv:" << r.collision_val << " tv:" << r.time_val;
+    printPair(r.pos);
+    printPair(r.xy_pos);
+}
+
+void solveRobortsCollision()
+{
     int stopID, goID;
-    pair<double, double> next_pos;
-    for(int i = 0; i < 4; i++) {
-        for(int j = i + 1; j < 4; j++) {
-            if(checkRobortsCollison(i, j)) {
+    double speed_go, speed_stop;
+    bool flag_go, flag_stop;
 
-                if(robots[i].get_type == 0 & robots[j].get_type == 0)
+    for (int i = 0; i < 4; i++)
+    {
+        for (int j = i + 1; j < 4; j++)
+        {
+            if (checkIsTrySeparate(i, j))
+                continue;
+
+            stopID = robots[i] < robots[j] ? i : j;
+            goID = robots[i] < robots[j] ? j : i;
+            speed_go = calVectorSize(robots[goID].xy_pos);
+            speed_stop = calVectorSize(robots[stopID].xy_pos);
+
+            double angle = fabs(robots[i].direction - robots[j].direction);
+            angle = gt(angle, Pi) ? 2 * Pi - angle : angle;
+
+            if ((state.FrameID >= 1555 && state.FrameID <= 1557) && i == 2 && j == 3)
+            {
+                cerr << "time" << state.FrameID << endl;
+                cerr << "angle:" << angle << endl;
+            }
+
+            // 如果两小球方向为锐角
+            if (lt(angle, Pi * 0.5))
+            {
+                continue;
+                if (!checkRobortsCollison(i, j, 1.0))
                     continue;
 
-                //优先级小的先
-                stopID = robots[i] < robots[j] ? i: j;
-                goID = robots[i] < robots[j] ? j: i;
-
-                if(checkIsTrySeparate(i, j))
+                flag_go = isAcuteAngle(subVector(robots[stopID].pos, robots[goID].pos), robots[goID].direction);
+                flag_stop = isAcuteAngle(subVector(robots[goID].pos, robots[stopID].pos), robots[stopID].direction);
+                if (flag_go && flag_stop)
+                { // 并排运动
+                    // 优先级低的先减速
+                    ins[stopID].forward = 0;
+                }
+                else
+                { // 追赶ing，且后面的速度大于前面，锐角在后
+                    if (flag_go && gt(speed_go, speed_stop))
+                    {                                    // goID小球在后面
+                        getAvoidDirection(goID, stopID); // go转弯
+                    }
+                    else if (flag_stop && lt(speed_go, speed_stop))
+                    {
+                        getAvoidDirection(stopID, goID);
+                    }
+                }
+            }
+            else
+            { // 夹角为钝角
+                if (!checkRobortsCollison(i, j, max(10 * 0.02 * (speed_go + speed_stop), 0.5)))
                     continue;
-                double angle = fabs(robots[i].direction - robots[j].direction);
-                angle = gt(angle, Pi)? 2 * Pi - angle: angle;
-                if(lt(angle, Pi * 1.5)) continue;
+                // 优先级小的先
+                // 如果goID需要变换方向
+                if (getAvoidDirection(goID, stopID))
+                {
+                    ins[stopID].rotate = ins[goID].rotate;
+                    if (lt(speed_stop, 1.0))
+                        ins[stopID].forward = 2;
+                }
+                else
+                {
+                    getAvoidDirection(stopID, goID);
+                }
+            }
 
-                ins[stopID].rotate = gt(ins[goID].rotate, 0)? Pi: -Pi;
-                ins[stopID].rotate = gt(ins[goID].rotate, 0)? -Pi: Pi;
-
-                // ins[stopID].forward = -2;
-
-                // getAvoidDirection(stopID, goID);
-                // getAvoidDirection(j, i);
-                
-                // todo
-
-                // if(true) {
-                //     cerr<<"time:"<<state.FrameID<<endl;
-                //     cerr << "stopID:" <<stopID <<"-"<<robots[stopID].target_id<<endl;
-                //     cerr<<"**"<<robots[stopID].get_type<<endl;
-                //     cerr << "speed"<<calVectorSize(robots[stopID].xy_pos)<<" cv:"<<robots[stopID].angular_velocity<<endl;
-                //     cerr << "rate:"<<ins[stopID].rotate<<endl;
-                //     cerr<<" goID:"<<goID<<"-"<<robots[goID].target_id<<endl;
-                //     cerr<<"**"<<robots[goID].get_type<<endl;
-                //     cerr << "speed"<<calVectorSize(robots[goID].xy_pos)<<" cv:"<<robots[goID].angular_velocity<<endl;
-                //     cerr << "rate:"<<ins[goID].rotate<<endl<<endl;
-                // }
-                
-                //判断停下来的球是否会阻挡路线
-                // next_pos = getNextPos(goID);
-                // if(checkRobortsCollison(goID, next_pos, stopID)) {
-
-                //     ins[goID].rotate = - Pi * robots[goID].lastSign;
-
-                //     if(lt(robots[stopID].lastSign * robots[goID].lastSign, 0)) {
-                //         ins[stopID].rotate = - Pi * robots[stopID].lastSign;
-                //     }
-                //     else {
-                //         ins[stopID].rotate = Pi * robots[stopID].lastSign;
-                //     }
-                // }
+            if (true)
+            {
+                cerr << "time:" << state.FrameID << endl;
+                cerr << angle << endl;
+                cerr << "stopID:" << stopID << "-" << robots[stopID].target_id << endl;
+                // cerr<<"**"<<robots[stopID].get_type<<endl;
+                cerr << "speed" << calVectorSize(robots[stopID].xy_pos) << " dir:" << robots[stopID].direction << endl;
+                cerr << "a_speed" << robots[stopID].angular_velocity << endl;
+                cerr << "rate:" << ins[stopID].rotate << endl;
+                cerr << "**" << endl;
+                cerr << "goID:" << goID << "-" << robots[goID].target_id << endl;
+                // cerr<<"**"<<robots[goID].get_type<<endl;
+                cerr << "speed" << calVectorSize(robots[goID].xy_pos) << " dir:" << robots[goID].direction << endl;
+                cerr << "a_speed" << robots[goID].angular_velocity << endl;
+                cerr << "rate:" << ins[goID].rotate << endl
+                     << endl;
             }
         }
     }
 }
 
+void updateLastRate()
+{
+    for (int i = 0; i < 4; ++i)
+    {
+        robots[i].lastRate = ins[i].rotate;
+    }
+}
 
 
 
@@ -577,7 +644,7 @@ void control(vector<PayLoad> payLoad){
         }
       
         double dis=calcuDis(robots[i].pos,studios[robots[i].target_id].pos);
-        if(dis<3&&!can_st){
+        if(lt(dis,(getRobotRadius(i)+2))&&!can_st){
                 ins[i].rotate=((isSame==1&&isTurn==0)?Pi*payLoad[i].sign:max(0.8,Dec_val_ra*lastRate)*payLoad[i].sign);
                 // if(i==0)
                 // cerr<<"~"<<ins[i].rotate<<" "<<isSame<<"+"<<payLoad[i].angle<<"+" <<Dec_val_ra*lastRate*payLoad[i].sign<<endl;
@@ -593,7 +660,7 @@ void control(vector<PayLoad> payLoad){
                 // cerr<<"~"<<ins[i].rotate<<" "<<isSame<<"+"<<payLoad[i].angle<<"+" <<Dec_val_ra*lastRate*payLoad[i].sign<<endl;
                 // if(robots[i]..forward>=3)
                 // ins[i].forward=-2;
-                ins[i].forward=2;
+                ins[i].forward=1;
                 robots[i].lastRate=ins[i].rotate;   
                 continue;     
         }
@@ -916,14 +983,15 @@ void first_action(){
     pair <int,double> p;
     pair <int,double> f;
     for(i = 0; i < robots.size(); i++){
-        robots[i].target_id = pick_point(i, 1).first;
+        robots[i].target_id = pick_point(i, 2).first;
     }
     for(i = 0; i < robots.size(); i++)
     {
         for(j = i + 1; j < robots.size(); j++){
             if(robots[i].target_id == robots[j].target_id){
-                p = pick_point(i,1);
-                f = pick_point(j,1);
+                studios[robots[i].target_id].r_id = i;
+                p = pick_point(i,2);
+                f = pick_point(j,2);
                 if(gt(p.second,f.second)){
                     studios[robots[i].target_id].r_id = i;
                     robots[j].target_id = f.first;
@@ -935,7 +1003,7 @@ void first_action(){
                 }
             }
         }
-        //studios[robots[i].target_id].r_id = i;
+        studios[robots[i].target_id].r_id = i;
         //cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
     }
 }
@@ -1505,6 +1573,8 @@ pair<int,int> far_away(int i1,int i2,int base1,int base2){
     int arr[][2]{{-1*base1,1*base2},{1*base1,1*base2},{-1*base1,-1*base2},{1*base1,-1*base2}};
     double time=0.02;
     pair<int,int>tmp(0,0);
+    pair<double,double>pre_xy1=robots[i1].xy_pos;
+    pair<double,double>pre_xy2=robots[i2].xy_pos;
     double mmax=0.0;
     int pos=0;
     for(int i=0;i<4;i++){
