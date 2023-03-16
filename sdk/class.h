@@ -116,12 +116,15 @@ struct Robot
         //     return false;
         // if(speed2_a - speed2 > 1e-5)
         //     return true;
-        // if(angular_velocity - a.angular_velocity > 1e-10)
+        // if(fabs(angular_velocity) - fabs(a.angular_velocity) > 1e-10)
         //     return false;
-        // if(a.angular_velocity - angular_velocity > 1e-10)
+        // if(fabs(a.angular_velocity) - fabs(angular_velocity) > 1e-10)
         //     return true;
-        if (get_type == get_type)
-            return time_val * collision_val - a.time_val * a.collision_val < -1e-10;
+        if (get_type == get_type){
+            if(fabs(time_val * collision_val - a.time_val * a.collision_val) < 1e-10)
+                return id < a.id;
+            return time_val * collision_val - a.time_val * a.collision_val < 1e-10;
+        }
         return get_type < a.get_type;
     }
 };
