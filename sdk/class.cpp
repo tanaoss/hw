@@ -819,11 +819,14 @@ if(state.FrameID>=15){
 if(state.FrameID>=15){
     cerr<<state.FrameID<<endl;
     for(int i=0;i<4;i++) {
+        double tmpDis=calcuDis(robots[i].pos,robots[j].pos);
+                    bool Flag_line1=lt(fabs(payLoad[i].angle),(double)Pi/tmpDis)||can_stop(robots[i].pos,studios[robots[i].target_id].pos,payLoad[i].angle);
+            bool Flag_line2=lt(fabs(payLoad[j].angle),(double)Pi/tmpDis)||can_stop(robots[j].pos,studios[robots[j].target_id].pos,payLoad[j].angle);
                 double adjustAng1=fabs(return_maxAng(i));
            bool f= can_stop(robots[i].pos,studios[robots[i].target_id].pos,payLoad[i].angle);
         cerr<<arr[i]<<" "<<ins[arr[i]].forward<<" "<<ins[arr[i]].rotate
         <<" tar "<<robots[arr[i]].target_id<<" ang "<<payLoad[i].angle
-        <<" "<<f<<endl;
+        <<" "<<f<<" can join "<<(Flag_line1&&Flag_line2)<< endl;
        
 
     }   
@@ -1071,7 +1074,7 @@ void robot_judge(int full,int threshold_near,int threshold_lack){
                 ins[i].buy = 1;
                 ins[i].sell = -1;
                 if(state.FrameID>8500){
-                    cerr <<"***";
+                    // cerr <<"***";
                     if(!checkTimeEnough(i,robots[i].target_id,9000-state.FrameID))ins[i].buy = -1;
                 }
             }
@@ -1177,7 +1180,7 @@ void robot_judge_sol(int threshold_lack){
                 ins[i].buy = 1;
                 ins[i].sell = -1;
                 if(state.FrameID>8500){
-                    cerr <<"***";
+                    // cerr <<"***";
                     if(!checkTimeEnough(i,robots[i].target_id,9000-state.FrameID))ins[i].buy = -1;
                 }
             }
