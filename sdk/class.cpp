@@ -430,7 +430,7 @@ bool getAvoidDirection(int goID, int stopID)
     included_angle = gt(angle3, Pi) ? 2 * Pi - angle3 : angle3;
 
     if (state.FrameID == 965)
-        cerr << "angle" << included_angle << "angle3:" << angle3 << endl;
+        // cerr << "angle" << included_angle << "angle3:" << angle3 << endl;
 
     // 如果stopID-goID方向与goTD前进方向是锐角，go旋转
     if (lt(fabs(included_angle), Pi / 2))
@@ -465,9 +465,9 @@ void printRobotInfo(int i)
 {
     Robot r = robots[i];
 
-    cerr << "id:" << r.id << " dir:" << r.direction
-         << "speed:" << calVectorSize(r.xy_pos)
-         << "/n cv:" << r.collision_val << " tv:" << r.time_val;
+    // cerr << "id:" << r.id << " dir:" << r.direction
+    //      << "speed:" << calVectorSize(r.xy_pos)
+    //      << "/n cv:" << r.collision_val << " tv:" << r.time_val;
     printPair(r.pos);
     printPair(r.xy_pos);
 }
@@ -493,11 +493,11 @@ void solveRobortsCollision()
             double angle = fabs(robots[i].direction - robots[j].direction);
             angle = gt(angle, Pi) ? 2 * Pi - angle : angle;
 
-            if ((state.FrameID >= 1555 && state.FrameID <= 1557) && i == 2 && j == 3)
-            {
-                cerr << "time" << state.FrameID << endl;
-                cerr << "angle:" << angle << endl;
-            }
+            // if ((state.FrameID >= 1555 && state.FrameID <= 1557) && i == 2 && j == 3)
+            // {
+            //     cerr << "time" << state.FrameID << endl;
+            //     cerr << "angle:" << angle << endl;
+            // }
 
             // 如果两小球方向为锐角
             if (lt(angle, Pi * 0.5))
@@ -1218,8 +1218,7 @@ void robot_judge_sol(int threshold_lack){
                     }
                     robots[i].target_id = min_subscript;
                     if(min_subscript != -1){
-                    
-                     studios[robots[i].target_id].r_id = i;
+                        studios[robots[i].target_id].r_id = i;
                     }
                 }
             }
@@ -1591,7 +1590,7 @@ pair<int,int> far_away(int i1,int i2,int base1,int base2){
 
     }
         if(state.FrameID==798&&i1==0&&i2==2){
-        cerr<<endl;
+        // cerr<<endl;
         } 
     tmp.first=arr[pos][0];
     tmp.second=arr[pos][1];
