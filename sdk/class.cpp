@@ -778,19 +778,22 @@ if(state.FrameID>=15){
             if(will_collision(id1,id2)){
                 tmp=far_away(id1,id2,1,1);
                 double dis=calcuDis(robots[id1].pos,robots[id2].pos);
-                if(Flag_line1_t&&Flag_line2_t){
+                if(Flag_line1_t&&Flag_line2_t&&lt(tmpDis,10)){
                     double angle=get_angle(robots[id1].direction,robots[id2].direction);
+                    tmp=far_away(id1,id2,0,1);
                     if(lt(angle,-0.7)){
                         ins[id2].rotate=(Pi)*tmp.second;
                     }
                     ins[id2].forward=(dis/3.0)*v2;
+                        
 
-                }else if(lt(tmpDis,2)&&(gt(max(v1,v2),3.0))){
+                }else if(lt(tmpDis,2)){
                     ins[id2].rotate=(Pi)*tmp.second;
                     ins[id1].rotate=(Pi)*tmp.first;
                     ins[id2].forward=0; 
                     ins[id1].forward=0;   
-                }else if(lt(tmpDis,5)){
+                }
+                else if(lt(tmpDis,5)){
                     ins[id2].rotate=max(fabs(ins[id2].rotate),fabs(adjustAng2))*tmp.second;
                     ins[id1].rotate=max(fabs(ins[id1].rotate),fabs(adjustAng1))*tmp.second;;
                 }else{
@@ -819,22 +822,21 @@ if(state.FrameID>=15){
 if(state.FrameID>=15){
     cerr<<state.FrameID<<endl;
     for(int i=0;i<4;i++) {
-        double tmpDis=calcuDis(robots[i].pos,robots[j].pos);
-                    bool Flag_line1=lt(fabs(payLoad[i].angle),(double)Pi/tmpDis)||can_stop(robots[i].pos,studios[robots[i].target_id].pos,payLoad[i].angle);
-            bool Flag_line2=lt(fabs(payLoad[j].angle),(double)Pi/tmpDis)||can_stop(robots[j].pos,studios[robots[j].target_id].pos,payLoad[j].angle);
                 double adjustAng1=fabs(return_maxAng(i));
            bool f= can_stop(robots[i].pos,studios[robots[i].target_id].pos,payLoad[i].angle);
         cerr<<arr[i]<<" "<<ins[arr[i]].forward<<" "<<ins[arr[i]].rotate
         <<" tar "<<robots[arr[i]].target_id<<" ang "<<payLoad[i].angle
-        <<" "<<f<<" can join "<<(Flag_line1&&Flag_line2)<< endl;
+        <<" "<<f<< endl;
        
 
     }   
     for(int i=0;i<4;i++){
         for(int j=i+1;j<4;j++){
             double tmpDis=calcuDis(robots[i].pos,robots[j].pos);
+            bool Flag_line1=lt(fabs(payLoad[i].angle),(double)Pi/tmpDis)||can_stop(robots[i].pos,studios[robots[i].target_id].pos,payLoad[i].angle);
+            bool Flag_line2=lt(fabs(payLoad[j].angle),(double)Pi/tmpDis)||can_stop(robots[j].pos,studios[robots[j].target_id].pos,payLoad[j].angle);
             cerr<<i<<"-"<<j<<" "<<tmpDis<<" "<<will_collision(i,j)<< " "<<Calculate_root(i,j)
-            <<endl;
+            <<" can join "<<(Flag_line1&&Flag_line2)<<endl;
         }
     }
     cerr<<"~~~~"<<endl;;     
@@ -1547,7 +1549,7 @@ bool will_collision(int i1,int i2){
     Vec x2(robots[i2].pos);
     Vec c_t=x1-x2;
     Vec v_t=v1-v2;
-    double r=getRobotRadius(i1)+getRobotRadius(i2)+0.2;
+    double r=getRobotRadius(i1)+getRobotRadius(i2);
     double a=v_t*v_t;
     double b=2*(v_t*c_t);
     double c=c_t*c_t-r*r;
@@ -1569,7 +1571,7 @@ bool will_collision(int i1,int i2){
         double dis2=calcuDis(pos_tmp_r2,pos_tmp_s2);
         double dis4=calcuDis(pos_tmp_r2,pos_tmp_r_c);
         if(gt(tmp.first,0.0))
-        if(le(dis3,dis1+0.5)&&le(dis4,dis2+0.5))return true;
+        if(le(dis3,dis1)&&le(dis4,dis2))return true;
         return false;
 
     }else if(gt(cla,0)){
@@ -1602,7 +1604,7 @@ bool will_collision(int i1,int i2){
         //     cerr<<"---\n"<<endl;
         // }
         if(gt(tmp.first,0.0))
-        if(le(dis3,dis1+0.5)&&le(dis4,dis2+0.5))return true;
+        if(le(dis3,dis1)&&le(dis4,dis2))return true;
 
         tmp.second=(-1*b-sqrt(cla))/(2*a);
         
@@ -1630,7 +1632,7 @@ pair<int,int> far_away(int i1,int i2,int base1,int base2){
     int sign1=pl_g[i1].sign,sign2=pl_g[i2].sign;
     if(sign1*sign2<0) return pair<int,int> (sign1,sign2);
     else{
-        if(robots[i1].get_type>robots[i2].get_type){
+        if(gt(fabs(pl_g[i1].angle)-fabs(pl_g[i2].angle) ,2)||robots[i1].get_type>(robots[i2].get_type)){
             return pair<int,int> (sign1,-1*sign2);
         }
         return pair<int,int> (-1*sign1,sign2);
