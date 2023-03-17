@@ -16,6 +16,7 @@ int main()
     std::cin.tie(0);    // IO
     readMapUntilOK();
     calcuStudioDis();
+    cerr<<robots.size();
     cout<<"OK\n";
     cout.flush();
     int count = 0;
@@ -23,15 +24,18 @@ int main()
     initRobortInfo();
     init_studio_parameter();
     while (cin>>state.FrameID){
-        //cerr<<" time "<<state.FrameID<<endl;
+        cerr<<" time "<<state.FrameID<<endl;
         readStatusUntilOK() ;
         cout<<state.FrameID<<endl;
+        cerr<<"aaa"<<endl;
         if(count == 0)first_action();
         else robot_action();
+        cerr<<"bbb"<<endl;
         payloads.clear();
         for(int i=0;i<4;++i){
             payloads.push_back(calPayload(i,robots[i].target_id));
         }
+        cerr<<"kkk"<<endl;
         pl_g=payloads;
         control(payloads);
         // int lineSpeed = 3;
