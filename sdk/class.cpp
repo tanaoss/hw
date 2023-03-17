@@ -813,10 +813,16 @@ void Collision_detection(vector<PayLoad> payLoad){
             int sign1=return_line_dire(sel_1,sel,payLoad[sel].sign);
             if(gt(sign*payLoad[sel_1].sign,0)){
                 ins[sel_1].rotate=Pi*sign;
+                // ins[sel].rotate/=2;
+                cerr<<"sel: "<<sel_1<<endl;
             }else if(gt(sign1*payLoad[sel].sign,0)){
                 ins[sel].rotate=Pi*sign;
+                // ins[sel_1].rotate/=2;
+                cerr<<"sel: "<<sel_1<<endl;
             }else{
                 ins[sel_1].rotate=Pi*sign;
+                // ins[sel].rotate/=2;
+                cerr<<"sel: "<<sel_1<<endl;
             }
         }
         double v1=return_v(sel);
@@ -1778,13 +1784,16 @@ int return_line_dire(int i1,int i2,int signBase){
     will_collision(i1,i2);
     double canAngle=min(fabs(Root.first),fabs(Root.second))*40*0.3;
     double need_angle=get_rotation(i1,i2);
+    double need_angle_2=robots[i2].angular_velocity*min(fabs(Root.first),fabs(Root.second));
     auto tmp= subVector(robots[i1].pos, robots[i2].pos);
+    int as=addSign(i1,i2,signBase);
+    int as1=addSign_other(i2,i1,signBase);
     Vec v1(tmp);
     Vec v2(robots[i2].xy_pos);
     double tmpAngle=acos(cos_t(v1,v2));
 
     int sign= (lt(v1^v2,0))?-1:1;
-    if(sign*signBase==-1&&gt(canAngle,tmpAngle+need_angle)){
+    if(sign*signBase==-1&&gt(canAngle,fabs(as1*need_angle_2+as*tmpAngle+need_angle))){
         sign*=-1;
     }
     return sign;
@@ -1862,12 +1871,27 @@ int return_int_neg(int base){
     return  1;
 }
 bool is_same_direction(int i1,int i2){
-    Vec v1(pair<double,double>(cos(robots[i1].direction),sin(robots[i1].direction)));
-    Vec v2(pair<double,double>(cos(robots[i2].direction),sin(robots[i2].direction)));
+    Vec v1(robots[i1].xy_pos);
+    Vec v2(robots[i2].xy_pos);
     return gt(cos_t(v1,v2),0.0);
 }
 double get_rotation(int i1,int i2){
-    Vec v1(pair<double,double>(cos(robots[i1].direction),sin(robots[i1].direction)));
-    Vec v2(subVector(robots[i1].pos, robots[i2].pos));
-    return acos(cos_t(v1,v2));
+    double dis=calcuDis(robots[i1].pos,robots[i2].pos);
+    return asin(getRobotRadius(i1)/dis);
+}
+bool approaching_the_angle(int i1,int i2,int sign1,int sign1_2,int sign2){
+    int sign=1;
+}
+int addSign(int i1,int i2,int sign){
+    auto tmp= subVector(robots[i1].pos, robots[i2].pos);
+    Vec v1(tmp);
+    Vec v2(robots[i2].xy_pos);
+    int baseSign=(lt(v1^v2,0))?-1:1;
+    return gt(baseSign*sign,0.0)?-1:1;    
+}
+int addSign_other(int i1,int i2,int sign){
+    auto tmp= subVector(robots[i1].pos, robots[i2].pos);
+    Vec v1(tmp);
+    Vec v2(robots[i2].xy_pos);
+    int baseSign=(lt(v1^v2,0))?1:-1;    
 }
