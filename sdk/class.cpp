@@ -15,6 +15,7 @@ State state;//当前帧数，全局可见
 vector<Ins> ins(4);
 vector<int> material[8];
 vector<int> product[8];
+vector<int> full_product;
 double EPS=1e-7;
 double acceleration_no;
 double acceleration_has;
@@ -27,7 +28,7 @@ int studio_material[4][4];
 int studio_level[5][2];
 int material_send[8][3];
 int RootFlag=-2;
-
+int Adjust_the_same_direction[4][2];
 pair<double ,double> Root;
 pair<double ,double> Collision_point;
 vector<PayLoad> pl_g;
@@ -372,7 +373,7 @@ bool checkTimeEnough(int robot_id, int target_id, int frame) {
     //     cerr<<"dis:"<<dis<<" speed:"<<speed<<endl;
     //     cerr<<calNextTimeDistance(speed, time, acceleration)<<endl;
     // }
-    if(lt(calNextTimeDistance(speed, time, acceleration), dis*1.3))
+    if(lt(calNextTimeDistance(speed, time, acceleration), dis*1.2))
         return false;
         
     return true;
@@ -386,7 +387,7 @@ bool checkEnough(int robot_id, int target_id, int frame)
         double time = (dis / 6.0) / 0.02; // 剩余秒数
         // cerr<<"time = "<<time<<" least time = "<<frame<<endl;
         if (time > frame)
-            return true;
+            return false;
         else
             return false;
     }
@@ -708,6 +709,8 @@ void control(vector<PayLoad> payLoad){
         
     }
     // solveRobortsCollision();
+    Collision_detection(payLoad);
+    updateLastRate();
     
     
 //     vector<bool>vis(4,false);
@@ -747,7 +750,7 @@ void control(vector<PayLoad> payLoad){
       
 // }
 
-Collision_detection(payLoad);
+
 // if(state.FrameID>=15){
 //     cerr<<state.FrameID<<endl;
 //     for(int i=0;i<4;i++) {
@@ -800,127 +803,34 @@ void Collision_detection(vector<PayLoad> payLoad){
         cerr<<"id: "<<state.FrameID<<" "<<id1<<" "<<id2<<" "
         <<will_collision(id1,id2)<< " "<<Flag_line1<<" "<<Flag_line2<<
         " "<<tmpDis<<" "<<endl;
+        cerr<<" angle "<<payLoad[id1].angle<<" "<<payLoad[id2].angle<<endl;
+        cerr<<" tar "<<robots[id1].target_id<<" "<<robots[id2].target_id<<endl;
+        cerr<<"pos "<<RootFlag<<" "<<Root.first<<" "<<Root.second <<endl;
         int sel=robots[id1].get_type>robots[id2].get_type?id1:id2;
         int sel_1=robots[id1].get_type>robots[id2].get_type?id2:id1;
-        if(Flag_line1&&Flag_line2){
-            if(will_collision(id1,id2)){
-                double v1=return_v(sel);
-                double v2=return_v(sel_1);
-                bool f=true;
-                if(lt(v2,3)){
-                pair<double,double > pre_xy=robots[sel_1].xy_pos;
-                robots[sel_1].xy_pos.first=cos(robots[sel_1].direction)*3;
-                robots[sel_1].xy_pos.first=sin(robots[sel_1].direction)*3;
-                f=will_collision(sel,sel_1);
-                robots[sel_1].xy_pos=pre_xy;
-                }
-                if(f){
-                    continue;
-                }
-                else if(lt(tmpDis,5)){
-                    if(lt(v2,3)){
-                        ins[sel_1].forward=0.8*v2;
-                        ins[sel_1].rotate=Pi*return_line_dire(sel,sel_1)*-1;                        
-                    }else{
-                        ins[sel_1].forward=0.5;
-                        ins[sel_1].rotate=Pi*return_line_dire(sel,sel_1); 
-                        ins[sel].forward=gt(v1,0.5)?-2:1;                        
-                    }
-                }else if(lt(tmpDis,2)){
-                   if(lt(v2,3)){
-                        ins[sel_1].forward=0.8*v2;
-                        ins[sel_1].rotate=Pi*return_line_dire(sel,sel_1)*-1;                        
-                    }else{
-                        ins[sel_1].forward=3;
-                        ins[sel_1].rotate=Pi*return_line_dire(sel,sel_1); 
-                        ins[sel].forward=gt(v1,0.5)?-2:3;                        
-                    }
-                }
-                cerr<<"--"<<endl;
-                cerr<<state.FrameID<<endl;
-                cerr<<sel<<"-"<<sel_1<<endl;
-                cerr<<"dis "<<tmpDis<<endl;
-                cerr<<"dire "<<return_line_dire(sel,sel_1)<<endl;
-                cerr<<"v "<<v1<<" "<<v2<<endl;
-                cerr<<"--"<<endl;
-            }
-        }else if(Flag_line1&&!Flag_line2){                
-            int sel=id1;
-            int sel_1=id2;
-            double v1=return_v(sel);
-            double v2=return_v(sel_1); 
-            bool f=true;
-            if(robots[sel].get_type==0&&lt(v1,2)&&robots[sel].get_type!=0){
-                sel=id2;
-                sel_1=id1;                
-            }
-            if(lt(v2,3)){
-                pair<double,double > pre_xy=robots[sel_1].xy_pos;
-                robots[sel_1].xy_pos.first=cos(robots[sel_1].direction)*3;
-                robots[sel_1].xy_pos.first=sin(robots[sel_1].direction)*3;
-                f=will_collision(sel,sel_1);
-                robots[sel_1].xy_pos=pre_xy;
-            }
-            if(f&&will_collision(sel,sel_1)){
-                if(lt(tmpDis,4)){
-                    ins[sel_1].forward= gt(v1,0.5)?-2:0.5;
-                    if(lt(v2,3)){
-                        ins[sel_1].rotate=Pi*return_line_dire(sel,sel_1)*-1;
-                    }else{
-                        ins[sel_1].rotate=Pi*return_line_dire(sel,sel_1);
-                    }
-                    robots[sel_1].pre_cnt=5;
-                    cerr<<"dire "<<ins[sel_1].rotate<<" fow "<<ins[sel_1].forward<<" rd "<<
-                    robots[sel_1].direction<<endl;
-                }
+        if(lt(tmpDis,5)&&will_collision(sel,sel_1)){
+            int sign=return_line_dire(sel,sel_1,payLoad[sel_1].sign);
+            int sign1=return_line_dire(sel_1,sel,payLoad[sel].sign);
+            if(gt(sign*payLoad[sel_1].sign,0)){
+                ins[sel_1].rotate=Pi*sign;
+            }else if(gt(sign1*payLoad[sel].sign,0)){
+                ins[sel].rotate=Pi*sign;
             }else{
-                if(!f||(lt(tmpDis,4)&&robots[sel_1].pre_cnt>0)){
-                    
-                    ins[sel_1].forward=6;  
-                    robots[sel_1].pre_cnt--; 
-                }                    
+                ins[sel_1].rotate=Pi*sign;
             }
-        }else if(!Flag_line1&&Flag_line2){
-            int sel=id2;
-            int sel_1=id1;
-            double v1=return_v(sel);
-            double v2=return_v(sel_1); 
-            bool f=true;
-            if(robots[sel].get_type==0&&lt(v1,2)&&robots[sel].get_type!=0){
-                sel=id1;
-                sel_1=id2;                
-            }
-            if(lt(v2,3)){
-                pair<double,double > pre_xy=robots[sel_1].xy_pos;
-                robots[sel_1].xy_pos.first=cos(robots[sel_1].direction)*3;
-                robots[sel_1].xy_pos.first=sin(robots[sel_1].direction)*3;
-                f=will_collision(sel,sel_1);
-                robots[sel_1].xy_pos=pre_xy;
-            }
-            if(f&&will_collision(sel,sel_1)){
-                if(lt(tmpDis,4)){
-                    ins[sel_1].forward= gt(v1,0.5)?-2:0.5;
-                    if(lt(v2,3)){
-                        ins[sel_1].rotate=Pi*return_line_dire(sel,sel_1)*-1;
-                    }else{
-                        ins[sel_1].rotate=Pi*return_line_dire(sel,sel_1);
-                    }
-                    robots[sel_1].pre_cnt=5;
-                    cerr<<"dire "<<ins[sel_1].rotate<<" fow "<<ins[sel_1].forward<<" rd "<<
-                    robots[sel_1].direction<<endl;
-                }
-            }else{
-                if(!f||(lt(tmpDis,4)&&robots[sel_1].pre_cnt>0)){
-                    
-                    ins[sel_1].forward=6;  
-                    robots[sel_1].pre_cnt--; 
-                }                    
-            }
-        }else{
-
         }
+        double v1=return_v(sel);
+        double v2=return_v(sel_1);
+        if(lt(min(v1,v2),3)&&is_same_direction(sel,sel_1)){
+            int F=who_isFirst(sel,sel_1)?sel:sel_1;
+            int S=who_isFirst(sel,sel_1)?sel_1:sel;
+            ins[F].forward=6;
+            continue;
+            }
+        
     }
-
+    
+    Detect_codirection();
 }
 double anger_to_length(int robot_id,int studio_id){
     double length;
@@ -932,7 +842,7 @@ double anger_to_length(int robot_id,int studio_id){
 
 double close_threshold(int robot_id,int target_id,int close_threshold){
     int count = 0;
-    double dist;
+    int dist;
     for(int i=0;i<4;i++){
         if(i!=robot_id){
             if(robots[i].target_id != -1){
@@ -978,33 +888,51 @@ double close_threshold2(int robot_id,int target_id,int close_threshold){
 */
 pair<int,double> pick_point(int robot_id, int state){
     pair<double,double> pos = robots[robot_id].pos;
-    int min = 10000;
+    int min = 1000;
     int min_subscript = -1;
     int i,j;
     int studio_id;
     int dist;
     int item_type = robots[robot_id].get_type;
-    // if(state == 1){
-    //     for(i=0;i<=studios.size();i++){
-    //         //cerr<<studios.size()<<endl;
-    //         if(studios[i].type >= 1 && studios[i].type <= 3 && studios[i].r_id==-1){  //123 and no robot choose ,first choose ,get
-    //             if(studios[i].pStatus == 1 ||(studios[i].r_time>0&&(checkEnough(robot_id,i,studios[i].r_time)))){
-    //                 dist=calcuDis(robots[robot_id].pos,studios[i].pos);
-    //                 if(dist<min){
-    //                     min=dist;
-    //                     min_subscript=i;
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-    // else 
-    if(state == 2){
+    if(state == 0){
+        for(i=0;i<studios.size();i++){
+            if(studios[i].type >= 1 && studios[i].type <= 3 && (studios[i].r_id==-1 || studios[i].r_id== robot_id) ){  //123 and no robot choose ,get
+                    if(material[studios[i].type].size()>0 && robot_get_type[studios[i].type]< material[studios[i].type].size()){
+                        // dist=(calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i))*close_threshold2(robot_id,i,2);
+                        dist=(calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i));
+                        // dist=calcuDis(robots[robot_id].pos,studios[i].pos);
+                        if(dist<min){
+                            min=dist;
+                            min_subscript=i;
+                        }
+                    }
+                
+            }
+        }
+    }
+    else if(state == 1){
+        for(i=0;i<full_product.size();i++){
+            //cerr<<studios.size()<<endl;
+            // cerr<<" full_product[i] = "<<full_product[i]<<endl;
+            if(studios[full_product[i]].r_id==-1){  //123 and no robot choose ,first choose ,get
+                if(studios[full_product[i]].pStatus == 1 ||(studios[full_product[i]].r_time>0&&(checkEnough(robot_id,full_product[i],studios[i].r_time)))){
+                    // dist=(calcuDis(robots[robot_id].pos,studios[full_product[i]].pos)+anger_to_length(robot_id,full_product[i]))*close_threshold2(robot_id,full_product[i],0.9);
+                    dist=(calcuDis(robots[robot_id].pos,studios[full_product[i]].pos)+anger_to_length(robot_id,full_product[i]));
+                    // dist=calcuDis(robots[robot_id].pos,studios[full_product[i]].pos);
+                    if(dist<min){
+                        min=dist;
+                        min_subscript=full_product[i];
+                    }
+                }
+            }
+        }
+    }
+    else if(state == 2){
         for(i=0;i<studios.size();i++){
             if(studios[i].type >= 1 && studios[i].type <= 3 && (studios[i].r_id==-1 || studios[i].r_id== robot_id) ){  //123 and no robot choose ,get
                 if(studios[i].pStatus == 1||(studios[i].r_time>0&&(checkEnough(robot_id,i,studios[i].r_time)))){
                     if(material[studios[i].type].size()>0 && robot_get_type[studios[i].type]< material[studios[i].type].size()){
-                        // dist=(calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i))*close_threshold2(robot_id,i,1);
+                        // dist=(calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i))*close_threshold2(robot_id,i,2);
                         dist=(calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i));
                         // dist=calcuDis(robots[robot_id].pos,studios[i].pos);
                         if(dist<min){
@@ -1022,7 +950,7 @@ pair<int,double> pick_point(int robot_id, int state){
                 if(studios[i].pStatus == 1 ||(studios[i].r_time>0&&(checkEnough(robot_id,i,studios[i].r_time)))){
                     //||(studios[i].r_time>0&&(checkEnough(robot_id,i,studios[i].r_time)))
                     if(material[studios[i].type].size()>0&& robot_get_type[studios[i].type]< material[studios[i].type].size()){
-                        // dist=(calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i))*close_threshold2(robot_id,i,1);
+                        // dist=(calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i))*close_threshold2(robot_id,i,0.9);
                         dist=calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i);
                         // cerr<<"close_threshold = "<<close_threshold2(robot_id,i,1)<<endl;
                         // dist=calcuDis(robots[robot_id].pos,studios[i].pos);
@@ -1040,7 +968,7 @@ pair<int,double> pick_point(int robot_id, int state){
             if(studios[i].type ==7 && (studios[i].r_id==-1 || studios[i].r_id== robot_id)){  //7 and no robot choose ,get
                 if(studios[i].pStatus == 1 ||(studios[i].r_time>0&&(checkEnough(robot_id,i,studios[i].r_time)))){
                     if(material[studios[i].type].size()>0&& robot_get_type[studios[i].type]< material[studios[i].type].size()){
-                        // dist=(calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i))*close_threshold2(robot_id,i,1);
+                        // dist=(calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i))*close_threshold2(robot_id,i,0.9);
                         // cerr<<"close_threshold = "<<close_threshold2(robot_id,i,1)<<endl;
                         dist=calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i);
                         // dist=calcuDis(robots[robot_id].pos,studios[i].pos);
@@ -1058,19 +986,21 @@ pair<int,double> pick_point(int robot_id, int state){
         for(i=0;i<studios.size();i++){
             for(j=1;j<=material_send[item_type][0];j++){
                 if(item_type != 7){
-                    if(studios[i].type == material_send[item_type][j] && (studios_rid[i][item_type] == -1) && ((studios[i].bitSatus & ((int)pow(2,item_type)))==0)){
-                        // dist=(calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i))*close_threshold(robot_id,i,4);
-                        dist=calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i);
-                        // dist=calcuDis(robots[robot_id].pos,studios[i].pos);
-                        if(dist<min){
-                            min=dist;
-                            min_subscript=i;
+                    if(studios[i].type == material_send[item_type][j] && (studios_rid[i][item_type] == -1) ){
+                        if(((studios[i].bitSatus & ((int)pow(2,item_type)))==0)||((check_material_full(i)&&(studios[i].pStatus != 1)&&(studios[i].r_time>0&&(checkEnough(robot_id,i,studios[i].r_time)))))){
+                            // dist=(calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i))*close_threshold(robot_id,i,0.9);
+                            dist=calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i);
+                            // dist=calcuDis(robots[robot_id].pos,studios[i].pos);
+                            if(dist<min){
+                                min=dist;
+                                min_subscript=i;
+                            }
                         }
                     }
                 }
                 else{
                     if(studios[i].type == material_send[item_type][j]){
-                        // dist=(calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i))*close_threshold(robot_id,i,4);
+                        // dist=(calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i))*close_threshold(robot_id,i,0.9);
                         dist=calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i);
                         // dist=calcuDis(robots[robot_id].pos,studios[i].pos);
                         if(dist<min){
@@ -1081,7 +1011,7 @@ pair<int,double> pick_point(int robot_id, int state){
                 }
             }
             if(studios[i].type == 9){
-                // dist=(calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i))*close_threshold(robot_id,i,4);
+                // dist=(calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i))*close_threshold(robot_id,i,0.9);
                 dist=calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i);
                 // dist=calcuDis(robots[robot_id].pos,studios[i].pos);
                 if(dist<min){
@@ -1128,9 +1058,12 @@ void first_action(){
     pair <int,double> p;
     pair <int,double> f;
     for(i = 0; i < robots.size(); i++){
-        robots[i].target_id = pick_point(i, 2).first;
+        robots[i].target_id = pick_point(i, 0).first;
+        //cerr<<"aaa"<<robots[i].target_id<<endl;
         studios[robots[i].target_id].r_id = i;
     }
+    // if(robots[i].get_type==0)cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<studios[robots[i].target_id].type<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
+    // else cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
     // for(i = 0; i < robots.size(); i++)
     // {
     //     for(j = i + 1; j < robots.size(); j++){
@@ -1155,22 +1088,31 @@ void first_action(){
 }
 
 bool judge_full(int level, double threshold){
-    int i;
+    int i,j;
     int count = 0;
     int full_count = 0;
     double v;
+    full_product.clear();
     if(level == 2){
         for(i = 0;i < studios.size();i++){
-            if(studios[i].type >= 4 && studios[i].type <= 6){
+            if(studios[i].type >= 4 && studios[i].type <= 7){
                 count++;
-                if(studios[i].pStatus == 1 && studios[i].r_id == -1){
-                    full_count++;
+                if(studios[i].pStatus == 1 && studios[i].r_id == -1 ){
+                    for(j = 0;j<studio_material[studios[i].type-4][0];j++){
+                        if((studios[i].bitSatus & (int)pow(2,studio_material[studios[i].type-4][j+1])) == 0) break;
+                    }
+                    if(j==studio_material[studios[i].type-4][0]){
+                        full_count++;
+                        full_product.push_back(i);
+                        // cerr<<" stuidio_id = "<<i<<" studios[i].type = "<<studios[i].type<<" studios[i].pStatus = "<<studios[i].pStatus<<" studios[i].bitSatus = "<<studios[i].bitSatus<<endl;
+                    }
                 }
             }
         }
         v = (double)full_count/(double)count;
-        //cerr<<" full_count = "<<full_count<<" count = "<<count<<" bilu "<<v<<endl;
+        cerr<<" full_count = "<<full_count<<" count = "<<count<<" bilu "<<v<<endl;
         if(v >= threshold){
+            // print_matr();
             return true;
         }
     }
@@ -1179,19 +1121,36 @@ bool judge_full(int level, double threshold){
             if(studios[i].type == 7){
                 count++;
                 if(studios[i].pStatus == 1 && studios[i].r_id == -1){
-                    full_count++;
+                    for(j = 0;j<studio_material[studios[i].type-4][0];j++){
+                        if((studios[i].bitSatus & (int)pow(2,studio_material[studios[i].type-4][j+1])) == 0) break;
+                    }
+                    if(j==studio_material[studios[i].type-4][0]){
+                        // cerr<<" stuidio_id = "<<i<<" studios[i].type = "<<studios[i].type<<" studios[i].pStatus = "<<studios[i].pStatus<<" studios[i].bitSatus = "<<studios[i].bitSatus<<endl;
+                        full_product.push_back(i);
+                        full_count++;
+                    }
                 }
             }
         }
         v = (double)full_count/(double)count;
-        //cerr<<" full_count = "<<full_count<<" count = "<<count<<" bilu "<<v<<endl;
+        cerr<<" full_count = "<<full_count<<" count = "<<count<<" bilu "<<v<<endl;
         if(v >= threshold){
+            // print_matr();
             return true;
         }
     }
     return false;
 }
-
+bool check_material_full(int studio_id){
+    int j;
+    for(j = 0;j<studio_material[studios[studio_id].type-4][0];j++){
+        if((studios[studio_id].bitSatus & (int)pow(2,studio_material[studios[studio_id].type-4][j+1])) == 0) break;
+    }
+    if(j==studio_material[studios[studio_id].type-4][0]){
+        return true;
+    }
+    return false;
+}
 void robot_judge(int full,int threshold_near,int threshold_lack){
     int i;
     int target;
@@ -1297,10 +1256,10 @@ void robot_judge(int full,int threshold_near,int threshold_lack){
         // }
     }
 }
-void robot_judge_sol(int threshold_lack){
+void robot_judge_sol(int threshold_lack,int full){
     int i;
-    int target;
-    int min_dist,dist,min_subscript;
+    int target,min_subscript;
+    int min_dist,dist;
     pair<int,double> temp1;
     pair<int,double> temp2;
     //cerr<<robots.size()<<endl;
@@ -1308,23 +1267,30 @@ void robot_judge_sol(int threshold_lack){
         //cerr<<i<<robots[i].target_id<<endl;
         if(robots[i].loc_id == robots[i].target_id && robots[i].target_id != -1){
             if(robots[i].get_type == 0){
+                if(studios[robots[i].target_id].pStatus == 1){
                 //dosomething buy ,next send
-                robots[i].lastSign=0;
-                robots[i].isTurn=0;
-                robots[i].get_type = studios[robots[i].loc_id].type;
-                //cerr<<"robots "<< i<<" buy "<<studios[robots[i].target_id].type<<endl;
-                studios[robots[i].loc_id].r_id = -1;
-                robots[i].target_id = pick_point(i,5).first;
-                if(robots[i].target_id!= -1){
-                    //studios[robots[i].target_id].r_id = i;
-                    if(studios[robots[i].target_id].type!=8&&studios[robots[i].target_id].type!=9)studios_rid[robots[i].target_id][robots[i].get_type] = i;
-                    //cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<" flag "<<studios_rid[robots[i].target_id][robots[i].get_type]<<endl;
+                    robots[i].lastSign=0;
+                    robots[i].isTurn=0;
+                    robots[i].get_type = studios[robots[i].loc_id].type;
+                    //cerr<<"robots "<< i<<" buy "<<studios[robots[i].target_id].type<<endl;
+                    studios[robots[i].loc_id].r_id = -1;
+                    //cerr<<"dddd"<<endl;
+                    robots[i].target_id = pick_point(i,5).first;
+                    //cerr<<"kkkk"<<endl;
+                    if(robots[i].target_id!= -1){
+                        //studios[robots[i].target_id].r_id = i;
+                        if(studios[robots[i].target_id].type!=8&&studios[robots[i].target_id].type!=9)studios_rid[robots[i].target_id][robots[i].get_type] = i;
+                        //cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<" flag "<<studios_rid[robots[i].target_id][robots[i].get_type]<<endl;
+                    }
+                    ins[i].buy = 1;
+                    ins[i].sell = -1;
+                    if(state.FrameID>8000){
+                        // cerr <<"***";
+                        if(!checkTimeEnough(i,robots[i].target_id,9000-state.FrameID))ins[i].buy = -1;
+                    }
                 }
-                ins[i].buy = 1;
-                ins[i].sell = -1;
-                if(state.FrameID>8000){
-                    // cerr <<"***";
-                    if(!checkTimeEnough(i,robots[i].target_id,9000-state.FrameID))ins[i].buy = -1;
+                else{
+                    cerr<<" robot "<<i<<" can not buy "<<studios[robots[i].target_id].type<<endl;
                 }
             }
             else{
@@ -1338,6 +1304,7 @@ void robot_judge_sol(int threshold_lack){
                 //studios[robots[i].loc_id].r_id = -1;
                 studios_rid[robots[i].loc_id][robots[i].get_type] = -1;
                 robots[i].get_type = 0;
+                // target = -1;
                 target = choose_lack(robots[i].loc_id,threshold_lack).first;
                 //cerr<<"robots[i].loc_id "<<robots[i].loc_id<<"target = "<<target<<endl;
                 if(target != -1){
@@ -1347,12 +1314,33 @@ void robot_judge_sol(int threshold_lack){
                 else{
                     min_subscript = -1;
                     min_dist = 100;
-                    for(int j=2;j<=4;j++){
-                        temp1=pick_point(i,j);
-                        dist = temp1.second;
-                        if(min_dist>dist){
-                            min_dist=dist;
+                    // cerr<<"dddd "<<full<<endl;
+                    if(full !=0){
+                        //cerr<<"fdfdf "<<endl;
+                        temp1=pick_point(i,1);
+                        //cerr<<"temp1 = "<<temp1.first<<' '<<temp1.second<<endl;
+                        for(int j=2;j<=4;j++){
+                            temp2=pick_point(i,j);
+                            dist = temp2.second;
+                            if(min_dist>dist){
+                                min_dist=dist;
+                                min_subscript=temp2.first;
+                            }
+                        }
+                        //cerr<<"min = "<<min_subscript<<' '<<min_dist<<endl;
+                        if(temp1.second<min_dist*1.5){
+                            min_dist=temp1.second;
                             min_subscript=temp1.first;
+                        }
+                    }
+                    else{
+                        for(int j=2;j<=4;j++){
+                            temp1=pick_point(i,j);
+                            dist = temp1.second;
+                            if(min_dist>dist){
+                                min_dist=dist;
+                                min_subscript=temp1.first;
+                            }
                         }
                     }
                     robots[i].target_id = min_subscript;
@@ -1409,12 +1397,13 @@ void robot_action(){
     }
     //for(int i =0;i<=7;i++)cerr<<"type "<<i<<" has "<<robot_get_type[i];
     // cerr <<endl;
-    // int full = 0;
-    // if(judge_full(2,0.08))full = 1;   //4,5,6 full threshold
-    // if(judge_full(3,0.3))full = 2;   //7 full threshold Higher priority
-    //cerr<<" full = "<<full<<endl;
+    int full = 0;
+    // if(judge_full(2,0.5))full = 1;   //4,5,6 full threshold
+    // // if(judge_full(3,0.2))full = 2;   //7 full threshold Higher priority
+    // cerr<<" full = "<<full<<endl;
+    // if(full!=0);
     //robot_judge(full,1.3,4.5);
-    robot_judge_sol(5);
+    robot_judge_sol(5,full);
 }
 
 vector<double>  get_T_limits(pair<double,double>pos,int id,int ctr,double dis){
@@ -1666,7 +1655,7 @@ bool will_collision(int i1,int i2){
         double dis4=calcuDis(pos_tmp_r2,pos_tmp_r_c);
         Root=tmp;
         if(!f1&&!f2){
-            if(gt(tmp.first,0.0)&&lt(tmp.first,0.2))return true;
+            if(gt(tmp.first,0.0)&&lt(tmp.first,0.3))return true;
         }
         if(gt(tmp.first,0.0))
         if(le(dis3,dis1)&&le(dis4,dis2))return true;
@@ -1677,6 +1666,10 @@ bool will_collision(int i1,int i2){
         tmp.first=(-1*b+sqrt(cla))/(2*a);
         tmp.second=(-1*b-sqrt(cla))/(2*a);
         Root=tmp;
+        if(!f1&&!f2){
+            if(gt(tmp.first,0.0)&&lt(tmp.first,0.3))return true;
+            if(gt(tmp.second,0.0)&&lt(tmp.second,0.3))return true;
+        }
         pair<double,double>pos_tmp_r1=robots[i1].pos;
         pair<double,double>pos_tmp_r_c(pos_tmp_r1.first+robots[i1].xy_pos.first*tmp.first,
         pos_tmp_r1.second+robots[i1].xy_pos.second*tmp.first
@@ -1704,9 +1697,7 @@ bool will_collision(int i1,int i2){
         //     cerr<<"---\n"<<endl;
         // }
         Collision_point=pos_tmp_r_c;
-        if(!f1&&!f2){
-            if(gt(tmp.first,0.0)&&lt(tmp.first,0.2))return true;
-        }
+
         if(gt(tmp.first,0.0))
         if(le(dis3,dis1)&&le(dis4,dis2))return true;
 
@@ -1722,9 +1713,6 @@ bool will_collision(int i1,int i2){
         double dis21=calcuDis(pos_tmp_r2,pos_tmp_s2);
         double dis41=calcuDis(pos_tmp_r2,pos_tmp_r_c1);
         Collision_point=pos_tmp_r_c1;
-        if(!f1&&!f2){
-            if(gt(tmp.second,0.0)&&lt(tmp.second,0.2))return true;
-        }
         if(gt(tmp.second,0.0))
         if(le(dis31,dis11)&&le(dis41,dis21))return true;
         return false;       
@@ -1786,11 +1774,28 @@ bool Check_for_balls_around(int pos){
     }
     return true;
 }
+int return_line_dire(int i1,int i2,int signBase){
+    will_collision(i1,i2);
+    double canAngle=min(fabs(Root.first),fabs(Root.second))*40*0.3;
+    double need_angle=get_rotation(i1,i2);
+    auto tmp= subVector(robots[i1].pos, robots[i2].pos);
+    Vec v1(tmp);
+    Vec v2(robots[i2].xy_pos);
+    double tmpAngle=acos(cos_t(v1,v2));
+
+    int sign= (lt(v1^v2,0))?-1:1;
+    if(sign*signBase==-1&&gt(canAngle,tmpAngle+need_angle)){
+        sign*=-1;
+    }
+    return sign;
+}
 int return_line_dire(int i1,int i2){
+    will_collision(i1,i2);
     auto tmp= subVector(robots[i1].pos, robots[i2].pos);
     Vec v1(tmp);
     Vec v2(robots[i2].xy_pos);
     int sign= (lt(v1^v2,0))?-1:1;
+    
     return sign;
 }
 pair<double,bool>  return_int_dis(int base){
@@ -1818,4 +1823,51 @@ vector<int> return_int_pos(int base){
         }
     }
     return arr;
+}
+void Detect_codirection(){
+    for(int i=1;i<(1<<4);i++){
+        if(__builtin_popcount(i)==2){
+            return_int_neg(i);
+        }
+    } 
+}
+int return_int_neg(int base){
+    vector<int>arr(2);
+    int pos=0;
+    for(int i=0;i<4;i++){
+        if((base>>i)&1){
+            arr[pos++]=i;
+        }
+    }
+    int tmp=Calculate_root(arr[0],arr[1]);
+    if(Adjust_the_same_direction[arr[0]][0]>0){
+        Adjust_the_same_direction[arr[0]][0]--;
+        ins[arr[0]].rotate=Adjust_the_same_direction[arr[0]][1];
+    }
+    if(Adjust_the_same_direction[arr[1]][0]>0){
+        Adjust_the_same_direction[arr[1]][0]--;
+        ins[arr[1]].rotate=Adjust_the_same_direction[arr[1]][1];
+    }
+    int id1=arr[0],id2=arr[1];
+    double dis=calcuDis(robots[id1].pos,robots[id2].pos);
+    if(tmp==-1&&lt(dis,4)){
+        
+        int sel=robots[id1].get_type>robots[id2].get_type?id1:id2;
+        int sel_1=robots[id1].get_type>robots[id2].get_type?id2:id1;
+        int sign1=return_line_dire(sel,sel_1);
+        ins[sel_1].rotate=Pi*sign1;
+        Adjust_the_same_direction[arr[1]][1]=Pi*sign1;
+        Adjust_the_same_direction[arr[1]][0]=5;
+    }
+    return  1;
+}
+bool is_same_direction(int i1,int i2){
+    Vec v1(pair<double,double>(cos(robots[i1].direction),sin(robots[i1].direction)));
+    Vec v2(pair<double,double>(cos(robots[i2].direction),sin(robots[i2].direction)));
+    return gt(cos_t(v1,v2),0.0);
+}
+double get_rotation(int i1,int i2){
+    Vec v1(pair<double,double>(cos(robots[i1].direction),sin(robots[i1].direction)));
+    Vec v2(subVector(robots[i1].pos, robots[i2].pos));
+    return acos(cos_t(v1,v2));
 }
