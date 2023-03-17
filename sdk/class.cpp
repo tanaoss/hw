@@ -850,16 +850,16 @@ void Collision_detection(vector<PayLoad> payLoad){
             double v1=return_v(sel);
             double v2=return_v(sel_1); 
             bool f=true;
+            if(robots[sel].get_type==0&&lt(v1,2)&&robots[sel].get_type!=0){
+                sel=id2;
+                sel_1=id1;                
+            }
             if(lt(v2,3)){
                 pair<double,double > pre_xy=robots[sel_1].xy_pos;
                 robots[sel_1].xy_pos.first=cos(robots[sel_1].direction)*3;
                 robots[sel_1].xy_pos.first=sin(robots[sel_1].direction)*3;
                 f=will_collision(sel,sel_1);
                 robots[sel_1].xy_pos=pre_xy;
-            }
-            if(robots[sel].get_type==0&&lt(v1,2)&&robots[sel].get_type!=0){
-                sel=id2;
-                sel_1=id1;                
             }
             if(f&&will_collision(sel,sel_1)){
                 if(lt(tmpDis,4)){
@@ -886,16 +886,16 @@ void Collision_detection(vector<PayLoad> payLoad){
             double v1=return_v(sel);
             double v2=return_v(sel_1); 
             bool f=true;
+            if(robots[sel].get_type==0&&lt(v1,2)&&robots[sel].get_type!=0){
+                sel=id1;
+                sel_1=id2;                
+            }
             if(lt(v2,3)){
                 pair<double,double > pre_xy=robots[sel_1].xy_pos;
                 robots[sel_1].xy_pos.first=cos(robots[sel_1].direction)*3;
                 robots[sel_1].xy_pos.first=sin(robots[sel_1].direction)*3;
                 f=will_collision(sel,sel_1);
                 robots[sel_1].xy_pos=pre_xy;
-            }
-            if(robots[sel].get_type==0&&lt(v1,2)&&robots[sel].get_type!=0){
-                sel=id2;
-                sel_1=id1;                
             }
             if(f&&will_collision(sel,sel_1)){
                 if(lt(tmpDis,4)){
