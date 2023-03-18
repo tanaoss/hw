@@ -8,6 +8,7 @@
 // #include "line.h"
 
 using namespace std;
+vector<PayLoad> payloads;
 vector<vector<double>> dis(50, vector<double>(50, 0));
 vector<Studio> studios;
 vector<Robot> robots;
@@ -293,6 +294,8 @@ PayLoad calPayload(int robortID,int studioID) {
     double angle2 = ge(robort.direction, 0.0) ? robort.direction: 2 * Pi + robort.direction;
     double angle = angle2 - angle1;
 
+    double speed = calVectorSize(robort.xy_pos);
+
     int sign;
 
     if(ge(angle, 0) && lt(angle, Pi) || lt(angle, -Pi))
@@ -306,7 +309,7 @@ PayLoad calPayload(int robortID,int studioID) {
     // cerr<<"**"<< angle1<<"**dir:"<<robort.direction<<"**"<<angle2<<endl;
     // cerr<<"**"<< angle << "**"<<distance<<"**"<<sign<<endl;
 
-    return PayLoad(angle, angular_acceleration, acceleration, distance, sign);
+    return PayLoad((robort.get_type == 0? 0.45: 0.53), angle, angular_acceleration, acceleration, distance, speed, sign);
 }
 
 bool eq(double a, double b) { return abs(a - b) < EPS; } // ==
@@ -542,8 +545,12 @@ void solveRobortsCollision()
                 if (getAvoidDirection(goID, stopID))
                 {
                     ins[stopID].rotate = ins[goID].rotate;
-                    if (lt(speed_stop, 1.0))
-                        ins[stopID].forward = 2;
+                    // if(payloads[i].sign != payloads[j].sign && eq(ins[i].rotate, Pi) && eq(ins[j].rotate, Pi)){
+                    //     getAvoidDirection(goID, stopID);
+                    //     ins[stopID].rotate = ins[goID].rotate;
+                    // }                    
+                } else if(flag_go) {
+                    getAvoidDirection(goID, stopID);
                 }
                 else
                 {
@@ -551,23 +558,30 @@ void solveRobortsCollision()
                 }
             }
 
-            if (true)
-            {
-                // cerr << "time:" << state.FrameID << endl;
-                // cerr << angle << endl;
-                // cerr << "stopID:" << stopID << "-" << robots[stopID].target_id << endl;
-                // // cerr<<"**"<<robots[stopID].get_type<<endl;
-                // cerr << "speed" << calVectorSize(robots[stopID].xy_pos) << " dir:" << robots[stopID].direction << endl;
-                // cerr << "a_speed" << robots[stopID].angular_velocity << endl;
-                // cerr << "rate:" << ins[stopID].rotate << endl;
-                // cerr << "**" << endl;
-                // cerr << "goID:" << goID << "-" << robots[goID].target_id << endl;
-                // // cerr<<"**"<<robots[goID].get_type<<endl;
-                // cerr << "speed" << calVectorSize(robots[goID].xy_pos) << " dir:" << robots[goID].direction << endl;
-                // cerr << "a_speed" << robots[goID].angular_velocity << endl;
-                // cerr << "rate:" << ins[goID].rotate << endl
-                //      << endl;
-            }
+            // if(le(dis, 1.06))
+            //     cerr<<"time:"<< state.FrameID << endl<<endl;
+            // if (state.FrameID >= 5800 && state.FrameID <= 6000)
+            // {
+            //     cerr << "time:" << state.FrameID << endl << angle<<"-"<<lt(angle, Pi / 2) << endl
+            //         <<"flag_stop:"<<flag_stop<<" flag_go:"<<flag_go<<endl
+            //         <<"dis:"<<dis<<endl
+            //         << "stopID:" << stopID << "-" << robots[stopID].target_id << endl
+            //     // cerr<<"**"<<robots[stopID].get_type<<endl;
+            //         << "speed" << calVectorSize(robots[stopID].xy_pos) << " dir:" << robots[stopID].direction << endl
+            //         << "speed_stop:"<<speed_stop<<endl
+            //         << "a_speed" << robots[stopID].angular_velocity << endl
+            //         << "rate:" << ins[stopID].rotate << endl
+            //         <<"forward:"<<ins[stopID].forward<<endl;
+            //     cerr << "**" << endl<< "goID:" << goID << "-" << robots[goID].target_id << endl
+            //     // cerr<<"**"<<robots[goID].get_type<<endl;
+            //         << "speed" << calVectorSize(robots[goID].xy_pos) << " dir:" << robots[goID].direction << endl
+            //         << "a_speed" << robots[goID].angular_velocity << endl
+            //         << "speed_go:"<<speed_go<<endl
+            //         <<"forward:"<<ins[goID].forward<<endl
+            //         << "rate:" << ins[goID].rotate << endl
+            //          << endl;
+            // }
+            // else cerr<<"-";
         }
     }
 }
@@ -781,6 +795,7 @@ void control(vector<PayLoad> payLoad){
 void Collision_detection(vector<PayLoad> payLoad){
     int selct1=3;
     double minDis=200;
+    void change_getType();
     void change_getType();
     for(int i=1;i<(1<<4);i++){
         if(__builtin_popcount(i)==2){
