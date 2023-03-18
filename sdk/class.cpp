@@ -913,7 +913,7 @@ double wait_dis(int robot_id ,int studio_id){
     if(studios[studio_id].pStatus==1||checkEnough(robot_id,studio_id,studios[studio_id].r_time))return 0;
     else{
         // cerr<<" studios[studio_id].r_time = "<<studios[studio_id].r_time<<" (dist/6.0/0.02) "<<(dist/6.0/0.02)<<endl;
-        dis = (studios[studio_id].r_time-(dist/6.0/0.02))*6*0.02;
+        dis = (studios[studio_id].r_time-(dist/6.0/0.02))*6*0.02*1;
         //cerr<<" wait dis = "<<dis<<endl;
     }
     return dis;  
@@ -1081,8 +1081,8 @@ pair<int,double> pick_point(int robot_id, int state){
 }
 pair<int,double> choose_lack(int studio_id ,int threshold){
     double dist ;
-    double min =100;
-    int min_subscript = -1;
+    int min =100;
+    double min_subscript = -1;
     if(studios[studio_id].type >3 &&studios[studio_id].type < 8){
         for(int i = 0;i < 4;i++){
             if(studios[studio_id].type == i+4){
