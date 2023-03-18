@@ -819,7 +819,6 @@ void Collision_detection(vector<PayLoad> payLoad){
         }
         if(lt(tmpDis,5)&&will_collision(sel,sel_1)){
             int sign=return_line_dire(sel,sel_1,payLoad[sel_1].sign);
-            int sign1=return_line_dire(sel_1,sel,payLoad[sel].sign);
             ins[sel_1].rotate=Pi*sign; 
             cerr<<"sel: "<<sel_1<<" 0 "<<Pi*sign<< endl;
         }
@@ -1840,6 +1839,7 @@ int return_line_dire(int i1,int i2,int signBase){
         }else if(lt(Pi-seta-arf,canAngle)){
             return sign;
         }else if(lt(fabs(Pi-seta-arf),fabs(seta+arf))){
+           
             return sign;
         }else{
             return sign*-1;
