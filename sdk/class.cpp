@@ -807,6 +807,7 @@ void Collision_detection(vector<PayLoad> payLoad){
         cerr<<" angle "<<payLoad[id1].angle<<" "<<payLoad[id2].angle<<endl;
         cerr<<" tar "<<robots[id1].target_id<<" "<<robots[id2].target_id<<endl;
         cerr<<"pos "<<RootFlag<<" "<<Root.first<<" "<<Root.second <<endl;
+        cerr<<"v "<<return_v(id1) <<" "<<return_v(id2) <<endl;
         int sel=robots[id1].get_type>robots[id2].get_type?id1:id2;
         int sel_1=robots[id1].get_type>robots[id2].get_type?id2:id1;
         if(Flag_line1&&!Flag_line2){
@@ -822,14 +823,7 @@ void Collision_detection(vector<PayLoad> payLoad){
             ins[sel_1].rotate=Pi*sign; 
             cerr<<"sel: "<<sel_1<<" 0 "<<Pi*sign<< endl;
         }
-        double v1=return_v(sel);
-        double v2=return_v(sel_1);
-        if(lt(min(v1,v2),3)&&is_same_direction(sel,sel_1)){
-            int F=who_isFirst(sel,sel_1)?sel:sel_1;
-            int S=who_isFirst(sel,sel_1)?sel_1:sel;
-            ins[F].forward=6;
-            continue;
-            }
+
         
     }
     
@@ -903,7 +897,7 @@ double wait_dis(int robot_id ,int studio_id){
     else{
         // cerr<<" studios[studio_id].r_time = "<<studios[studio_id].r_time<<" (dist/6.0/0.02) "<<(dist/6.0/0.02)<<endl;
         dis = (studios[studio_id].r_time-(dist/6.0/0.02))*6*0.02 ;
-        cerr<<" wait dis = "<<dis<<endl;
+        //cerr<<" wait dis = "<<dis<<endl;
     }
     return dis;  
 }
@@ -1131,7 +1125,7 @@ void first_action(){
             }
         }
         //studios[robots[i].target_id].r_id = i;
-        cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
+        //cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
     }
 }
 
@@ -1443,7 +1437,7 @@ void robot_action(){
         if(robots[i].get_type != 0)robot_get_type[robots[i].get_type]++;
         else if(robots[i].target_id != -1)robot_get_type[studios[robots[i].target_id].type]++;
     }
-    for(int i =0;i<=7;i++)cerr<<"type "<<i<<" has "<<robot_get_type[i];
+    //for(int i =0;i<=7;i++)cerr<<"type "<<i<<" has "<<robot_get_type[i];
     // cerr <<endl;
     int full = 0;
     // if(judge_full(2,0.5))full = 1;   //4,5,6 full threshold
@@ -1646,19 +1640,8 @@ double return_v(int id){
     return sqrt(xy_pos.first*xy_pos.first+xy_pos.second*xy_pos.second);//合速度
 }
 int Calculate_root(int i1,int i2){
-    Vec v1(robots[i1].xy_pos);
-    Vec v2(robots[i2].xy_pos);
-    Vec x1(robots[i1].pos);
-    Vec x2(robots[i2].pos);
-    Vec x_t=x1-x2;
-    Vec v_t=v1-v2;
-    double r=1.4;
-    double a=v_t*v_t;
-    double b=2*v_t*x_t;
-    double c=x_t*x_t-r*r;
-    double cla=b*b-4*a*c;
-    if(eq(a,0))return -1;
-    else if(gt(cla,0)) return 1;
+    double tmp= get_angle(robots[i1].xy_pos,robots[i2].xy_pos);
+    if(gt(tmp,0.9)&&!will_collision(i1,i2))return -1;
     else return 0;
 }
 bool will_collision(int i1,int i2){
@@ -1671,7 +1654,7 @@ bool will_collision(int i1,int i2){
     bool f1=isWall(robots[i1].target_id);
     bool f2=isWall(robots[i2].target_id);
     double tmpDis=calcuDis(robots[i1].pos,robots[i2].pos);
-    if(gt(tmpDis,3)){
+    if(gt(tmpDis,2)){
             Compute_redundancy=1.0;
     }else{
             Compute_redundancy=0.0;
@@ -1681,10 +1664,428 @@ bool will_collision(int i1,int i2){
     double b=2*(v_t*c_t);
     double c=c_t*c_t-r*r;
     double cla=b*b-4*a*c;   
+    if(state.FrameID>=6830&&state.FrameID<=6840&&i1==1&&i2==2){
+
+        cerr<<"will_c: "<<(-1*b+sqrt(cla))/(2*a)<<" "<<b<<" "<<(-1*b-sqrt(cla))/(2*a)<<" "<<cla<<endl;
+        cerr<<"dis: "<<tmpDis<<"  v "<<return_v(i1)<<" "<<return_v(i2)<<endl;
+    }
     pair<double ,double>tmp(-7,-7);
     if(cla<0){
         RootFlag=-1;
         return false;
+    }
+    if(eq(cla,0)){
+        RootFlag=0;
+        tmp.first=-1*b/(2*a);
+        pair<double,double>pos_tmp_r1=robots[i1].pos;
+        pair<double,double>pos_tmp_r_c(pos_tmp_r1.first+robots[i1].xy_pos.first*tmp.first,
+        pos_tmp_r1.second+robots[i1].xy_pos.second*tmp.first
+        );
+        pair<double,double>pos_tmp_s1=studios[robots[i1].target_id].pos;
+        double dis1=calcuDis(pos_tmp_r1,pos_tmp_s1);
+        double dis3=calcuDis(pos_tmp_r1,pos_tmp_r_c);
+        Collision_point=pos_tmp_r_c;
+        pair<double,double>pos_tmp_r2=robots[i2].pos;
+        pair<double,double>pos_tmp_s2=studios[robots[i2].target_id].pos;
+        double dis2=calcuDis(pos_tmp_r2,pos_tmp_s2);
+        double dis4=calcuDis(pos_tmp_r2,pos_tmp_r_c);
+        Root=tmp;
+        if(!f1&&!f2){
+            if(gt(tmp.first,0.0)){
+                if(lt(tmp.first,0.3))
+                return true;
+            }else{
+            auto t1=Root;
+            auto t2=RootFlag;
+            if(will_collision_Careful(i1,i2)){
+                
+                return true;
+            }
+            Root=t1;
+            RootFlag=t2;
+            }
+        }
+        if(gt(tmp.first,0.0)){
+            if(le(dis3,dis1)&&le(dis4,dis2))return true;
+        }else{
+            auto t1=Root;
+            auto t2=RootFlag;
+            if(will_collision_Careful(i1,i2)){
+                
+                return true;
+            }
+            Root=t1;
+            RootFlag=t2;
+        }
+        
+        return false;
+
+    }else if(gt(cla,0)){
+        RootFlag=1;
+        tmp.first=(-1*b+sqrt(cla))/(2*a);
+        tmp.second=(-1*b-sqrt(cla))/(2*a);
+        Root=tmp;
+        if(!f1&&!f2){
+            if(gt(tmp.first,0.0)){
+                if(lt(tmp.first,0.3))
+                return true;
+            }else{
+                auto t1=Root;
+                auto t2=RootFlag;
+                if(will_collision_Careful(i1,i2)){
+                    
+                    return true;
+                }
+                Root=t1;
+                RootFlag=t2;
+            }
+            if(gt(tmp.second,0.0)){
+                if(lt(tmp.second,0.3))
+                return true;
+            }else{
+                auto t1=Root;
+                auto t2=RootFlag;
+                if(will_collision_Careful(i1,i2)){
+                    
+                    return true;
+                }
+                Root=t1;
+                RootFlag=t2;
+            }
+        }
+ 
+        pair<double,double>pos_tmp_r1=robots[i1].pos;
+        pair<double,double>pos_tmp_r_c(pos_tmp_r1.first+robots[i1].xy_pos.first*tmp.first,
+        pos_tmp_r1.second+robots[i1].xy_pos.second*tmp.first
+        );
+        pair<double,double>pos_tmp_s1=studios[robots[i1].target_id].pos;
+        double dis1=calcuDis(pos_tmp_r1,pos_tmp_s1);
+        double dis3=calcuDis(pos_tmp_r1,pos_tmp_r_c);
+
+        pair<double,double>pos_tmp_r2=robots[i2].pos;
+        pair<double,double>pos_tmp_s2=studios[robots[i2].target_id].pos;
+        double dis2=calcuDis(pos_tmp_r2,pos_tmp_s2);
+        double dis4=calcuDis(pos_tmp_r2,pos_tmp_r_c);
+        // if(state.FrameID==1354&&i1==0&&i2==3){
+        //     cerr<<"---\n"<<endl;
+        //     cerr<<robots[i1].pos.first<<"-"<<robots[i1].pos.second<<" "
+        //     <<robots[i2].pos.first<<"-"<<robots[i2].pos.second<<endl;
+        //     cerr<<robots[i1].xy_pos.first<<"-"<<robots[i1].xy_pos.second<<" "
+        //     <<robots[i2].xy_pos.first<<"-"<<robots[i2].xy_pos.second<<endl;
+        //     cerr<<v_t.x<<"-"<<v_t.y<<endl;
+        //     cerr<<c_t.x<<"-"<<c_t.y<<endl;
+        //     cerr<<a<<"-"<<b<<"-"<<c<<" "<<sqrt(cla)<<" "<<(-1*b+sqrt(cla))<<" "<<
+        //     (-1*b+sqrt(cla))/(2*a)<<endl;
+        //     cerr<<tmp.first<<"-"<<tmp.second<<endl;
+        //     cerr<<dis1<<" "<<dis2<<" "<<dis3<<" "<<dis4<<" "<<pos_tmp_r_c.first<<"-"<<pos_tmp_r_c.second<<endl;
+        //     cerr<<"---\n"<<endl;
+        // }
+        Collision_point=pos_tmp_r_c;
+
+        if(gt(tmp.first,0.0)){
+            if(le(dis3,dis1)&&le(dis4,dis2))return true;
+        }else{
+            auto t1=Root;
+            auto t2=RootFlag;
+            if(will_collision_Careful(i1,i2)){
+                
+                return true;
+            }
+            Root=t1;
+            RootFlag=t2;
+        }
+        
+
+        tmp.second=(-1*b-sqrt(cla))/(2*a);
+        
+        pair<double,double>pos_tmp_r_c1(pos_tmp_r1.first+robots[i1].xy_pos.first*tmp.second,
+        pos_tmp_r1.second+robots[i1].xy_pos.second*tmp.second
+        );
+        double dis11=calcuDis(pos_tmp_r1,pos_tmp_s1);
+        double dis31=calcuDis(pos_tmp_r1,pos_tmp_r_c1);
+
+
+        double dis21=calcuDis(pos_tmp_r2,pos_tmp_s2);
+        double dis41=calcuDis(pos_tmp_r2,pos_tmp_r_c1);
+        Collision_point=pos_tmp_r_c1;
+        if(gt(tmp.second,0.0)){
+            if(le(dis31,dis11)&&le(dis41,dis21))return true;
+        }else{
+            auto t1=Root;
+            auto t2=RootFlag;
+            if(will_collision_Careful(i1,i2)){
+                
+                return true;
+            }
+            Root=t1;
+            RootFlag=t2;
+        }
+        
+        return false;       
+    }
+    if(eq(a,0))return true;
+    return true;
+}
+bool return_collision(int i1,int i2){
+    return lt(robots[i1].collision_val_pre,robots[i1].collision_val)&&
+    lt(robots[i2].collision_val_pre,robots[i2].collision_val);
+}
+pair<int,int> far_away(int i1,int i2,int base1,int base2){
+    int sign1=pl_g[i1].sign,sign2=pl_g[i2].sign;
+    if(sign1*sign2<0) return pair<int,int> (sign1,sign2);
+    else{
+        if(gt(fabs(pl_g[i1].angle)-fabs(pl_g[i2].angle) ,2)||robots[i1].get_type>(robots[i2].get_type)){
+            return pair<int,int> (sign1,-1*sign2);
+        }
+        return pair<int,int> (-1*sign1,sign2);
+    }
+    double dis = calcuDis(robots[i1].pos, robots[i2].pos);
+    int arr[][2]{{-1*base1,1*base2},{1*base1,1*base2},{-1*base1,-1*base2},{1*base1,-1*base2}};
+    double time=0.02;
+    pair<int,int>tmp(0,0);
+    pair<double,double>pre_xy1=robots[i1].xy_pos;
+    pair<double,double>pre_xy2=robots[i2].xy_pos;
+    double mmax=0.0;
+    int pos=0;
+    for(int i=0;i<4;i++){
+        Vec v1(make_pair<double ,double>(cos(Pi/2),sin(Pi/2)));
+        Vec v2(make_pair<double ,double>(cos(Pi/2),sin(Pi/2)));
+        auto p1=make_pair<double,double>(robots[i1].pos.first+robots[i1].xy_pos.first+(time*v1.x*arr[i][0]),
+        robots[i1].pos.second+robots[i1].xy_pos.second+(time*v1.x*arr[i][0])
+        );
+        auto p2=make_pair<double,double>(robots[i2].pos.first+robots[i2].xy_pos.first+(time*v2.x*arr[i][1]),
+        robots[i2].pos.second+robots[i2].xy_pos.second+(time*v2.x*arr[i][1])
+        );
+        double dis=calcuDis(p1,p2);    
+        if(gt(dis,mmax)){
+            mmax=dis;
+            pos=i;
+        }
+
+    }
+    tmp.first=arr[pos][0];
+    tmp.second=arr[pos][1];
+    return tmp;
+}
+double return_maxAng(int id1){
+    double dis=calcuDis(robots[id1].pos,studios[robots[id1].target_id].pos);
+    if(lt(dis,0.4))return Pi;
+    return asin(0.4/dis);
+}
+bool Check_for_balls_around(int pos){
+    for(int i=0;i<4;i++){
+        double dis = calcuDis(robots[i].pos, robots[pos].pos);
+        if(gt(dis,3))return false;
+       
+    }
+    return true;
+}
+int return_line_dire(int i1,int i2,int signBase){
+    will_collision(i1,i2);
+    int flagSign=getSign(i1,i2);
+    double canAngle=min(fabs(Root.first),fabs(Root.second))*40*0.3;
+    double stop_time= (fabs(robots[i2].angular_velocity)*fabs(robots[i2].angular_velocity))/(pl_g[i2].angular_acceleration*2);
+    double subVal=stop_time*40*0.3;
+    auto tmp= subVector(robots[i1].pos, robots[i2].pos);
+    Vec v2(robots[i2].xy_pos); 
+    Vec v1(tmp);
+    int sign= (lt(v1^v2,0))?-1:1;
+    int ns=gt(sign*(gt(robots[i2].angular_velocity,0)?1:-1),0)?0:-1;
+    int ns1=gt(sign*(gt(robots[i2].angular_velocity,0)?1:-1),0)?0:-1;
+    auto angle= return_seta(i1,i2); 
+    double seta=angle.first,arf=angle.second;
+    if(state.FrameID>=6830&&state.FrameID<=6840&&i1==1&&i2==2){
+        cerr<<"Frame: "<<state.FrameID<<" "<<canAngle<<" "<<seta<<" "<<arf<<
+        " "<<robots[i2].angular_velocity<< " "<<flagSign<<endl;
+    }
+    if(flagSign==1){
+        bool f1=false,f2=false;
+        if(gt(canAngle+ns1*subVal,seta+arf)){
+            f2=true;
+            // return sign*-1;
+        }else if(lt(Pi-seta-arf,canAngle+ns*subVal)){
+            f1=true;
+            // return sign;
+        }else if(lt(fabs(Pi-seta-arf),fabs(seta+arf))){
+            cerr<<"can't raote "<<state.FrameID<<" "<<i1<<" "<<i2<<endl;
+            return sign;
+        }else{
+            cerr<<"can't raote "<<state.FrameID<<" "<<i1<<" "<<i2<<endl;
+            return sign*-1;
+        }
+        if(f1&&f2){
+            return signBase;
+        }
+        if(f1)return sign;
+         return  -1*sign;
+    }else{
+        bool f1=false,f2=false;
+         if(lt(seta-arf,canAngle)){
+            f1=true;
+            // return sign;
+        }else if(gt(canAngle,Pi-seta+arf+ns1*subVal)){
+            f2=true;
+            // return sign*-1;
+        }else if(lt(fabs(seta-arf),fabs(Pi-seta+arf+ns*subVal))){
+            cerr<<"can't raote "<<state.FrameID<<" "<<i1<<" "<<i2<<endl;
+            return sign;
+        }else{
+            cerr<<"can't raote "<<state.FrameID<<" "<<i1<<" "<<i2<<endl;
+            return sign*-1;
+        }  
+        if(f1&&f2){
+            return signBase;
+        }
+        if(f1)return sign;
+         return  -1*sign; 
+    } 
+    // double canAngle=min(fabs(Root.first),fabs(Root.second))*40*0.3;
+    // double need_angle_1=min(fabs(Root.first),fabs(Root.second))*fabs(robots[i1].angular_velocity);
+    // double need_angle=get_rotation(i1,i2);
+    // auto tmp= subVector(robots[i1].pos, robots[i2].pos);
+    // int sa=addSign(i1,i2,lt(robots[i1].angular_velocity,0.0)?-1:1);
+    // Vec v1(tmp);
+    // Vec v2(robots[i2].xy_pos);
+    // double tmpAngle=acos(cos_t(v1,v2));
+    // auto tmp1= subVector(robots[i2].pos, robots[i1].pos);
+    // Vec v3(tmp1);
+    // Vec v4(robots[i1].xy_pos);
+    // double tmpAngle_1=acos(cos_t(v3,v4));
+    // cerr<<"id"<<i1<<" "<<i2<<endl;
+    // cerr<<tmpAngle<<"-"<<need_angle<<endl;
+    // int sign= (lt(v1^v2,0))?-1:1;
+    // if(sign*signBase==-1&&gt(canAngle,Pi-tmpAngle_1+tmpAngle+need_angle_1*sa)){
+    //     sign*=-1;
+    // }
+    // return sign;
+}
+int return_line_dire(int i1,int i2){
+    will_collision(i1,i2);
+    auto tmp= subVector(robots[i1].pos, robots[i2].pos);
+    Vec v1(tmp);
+    Vec v2(robots[i2].xy_pos);
+    int sign= (lt(v1^v2,0))?-1:1;
+    
+    return sign;
+}
+pair<double,bool>  return_int_dis(int base){
+    vector<int>arr(2);
+    int pos=0;
+    for(int i=0;i<4;i++){
+        if((base>>i)&1){
+            arr[pos++]=i;
+        }
+    }
+    if(base==12&&calcuDis(robots[arr[0]].pos,robots[arr[1]].pos)<2&&!will_collision(arr[0],arr[1])){
+                // cerr<<"% "<<RootFlag<<" "<< Root.first<<"-"<<Root.second<<
+                // " "<<Collision_point.first<<"-"<<Collision_point.second<< endl;
+    }
+    return pair<double,int>(calcuDis(robots[arr[0]].pos,robots[arr[1]].pos),
+    will_collision(arr[0],arr[1])
+    );
+}
+vector<int> return_int_pos(int base){
+    vector<int>arr(2);
+    int pos=0;
+    for(int i=0;i<4;i++){
+        if((base>>i)&1){
+            arr[pos++]=i;
+        }
+    }
+    return arr;
+}
+void Detect_codirection(){
+    for(int i=1;i<(1<<4);i++){
+        if(__builtin_popcount(i)==2){
+            return_int_neg(i);
+        }
+    } 
+}
+int return_int_neg(int base){
+    // vector<int>arr(2);
+    // int pos=0;
+    // for(int i=0;i<4;i++){
+    //     if((base>>i)&1){
+    //         arr[pos++]=i;
+    //     }
+    // }
+    // int tmp=Calculate_root(arr[0],arr[1]);
+    // int id1=arr[0],id2=arr[1];
+    // double dis=calcuDis(robots[id1].pos,robots[id2].pos);
+    // if(tmp==-1&&lt(dis,3)){
+    //     int sel=robots[id1].get_type>robots[id2].get_type?id1:id2;
+    //     int sel_1=robots[id1].get_type>robots[id2].get_type?id2:id1;
+    //     int sign1=return_line_dire(sel,sel_1);
+    //     ins[sel_1].forward=-2;
+        
+    // }
+    return  1;
+}
+bool is_same_direction(int i1,int i2){
+    Vec v1(pair<double,double>(cos(robots[i1].direction),sin(robots[i1].direction)));
+    Vec v2(pair<double,double>(cos(robots[i2].direction),sin(robots[i2].direction)));
+    return gt(cos_t(v1,v2),0.0);
+}
+double get_rotation(int i1,int i2){
+    Vec v1(pair<double,double>(cos(robots[i1].direction),sin(robots[i1].direction)));
+    Vec v2(subVector(robots[i1].pos, robots[i2].pos));
+    return acos(cos_t(v1,v2));
+}
+int addSign(int i1,int i2,int baseSign){
+    Vec v1(pair<double,double>(cos(robots[i1].direction),sin(robots[i1].direction)));
+    Vec v2(subVector(robots[i1].pos, robots[i2].pos)); 
+    int sign= (lt(v1^v2,0))?-1:1;
+    return gt(sign*baseSign,0.0)?-1:1;  
+}
+int getSign(int i1,int i2){
+    auto tmp= subVector(robots[i1].pos, robots[i2].pos);
+    Vec v1(tmp);
+    Vec v2(robots[i2].xy_pos);
+    int sign1=(lt(v1^v2,0))?-1:1;
+    auto tmp1= subVector(robots[i2].pos, robots[i1].pos);
+    Vec v3(tmp1);
+    Vec v4(robots[i1].xy_pos);
+
+    int sign2=(lt(v3^v4,0))?-1:1;
+    return gt(sign1*sign2,0.0)?-1:1;
+}
+pair<double,double> return_seta(int i1,int i2){
+    auto tmp= subVector(robots[i1].pos, robots[i2].pos);
+    Vec v1(tmp);
+    Vec v2(robots[i2].xy_pos);
+    int sign1=(lt(v1^v2,0))?-1:1;
+    auto tmp1= subVector(robots[i2].pos, robots[i1].pos);
+    Vec v3(tmp1);
+    Vec v4(robots[i1].xy_pos);
+    double tmpAngle=acos(cos_t(v1,v2));
+    double tmpAngle1=acos(cos_t(v3,v4));
+    return pair<double,double>(tmpAngle,tmpAngle1);
+}
+bool will_collision_Careful(int i1,int i2){
+    Vec v1(robots[i1].xy_pos);
+    Vec v2(robots[i2].xy_pos);
+    Vec x1(robots[i1].pos);
+    Vec x2(robots[i2].pos);
+    Vec c_t=x1-x2;
+    Vec v_t=v1-v2;
+    bool f1=isWall(robots[i1].target_id);
+    bool f2=isWall(robots[i2].target_id);
+    double tmpDis=calcuDis(robots[i1].pos,robots[i2].pos);
+
+    double r=getRobotRadius(i1)+getRobotRadius(i2);
+    double a=v_t*v_t;
+    double b=2*(v_t*c_t);
+    double c=c_t*c_t-r*r;
+    double cla=b*b-4*a*c;   
+    pair<double ,double>tmp(-7,-7);
+    if(cla<0){
+        RootFlag=-1;
+        return false;
+    }
+        if(state.FrameID>=6830&&state.FrameID<=6840&&i1==1&&i2==2){
+
+        cerr<<"will_c_c: "<<(-1*b+sqrt(cla))/(2*a)<<" "<<b<<" "<<(-1*b-sqrt(cla))/(2*a)<<" "<<cla<<endl;
+        cerr<<"dis: "<<tmpDis<<"  v "<<return_v(i1)<<" "<<return_v(i2)<<endl;
     }
     if(eq(cla,0)){
         RootFlag=0;
@@ -1766,224 +2167,5 @@ bool will_collision(int i1,int i2){
         return false;       
     }
     if(eq(a,0))return true;
-    return true;
-}
-bool return_collision(int i1,int i2){
-    return lt(robots[i1].collision_val_pre,robots[i1].collision_val)&&
-    lt(robots[i2].collision_val_pre,robots[i2].collision_val);
-}
-pair<int,int> far_away(int i1,int i2,int base1,int base2){
-    int sign1=pl_g[i1].sign,sign2=pl_g[i2].sign;
-    if(sign1*sign2<0) return pair<int,int> (sign1,sign2);
-    else{
-        if(gt(fabs(pl_g[i1].angle)-fabs(pl_g[i2].angle) ,2)||robots[i1].get_type>(robots[i2].get_type)){
-            return pair<int,int> (sign1,-1*sign2);
-        }
-        return pair<int,int> (-1*sign1,sign2);
-    }
-    double dis = calcuDis(robots[i1].pos, robots[i2].pos);
-    int arr[][2]{{-1*base1,1*base2},{1*base1,1*base2},{-1*base1,-1*base2},{1*base1,-1*base2}};
-    double time=0.02;
-    pair<int,int>tmp(0,0);
-    pair<double,double>pre_xy1=robots[i1].xy_pos;
-    pair<double,double>pre_xy2=robots[i2].xy_pos;
-    double mmax=0.0;
-    int pos=0;
-    for(int i=0;i<4;i++){
-        Vec v1(make_pair<double ,double>(cos(Pi/2),sin(Pi/2)));
-        Vec v2(make_pair<double ,double>(cos(Pi/2),sin(Pi/2)));
-        auto p1=make_pair<double,double>(robots[i1].pos.first+robots[i1].xy_pos.first+(time*v1.x*arr[i][0]),
-        robots[i1].pos.second+robots[i1].xy_pos.second+(time*v1.x*arr[i][0])
-        );
-        auto p2=make_pair<double,double>(robots[i2].pos.first+robots[i2].xy_pos.first+(time*v2.x*arr[i][1]),
-        robots[i2].pos.second+robots[i2].xy_pos.second+(time*v2.x*arr[i][1])
-        );
-        double dis=calcuDis(p1,p2);    
-        if(gt(dis,mmax)){
-            mmax=dis;
-            pos=i;
-        }
-
-    }
-    tmp.first=arr[pos][0];
-    tmp.second=arr[pos][1];
-    return tmp;
-}
-double return_maxAng(int id1){
-    double dis=calcuDis(robots[id1].pos,studios[robots[id1].target_id].pos);
-    if(lt(dis,0.4))return Pi;
-    return asin(0.4/dis);
-}
-bool Check_for_balls_around(int pos){
-    for(int i=0;i<4;i++){
-        double dis = calcuDis(robots[i].pos, robots[pos].pos);
-        if(gt(dis,3))return false;
-       
-    }
-    return true;
-}
-int return_line_dire(int i1,int i2,int signBase){
-    will_collision(i1,i2);
-    int flagSign=getSign(i1,i2);
-    double canAngle=min(fabs(Root.first),fabs(Root.second))*40*0.3;
-    auto tmp= subVector(robots[i1].pos, robots[i2].pos);
-    Vec v2(robots[i2].xy_pos); 
-    Vec v1(tmp);
-    int sign= (lt(v1^v2,0))?-1:1;
-    auto angle= return_seta(i1,i2); 
-    double seta=angle.first,arf=angle.second;
-
-    if(flagSign==1){
-        if(gt(canAngle,seta+arf)){
-            return sign*-1;
-        }else if(lt(Pi-seta-arf,canAngle)){
-            return sign;
-        }else if(lt(fabs(Pi-seta-arf),fabs(seta+arf))){
-           
-            return sign;
-        }else{
-            return sign*-1;
-        }
-    }else{
-         if(lt(seta-arf,canAngle)){
-            return sign;
-        }else if(gt(canAngle,Pi-seta+arf)){
-            return sign*-1;
-        }else if(lt(fabs(seta-arf),fabs(Pi-seta+arf))){
-            return sign;
-        }else{
-            return sign*-1;
-        }   
-    } 
-    // double canAngle=min(fabs(Root.first),fabs(Root.second))*40*0.3;
-    // double need_angle_1=min(fabs(Root.first),fabs(Root.second))*fabs(robots[i1].angular_velocity);
-    // double need_angle=get_rotation(i1,i2);
-    // auto tmp= subVector(robots[i1].pos, robots[i2].pos);
-    // int sa=addSign(i1,i2,lt(robots[i1].angular_velocity,0.0)?-1:1);
-    // Vec v1(tmp);
-    // Vec v2(robots[i2].xy_pos);
-    // double tmpAngle=acos(cos_t(v1,v2));
-    // auto tmp1= subVector(robots[i2].pos, robots[i1].pos);
-    // Vec v3(tmp1);
-    // Vec v4(robots[i1].xy_pos);
-    // double tmpAngle_1=acos(cos_t(v3,v4));
-    // cerr<<"id"<<i1<<" "<<i2<<endl;
-    // cerr<<tmpAngle<<"-"<<need_angle<<endl;
-    // int sign= (lt(v1^v2,0))?-1:1;
-    // if(sign*signBase==-1&&gt(canAngle,Pi-tmpAngle_1+tmpAngle+need_angle_1*sa)){
-    //     sign*=-1;
-    // }
-    // return sign;
-}
-int return_line_dire(int i1,int i2){
-    will_collision(i1,i2);
-    auto tmp= subVector(robots[i1].pos, robots[i2].pos);
-    Vec v1(tmp);
-    Vec v2(robots[i2].xy_pos);
-    int sign= (lt(v1^v2,0))?-1:1;
-    
-    return sign;
-}
-pair<double,bool>  return_int_dis(int base){
-    vector<int>arr(2);
-    int pos=0;
-    for(int i=0;i<4;i++){
-        if((base>>i)&1){
-            arr[pos++]=i;
-        }
-    }
-    if(base==12&&calcuDis(robots[arr[0]].pos,robots[arr[1]].pos)<2&&!will_collision(arr[0],arr[1])){
-                // cerr<<"% "<<RootFlag<<" "<< Root.first<<"-"<<Root.second<<
-                // " "<<Collision_point.first<<"-"<<Collision_point.second<< endl;
-    }
-    return pair<double,int>(calcuDis(robots[arr[0]].pos,robots[arr[1]].pos),
-    will_collision(arr[0],arr[1])
-    );
-}
-vector<int> return_int_pos(int base){
-    vector<int>arr(2);
-    int pos=0;
-    for(int i=0;i<4;i++){
-        if((base>>i)&1){
-            arr[pos++]=i;
-        }
-    }
-    return arr;
-}
-void Detect_codirection(){
-    for(int i=1;i<(1<<4);i++){
-        if(__builtin_popcount(i)==2){
-            return_int_neg(i);
-        }
-    } 
-}
-int return_int_neg(int base){
-    vector<int>arr(2);
-    int pos=0;
-    for(int i=0;i<4;i++){
-        if((base>>i)&1){
-            arr[pos++]=i;
-        }
-    }
-    int tmp=Calculate_root(arr[0],arr[1]);
-    if(Adjust_the_same_direction[arr[0]][0]>0){
-        Adjust_the_same_direction[arr[0]][0]--;
-        ins[arr[0]].rotate=Adjust_the_same_direction[arr[0]][1];
-    }
-    if(Adjust_the_same_direction[arr[1]][0]>0){
-        Adjust_the_same_direction[arr[1]][0]--;
-        ins[arr[1]].rotate=Adjust_the_same_direction[arr[1]][1];
-    }
-    int id1=arr[0],id2=arr[1];
-    double dis=calcuDis(robots[id1].pos,robots[id2].pos);
-    if(tmp==-1&&lt(dis,4)){
-        
-        int sel=robots[id1].get_type>robots[id2].get_type?id1:id2;
-        int sel_1=robots[id1].get_type>robots[id2].get_type?id2:id1;
-        int sign1=return_line_dire(sel,sel_1);
-        ins[sel_1].rotate=Pi*sign1;
-        Adjust_the_same_direction[arr[1]][1]=Pi*sign1;
-        Adjust_the_same_direction[arr[1]][0]=5;
-    }
-    return  1;
-}
-bool is_same_direction(int i1,int i2){
-    Vec v1(pair<double,double>(cos(robots[i1].direction),sin(robots[i1].direction)));
-    Vec v2(pair<double,double>(cos(robots[i2].direction),sin(robots[i2].direction)));
-    return gt(cos_t(v1,v2),0.0);
-}
-double get_rotation(int i1,int i2){
-    Vec v1(pair<double,double>(cos(robots[i1].direction),sin(robots[i1].direction)));
-    Vec v2(subVector(robots[i1].pos, robots[i2].pos));
-    return acos(cos_t(v1,v2));
-}
-int addSign(int i1,int i2,int baseSign){
-    Vec v1(pair<double,double>(cos(robots[i1].direction),sin(robots[i1].direction)));
-    Vec v2(subVector(robots[i1].pos, robots[i2].pos)); 
-    int sign= (lt(v1^v2,0))?-1:1;
-    return gt(sign*baseSign,0.0)?-1:1;  
-}
-int getSign(int i1,int i2){
-    auto tmp= subVector(robots[i1].pos, robots[i2].pos);
-    Vec v1(tmp);
-    Vec v2(robots[i2].xy_pos);
-    int sign1=(lt(v1^v2,0))?-1:1;
-    auto tmp1= subVector(robots[i2].pos, robots[i1].pos);
-    Vec v3(tmp1);
-    Vec v4(robots[i1].xy_pos);
-
-    int sign2=(lt(v3^v4,0))?-1:1;
-    return gt(sign1*sign2,0.0)?-1:1;
-}
-pair<double,double> return_seta(int i1,int i2){
-    auto tmp= subVector(robots[i1].pos, robots[i2].pos);
-    Vec v1(tmp);
-    Vec v2(robots[i2].xy_pos);
-    int sign1=(lt(v1^v2,0))?-1:1;
-    auto tmp1= subVector(robots[i2].pos, robots[i1].pos);
-    Vec v3(tmp1);
-    Vec v4(robots[i1].xy_pos);
-    double tmpAngle=acos(cos_t(v1,v2));
-    double tmpAngle1=acos(cos_t(v3,v4));
-    return pair<double,double>(tmpAngle,tmpAngle1);
+    return true;    
 }
