@@ -388,7 +388,7 @@ bool checkEnough(int robot_id, int target_id, int frame)
         double time = (dis / 6.0) / 0.02; // 剩余秒数
         // cerr<<"time = "<<time<<" least time = "<<frame<<endl;
         if (time > frame)
-            return false;
+            return true;
         else
             return false;
     }
@@ -902,8 +902,9 @@ double wait_dis(int robot_id ,int studio_id){
     double dist = calcuDis(robots[robot_id].pos,studios[studio_id].pos);
     if(studios[studio_id].pStatus==1||checkEnough(robot_id,studio_id,studios[studio_id].r_time))return 0;
     else{
-        dis = (studios[studio_id].r_time*0.02-dist/6)*6 ;
-        // cerr<<" wait dis = "<<dis<<endl;
+        // cerr<<" studios[studio_id].r_time = "<<studios[studio_id].r_time<<" (dist/6.0/0.02) "<<(dist/6.0/0.02)<<endl;
+        dis = (studios[studio_id].r_time-(dist/6.0/0.02))*6*0.02 ;
+        cerr<<" wait dis = "<<dis<<endl;
     }
     return dis;  
 }
@@ -912,11 +913,11 @@ double wait_dis(int robot_id ,int studio_id){
 */
 pair<int,double> pick_point(int robot_id, int state){
     pair<double,double> pos = robots[robot_id].pos;
-    int min = 1000;
+    double min = 1000;
     int min_subscript = -1;
     int i,j;
     int studio_id;
-    int dist;
+    double dist;
     int item_type = robots[robot_id].get_type;
     // if(state == 0){
     //     for(i=0;i<studios.size();i++){
@@ -968,13 +969,14 @@ pair<int,double> pick_point(int robot_id, int state){
                         // dist=(calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i))*close_threshold2(robot_id,i,1.0);
                         // dist=(calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i));
                         dist=(calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i))+wait_dis(robot_id,i);
+                        // cerr<<calcuDis(robots[robot_id].pos,studios[i].pos)<<' '<<anger_to_length(robot_id,i)<<' '<<wait_dis(robot_id,i)<<endl;
                         
                         // dist=calcuDis(robots[robot_id].pos,studios[i].pos);
                         if(dist<min){
                             min=dist;
                             min_subscript=i;
                         }
-                        //<<state<< ' '<<dist<< ' '<<min<<' '<<min_subscript<<' '<<i<<endl;
+                        // cerr<<state<< ' '<<dist<< ' '<<min<<' '<<min_subscript<<' '<<i<<endl;
                     }
                 }
             }
@@ -997,7 +999,7 @@ pair<int,double> pick_point(int robot_id, int state){
                             min=dist;
                             min_subscript=i;
                         }
-                        //cerr<<state<< ' '<<dist<< ' '<<min<<' '<<min_subscript<<endl;
+                        // cerr<<state<< ' '<<dist<< ' '<<min<<' '<<min_subscript<<endl;
                     }
                 }
             }
@@ -1019,7 +1021,7 @@ pair<int,double> pick_point(int robot_id, int state){
                             min=dist;
                             min_subscript=i;
                         }
-                        //cerr<<state<< ' '<<dist<< ' '<<min<<' '<<min_subscript<<endl;
+                        // cerr<<state<< ' '<<dist<< ' '<<min<<' '<<min_subscript<<endl;
                     }
                 }
             }
@@ -1130,7 +1132,7 @@ void first_action(){
             }
         }
         //studios[robots[i].target_id].r_id = i;
-        // cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
+        cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
     }
 }
 
@@ -1436,7 +1438,7 @@ void robot_judge_sol(int threshold_lack,int full){
 void robot_action(){
     //cerr<<"start"<<endl;
     //print_matr();
-    print_matr();
+    // print_matr();
     for(int i =0;i<=7;i++)robot_get_type[i]=0;
     for(int i = 0;i<4;i++){
         if(robots[i].get_type != 0)robot_get_type[robots[i].get_type]++;
