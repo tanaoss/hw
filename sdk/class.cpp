@@ -781,7 +781,7 @@ void control(vector<PayLoad> payLoad){
 void Collision_detection(vector<PayLoad> payLoad){
     int selct1=3;
     double minDis=200;
-    
+    void change_getType();
     for(int i=1;i<(1<<4);i++){
         if(__builtin_popcount(i)==2){
             pair<double,bool> tmpF=return_int_dis(i);
@@ -808,8 +808,10 @@ void Collision_detection(vector<PayLoad> payLoad){
         cerr<<" tar "<<robots[id1].target_id<<" "<<robots[id2].target_id<<endl;
         cerr<<"pos "<<RootFlag<<" "<<Root.first<<" "<<Root.second <<endl;
         cerr<<"v "<<return_v(id1) <<" "<<return_v(id2) <<endl;
-        int sel=robots[id1].get_type>robots[id2].get_type?id1:id2;
-        int sel_1=robots[id1].get_type>robots[id2].get_type?id2:id1;
+        int sel=return_type(id1)>return_type(id2)&&robots[id1].get_type==robots[id2].get_type
+        ||robots[id1].get_type>robots[id2].get_type?id1:id2;
+        int sel_1=return_type(id1)>return_type(id2)&&robots[id1].get_type==robots[id2].get_type
+        ||robots[id1].get_type>robots[id2].get_type?id2:id1;
         if(Flag_line1&&!Flag_line2){
             sel=id1;
             sel_1=id2;
@@ -896,7 +898,7 @@ double wait_dis(int robot_id ,int studio_id){
     if(studios[studio_id].pStatus==1||checkEnough(robot_id,studio_id,studios[studio_id].r_time))return 0;
     else{
         // cerr<<" studios[studio_id].r_time = "<<studios[studio_id].r_time<<" (dist/6.0/0.02) "<<(dist/6.0/0.02)<<endl;
-        dis = (studios[studio_id].r_time-(dist/6.0/0.02))*6*0.02 ;
+        dis = (studios[studio_id].r_time-(dist/6.0/0.02))*6*0.02;
         //cerr<<" wait dis = "<<dis<<endl;
     }
     return dis;  
@@ -1914,7 +1916,10 @@ int return_line_dire(int i1,int i2,int signBase){
             return sign*-1;
         }
         if(f1&&f2){
-            return signBase;
+            if(lt(fabs(Pi-seta-arf),fabs(seta+arf)))
+                return sign;
+            return -1*sign;
+            
         }
         if(f1)return sign;
          return  -1*sign;
@@ -1934,7 +1939,10 @@ int return_line_dire(int i1,int i2,int signBase){
             return sign*-1;
         }  
         if(f1&&f2){
-            return signBase;
+            if(lt(fabs(seta-arf),fabs(Pi-seta+arf+ns*subVal))){
+                return sign;
+            }
+            return -1*sign;
         }
         if(f1)return sign;
          return  -1*sign; 
@@ -2168,4 +2176,14 @@ bool will_collision_Careful(int i1,int i2){
     }
     if(eq(a,0))return true;
     return true;    
+}
+double return_type(int i1){
+    return robots[i1].collision_val*robots[i1].time_val;
+}
+void change_getType(){
+    // for(int i=0;i<4;i++){
+    //     double val=(eq(robots[i].collision_val,0)?1:robots[i].collision_val)*(eq(robots[i].time_val,0)?1:robots[i].time_val);
+    //     if(lt(val,0.8))
+    //     robots[i].get_type=0;
+    // }
 }

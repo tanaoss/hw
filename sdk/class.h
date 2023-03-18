@@ -231,3 +231,5 @@ double get_rotation(int i1,int i2);
 int addSign(int i1,int i2,int baseSign);
 int getSign(int i1,int i2);
 pair<double,double> return_seta(int i1,int i2);
+double return_type(int i1);
+void change_getType();
