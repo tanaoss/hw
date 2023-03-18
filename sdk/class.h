@@ -8,17 +8,21 @@ using namespace std;
 
 struct PayLoad
 {
+    double radius;
     double angle;                // 角度
     double angular_acceleration; // 角加速度
     double acceleration;         // 加速度
     double distance;
+    double speed;
     int sign; // 当前角速度是在贴合目标点的夹角还是远离目标点的夹角
-    PayLoad(double _angle, double _angular_acceleration, double _acceleration, double _distance, int _sign)
+    PayLoad(double _radius, double _angle, double _angular_acceleration, double _acceleration, double _distance, double _speed, int _sign)
     {
+        radius = _radius;
         angle = _angle;
         angular_acceleration = _angular_acceleration;
         acceleration = _acceleration;
         distance = _distance;
+        speed = _speed;
         sign = _sign;
     }
 };
@@ -79,8 +83,9 @@ struct Robot
     int pre_forWard;
     int pre_rote;
     int pre_cnt;
+    int wait;
     Robot(int _id, int _loc_id, int _get_type, double _time_val, double _collision_val, double _angular_velocity, pair<double, double> &_xy_pos,
-          double _direction, pair<double, double> &_pos, int _target_id = -1, int _lastSign = 0, int _isTurn = 0) : xy_pos(_xy_pos), pos(_pos)
+          double _direction, pair<double, double> &_pos, int _target_id = -1,int _wait = -1,int _lastSign = 0, int _isTurn = 0) : xy_pos(_xy_pos), pos(_pos)
     {
         id = _id;
         loc_id = _loc_id;
@@ -93,6 +98,7 @@ struct Robot
         lastSign = _lastSign;
         isTurn = _isTurn;
         pre_cnt=0;
+        wait=_wait;
     }
     void set(int _id, int _loc_id, int _get_type, double _time_val, double _collision_val, double _angular_velocity, pair<double, double> &&_xy_pos,
              double _direction, pair<double, double> &&_pos)
@@ -120,12 +126,15 @@ struct Robot
         //     return false;
         // if(speed2_a - speed2 > 1e-5)
         //     return true;
-        // if(angular_velocity - a.angular_velocity > 1e-10)
+        // if(fabs(angular_velocity) - fabs(a.angular_velocity) > 1e-10)
         //     return false;
-        // if(a.angular_velocity - angular_velocity > 1e-10)
+        // if(fabs(a.angular_velocity) - fabs(angular_velocity) > 1e-10)
         //     return true;
-        if (get_type == get_type)
-            return time_val * collision_val - a.time_val * a.collision_val < -1e-10;
+        if (get_type == get_type){
+            if(fabs(time_val * collision_val - a.time_val * a.collision_val) < 1e-10)
+                return id < a.id;
+            return time_val * collision_val - a.time_val * a.collision_val < 1e-10;
+        }
         return get_type < a.get_type;
     }
 };
