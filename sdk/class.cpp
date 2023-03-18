@@ -387,7 +387,7 @@ bool checkEnough(int robot_id, int target_id, int frame)
         double time = (dis / 6.0) / 0.02; // 剩余秒数
         // cerr<<"time = "<<time<<" least time = "<<frame<<endl;
         if (time > frame)
-            return true;
+            return false;
         else
             return false;
     }
@@ -1403,7 +1403,7 @@ void robot_action(){
     }
     //for(int i =0;i<=7;i++)cerr<<"type "<<i<<" has "<<robot_get_type[i];
     // cerr <<endl;
-    // int full = 0;
+    int full = 0;
     // if(judge_full(2,0.5))full = 1;   //4,5,6 full threshold
     // // if(judge_full(3,0.2))full = 2;   //7 full threshold Higher priority
     // cerr<<" full = "<<full<<endl;
@@ -1630,7 +1630,7 @@ bool will_collision(int i1,int i2){
     bool f2=isWall(robots[i2].target_id);
     double tmpDis=calcuDis(robots[i1].pos,robots[i2].pos);
     if(gt(tmpDis,3)){
-            Compute_redundancy=0.5;
+            Compute_redundancy=1.0;
     }else{
             Compute_redundancy=0.0;
         }
