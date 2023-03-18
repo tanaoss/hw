@@ -649,6 +649,10 @@ void solveRobortsCollision()
                     // stopID = (goID == i) ? j : i;
                     getAvoidDirection(goID, stopID);
                     ins[stopID].rotate = ins[goID].rotate;
+                    // if(payloads[i].sign != payloads[j].sign && eq(ins[i].rotate, Pi) && eq(ins[j].rotate, Pi)){
+                    //     getAvoidDirection(goID, stopID);
+                    //     ins[stopID].rotate = ins[goID].rotate;
+                    // }                    
                 } else if(flag_go) {
                     getAvoidDirection(goID, stopID);
                 }
@@ -659,7 +663,7 @@ void solveRobortsCollision()
 
             // if(le(dis, 1.06))
             //     cerr<<"time:"<< state.FrameID << endl<<endl;
-            // if (state.FrameID >= 7600 && state.FrameID <= 7860)
+            // if (state.FrameID >= 5800 && state.FrameID <= 6000)
             // {
             //     cerr << "time:" << state.FrameID << endl << angle<<"-"<<lt(angle, Pi / 2) << endl
             //         <<"flag_stop:"<<flag_stop<<" flag_go:"<<flag_go<<endl
