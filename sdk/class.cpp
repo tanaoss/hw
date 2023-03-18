@@ -924,7 +924,7 @@ double wait_dis(int robot_id ,int studio_id){
 */
 pair<int,double> pick_point(int robot_id, int state){
     pair<double,double> pos = robots[robot_id].pos;
-    double min = 1000;
+    int min = 1000;
     int min_subscript = -1;
     int i,j;
     int studio_id;
