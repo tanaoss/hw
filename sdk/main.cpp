@@ -9,6 +9,7 @@ extern vector<Studio> studios;
 extern vector<Robot> robots;
 extern State state;//当前帧数，全局可见
 extern vector<PayLoad> pl_g;;
+extern vector<PayLoad> payloads;
 
 int main()
 {
@@ -16,11 +17,10 @@ int main()
     std::cin.tie(0);    // IO
     readMapUntilOK();
     calcuStudioDis();
-    cerr<<robots.size();
+    // cerr<<robots.size();
     cout<<"OK\n";
     cout.flush();
     int count = 0;
-    vector<PayLoad> payloads;
     initRobortInfo();
     init_studio_parameter();
     while (cin>>state.FrameID){

@@ -2181,9 +2181,9 @@ double return_type(int i1){
     return robots[i1].collision_val*robots[i1].time_val;
 }
 void change_getType(){
-    // for(int i=0;i<4;i++){
-    //     double val=(eq(robots[i].collision_val,0)?1:robots[i].collision_val)*(eq(robots[i].time_val,0)?1:robots[i].time_val);
-    //     if(lt(val,0.8))
-    //     robots[i].get_type=0;
-    // }
+    for(int i=0;i<4;i++){
+        double val=(eq(robots[i].collision_val,0)?1:robots[i].collision_val)*(eq(robots[i].time_val,0)?1:robots[i].time_val);
+        if(lt(val,0.8))
+        robots[i].get_type=0;
+    }
 }
