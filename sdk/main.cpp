@@ -17,7 +17,7 @@ int main()
     std::cin.tie(0);    // IO
     readMapUntilOK();
     calcuStudioDis();
-    cerr<<robots.size();
+    // cerr<<robots.size();
     cout<<"OK\n";
     cout.flush();
     int count = 0;
