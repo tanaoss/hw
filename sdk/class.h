@@ -78,6 +78,9 @@ struct Robot
     int lastSign;  //
     double lastRate;
     double isTurn;
+    int pre_forWard;
+    int pre_rote;
+    int pre_cnt;
     Robot(int _id, int _loc_id, int _get_type, double _time_val, double _collision_val, double _angular_velocity, pair<double, double> &_xy_pos,
           double _direction, pair<double, double> &_pos, int _target_id = -1, int _lastSign = 0, int _isTurn = 0) : xy_pos(_xy_pos), pos(_pos)
     {
@@ -91,6 +94,7 @@ struct Robot
         target_id = _target_id;
         lastSign = _lastSign;
         isTurn = _isTurn;
+        pre_cnt=0;
     }
     void set(int _id, int _loc_id, int _get_type, double _time_val, double _collision_val, double _angular_velocity, pair<double, double> &&_xy_pos,
              double _direction, pair<double, double> &&_pos)
@@ -218,3 +222,16 @@ bool return_collision(int i1,int i2);
 pair<int,int> far_away(int i1,int i2,int base1,int base2);
 double return_maxAng(int id1);
 bool Check_for_balls_around(int i);
+int return_line_dire(int i1,int i2,int signBase);
+int return_line_dire(int i1,int i2);
+pair<double,bool> return_int_dis(int base);
+vector<int> return_int_pos(int base);
+int return_int_neg(int base);
+void Collision_detection(vector<PayLoad> payLoad);
+bool check_material_full(int studio_id);
+void Detect_codirection();
+bool is_same_direction(int i1,int i2);
+double get_rotation(int i1,int i2);
+int addSign(int i1,int i2,int baseSign);
+int getSign(int i1,int i2);
+pair<double,double> return_seta(int i1,int i2);
