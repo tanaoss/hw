@@ -899,6 +899,7 @@ void Collision_detection(vector<PayLoad> payLoad){
     int selct1=3;
     double minDis=200;
     void change_getType();
+    void change_getType();
     for(int i=1;i<(1<<4);i++){
         if(__builtin_popcount(i)==2){
             pair<double,bool> tmpF=return_int_dis(i);
@@ -2012,7 +2013,8 @@ int return_line_dire(int i1,int i2,int signBase){
     int ns=gt(sign*(gt(robots[i2].angular_velocity,0)?1:-1),0)?0:-1;
     int ns1=gt(sign*(gt(robots[i2].angular_velocity,0)?1:-1),0)?0:-1;
     auto angle= return_seta(i1,i2); 
-    double seta=angle.first,arf=angle.second;
+    double seta=angle.first;
+    double arf=angle.second;
     if(state.FrameID>=6830&&state.FrameID<=6840&&i1==1&&i2==2){
         cerr<<"Frame: "<<state.FrameID<<" "<<canAngle<<" "<<seta<<" "<<arf<<
         " "<<robots[i2].angular_velocity<< " "<<flagSign<<endl;
@@ -2298,9 +2300,9 @@ double return_type(int i1){
     return robots[i1].collision_val*robots[i1].time_val;
 }
 void change_getType(){
-    for(int i=0;i<4;i++){
-        double val=(eq(robots[i].collision_val,0)?1:robots[i].collision_val)*(eq(robots[i].time_val,0)?1:robots[i].time_val);
-        if(lt(val,0.8))
-        robots[i].get_type=0;
-    }
+    // for(int i=0;i<4;i++){
+    //     double val=(eq(robots[i].collision_val,0)?1:robots[i].collision_val)*(eq(robots[i].time_val,0)?1:robots[i].time_val);
+    //     if(lt(val,0.8))
+    //     robots[i].get_type=0;
+    // }
 }
