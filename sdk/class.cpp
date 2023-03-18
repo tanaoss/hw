@@ -249,7 +249,7 @@ void print_matr(){
     int i = 0;
     int j;
     for(i = 1 ; i <= 7; i++){
-        cerr << "kkkkkkk"<<material[i].size()<<endl;
+        // cerr << "kkkkkkk"<<material[i].size()<<endl;
         // for(j=0;j<material[i].size();j++) 
         //     cerr<<"mater "<<i<<"studio "<<material[i][j]<<endl;
     }
@@ -507,16 +507,13 @@ void printRobotInfo(int i)
     printPair(r.xy_pos);
 }
 
-bool isNearWall(pair<double, double> a) {
-    if(gt(a.first, 1) && lt(a.first, 49) && gt(a.second, 1) && lt(a.second, 49))
-        return false;
-    return true;
-}
 
 bool isNearWall(int id) {
-    if(gt(robots[id].pos.first, 1) && lt(robots[id].pos.first, 49) && gt(robots[id].pos.second, 1) && lt(robots[id].pos.second, 49))
-        return false;
-    return true;
+    int i=robots[id].pos.first;
+    int j=robots[id].pos.second;
+    if(i-1<=0||j-2<=0||i+2>=50||j+2>=50)
+        return true;
+    return false;
 }
 
 
@@ -575,8 +572,15 @@ void solveRobortsCollision()
             //     cerr << "angle:" << angle << endl;
             // }
 
+            if(eq(ins[i].forward, 0) && eq(ins[j].forward, 0)) {
+                stopID = robots[i] < robots[j] ? i : j;
+                goID = (stopID == i) ? j : i;
+                ins[stopID].forward = -2;
+                continue;
+            }
+
             if(le(speed_go, 0) && le(speed_stop, 0)){
-                cerr<< "time:" << state.FrameID<<"aaa"<<endl;
+                // cerr<< "time:" << state.FrameID<<"aaa"<<endl;
                 if(le(dis, payloads[i].radius + payloads[j].radius + 0.1)) {
                     getAvoidDirection(goID, stopID);
                     ins[stopID].rotate = ins[goID].rotate;
@@ -584,15 +588,15 @@ void solveRobortsCollision()
                 // continue;
             }
             else if(le(speed_stop, 0)) {
-                ins[goID].forward = ins[goID].forward * 0.8;
-                cerr<< "time:" << state.FrameID<<"bbb"<<endl;
+                ins[goID].forward = payloads[goID].speed * 0.8;
+                // cerr<< "time:" << state.FrameID<<"bbb"<<endl;
                 if(le(dis, payloads[i].radius + payloads[j].radius + 0.1)) {
                     ins[stopID].forward = checkForward(stopID)? 6: -2;
                 }
                 // continue;
             }
             else if(le(speed_go, 0)) {
-                cerr<< "time:" << state.FrameID<<"ccc"<<endl;
+                // cerr<< "time:" << state.FrameID<<"ccc"<<endl;
                 ins[stopID].forward = ins[stopID].forward * 0.8;
                 if(le(dis, payloads[i].radius + payloads[j].radius + 0.1)) {
                     ins[goID].forward = checkForward(goID)? 6: -2;
@@ -609,21 +613,24 @@ void solveRobortsCollision()
                 continue;
             }
 
-            if(isNearWall(i) && isNearWall(j)) {
+            if(isNearWall(i) && isNearWall(j) && gt(speed_go, 0) && gt(speed_stop, 0)) {
                 // cerr<< "time:" << state.FrameID<<"isNearWall(i) && isNearWall(j)"<<endl;
                 stopID = robots[i] < robots[j]? i: j;
                 goID = (stopID == i) ? j : i;
-                ins[stopID].forward = -2;
+                ins[stopID].forward = checkForward(stopID)? 6: -2;
+                ins[goID].forward = payloads[goID].speed * 0.8;
                 continue;
             }
             else if(isNearWall(i)) {
                 // cerr<< "time:" << state.FrameID<<"isNearWall(i)"<<endl;
                 ins[i].forward = checkForward(i)? 6: -2;
+                ins[j].forward = payloads[j].speed * 0.8;
                 continue;
             }
             else if(isNearWall(j)) {
                 // cerr<< "time:" << state.FrameID<<"isNearWall(j)"<<endl;
-                ins[i].forward = checkForward(j)? 6: -2;
+                ins[j].forward = checkForward(j)? 6: -2;
+                ins[i].forward = payloads[i].speed * 0.8;
                 continue;
             }
             
@@ -652,7 +659,7 @@ void solveRobortsCollision()
 
             // if(le(dis, 1.06))
             //     cerr<<"time:"<< state.FrameID << endl<<endl;
-            // if (state.FrameID >= 2200 && state.FrameID <= 2300)
+            // if (state.FrameID >= 7600 && state.FrameID <= 7860)
             // {
             //     cerr << "time:" << state.FrameID << endl << angle<<"-"<<lt(angle, Pi / 2) << endl
             //         <<"flag_stop:"<<flag_stop<<" flag_go:"<<flag_go<<endl
@@ -1551,8 +1558,8 @@ void robot_judge_sol(int threshold_lack,int full){
                 }
             }
         }
-       if(robots[i].get_type==0)cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<studios[robots[i].target_id].type<<"studios r_id = "<<studios[robots[i].target_id].r_id<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<" wait "<<robots[i].wait<<endl;
-       else cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<" wait "<<robots[i].wait<<endl;
+    //    if(robots[i].get_type==0)cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<studios[robots[i].target_id].type<<"studios r_id = "<<studios[robots[i].target_id].r_id<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<" wait "<<robots[i].wait<<endl;
+    //    else cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<" wait "<<robots[i].wait<<endl;
 
         // if(robots[i].target_id != -1 && robots[i].get_type !=0){
         //     if((studios[robots[i].target_id].pStatus ==1 ||(studios[robots[i].target_id].r_time>0&&(checkEnough(i,robots[i].target_id,studios[i].r_time))))&& studios[robots[i].target_id].r_id == -1){
