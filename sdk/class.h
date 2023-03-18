@@ -229,3 +229,4 @@ bool is_same_direction(int i1,int i2);
 double get_rotation(int i1,int i2);
 int addSign(int i1,int i2,int baseSign);
 int getSign(int i1,int i2);
+pair<double,double> return_seta(int i1,int i2);

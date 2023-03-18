@@ -248,7 +248,7 @@ void print_matr(){
     int i = 0;
     int j;
     for(i = 1 ; i <= 7; i++){
-        cerr << "kkkkkkk"<<material[i].size()<<endl;
+        //cerr << "kkkkkkk"<<material[i].size()<<endl;
         // for(j=0;j<material[i].size();j++) 
         //     cerr<<"mater "<<i<<"studio "<<material[i][j]<<endl;
     }
@@ -801,12 +801,12 @@ void Collision_detection(vector<PayLoad> payLoad){
         double tmpDis=calcuDis(robots[id1].pos,robots[id2].pos);
         bool Flag_line1=lt(fabs(payLoad[id1].angle),0.2)||can_stop(robots[id1].pos,studios[robots[id1].target_id].pos,payLoad[id1].angle);
         bool Flag_line2=lt(fabs(payLoad[id2].angle),0.2)||can_stop(robots[id2].pos,studios[robots[id2].target_id].pos,payLoad[id2].angle);
-        // cerr<<"id: "<<state.FrameID<<" "<<id1<<" "<<id2<<" "
-        // <<will_collision(id1,id2)<< " "<<Flag_line1<<" "<<Flag_line2<<
-        // " "<<tmpDis<<" "<<endl;
-        // cerr<<" angle "<<payLoad[id1].angle<<" "<<payLoad[id2].angle<<endl;
-        // cerr<<" tar "<<robots[id1].target_id<<" "<<robots[id2].target_id<<endl;
-        // cerr<<"pos "<<RootFlag<<" "<<Root.first<<" "<<Root.second <<endl;
+        cerr<<"id: "<<state.FrameID<<" "<<id1<<" "<<id2<<" "
+        <<will_collision(id1,id2)<< " "<<Flag_line1<<" "<<Flag_line2<<
+        " "<<tmpDis<<" "<<endl;
+        cerr<<" angle "<<payLoad[id1].angle<<" "<<payLoad[id2].angle<<endl;
+        cerr<<" tar "<<robots[id1].target_id<<" "<<robots[id2].target_id<<endl;
+        cerr<<"pos "<<RootFlag<<" "<<Root.first<<" "<<Root.second <<endl;
         int sel=robots[id1].get_type>robots[id2].get_type?id1:id2;
         int sel_1=robots[id1].get_type>robots[id2].get_type?id2:id1;
         if(Flag_line1&&!Flag_line2){
@@ -820,19 +820,8 @@ void Collision_detection(vector<PayLoad> payLoad){
         if(lt(tmpDis,5)&&will_collision(sel,sel_1)){
             int sign=return_line_dire(sel,sel_1,payLoad[sel_1].sign);
             int sign1=return_line_dire(sel_1,sel,payLoad[sel].sign);
-            if(gt(sign*payLoad[sel_1].sign,0)){
-                ins[sel_1].rotate=Pi*sign;
-                // ins[sel].rotate/=2;
-                cerr<<"sel: "<<sel_1<<" 0 "<<Pi*sign<< endl;
-            }else if(gt(sign1*payLoad[sel].sign,0)){
-                ins[sel].rotate=Pi*sign1;
-                // ins[sel_1].rotate/=2;
-                cerr<<"sel: "<<sel_1<<" 1 "<<Pi*sign<<endl;
-            }else{
-                ins[sel_1].rotate=Pi*sign;
-                // ins[sel].rotate/=2;
-                cerr<<"sel: "<<sel_1<<" 0 "<<Pi*sign<<endl;
-            }
+            ins[sel_1].rotate=Pi*sign; 
+            cerr<<"sel: "<<sel_1<<" 0 "<<Pi*sign<< endl;
         }
         double v1=return_v(sel);
         double v2=return_v(sel_1);
@@ -883,7 +872,7 @@ double close_threshold2(int robot_id,int target_id,int close_threshold){
                         y1=k*(studios[robots[i].target_id].pos.first-close_threshold)+b;
                         y2=k*(studios[robots[i].target_id].pos.first+close_threshold)+b;
                         if(studios[robots[i].target_id].pos.second<=y2 && studios[robots[i].target_id].pos.second>=y1){
-                            cerr<<" robots[i].direction-robots[robot_id].direction- = "<<robots[i].direction-robots[robot_id].direction<<endl;
+                            //cerr<<" robots[i].direction-robots[robot_id].direction- = "<<robots[i].direction-robots[robot_id].direction<<endl;
                             if(((robots[i].direction-robots[robot_id].direction)>(Pi*0.6))&&((robots[i].direction-robots[robot_id].direction)<(Pi*1.4))){
                                 count++;
                             }
@@ -896,7 +885,7 @@ double close_threshold2(int robot_id,int target_id,int close_threshold){
                     y1=k*(studios[robots[i].target_id].pos.first-close_threshold)+b;
                     y2=k*(studios[robots[i].target_id].pos.first+close_threshold)+b;
                     if(studios[robots[i].target_id].pos.second<=y2 && studios[robots[i].target_id].pos.second>=y1){
-                        cerr<<" robots[i].direction-robots[robot_id].direction = "<<robots[i].direction-robots[robot_id].direction<<endl;
+                        //cerr<<" robots[i].direction-robots[robot_id].direction = "<<robots[i].direction-robots[robot_id].direction<<endl;
                         if(((robots[i].direction-robots[robot_id].direction<(-Pi*0.6))&&((robots[i].direction-robots[robot_id].direction)>(-Pi*1.4)))){
                             count++;
                         }
@@ -905,7 +894,7 @@ double close_threshold2(int robot_id,int target_id,int close_threshold){
             }
         }
     }
-    cerr<<"robot "<<robot_id<<" count = "<<count<<" studio_id = "<<target_id<<endl;
+    //cerr<<"robot "<<robot_id<<" count = "<<count<<" studio_id = "<<target_id<<endl;
     return 1+count*2;
 }
 double wait_dis(int robot_id ,int studio_id){
@@ -1116,7 +1105,7 @@ void first_action(){
     pair <int,double> f;
     for(i = 0; i < robots.size(); i++){
         robots[i].target_id = pick_point(i, 2).first;
-        cerr<<" first target "<<robots[i].target_id<<endl;
+        //cerr<<" first target "<<robots[i].target_id;
         //cerr<<"aaa"<<robots[i].target_id<<endl;
         //studios[robots[i].target_id].r_id = i;
     }
@@ -1129,7 +1118,7 @@ void first_action(){
             if(robots[i].target_id == robots[j].target_id){
                 p = pick_point(i,2);
                 f = pick_point(j,2);
-                cerr<<p.first<<' '<<f.first<<' '<<p.second<<' '<<f.second<<endl;
+                //cerr<<p.first<<' '<<f.first<<' '<<p.second<<' '<<f.second<<endl;
                 if(gt(p.second,f.second)){
                     studios[robots[i].target_id].r_id = i;
                     robots[j].target_id = f.first;
@@ -1137,7 +1126,7 @@ void first_action(){
                 }else {
                     studios[robots[j].target_id].r_id = j;
                     robots[i].target_id = p.first;
-                    cerr<<" robots[i].target_id = "<<robots[i].target_id<<endl;
+                    //cerr<<" robots[i].target_id = "<<robots[i].target_id<<endl;
                     studios[robots[i].target_id].r_id = i;
                 }
             }
@@ -1170,7 +1159,7 @@ bool judge_full(int level, double threshold){
             }
         }
         v = (double)full_count/(double)count;
-        cerr<<" full_count = "<<full_count<<" count = "<<count<<" bilu "<<v<<endl;
+        //cerr<<" full_count = "<<full_count<<" count = "<<count<<" bilu "<<v<<endl;
         if(v >= threshold){
             // print_matr();
             return true;
@@ -1193,7 +1182,7 @@ bool judge_full(int level, double threshold){
             }
         }
         v = (double)full_count/(double)count;
-        cerr<<" full_count = "<<full_count<<" count = "<<count<<" bilu "<<v<<endl;
+        //cerr<<" full_count = "<<full_count<<" count = "<<count<<" bilu "<<v<<endl;
         if(v >= threshold){
             // print_matr();
             return true;
@@ -1352,7 +1341,7 @@ void robot_judge_sol(int threshold_lack,int full){
                 else{
                     ins[i].buy = -1;
                     ins[i].sell = -1;
-                    cerr<<" robot "<<i<<" can not buy "<<studios[robots[i].target_id].type<<endl;
+                    //cerr<<" robot "<<i<<" can not buy "<<studios[robots[i].target_id].type<<endl;
                 }
             }
             else{
@@ -1435,8 +1424,8 @@ void robot_judge_sol(int threshold_lack,int full){
                 }
             }
         }
-        if(robots[i].get_type==0)cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<studios[robots[i].target_id].type<<"studios r_id = "<<studios[robots[i].target_id].r_id<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
-        else cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
+       // if(robots[i].get_type==0)cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<studios[robots[i].target_id].type<<"studios r_id = "<<studios[robots[i].target_id].r_id<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
+       // else cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
 
         // if(robots[i].target_id != -1 && robots[i].get_type !=0){
         //     if((studios[robots[i].target_id].pStatus ==1 ||(studios[robots[i].target_id].r_time>0&&(checkEnough(i,robots[i].target_id,studios[i].r_time))))&& studios[robots[i].target_id].r_id == -1){
@@ -1836,25 +1825,55 @@ bool Check_for_balls_around(int pos){
 }
 int return_line_dire(int i1,int i2,int signBase){
     will_collision(i1,i2);
+    int flagSign=getSign(i1,i2);
     double canAngle=min(fabs(Root.first),fabs(Root.second))*40*0.3;
-    double need_angle_1=min(fabs(Root.first),fabs(Root.second))*fabs(robots[i1].angular_velocity);
-    double need_angle=get_rotation(i1,i2);
     auto tmp= subVector(robots[i1].pos, robots[i2].pos);
-    int sa=addSign(i1,i2,lt(robots[i1].angular_velocity,0.0)?-1:1);
+    Vec v2(robots[i2].xy_pos); 
     Vec v1(tmp);
-    Vec v2(robots[i2].xy_pos);
-    double tmpAngle=acos(cos_t(v1,v2));
-    auto tmp1= subVector(robots[i2].pos, robots[i1].pos);
-    Vec v3(tmp1);
-    Vec v4(robots[i1].xy_pos);
-    double tmpAngle_1=acos(cos_t(v3,v4));
-    cerr<<"id"<<i1<<" "<<i2<<endl;
-    cerr<<tmpAngle<<"-"<<need_angle<<endl;
     int sign= (lt(v1^v2,0))?-1:1;
-    if(sign*signBase==-1&&gt(canAngle,Pi-tmpAngle_1+tmpAngle+need_angle_1*sa)){
-        sign*=-1;
-    }
-    return sign;
+    auto angle= return_seta(i1,i2); 
+    double seta=angle.first,arf=angle.second;
+
+    if(flagSign==1){
+        if(gt(canAngle,seta+arf)){
+            return sign*-1;
+        }else if(lt(Pi-seta-arf,canAngle)){
+            return sign;
+        }else if(lt(fabs(Pi-seta-arf),fabs(seta+arf))){
+            return sign;
+        }else{
+            return sign*-1;
+        }
+    }else{
+         if(lt(seta-arf,canAngle)){
+            return sign;
+        }else if(gt(canAngle,Pi-seta+arf)){
+            return sign*-1;
+        }else if(lt(fabs(seta-arf),fabs(Pi-seta+arf))){
+            return sign;
+        }else{
+            return sign*-1;
+        }   
+    } 
+    // double canAngle=min(fabs(Root.first),fabs(Root.second))*40*0.3;
+    // double need_angle_1=min(fabs(Root.first),fabs(Root.second))*fabs(robots[i1].angular_velocity);
+    // double need_angle=get_rotation(i1,i2);
+    // auto tmp= subVector(robots[i1].pos, robots[i2].pos);
+    // int sa=addSign(i1,i2,lt(robots[i1].angular_velocity,0.0)?-1:1);
+    // Vec v1(tmp);
+    // Vec v2(robots[i2].xy_pos);
+    // double tmpAngle=acos(cos_t(v1,v2));
+    // auto tmp1= subVector(robots[i2].pos, robots[i1].pos);
+    // Vec v3(tmp1);
+    // Vec v4(robots[i1].xy_pos);
+    // double tmpAngle_1=acos(cos_t(v3,v4));
+    // cerr<<"id"<<i1<<" "<<i2<<endl;
+    // cerr<<tmpAngle<<"-"<<need_angle<<endl;
+    // int sign= (lt(v1^v2,0))?-1:1;
+    // if(sign*signBase==-1&&gt(canAngle,Pi-tmpAngle_1+tmpAngle+need_angle_1*sa)){
+    //     sign*=-1;
+    // }
+    // return sign;
 }
 int return_line_dire(int i1,int i2){
     will_collision(i1,i2);
@@ -1943,4 +1962,28 @@ int addSign(int i1,int i2,int baseSign){
     Vec v2(subVector(robots[i1].pos, robots[i2].pos)); 
     int sign= (lt(v1^v2,0))?-1:1;
     return gt(sign*baseSign,0.0)?-1:1;  
+}
+int getSign(int i1,int i2){
+    auto tmp= subVector(robots[i1].pos, robots[i2].pos);
+    Vec v1(tmp);
+    Vec v2(robots[i2].xy_pos);
+    int sign1=(lt(v1^v2,0))?-1:1;
+    auto tmp1= subVector(robots[i2].pos, robots[i1].pos);
+    Vec v3(tmp1);
+    Vec v4(robots[i1].xy_pos);
+
+    int sign2=(lt(v3^v4,0))?-1:1;
+    return gt(sign1*sign2,0.0)?-1:1;
+}
+pair<double,double> return_seta(int i1,int i2){
+    auto tmp= subVector(robots[i1].pos, robots[i2].pos);
+    Vec v1(tmp);
+    Vec v2(robots[i2].xy_pos);
+    int sign1=(lt(v1^v2,0))?-1:1;
+    auto tmp1= subVector(robots[i2].pos, robots[i1].pos);
+    Vec v3(tmp1);
+    Vec v4(robots[i1].xy_pos);
+    double tmpAngle=acos(cos_t(v1,v2));
+    double tmpAngle1=acos(cos_t(v3,v4));
+    return pair<double,double>(tmpAngle,tmpAngle1);
 }
