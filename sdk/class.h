@@ -222,6 +222,7 @@ bool who_isFirst(int i1,int i2);
 double return_v(int id);
 int Calculate_root(int i1,int i2);
 bool will_collision(int i1,int i2);
+bool will_collision_Careful(int i1,int i2);
 bool return_collision(int i1,int i2);
 pair<int,int> far_away(int i1,int i2,int base1,int base2);
 double return_maxAng(int id1);
