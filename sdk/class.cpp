@@ -295,6 +295,8 @@ PayLoad calPayload(int robortID,int studioID) {
     double angle2 = ge(robort.direction, 0.0) ? robort.direction: 2 * Pi + robort.direction;
     double angle = angle2 - angle1;
 
+    double speed = calVectorSize(robort.xy_pos);
+
     int sign;
 
     if(ge(angle, 0) && lt(angle, Pi) || lt(angle, -Pi))
@@ -308,7 +310,7 @@ PayLoad calPayload(int robortID,int studioID) {
     // cerr<<"**"<< angle1<<"**dir:"<<robort.direction<<"**"<<angle2<<endl;
     // cerr<<"**"<< angle << "**"<<distance<<"**"<<sign<<endl;
 
-    return PayLoad((robort.get_type == 0? 0.45: 0.53), angle, angular_acceleration, acceleration, distance, sign);
+    return PayLoad((robort.get_type == 0? 0.45: 0.53), angle, angular_acceleration, acceleration, distance, speed, sign);
 }
 
 bool eq(double a, double b) { return abs(a - b) < EPS; } // ==
@@ -543,6 +545,7 @@ void solveRobortsCollision()
     double dis, angle;
     bool flag_go, flag_stop;
     vector<double> tmp;
+    double radius;
 
     for (int i = 0; i < 4; i++)
     {
@@ -572,18 +575,29 @@ void solveRobortsCollision()
             //     cerr << "angle:" << angle << endl;
             // }
 
-            if(lt(speed_go, 0) && lt(speed_stop, 0)){
-                continue;
+            if(le(speed_go, 0) && le(speed_stop, 0)){
+                cerr<< "time:" << state.FrameID<<"aaa"<<endl;
+                if(le(dis, payloads[i].radius + payloads[j].radius + 0.1)) {
+                    getAvoidDirection(goID, stopID);
+                    ins[stopID].rotate = ins[goID].rotate;
+                }
+                // continue;
             }
-            else if(lt(speed_stop, 0)) {
+            else if(le(speed_stop, 0)) {
                 ins[goID].forward = ins[goID].forward * 0.8;
-                if(checkForward(stopID))
-
-                continue;
+                cerr<< "time:" << state.FrameID<<"bbb"<<endl;
+                if(le(dis, payloads[i].radius + payloads[j].radius + 0.1)) {
+                    ins[stopID].forward = checkForward(stopID)? 6: -2;
+                }
+                // continue;
             }
-            else if(lt(speed_go, 0)) {
+            else if(le(speed_go, 0)) {
+                cerr<< "time:" << state.FrameID<<"ccc"<<endl;
                 ins[stopID].forward = ins[stopID].forward * 0.8;
-                continue;
+                if(le(dis, payloads[i].radius + payloads[j].radius + 0.1)) {
+                    ins[goID].forward = checkForward(goID)? 6: -2;
+                }
+                // continue;
             }
 
             //同个目标并相互接近
@@ -591,16 +605,27 @@ void solveRobortsCollision()
                 stopID = gt(payloads[i].distance, payloads[j].distance) ? i : j;
                 goID = (stopID == i) ? j : i;
                 // getAvoidDirection(stopID, goID);//stopID转向
-                ins[stopID].forward = calVectorSize(robots[stopID].xy_pos) * 0.8;
+                ins[stopID].forward = payloads[goID].speed * 0.8;
                 continue;
             }
 
-            // if(isNearWall(i) && isNearWall(j)) {
-                
-            // }
-            // else if(isNearWall(i)) {
-
-            // }
+            if(isNearWall(i) && isNearWall(j)) {
+                // cerr<< "time:" << state.FrameID<<"isNearWall(i) && isNearWall(j)"<<endl;
+                stopID = robots[i] < robots[j]? i: j;
+                goID = (stopID == i) ? j : i;
+                ins[stopID].forward = -2;
+                continue;
+            }
+            else if(isNearWall(i)) {
+                // cerr<< "time:" << state.FrameID<<"isNearWall(i)"<<endl;
+                ins[i].forward = checkForward(i)? 6: -2;
+                continue;
+            }
+            else if(isNearWall(j)) {
+                // cerr<< "time:" << state.FrameID<<"isNearWall(j)"<<endl;
+                ins[i].forward = checkForward(j)? 6: -2;
+                continue;
+            }
             
 
             // 如果两小球方向为锐角
@@ -618,15 +643,16 @@ void solveRobortsCollision()
                     getAvoidDirection(goID, stopID);
                     ins[stopID].rotate = ins[goID].rotate;
                 } else if(flag_go) {
-                    getAvoidDirection(goID, stopID);                
+                    getAvoidDirection(goID, stopID);
                 }
                 else if(flag_stop) {
                     getAvoidDirection(stopID, goID);
                 }
             }
 
-            //le(dis, 1.06) && 
-            // if (state.FrameID >= 5329 && state.FrameID <= 5500)
+            // if(le(dis, 1.06))
+            //     cerr<<"time:"<< state.FrameID << endl<<endl;
+            // if (state.FrameID >= 2200 && state.FrameID <= 2300)
             // {
             //     cerr << "time:" << state.FrameID << endl << angle<<"-"<<lt(angle, Pi / 2) << endl
             //         <<"flag_stop:"<<flag_stop<<" flag_go:"<<flag_go<<endl
@@ -901,7 +927,7 @@ void Collision_detection(vector<PayLoad> payLoad){
         if(lt(tmpDis,5)&&will_collision(sel,sel_1)){
             int sign=return_line_dire(sel,sel_1,payLoad[sel_1].sign);
             ins[sel_1].rotate=Pi*sign; 
-            cerr<<"sel: "<<sel_1<<" 0 "<<Pi*sign<< endl;
+            // cerr<<"sel: "<<sel_1<<" 0 "<<Pi*sign<< endl;
         }
         double v1=return_v(sel);
         double v2=return_v(sel_1);
@@ -1215,7 +1241,7 @@ void first_action(){
             }
         }
         //studios[robots[i].target_id].r_id = i;
-        cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
+        // cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
     }
 }
 
