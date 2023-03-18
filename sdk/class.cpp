@@ -808,22 +808,21 @@ void Collision_detection(vector<PayLoad> payLoad){
         cerr<<"pos "<<RootFlag<<" "<<Root.first<<" "<<Root.second <<endl;
         int sel=robots[id1].get_type>robots[id2].get_type?id1:id2;
         int sel_1=robots[id1].get_type>robots[id2].get_type?id2:id1;
-        if((!can_rate(sel,sel_1,payLoad[sel_1].sign)
-        ||!can_rate(sel_1,sel,payLoad[sel].sign) ||lt(tmpDis,5))&&will_collision(sel,sel_1)){
+        if(lt(tmpDis,5)&&will_collision(sel,sel_1)){
             int sign=return_line_dire(sel,sel_1,payLoad[sel_1].sign);
             int sign1=return_line_dire(sel_1,sel,payLoad[sel].sign);
             if(gt(sign*payLoad[sel_1].sign,0)){
                 ins[sel_1].rotate=Pi*sign;
                 // ins[sel].rotate/=2;
-                cerr<<"sel: "<<sel_1<<endl;
+                cerr<<"sel: "<<sel_1<<" 0 "<<Pi*sign<< endl;
             }else if(gt(sign1*payLoad[sel].sign,0)){
-                ins[sel].rotate=Pi*sign;
+                ins[sel].rotate=Pi*sign1;
                 // ins[sel_1].rotate/=2;
-                cerr<<"sel: "<<sel_1<<endl;
+                cerr<<"sel: "<<sel_1<<" 1 "<<Pi*sign<<endl;
             }else{
                 ins[sel_1].rotate=Pi*sign;
                 // ins[sel].rotate/=2;
-                cerr<<"sel: "<<sel_1<<endl;
+                cerr<<"sel: "<<sel_1<<" 0 "<<Pi*sign<<endl;
             }
         }
         double v1=return_v(sel);
@@ -1631,7 +1630,7 @@ bool will_collision(int i1,int i2){
     bool f2=isWall(robots[i2].target_id);
     double tmpDis=calcuDis(robots[i1].pos,robots[i2].pos);
     if(gt(tmpDis,3)){
-            Compute_redundancy=1.0;
+            Compute_redundancy=0.5;
     }else{
             Compute_redundancy=0.0;
         }
@@ -1784,17 +1783,17 @@ bool Check_for_balls_around(int pos){
 int return_line_dire(int i1,int i2,int signBase){
     will_collision(i1,i2);
     double canAngle=min(fabs(Root.first),fabs(Root.second))*40*0.3;
+    double need_angle_1=min(fabs(Root.first),fabs(Root.second))*fabs(robots[i1].angular_velocity);
     double need_angle=get_rotation(i1,i2);
-    double need_angle_2=robots[i2].angular_velocity*min(fabs(Root.first),fabs(Root.second));
     auto tmp= subVector(robots[i1].pos, robots[i2].pos);
-    int as=addSign(i1,i2,signBase);
-    int as1=addSign_other(i2,i1,signBase);
+    int sa=addSign(i1,i2,lt(robots[i1].angular_velocity,0.0)?-1:1);
     Vec v1(tmp);
     Vec v2(robots[i2].xy_pos);
     double tmpAngle=acos(cos_t(v1,v2));
-
+    cerr<<"id"<<i1<<" "<<i2<<endl;
+    cerr<<tmpAngle<<"-"<<need_angle<<endl;
     int sign= (lt(v1^v2,0))?-1:1;
-    if(sign*signBase==-1&&gt(canAngle,fabs(as1*need_angle_2+as*tmpAngle+need_angle))){
+    if(sign*signBase==-1&&gt(canAngle,tmpAngle+need_angle+need_angle_1*sa)){
         sign*=-1;
     }
     return sign;
@@ -1872,42 +1871,18 @@ int return_int_neg(int base){
     return  1;
 }
 bool is_same_direction(int i1,int i2){
-    Vec v1(robots[i1].xy_pos);
-    Vec v2(robots[i2].xy_pos);
+    Vec v1(pair<double,double>(cos(robots[i1].direction),sin(robots[i1].direction)));
+    Vec v2(pair<double,double>(cos(robots[i2].direction),sin(robots[i2].direction)));
     return gt(cos_t(v1,v2),0.0);
 }
 double get_rotation(int i1,int i2){
-    double dis=calcuDis(robots[i1].pos,robots[i2].pos);
-    return asin(getRobotRadius(i1)/dis);
+    Vec v1(pair<double,double>(cos(robots[i1].direction),sin(robots[i1].direction)));
+    Vec v2(subVector(robots[i1].pos, robots[i2].pos));
+    return acos(cos_t(v1,v2));
 }
-
-int addSign(int i1,int i2,int sign){
-    auto tmp= subVector(robots[i1].pos, robots[i2].pos);
-    Vec v1(tmp);
-    Vec v2(robots[i2].xy_pos);
-    int baseSign=(lt(v1^v2,0))?-1:1;
-    return gt(baseSign*sign,0.0)?-1:1;    
-}
-int addSign_other(int i1,int i2,int sign){
-    auto tmp= subVector(robots[i1].pos, robots[i2].pos);
-    Vec v1(tmp);
-    Vec v2(robots[i2].xy_pos);
-    int baseSign=(lt(v1^v2,0))?1:-1;    
-}
-bool can_rate(int i1,int i2,int signBase){
-    will_collision(i1,i2);
-    double canAngle=min(fabs(Root.first),fabs(Root.second))*40*0.3;
-    double need_angle=get_rotation(i1,i2);
-    double need_angle_2=robots[i2].angular_velocity*min(fabs(Root.first),fabs(Root.second));
-    auto tmp= subVector(robots[i1].pos, robots[i2].pos);
-    int as=addSign(i1,i2,signBase);
-    int as1=addSign_other(i2,i1,signBase);
-    Vec v1(tmp);
-    Vec v2(robots[i2].xy_pos);
-    double tmpAngle=acos(cos_t(v1,v2));
-
-    if(gt(canAngle,fabs(as1*need_angle_2+as*tmpAngle+need_angle)+0.1)){
-        return true;
-    }    
-    return false;
+int addSign(int i1,int i2,int baseSign){
+    Vec v1(pair<double,double>(cos(robots[i1].direction),sin(robots[i1].direction)));
+    Vec v2(subVector(robots[i1].pos, robots[i2].pos)); 
+    int sign= (lt(v1^v2,0))?-1:1;
+    return gt(sign*baseSign,0.0)?-1:1;  
 }

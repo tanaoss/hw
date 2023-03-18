@@ -227,7 +227,4 @@ bool check_material_full(int studio_id);
 void Detect_codirection();
 bool is_same_direction(int i1,int i2);
 double get_rotation(int i1,int i2);
-bool approaching_the_angle(int i1,int i2,int sign1,int sign1_2,int sign2);
-int addSign(int i1,int i2,int sign);
-int addSign_other(int i1,int i2,int sign);
-bool can_rate(int i1,int i2,int sign);
+int addSign(int i1,int i2,int baseSign);
