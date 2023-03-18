@@ -387,7 +387,7 @@ bool checkEnough(int robot_id, int target_id, int frame)
         double time = (dis / 6.0) / 0.02; // 剩余秒数
         // cerr<<"time = "<<time<<" least time = "<<frame<<endl;
         if (time > frame)
-            return false;
+            return true;
         else
             return false;
     }
@@ -1403,7 +1403,7 @@ void robot_action(){
     }
     //for(int i =0;i<=7;i++)cerr<<"type "<<i<<" has "<<robot_get_type[i];
     // cerr <<endl;
-    int full = 0;
+    // int full = 0;
     // if(judge_full(2,0.5))full = 1;   //4,5,6 full threshold
     // // if(judge_full(3,0.2))full = 2;   //7 full threshold Higher priority
     // cerr<<" full = "<<full<<endl;
