@@ -987,7 +987,7 @@ double wait_dis(int robot_id ,int studio_id){
     }
     if(i!=(type+1))return 0;
         // cerr<<" studios[studio_id].r_time = "<<studios[studio_id].r_time<<" (dist/6.0/0.02) "<<(dist/6.0/0.02)<<endl;
-    dis = (studios[studio_id].r_time-(dist/6.0/0.02))*6*0.02 ;
+    dis = (studios[studio_id].r_time-(dist/6.0/0.02))*6*0.02*1.5;
         // cerr<<" wait dis = "<<dis<<endl;
     return dis;          
 }
@@ -1389,7 +1389,7 @@ void robot_judge(int full,int threshold_near,int threshold_lack){
     }
 }
 void robot_judge_sol(int threshold_lack,int full){
-    int i;
+    int i,k;
     int target,min_subscript;
     int min_dist,dist;
     pair<int,double> temp1;
@@ -1397,13 +1397,14 @@ void robot_judge_sol(int threshold_lack,int full){
     //cerr<<robots.size()<<endl;
     for(i = 0; i < robots.size(); i++){
         //cerr<<i<<robots[i].target_id<<endl;
-        if(robots[i].loc_id == robots[i].target_id && robots[i].target_id != -1){
-            if(robots[i].get_type == 0){
+        if((robots[i].loc_id == robots[i].target_id && robots[i].target_id != -1)||robots[i].wait==1){
+            if(robots[i].get_type == 0 && (robots[i].wait!=1||(robots[i].wait==1&&studios[robots[i].target_id].pStatus == 1&&(robots[i].loc_id == robots[i].target_id)))){
                 if(studios[robots[i].target_id].pStatus == 1){
                 //dosomething buy ,next send
                     robots[i].lastSign=0;
                     robots[i].isTurn=0;
                     robots[i].get_type = studios[robots[i].loc_id].type;
+                    robots[i].wait= -1;
                     //cerr<<"robots "<< i<<" buy "<<studios[robots[i].target_id].type<<endl;
                     studios[robots[i].loc_id].r_id = -1;
                     //cerr<<"dddd"<<endl;
@@ -1424,21 +1425,31 @@ void robot_judge_sol(int threshold_lack,int full){
                 else{
                     ins[i].buy = -1;
                     ins[i].sell = -1;
+                    robots[i].wait= 1;
                     //cerr<<" robot "<<i<<" can not buy "<<studios[robots[i].target_id].type<<endl;
                 }
             }
             else{
                 //dosomething sell
-                ins[i].sell = 1;
-                ins[i].buy = -1;
-                robots[i].lastSign=0;
-                robots[i].isTurn=0;
-                //cerr<<"robots "<< i<<" sell "<<robots[i].get_type<<endl;
-                studios[robots[i].loc_id].bitSatus += (int)pow(2,robots[i].get_type);
-                //studios[robots[i].loc_id].r_id = -1;
-                studios_rid[robots[i].loc_id][robots[i].get_type] = -1;
-                robots[i].get_type = 0;
+                if(robots[i].wait != 1){
+                    ins[i].sell = 1;
+                    ins[i].buy = -1;
+                    robots[i].lastSign=0;
+                    robots[i].isTurn=0;
+                    //cerr<<"robots "<< i<<" sell "<<robots[i].get_type<<endl;
+                    studios[robots[i].loc_id].bitSatus += (int)pow(2,robots[i].get_type);
+                    //studios[robots[i].loc_id].r_id = -1;
+                    studios_rid[robots[i].loc_id][robots[i].get_type] = -1;
+                    robots[i].get_type = 0;
+                }
                 // target = -1;
+                if(robots[i].wait == 1){
+                    int type =studio_material[(studios[robots[i].target_id].type-4)][0];
+                    for(k = 1; k<=type; k++){
+                        if(studios_rid[robots[i].target_id][k]!=-1)break;
+                    }
+                    if(k==(type+1))continue;
+                }
                 target = choose_lack(robots[i].loc_id,threshold_lack).first;
                 //cerr<<"robots[i].loc_id "<<robots[i].loc_id<<"target = "<<target<<endl;
                 if(target != -1){
@@ -1455,7 +1466,7 @@ void robot_judge_sol(int threshold_lack,int full){
                         //cerr<<"temp1 = "<<temp1.first<<' '<<temp1.second<<endl;
                         for(int j=2;j<=4;j++){
                             temp2=pick_point(i,j);
-                            dist = temp2.second*(1-(j-2)*0.3);
+                            dist = temp2.second*(1-(j-2)*0.1);
                             if(min_dist>dist){
                                 min_dist=dist;
                                 min_subscript=temp2.first;
@@ -1482,6 +1493,13 @@ void robot_judge_sol(int threshold_lack,int full){
                         studios[robots[i].target_id].r_id = i;
                     }
                 }
+                if(robots[i].wait == 1){
+                    ins[i].buy = -1;
+                    ins[i].sell = -1;
+                    ins[i].destroy = -1;
+                    studios[robots[i].target_id].r_id=-1;
+                    robots[i].wait = -1;
+                }
             }
         }
         else{
@@ -1507,8 +1525,8 @@ void robot_judge_sol(int threshold_lack,int full){
                 }
             }
         }
-       //if(robots[i].get_type==0)cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<studios[robots[i].target_id].type<<"studios r_id = "<<studios[robots[i].target_id].r_id<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
-       //else cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
+       if(robots[i].get_type==0)cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<studios[robots[i].target_id].type<<"studios r_id = "<<studios[robots[i].target_id].r_id<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<" wait "<<robots[i].wait<<endl;
+       else cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<" wait "<<robots[i].wait<<endl;
 
         // if(robots[i].target_id != -1 && robots[i].get_type !=0){
         //     if((studios[robots[i].target_id].pStatus ==1 ||(studios[robots[i].target_id].r_time>0&&(checkEnough(i,robots[i].target_id,studios[i].r_time))))&& studios[robots[i].target_id].r_id == -1){

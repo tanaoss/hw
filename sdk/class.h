@@ -81,8 +81,9 @@ struct Robot
     int pre_forWard;
     int pre_rote;
     int pre_cnt;
+    int wait;
     Robot(int _id, int _loc_id, int _get_type, double _time_val, double _collision_val, double _angular_velocity, pair<double, double> &_xy_pos,
-          double _direction, pair<double, double> &_pos, int _target_id = -1, int _lastSign = 0, int _isTurn = 0) : xy_pos(_xy_pos), pos(_pos)
+          double _direction, pair<double, double> &_pos, int _target_id = -1,int _wait = -1,int _lastSign = 0, int _isTurn = 0) : xy_pos(_xy_pos), pos(_pos)
     {
         id = _id;
         loc_id = _loc_id;
@@ -95,6 +96,7 @@ struct Robot
         lastSign = _lastSign;
         isTurn = _isTurn;
         pre_cnt=0;
+        wait=_wait;
     }
     void set(int _id, int _loc_id, int _get_type, double _time_val, double _collision_val, double _angular_velocity, pair<double, double> &&_xy_pos,
              double _direction, pair<double, double> &&_pos)
