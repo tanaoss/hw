@@ -8,13 +8,15 @@ using namespace std;
 
 struct PayLoad
 {
+    double radius;
     double angle;                // 角度
     double angular_acceleration; // 角加速度
     double acceleration;         // 加速度
     double distance;
     int sign; // 当前角速度是在贴合目标点的夹角还是远离目标点的夹角
-    PayLoad(double _angle, double _angular_acceleration, double _acceleration, double _distance, int _sign)
+    PayLoad(double _radius, double _angle, double _angular_acceleration, double _acceleration, double _distance, int _sign)
     {
+        radius = _radius;
         angle = _angle;
         angular_acceleration = _angular_acceleration;
         acceleration = _acceleration;
@@ -120,12 +122,15 @@ struct Robot
         //     return false;
         // if(speed2_a - speed2 > 1e-5)
         //     return true;
-        // if(angular_velocity - a.angular_velocity > 1e-10)
+        // if(fabs(angular_velocity) - fabs(a.angular_velocity) > 1e-10)
         //     return false;
-        // if(a.angular_velocity - angular_velocity > 1e-10)
+        // if(fabs(a.angular_velocity) - fabs(angular_velocity) > 1e-10)
         //     return true;
-        if (get_type == get_type)
-            return time_val * collision_val - a.time_val * a.collision_val < -1e-10;
+        if (get_type == get_type){
+            if(fabs(time_val * collision_val - a.time_val * a.collision_val) < 1e-10)
+                return id < a.id;
+            return time_val * collision_val - a.time_val * a.collision_val < 1e-10;
+        }
         return get_type < a.get_type;
     }
 };
