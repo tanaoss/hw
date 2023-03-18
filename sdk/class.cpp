@@ -808,6 +808,14 @@ void Collision_detection(vector<PayLoad> payLoad){
         cerr<<"pos "<<RootFlag<<" "<<Root.first<<" "<<Root.second <<endl;
         int sel=robots[id1].get_type>robots[id2].get_type?id1:id2;
         int sel_1=robots[id1].get_type>robots[id2].get_type?id2:id1;
+        if(Flag_line1&&!Flag_line2){
+            sel=id1;
+            sel_1=id2;
+        }
+        if(Flag_line2&&!Flag_line1){
+            sel=id2;
+            sel_1=id1;            
+        }
         if(lt(tmpDis,5)&&will_collision(sel,sel_1)){
             int sign=return_line_dire(sel,sel_1,payLoad[sel_1].sign);
             int sign1=return_line_dire(sel_1,sel,payLoad[sel].sign);
@@ -1790,10 +1798,14 @@ int return_line_dire(int i1,int i2,int signBase){
     Vec v1(tmp);
     Vec v2(robots[i2].xy_pos);
     double tmpAngle=acos(cos_t(v1,v2));
+    auto tmp1= subVector(robots[i2].pos, robots[i1].pos);
+    Vec v3(tmp1);
+    Vec v4(robots[i1].xy_pos);
+    double tmpAngle_1=acos(cos_t(v3,v4));
     cerr<<"id"<<i1<<" "<<i2<<endl;
     cerr<<tmpAngle<<"-"<<need_angle<<endl;
     int sign= (lt(v1^v2,0))?-1:1;
-    if(sign*signBase==-1&&gt(canAngle,tmpAngle+need_angle+need_angle_1*sa)){
+    if(sign*signBase==-1&&gt(canAngle,Pi-tmpAngle_1+tmpAngle+need_angle_1*sa)){
         sign*=-1;
     }
     return sign;
