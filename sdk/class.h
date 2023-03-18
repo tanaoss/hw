@@ -8,13 +8,15 @@ using namespace std;
 
 struct PayLoad
 {
+    double radius;
     double angle;                // 角度
     double angular_acceleration; // 角加速度
     double acceleration;         // 加速度
     double distance;
     int sign; // 当前角速度是在贴合目标点的夹角还是远离目标点的夹角
-    PayLoad(double _angle, double _angular_acceleration, double _acceleration, double _distance, int _sign)
+    PayLoad(double _radius, double _angle, double _angular_acceleration, double _acceleration, double _distance, int _sign)
     {
+        radius = _radius;
         angle = _angle;
         angular_acceleration = _angular_acceleration;
         acceleration = _acceleration;
