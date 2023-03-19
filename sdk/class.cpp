@@ -18,6 +18,7 @@ vector<Ins> ins(4);
 vector<int> material[8];
 vector<int> product[8];
 vector<int> full_product;
+vector<int> full_product;
 double EPS=1e-7;
 double acceleration_no;
 double acceleration_has;
@@ -829,8 +830,8 @@ void control(vector<PayLoad> payLoad){
         }
         
     }
-    solveRobortsCollision();
-    // Collision_detection(payLoad);
+    // solveRobortsCollision();
+    Collision_detection(payLoad);
     updateLastRate();
     
     
@@ -902,7 +903,6 @@ void Collision_detection(vector<PayLoad> payLoad){
     int selct1=3;
     double minDis=200;
     void change_getType();
-    void change_getType();
     for(int i=1;i<(1<<4);i++){
         if(__builtin_popcount(i)==2){
             pair<double,bool> tmpF=return_int_dis(i);
@@ -922,29 +922,29 @@ void Collision_detection(vector<PayLoad> payLoad){
         double tmpDis=calcuDis(robots[id1].pos,robots[id2].pos);
         bool Flag_line1=lt(fabs(payLoad[id1].angle),0.2)||can_stop(robots[id1].pos,studios[robots[id1].target_id].pos,payLoad[id1].angle);
         bool Flag_line2=lt(fabs(payLoad[id2].angle),0.2)||can_stop(robots[id2].pos,studios[robots[id2].target_id].pos,payLoad[id2].angle);
-        // cerr<<"id: "<<state.FrameID<<" "<<id1<<" "<<id2<<" "
-        // <<will_collision(id1,id2)<< " "<<Flag_line1<<" "<<Flag_line2<<
-        // " "<<tmpDis<<" "<<endl;
-        // cerr<<" angle "<<payLoad[id1].angle<<" "<<payLoad[id2].angle<<endl;
-        // cerr<<" tar "<<robots[id1].target_id<<" "<<robots[id2].target_id<<endl;
-        // cerr<<"pos "<<RootFlag<<" "<<Root.first<<" "<<Root.second <<endl;
-        // cerr<<"v "<<return_v(id1) <<" "<<return_v(id2) <<endl;
+        cerr<<"id: "<<state.FrameID<<" "<<id1<<" "<<id2<<" "
+        <<will_collision(id1,id2)<< " "<<Flag_line1<<" "<<Flag_line2<<
+        " "<<tmpDis<<" "<<endl;
+        cerr<<" angle "<<payLoad[id1].angle<<" "<<payLoad[id2].angle<<endl;
+        cerr<<" tar "<<robots[id1].target_id<<" "<<robots[id2].target_id<<endl;
+        cerr<<"pos "<<RootFlag<<" "<<Root.first<<" "<<Root.second <<endl;
+        cerr<<"v "<<return_v(id1) <<" "<<return_v(id2) <<endl;
         int sel=return_type(id1)>return_type(id2)&&robots[id1].get_type==robots[id2].get_type
         ||robots[id1].get_type>robots[id2].get_type?id1:id2;
         int sel_1=return_type(id1)>return_type(id2)&&robots[id1].get_type==robots[id2].get_type
         ||robots[id1].get_type>robots[id2].get_type?id2:id1;
-        if(Flag_line1&&!Flag_line2){
-            sel=id1;
-            sel_1=id2;
-        }
-        if(Flag_line2&&!Flag_line1){
-            sel=id2;
-            sel_1=id1;            
-        }
-        if(lt(tmpDis,5)&&will_collision(sel,sel_1)){
+        // if(Flag_line1&&!Flag_line2){
+        //     sel=id1;
+        //     sel_1=id2;
+        // }
+        // if(Flag_line2&&!Flag_line1){
+        //     sel=id2;
+        //     sel_1=id1;            
+        // }
+        if(lt(tmpDis,6)&&will_collision(sel,sel_1)){
             int sign=return_line_dire(sel,sel_1,payLoad[sel_1].sign);
             ins[sel_1].rotate=Pi*sign; 
-            // cerr<<"sel: "<<sel_1<<" 0 "<<Pi*sign<< endl;
+            cerr<<"sel: "<<sel_1<<" 0 "<<Pi*sign<< endl;
         }
 
         
@@ -1839,8 +1839,8 @@ bool will_collision(int i1,int i2){
     double cla=b*b-4*a*c;   
     if(state.FrameID>=6830&&state.FrameID<=6840&&i1==1&&i2==2){
 
-        // cerr<<"will_c: "<<(-1*b+sqrt(cla))/(2*a)<<" "<<b<<" "<<(-1*b-sqrt(cla))/(2*a)<<" "<<cla<<endl;
-        // cerr<<"dis: "<<tmpDis<<"  v "<<return_v(i1)<<" "<<return_v(i2)<<endl;
+        cerr<<"will_c: "<<(-1*b+sqrt(cla))/(2*a)<<" "<<b<<" "<<(-1*b-sqrt(cla))/(2*a)<<" "<<cla<<endl;
+        cerr<<"dis: "<<tmpDis<<"  v "<<return_v(i1)<<" "<<return_v(i2)<<endl;
     }
     pair<double ,double>tmp(-7,-7);
     if(cla<0){
@@ -2266,8 +2266,8 @@ bool will_collision_Careful(int i1,int i2){
     }
         if(state.FrameID>=6830&&state.FrameID<=6840&&i1==1&&i2==2){
 
-        // cerr<<"will_c_c: "<<(-1*b+sqrt(cla))/(2*a)<<" "<<b<<" "<<(-1*b-sqrt(cla))/(2*a)<<" "<<cla<<endl;
-        // cerr<<"dis: "<<tmpDis<<"  v "<<return_v(i1)<<" "<<return_v(i2)<<endl;
+        cerr<<"will_c_c: "<<(-1*b+sqrt(cla))/(2*a)<<" "<<b<<" "<<(-1*b-sqrt(cla))/(2*a)<<" "<<cla<<endl;
+        cerr<<"dis: "<<tmpDis<<"  v "<<return_v(i1)<<" "<<return_v(i2)<<endl;
     }
     if(eq(cla,0)){
         RootFlag=0;
@@ -2360,4 +2360,27 @@ void change_getType(){
     //     if(lt(val,0.8))
     //     robots[i].get_type=0;
     // }
+}
+double get_at_v(double t,double a,double v,int sign_v1){
+    double lef_time=0;
+    double s=0;
+    if(lt(fabs(v),Pi)){
+        double tmpTime=(sign_v1*Pi-v)/a;
+        double realTime=min(tmpTime,t);
+        s=v*realTime+0.5*a*realTime*realTime;
+        if(le(tmpTime,realTime)){
+            return fabs(s);
+        }
+        lef_time=tmpTime-realTime;
+    }
+
+    return fabs(s+sign_v1*Pi*t);
+}
+double get_at_v_z(double t,double a,double v,int sign_v1){
+    double lef_time=0;
+    double s=0;  
+    double tmpTime=(sign_v1*Pi)/a;
+    double realTime=min(tmpTime,t);
+    s=v*realTime+0.5*a*realTime*realTime;
+    return s;
 }

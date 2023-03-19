@@ -8,6 +8,7 @@ using namespace std;
 
 struct PayLoad
 {
+   
     double radius;
     double angle;                // 角度
     double angular_acceleration; // 角加速度
@@ -23,6 +24,14 @@ struct PayLoad
         acceleration = _acceleration;
         distance = _distance;
         speed = _speed;
+        sign = _sign;
+    }
+    PayLoad(double _angle, double _angular_acceleration, double _acceleration, double _distance, int _sign)
+    {
+        angle = _angle;
+        angular_acceleration = _angular_acceleration;
+        acceleration = _acceleration;
+        distance = _distance;
         sign = _sign;
     }
 };
@@ -233,6 +242,19 @@ pair<double,bool> return_int_dis(int base);
 vector<int> return_int_pos(int base);
 int return_int_neg(int base);
 void Collision_detection(vector<PayLoad> payLoad);
+bool check_material_full(int studio_id);
+void Detect_codirection();
+bool is_same_direction(int i1,int i2);
+double get_rotation(int i1,int i2);
+int addSign(int i1,int i2,int baseSign);
+int getSign(int i1,int i2);
+pair<double,double> return_seta(int i1,int i2);
+double return_type(int i1);
+void change_getType();
+bool can_Pass(int i1,double seta,double arf, double canAngle,
+double dis,double time,int ctr);
+double get_at_v(double t,double a,double v,int sign_v1);
+double get_at_v_z(double t,double a,double v,int sign_v1);
 bool check_material_full(int studio_id);
 void Detect_codirection();
 bool is_same_direction(int i1,int i2);
