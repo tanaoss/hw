@@ -405,8 +405,10 @@ bool checkEnough(int robot_id, int target_id, int frame)
     {
         double time = (dis / 6.0) / 0.02; // 剩余秒数
         // cerr<<"time = "<<time<<" least time = "<<frame<<endl;
-        if (time > frame)
+        if (time > frame){
+            // if(class_map!=1)return false;
             return true;
+        }
         else
             return false;
     }
