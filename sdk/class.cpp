@@ -16,6 +16,8 @@ vector<Ins> ins(4);
 vector<int> material[8];
 vector<int> product[8];
 vector<int> full_product;
+vector<PayLoad> payloads;
+int class_map;
 int price[8][2];
 double EPS=1e-7;
 double acceleration_no;
@@ -836,7 +838,18 @@ void Collision_detection(vector<PayLoad> payLoad){
         // }
         if(lt(tmpDis,6)&&will_collision(sel,sel_1)){
             int sign=return_line_dire(sel,sel_1,payLoad[sel_1].sign);
-            ins[sel_1].rotate=Pi*sign; 
+            if(sign==0){
+               sign=return_line_dire(sel_1,sel,payLoad[sel_1].sign); 
+               if(sign==0){
+                sign=return_line_dire(sel,sel_1,0); 
+                ins[sel_1].rotate=Pi*sign; 
+               }else{
+                ins[sel].rotate=Pi*sign; 
+               }
+            }else{
+                ins[sel_1].rotate=Pi*sign; 
+            }
+            
             // cerr<<"sel: "<<sel_1<<" 0 "<<Pi*sign<< endl;
         }
 
@@ -979,7 +992,7 @@ double back_dis(int studio_id){
     cerr<<studio_id<< ' '<<studios[studio_id].type<<' '<<min_subscript<<' '<<studios[min_subscript].type<<endl;
     cerr<<studios[studio_id].pos.first<<' '<<studios[studio_id].pos.second<<' '<<studios[min_subscript].pos.first<<' '<<studios[min_subscript].pos.second<<' '<<endl;
     cerr<<"back_dis = " <<min<<endl;
-    return min*0.1;
+    return min*0.2;
 }
 pair<int,double> pick_point(int robot_id, int state){
     pair<double,double> pos = robots[robot_id].pos;
@@ -1961,6 +1974,9 @@ bool Check_for_balls_around(int pos){
     return true;
 }
 int return_line_dire(int i1,int i2,int signBase){
+    if(gt(pl_g[i2].angle,Pi/2)&&signBase!=0){
+        return 0;
+    }
     will_collision(i1,i2);
     int flagSign=getSign(i1,i2);
     // double canAngle=min(fabs(Root.first),fabs(Root.second))*40*0.3;
@@ -2001,6 +2017,7 @@ int return_line_dire(int i1,int i2,int signBase){
             return sign*-1;
         }
         if(f1&&f2){
+            return signBase;
             if(lt(fabs(Pi-seta-arf)+canAngle_pos_z,fabs(seta+arf)+canAngle_neg_z)){
                 return sign;
             }else{
@@ -2027,6 +2044,7 @@ int return_line_dire(int i1,int i2,int signBase){
             return sign*-1;
         }  
         if(f1&&f2){
+            return signBase;
             if(lt(fabs(seta-arf)+canAngle_pos_z,fabs(Pi-seta+arf)+canAngle_neg_z)){
                 return sign;
             }else{
