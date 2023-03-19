@@ -13,6 +13,7 @@ vector<vector<double>> dis(50, vector<double>(50, 0));
 vector<Studio> studios;
 vector<Robot> robots;
 State state;//当前帧数，全局可见
+int class_map;
 vector<Ins> ins(4);
 vector<int> material[8];
 vector<int> product[8];
@@ -391,7 +392,7 @@ bool checkTimeEnough(int robot_id, int target_id, int frame) {
     //     cerr<<"dis:"<<dis<<" speed:"<<speed<<endl;
     //     cerr<<calNextTimeDistance(speed, time, acceleration)<<endl;
     // }
-    if(lt(calNextTimeDistance(speed, time, acceleration), dis*1.05))
+    if(lt(calNextTimeDistance(speed, time, acceleration), dis*1.1))
         return false;
         
     return true;
@@ -1010,7 +1011,7 @@ double close_threshold2(int robot_id,int target_id,int close_threshold){
     //cerr<<"robot "<<robot_id<<" count = "<<count<<" studio_id = "<<target_id<<endl;
     return 1+count*2;
 }
-double wait_dis(int robot_id ,int studio_id){
+double wait_dis(int robot_id ,int studio_id ){
     double dis;
     double dist = calcuDis(robots[robot_id].pos,studios[studio_id].pos);
     if(studios[studio_id].pStatus==1||checkEnough(robot_id,studio_id,studios[studio_id].r_time))return 0;
@@ -1019,7 +1020,9 @@ double wait_dis(int robot_id ,int studio_id){
         dis = (studios[studio_id].r_time-(dist/6.0/0.02))*6*0.02;
         //cerr<<" wait dis = "<<dis<<endl;
     }
-    if(dis > 5) dis = 100;
+    if(class_map!=1){
+        if(dis > 5) dis = 100;
+    }
     return dis;  
 }
 /*
@@ -1060,12 +1063,15 @@ double Calc_collisions_dis(int robot_id,int studio_id){
     }
     cerr<<" count = "<<count;
     if(count>=2){
-        dis = 0.53*2*Pi*(1.3+(count-2)*0.3);
+        if(class_map == 1){
+            dis = 0.53*2*Pi*(1.3+(count-2)*0.3);
+        }
+        else dis =0;
     }
     robots[robot_id].xy_pos.first = line_speed.first;
     robots[robot_id].xy_pos.second = line_speed.second;
     robots[robot_id].target_id = target;
-    cerr<<" dis = "<<dis<<endl;
+    // cerr<<" dis = "<<dis<<endl;
     return dis;
 }
 
