@@ -826,8 +826,8 @@ void control(vector<PayLoad> payLoad){
         }
         
     }
-    // solveRobortsCollision();
-    Collision_detection(payLoad);
+    solveRobortsCollision();
+    // Collision_detection(payLoad);
     updateLastRate();
     
     
@@ -1016,9 +1016,10 @@ double wait_dis(int robot_id ,int studio_id){
     if(studios[studio_id].pStatus==1||checkEnough(robot_id,studio_id,studios[studio_id].r_time))return 0;
     else{
         // cerr<<" studios[studio_id].r_time = "<<studios[studio_id].r_time<<" (dist/6.0/0.02) "<<(dist/6.0/0.02)<<endl;
-        dis = (studios[studio_id].r_time-(dist/6.0/0.02))*6*0.02*1;
+        dis = (studios[studio_id].r_time-(dist/6.0/0.02))*6*0.02;
         //cerr<<" wait dis = "<<dis<<endl;
     }
+    if(dis > 5) dis = 100;
     return dis;  
 }
 /*
