@@ -18,7 +18,7 @@ vector<Ins> ins(4);
 vector<int> material[8];
 vector<int> product[8];
 vector<int> full_product;
-vector<int> full_product;
+int price[8][2];
 double EPS=1e-7;
 double acceleration_no;
 double acceleration_has;
@@ -90,7 +90,20 @@ void init_studio_parameter(){
     material_send[6][1] = 7;
     material_send[7][0] = 1;
     material_send[7][1] = 8;
-
+    price[1][0]=3000;
+    price[1][1]=6000;
+    price[2][0]=4400;
+    price[2][1]=7600;
+    price[3][0]=5800;
+    price[3][1]=9200;
+    price[4][0]=15400;
+    price[4][1]=22500;
+    price[5][0]=17200;
+    price[5][1]=25000;
+    price[6][0]=19200;
+    price[6][1]=27500;
+    price[7][0]=76000;
+    price[7][1]=105000;
 
 }
 bool readMapUntilOK() {
@@ -922,13 +935,13 @@ void Collision_detection(vector<PayLoad> payLoad){
         double tmpDis=calcuDis(robots[id1].pos,robots[id2].pos);
         bool Flag_line1=lt(fabs(payLoad[id1].angle),0.2)||can_stop(robots[id1].pos,studios[robots[id1].target_id].pos,payLoad[id1].angle);
         bool Flag_line2=lt(fabs(payLoad[id2].angle),0.2)||can_stop(robots[id2].pos,studios[robots[id2].target_id].pos,payLoad[id2].angle);
-        cerr<<"id: "<<state.FrameID<<" "<<id1<<" "<<id2<<" "
-        <<will_collision(id1,id2)<< " "<<Flag_line1<<" "<<Flag_line2<<
-        " "<<tmpDis<<" "<<endl;
-        cerr<<" angle "<<payLoad[id1].angle<<" "<<payLoad[id2].angle<<endl;
-        cerr<<" tar "<<robots[id1].target_id<<" "<<robots[id2].target_id<<endl;
-        cerr<<"pos "<<RootFlag<<" "<<Root.first<<" "<<Root.second <<endl;
-        cerr<<"v "<<return_v(id1) <<" "<<return_v(id2) <<endl;
+        // cerr<<"id: "<<state.FrameID<<" "<<id1<<" "<<id2<<" "
+        // <<will_collision(id1,id2)<< " "<<Flag_line1<<" "<<Flag_line2<<
+        // " "<<tmpDis<<" "<<endl;
+        // cerr<<" angle "<<payLoad[id1].angle<<" "<<payLoad[id2].angle<<endl;
+        // cerr<<" tar "<<robots[id1].target_id<<" "<<robots[id2].target_id<<endl;
+        // cerr<<"pos "<<RootFlag<<" "<<Root.first<<" "<<Root.second <<endl;
+        // cerr<<"v "<<return_v(id1) <<" "<<return_v(id2) <<endl;
         int sel=return_type(id1)>return_type(id2)&&robots[id1].get_type==robots[id2].get_type
         ||robots[id1].get_type>robots[id2].get_type?id1:id2;
         int sel_1=return_type(id1)>return_type(id2)&&robots[id1].get_type==robots[id2].get_type
@@ -944,7 +957,7 @@ void Collision_detection(vector<PayLoad> payLoad){
         if(lt(tmpDis,6)&&will_collision(sel,sel_1)){
             int sign=return_line_dire(sel,sel_1,payLoad[sel_1].sign);
             ins[sel_1].rotate=Pi*sign; 
-            cerr<<"sel: "<<sel_1<<" 0 "<<Pi*sign<< endl;
+            // cerr<<"sel: "<<sel_1<<" 0 "<<Pi*sign<< endl;
         }
 
         
@@ -1055,7 +1068,7 @@ double Calc_collisions_dis(int robot_id,int studio_id){
         if(i!=robot_id&&(robots[i].target_id != -1)){
             will_collision(robot_id,i);
             time = check_root();
-            cerr<<" time = "<<time;
+            // cerr<<" time = "<<time;
             if(time>0){
                 if(studios[studio_id].pos.first>(robots[robot_id].pos.first+robots[robot_id].xy_pos.first*time)){
                     if(studios[studio_id].pos.second>(robots[robot_id].pos.second+robots[robot_id].xy_pos.second*time))count++;
@@ -1063,12 +1076,9 @@ double Calc_collisions_dis(int robot_id,int studio_id){
             } 
         }
     }
-    cerr<<" count = "<<count;
+    // cerr<<" count = "<<count;
     if(count>=2){
-        if(class_map == 1){
-            dis = 0.53*2*Pi*(1.3+(count-2)*0.3);
-        }
-        else dis =0;
+        dis = 0.53*2*Pi*(1.3+(count-2)*0.3);
     }
     robots[robot_id].xy_pos.first = line_speed.first;
     robots[robot_id].xy_pos.second = line_speed.second;
@@ -1076,7 +1086,17 @@ double Calc_collisions_dis(int robot_id,int studio_id){
     // cerr<<" dis = "<<dis<<endl;
     return dis;
 }
-
+double back_dis(int studio_id){
+    int i;
+    double min = 100;
+    double dist;
+    for(i=0;i<material[studios[studio_id].type].size();i++){
+        dist=calcuDis(studios[studio_id].pos,studios[material[studios[studio_id].type][i]].pos)+anger_to_length(studio_id,material[studios[studio_id].type][i]);
+        if(dist<min)min=dist;
+    }
+    cerr<<"back_dis = " <<min<<endl;
+    return min*1.2;
+}
 pair<int,double> pick_point(int robot_id, int state){
     pair<double,double> pos = robots[robot_id].pos;
     double min = 1000;
@@ -1134,7 +1154,7 @@ pair<int,double> pick_point(int robot_id, int state){
                     // if(material[studios[i].type].size()>0){
                         // dist=(calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i))*close_threshold2(robot_id,i,1.0);
                         // dist=(calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i));
-                        dist=(calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i))+wait_dis(robot_id,i)+Calc_collisions_dis(robot_id,i);
+                        dist=(calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i))+wait_dis(robot_id,i)+Calc_collisions_dis(robot_id,i)+back_dis(i);
                         // cerr<<calcuDis(robots[robot_id].pos,studios[i].pos)<<' '<<anger_to_length(robot_id,i)<<' '<<wait_dis(robot_id,i)<<endl;
                         
                         // dist=calcuDis(robots[robot_id].pos,studios[i].pos);
@@ -1158,7 +1178,7 @@ pair<int,double> pick_point(int robot_id, int state){
                     // if(material[studios[i].type].size()>0){
                         // dist=(calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i))*close_threshold2(robot_id,i,1.0);
                         // dist=calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i);
-                        dist=(calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i))+wait_dis(robot_id,i)+Calc_collisions_dis(robot_id,i);
+                        dist=(calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i))+wait_dis(robot_id,i)+Calc_collisions_dis(robot_id,i)+back_dis(i);
                         // cerr<<"close_threshold = "<<close_threshold2(robot_id,i,1)<<endl;
                         // dist=calcuDis(robots[robot_id].pos,studios[i].pos);
                         if(dist<min){
@@ -1181,7 +1201,7 @@ pair<int,double> pick_point(int robot_id, int state){
                         // dist=(calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i))*close_threshold2(robot_id,i,1.0);
                         // cerr<<"close_threshold = "<<close_threshold2(robot_id,i,1)<<endl;
                         // dist=calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i);
-                        dist=(calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i))+wait_dis(robot_id,i)+Calc_collisions_dis(robot_id,i);
+                        dist=(calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i))+wait_dis(robot_id,i)+Calc_collisions_dis(robot_id,i)+back_dis(i);
                         // dist=calcuDis(robots[robot_id].pos,studios[i].pos);
                         if(dist < min){
                             min=dist;
@@ -1516,6 +1536,7 @@ void robot_judge_sol(int threshold_lack,int full){
                 ins[i].buy = -1;
                 robots[i].lastSign=0;
                 robots[i].isTurn=0;
+                cerr<<"loss = "<<robots[i].time_val*robots[i].collision_val<<' '<<robots[i].time_val<<' '<<robots[i].collision_val<<' '<<robots[i].get_type<<' '<<(price[robots[i].get_type][1]*robots[i].time_val*robots[i].collision_val-price[robots[i].get_type][0])<<endl;
                 //cerr<<"robots "<< i<<" sell "<<robots[i].get_type<<endl;
                 studios[robots[i].loc_id].bitSatus += (int)pow(2,robots[i].get_type);
                 //studios[robots[i].loc_id].r_id = -1;
@@ -1839,8 +1860,8 @@ bool will_collision(int i1,int i2){
     double cla=b*b-4*a*c;   
     if(state.FrameID>=6830&&state.FrameID<=6840&&i1==1&&i2==2){
 
-        cerr<<"will_c: "<<(-1*b+sqrt(cla))/(2*a)<<" "<<b<<" "<<(-1*b-sqrt(cla))/(2*a)<<" "<<cla<<endl;
-        cerr<<"dis: "<<tmpDis<<"  v "<<return_v(i1)<<" "<<return_v(i2)<<endl;
+        // cerr<<"will_c: "<<(-1*b+sqrt(cla))/(2*a)<<" "<<b<<" "<<(-1*b-sqrt(cla))/(2*a)<<" "<<cla<<endl;
+        // cerr<<"dis: "<<tmpDis<<"  v "<<return_v(i1)<<" "<<return_v(i2)<<endl;
     }
     pair<double ,double>tmp(-7,-7);
     if(cla<0){
@@ -2266,8 +2287,8 @@ bool will_collision_Careful(int i1,int i2){
     }
         if(state.FrameID>=6830&&state.FrameID<=6840&&i1==1&&i2==2){
 
-        cerr<<"will_c_c: "<<(-1*b+sqrt(cla))/(2*a)<<" "<<b<<" "<<(-1*b-sqrt(cla))/(2*a)<<" "<<cla<<endl;
-        cerr<<"dis: "<<tmpDis<<"  v "<<return_v(i1)<<" "<<return_v(i2)<<endl;
+        // cerr<<"will_c_c: "<<(-1*b+sqrt(cla))/(2*a)<<" "<<b<<" "<<(-1*b-sqrt(cla))/(2*a)<<" "<<cla<<endl;
+        // cerr<<"dis: "<<tmpDis<<"  v "<<return_v(i1)<<" "<<return_v(i2)<<endl;
     }
     if(eq(cla,0)){
         RootFlag=0;
