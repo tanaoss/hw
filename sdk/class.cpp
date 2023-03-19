@@ -820,7 +820,7 @@ void Collision_detection(vector<PayLoad> payLoad){
         //     sel=id2;
         //     sel_1=id1;            
         // }
-        if(lt(tmpDis,6)&&will_collision(sel,sel_1)){
+        if(lt(tmpDis,4)&&will_collision(sel,sel_1)){
             int sign=return_line_dire(sel,sel_1,payLoad[sel_1].sign);
             ins[sel_1].rotate=Pi*sign; 
             cerr<<"sel: "<<sel_1<<" 0 "<<Pi*sign<< endl;
@@ -1661,6 +1661,7 @@ bool will_collision(int i1,int i2){
     }else{
             Compute_redundancy=0.0;
         }
+    
     double r=getRobotRadius(i1)+getRobotRadius(i2)+Compute_redundancy;
     double a=v_t*v_t;
     double b=2*(v_t*c_t);
@@ -2222,4 +2223,66 @@ double get_at_v_z(double t,double a,double v,int sign_v1){
     double realTime=min(tmpTime,t);
     s=v*realTime+0.5*a*realTime*realTime;
     return s;
+}
+double left_angle(int i1,int i2){
+   will_collision(i1,i2);
+    int flagSign=getSign(i1,i2);
+    // double canAngle=min(fabs(Root.first),fabs(Root.second))*40*0.3;
+    // double stop_time= (fabs(robots[i2].angular_velocity))/(pl_g[i2].angular_acceleration);
+    // double subVal=stop_time*40*0.36;
+    double canAngle_neg=get_at_v(min(fabs(Root.first),fabs(Root.second)),pl_g[i2].angular_acceleration
+    ,robots[i2].angular_velocity,-1);
+    double canAngle_pos=get_at_v(min(fabs(Root.first),fabs(Root.second)),pl_g[i2].angular_acceleration
+    ,robots[i2].angular_velocity,1);
+    auto tmp= subVector(robots[i1].pos, robots[i2].pos);
+    Vec v2(robots[i2].xy_pos); 
+    Vec v1(tmp);
+    int sign= (lt(v1^v2,0))?-1:1;
+    auto angle= return_seta(i1,i2); 
+    double seta=angle.first;
+    double arf=angle.second;
+    double canAngle_pos_z=get_at_v_z(min(fabs(Root.first),fabs(Root.second)),pl_g[i2].angular_acceleration
+    ,robots[i2].angular_velocity,sign)*-1;
+    double canAngle_neg_z=get_at_v_z(min(fabs(Root.first),fabs(Root.second)),pl_g[i2].angular_acceleration
+    ,robots[i2].angular_velocity,sign*-1)*-1;
+    if(state.FrameID>=6830&&state.FrameID<=6840&&i1==1&&i2==2){
+        cerr<<"Frame: "<<state.FrameID<<" "<<canAngle_neg<<" "<<seta<<" "<<arf<<
+        " "<<robots[i2].angular_velocity<< " "<<flagSign<<endl;
+    }
+    double reset=0.0;
+    if(flagSign==1){
+        bool f1=false,f2=false;
+        if(gt(sign*-1==-1?canAngle_neg:canAngle_pos,seta+arf)){
+            f2=true;
+            reset=sign*-1==-1?canAngle_neg:canAngle_pos-(seta+arf);
+            // return sign*-1;
+        }else if(lt(Pi-seta-arf,sign==-1?canAngle_neg:canAngle_pos)){
+            f1=true;
+            reset=sign*-1==-1?canAngle_neg:canAngle_pos-(Pi-seta-arf);
+            // return sign;
+        }else if(lt(fabs(Pi-seta-arf)+canAngle_pos_z,fabs(seta+arf)+canAngle_neg_z)){
+            cerr<<"can't raote "<<state.FrameID<<" "<<i1<<" "<<i2<<endl;
+            return 0;
+        }else{
+            cerr<<"can't raote "<<state.FrameID<<" "<<i1<<" "<<i2<<endl;
+            return 0;
+        }
+        return reset;
+    }else{
+        bool f1=false,f2=false;
+         if(gt(sign==-1?canAngle_neg:canAngle_pos,seta-arf)){
+            f1=true;
+            reset=sign*-1==-1?canAngle_neg:canAngle_pos-(seta-arf);
+        }else if(gt(sign*-1==-1?canAngle_neg:canAngle_pos,Pi-seta+arf)){
+            f2=true;
+            reset=sign*-1==-1?canAngle_neg:canAngle_pos-(Pi-seta+arf);
+        }else if(lt(fabs(seta-arf)+canAngle_pos_z,fabs(Pi-seta+arf)+canAngle_neg_z)){
+            cerr<<"can't raote "<<state.FrameID<<" "<<i1<<" "<<i2<<endl;
+            return 0;
+        }else{
+            cerr<<"can't raote "<<state.FrameID<<" "<<i1<<" "<<i2<<endl;
+            return 0;
+        }  
+        return reset;
+    }   
 }
