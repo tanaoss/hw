@@ -16,6 +16,8 @@ vector<Ins> ins(4);
 vector<int> material[8];
 vector<int> product[8];
 vector<int> full_product;
+int class_map;
+vector<PayLoad> payloads;
 double EPS=1e-7;
 double acceleration_no;
 double acceleration_has;
@@ -1646,7 +1648,7 @@ int Calculate_root(int i1,int i2){
     if(gt(tmp,0.9)&&!will_collision(i1,i2))return -1;
     else return 0;
 }
-bool will_collision(int i1,int i2){
+bool will_collision(int i1,int i2,int ctr){
     Vec v1(robots[i1].xy_pos);
     Vec v2(robots[i2].xy_pos);
     Vec x1(robots[i1].pos);
@@ -1656,7 +1658,7 @@ bool will_collision(int i1,int i2){
     bool f1=isWall(robots[i1].target_id);
     bool f2=isWall(robots[i2].target_id);
     double tmpDis=calcuDis(robots[i1].pos,robots[i2].pos);
-    if(gt(tmpDis,2)){
+    if(gt(tmpDis,2)&&ctr==1){
             Compute_redundancy=1.0;
     }else{
             Compute_redundancy=0.0;
@@ -1883,6 +1885,11 @@ bool Check_for_balls_around(int pos){
     return true;
 }
 int return_line_dire(int i1,int i2,int signBase){
+    bool l1=can_stop(robots[i1].pos,studios[robots[i1].target_id].pos,pl_g [i1].angle);
+    bool l2=can_stop(robots[i2].pos,studios[robots[i2].target_id].pos,pl_g [i2].angle);
+    // if(l1&&l2)
+    // will_collision(i1,i2,0);
+    // else
     will_collision(i1,i2);
     int flagSign=getSign(i1,i2);
     // double canAngle=min(fabs(Root.first),fabs(Root.second))*40*0.3;
@@ -1907,6 +1914,7 @@ int return_line_dire(int i1,int i2,int signBase){
         cerr<<"Frame: "<<state.FrameID<<" "<<canAngle_neg<<" "<<seta<<" "<<arf<<
         " "<<robots[i2].angular_velocity<< " "<<flagSign<<endl;
     }
+    cerr<<canAngle_pos_z<<" "<<canAngle_neg_z<<" "<<seta<<" "<<arf<<" "<<robots[i2].angular_velocity<<endl;
     if(flagSign==1){
         bool f1=false,f2=false;
         if(gt(sign*-1==-1?canAngle_neg:canAngle_pos,seta+arf)){
@@ -1916,10 +1924,14 @@ int return_line_dire(int i1,int i2,int signBase){
             f1=true;
             // return sign;
         }else if(lt(fabs(Pi-seta-arf)+canAngle_pos_z,fabs(seta+arf)+canAngle_neg_z)){
-            cerr<<"can't raote "<<state.FrameID<<" "<<i1<<" "<<i2<<endl;
+            cerr<<"can't raote "<<state.FrameID<<" "<<i1<<" "<<i2<<" Collision_point "<<Collision_point.first<<" "<<
+            Collision_point.second<<endl; 
+
+            
             return sign;
         }else{
-            cerr<<"can't raote "<<state.FrameID<<" "<<i1<<" "<<i2<<endl;
+            cerr<<"can't raote "<<state.FrameID<<" "<<i1<<" "<<i2<<" Collision_point "<<Collision_point.first<<" "<<
+            Collision_point.second<<endl; 
             return sign*-1;
         }
         if(f1&&f2){
@@ -1942,10 +1954,12 @@ int return_line_dire(int i1,int i2,int signBase){
             f2=true;
             // return sign*-1;
         }else if(lt(fabs(seta-arf)+canAngle_pos_z,fabs(Pi-seta+arf)+canAngle_neg_z)){
-            cerr<<"can't raote "<<state.FrameID<<" "<<i1<<" "<<i2<<endl;
+            cerr<<"can't raote "<<state.FrameID<<" "<<i1<<" "<<i2<<" Collision_point "<<Collision_point.first<<" "<<
+            Collision_point.second<<endl; 
             return sign;
         }else{
-            cerr<<"can't raote "<<state.FrameID<<" "<<i1<<" "<<i2<<endl;
+            cerr<<"can't raote "<<state.FrameID<<" "<<i1<<" "<<i2<<" Collision_point "<<Collision_point.first<<" "<<
+            Collision_point.second<<endl; 
             return sign*-1;
         }  
         if(f1&&f2){
@@ -2203,23 +2217,36 @@ void change_getType(){
 double get_at_v(double t,double a,double v,int sign_v1){
     double lef_time=0;
     double s=0;
+    a*=sign_v1;
     if(lt(fabs(v),Pi)){
         double tmpTime=(sign_v1*Pi-v)/a;
         double realTime=min(tmpTime,t);
         s=v*realTime+0.5*a*realTime*realTime;
-        if(le(tmpTime,realTime)){
+        if(ge(tmpTime,t)){
             return fabs(s);
         }
-        lef_time=tmpTime-realTime;
+        lef_time=t-realTime;
     }
 
-    return fabs(s+sign_v1*Pi*t);
+    return fabs(s+sign_v1*Pi*lef_time);
 }
 double get_at_v_z(double t,double a,double v,int sign_v1){
-    double lef_time=0;
-    double s=0;  
-    double tmpTime=(sign_v1*Pi)/a;
-    double realTime=min(tmpTime,t);
-    s=v*realTime+0.5*a*realTime*realTime;
-    return s;
+   double lef_time=0;
+    double s=0;
+    int flag= ge(sign_v1*v,0.0)?1:-1;
+    a*=sign_v1;
+    //cerr<<t<<" "<<a<<" "<<v<<" "<<sign_v1<<" "<<(sign_v1*Pi-v)/a<<endl;
+    if(lt(fabs(v),Pi)){
+        double tmpTime=(sign_v1*Pi-v)/a;
+        double realTime=min(tmpTime,t);
+        s=v*realTime+0.5*a*realTime*realTime;
+        //cerr<<" - "<<s<<endl;
+        if(ge(tmpTime,t)){
+            return fabs(s);
+        }
+        lef_time=t-realTime;
+        //cerr<" % "<<lef_time<<" "
+    }
+
+    return s+sign_v1*Pi*lef_time;
 }
