@@ -202,8 +202,8 @@ bool readStatusUntilOK() {
         robots[rob_id].collision_val_pre=robots[rob_id].collision_val;
         robots[rob_id].set(rob_id,tmp[0],tmp[1],tmp[2],tmp[3],tmp[4],pair<double,double>(tmp[5],tmp[6]),tmp[7],
         pair<double,double>(tmp[8],tmp[9]));
-        // if(gt(robots[rob_id].collision_val_pre, robots[rob_id].collision_val) && robots[rob_id].get_type != 0)
-        //     cerr<<"time:"<< state.FrameID <<"collision" <<rob_id<< endl<<endl;
+        if(gt(robots[rob_id].collision_val_pre, robots[rob_id].collision_val) && robots[rob_id].get_type != 0)
+            cerr<<"time:"<< state.FrameID <<"collision" <<rob_id<< endl<<endl;
         rob_id++;
     }
     cin>>line;
@@ -481,12 +481,9 @@ int getAvoidDirection(int goID, int stopID)
     int sign;
         
     // 如果stopID-goID方向与goTD前进方向是锐角，go旋转
-    // if (lt(fabs(included_angle), Pi / 2))
-    // {
-    // if(state.FrameID >= 4186 && state.FrameID <= 4700){
-    //     cerr<<"angle3:"<<angle3;
-    // }
-    if (eq(angle3, 0) || eq(angle3, Pi) || eq(angle3, -Pi))
+    if (gt(fabs(included_angle), Pi / 2))
+        sign = 0;
+    else if (eq(angle3, 0) || eq(angle3, Pi) || eq(angle3, -Pi))
         sign = gt(robots[goID].angular_velocity, 0)? 1: -1;
     else if (gt(angle3, 0) && lt(angle3, Pi) || lt(angle3, -Pi))
         sign = 1;
@@ -572,7 +569,7 @@ void solveRobotsCollision()
     int sign;
     bool cerr_flag = false;
 
-    // if(state.FrameID >= 140 && state.FrameID <= 220) cerr_flag = true;
+    if(state.FrameID >= 2240 && state.FrameID <= 2500) cerr_flag = true;
 
     for (int i = 0; i < 4; i++)
     {
@@ -590,15 +587,15 @@ void solveRobotsCollision()
             relative_speed[goID] = calVectorProduct(subVector(robots[stopID].pos, robots[goID].pos), robots[goID].xy_pos) / dis;
             relative_speed[stopID] = calVectorProduct(subVector(robots[goID].pos, robots[stopID].pos), robots[stopID].xy_pos) / dis;
 
-            // if (!le(dis, 1.06 + max(15 * 0.02 * (relative_speed[goID] + relative_speed[stopID]), 0.5))) {
-            //     collision_sign[i][j] = 0;
-            //     continue;
-            // }
-
-            if (!will_collision(i,j)) {
+            if (!le(dis, 1.06 + max(15 * 0.02 * (relative_speed[goID] + relative_speed[stopID]), 0.5))) {
                 collision_sign[i][j] = 0;
                 continue;
             }
+
+            // if (!will_collision(i,j)) {
+            //     collision_sign[i][j] = 0;
+            //     continue;
+            // }
 
             
             // if(cerr_flag && i == 1 && j == 3)
@@ -647,34 +644,48 @@ void solveRobotsCollision()
 
             //同个目标并相互接近
             if(robots[i].target_id == robots[j].target_id) {
-                stopID = gt(payloads[i].distance, payloads[j].distance) ? i : j;
-                goID = (stopID == i) ? j : i;
-                collision_sign[i][j] = (collision_sign[i][j] == 0)? getAvoidDirection(stopID, goID): collision_sign[i][j];//stopID转向
-                ins[stopID].rotate = collision_sign[i][j] * Pi;
-                ins[stopID].forward = min(payloads[stopID].distance / (payloads[goID].distance / payloads[goID].speed + 0.25), ins[stopID].forward);
-                // ins[stopID].forward = payloads[stopID].distance / (payloads[stopID].distance / payloads[goID].speed + 0.2);
-                continue;
+                if((robots[i].get_type != 0 && robots[j].get_type != 0) || studios[robots[i].target_id].pStatus == 1) {
+                    stopID = gt(payloads[i].distance, payloads[j].distance) ? i : j;
+                    goID = (stopID == i) ? j : i;
+                    collision_sign[i][j] = (collision_sign[i][j] == 0)? getAvoidDirection(stopID, goID): collision_sign[i][j];//stopID转向
+                    ins[stopID].rotate = collision_sign[i][j] * Pi;
+                    ins[stopID].forward = min(payloads[stopID].distance / (payloads[goID].distance / payloads[goID].speed + 0.25), ins[stopID].forward);
+                    continue;
+                }
+                
             }
 
 
             if(isNearWall(i) && isNearWall(j)) {
                 if(cerr_flag)
                     cerr<< "time:" << state.FrameID<<"isNearWall(i) && isNearWall(j)"<<endl;
-                stopID = gt(payloads[stopID].distance, payloads[goID].distance) ? stopID: goID;
+                if((robots[i].get_type != 0 && robots[j].get_type != 0) || (robots[i].get_type == 0 && robots[j].get_type == 0))
+                    stopID = gt(payloads[stopID].distance, payloads[goID].distance) ? stopID: goID;
+                else
+                    stopID = robots[i].get_type == 0? i: j;
                 goID = (stopID == i) ? j : i;
                 // collision_sign[i][j] = (collision_sign[i][j] == 0)? getAvoidDirection(stopID, goID): collision_sign[i][j];//stopID转向
                 // ins[stopID].rotate = collision_sign[i][j] * Pi;
-                ins[stopID].forward = checkForward(stopID)? 6: ins[stopID].forward;
-                ins[goID].forward = -2;
-                
-                if(gt(payloads[goID].speed, 0)) {
+
+                ins[goID].forward = checkForward(stopID)? 6: ins[stopID].forward;
+                ins[stopID].forward = -2;
+
+                if(gt(payloads[goID].distance, 2 + payloads[goID].radius)) {
                     collision_sign[i][j] = (collision_sign[i][j] == 0)? getAvoidDirection(goID, stopID): collision_sign[i][j];//stopID转向
                     ins[goID].rotate = collision_sign[i][j] * Pi;
                 }
-                else {
-                    collision_sign[i][j] == 0;
-                    ins[goID].rotate = 0;
-                }
+
+                // ins[stopID].forward = checkForward(stopID)? 6: ins[stopID].forward;
+                // ins[goID].forward = -2;
+                
+                // if(gt(payloads[goID].speed, 0)) {
+                //     collision_sign[i][j] = (collision_sign[i][j] == 0)? getAvoidDirection(goID, stopID): collision_sign[i][j];//stopID转向
+                //     ins[goID].rotate = collision_sign[i][j] * Pi;
+                // }
+                // else {
+                //     collision_sign[i][j] == 0;
+                //     ins[goID].rotate = 0;
+                // }
                 // if(le(dis, payloads[i].radius + payloads[j].radius + 0.1))
                 //     ins[goID].forward = -2;
                 // else
@@ -757,7 +768,7 @@ void solveRobotsCollision()
             else if (lt(angle, Pi / 2))
             {
                 // 速度快的先减速
-                stopID = gt(relative_speed[goID], relative_speed[stopID])? goID: stopID;
+                stopID = gt(payloads[stopID].distance, payloads[goID].distance)? stopID: goID;
                 ins[stopID].forward = 0;
                 collision_sign[i][j] == 0;
                 if(cerr_flag) cerr<<"333";
