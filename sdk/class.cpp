@@ -924,9 +924,13 @@ double close_threshold2(int robot_id,int target_id,int close_threshold){
     //cerr<<"robot "<<robot_id<<" count = "<<count<<" studio_id = "<<target_id<<endl;
     return 1+count*2;
 }
+bool check_send(int studio_id){
+    for(int i = 0;i<material)
+}
 double wait_dis(int robot_id ,int studio_id){
     double dis;
     double dist = calcuDis(robots[robot_id].pos,studios[studio_id].pos);
+    if(check_send(studio_id))
     if(studios[studio_id].pStatus==1||checkEnough(robot_id,studio_id,studios[studio_id].r_time))return 0;
     else{
         // cerr<<" studios[studio_id].r_time = "<<studios[studio_id].r_time<<" (dist/6.0/0.02) "<<(dist/6.0/0.02)<<endl;
