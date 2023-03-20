@@ -20,14 +20,14 @@ int main()
     if(eq(studios[0].pos.first,4.75)&&eq(studios[0].pos.second,48.75)) class_map = 2;
     if(eq(studios[0].pos.first,25.25)&&eq(studios[0].pos.second,47.75)) class_map = 3;
     if(eq(studios[0].pos.first,24.75)&&eq(studios[0].pos.second,49.25)) class_map = 4;
-    cerr<<studios[0].pos.first<<' '<<studios[0].pos.second<<endl;
-    cerr<<class_map<<endl;
+    // cerr<<studios[0].pos.first<<' '<<studios[0].pos.second<<endl;
+    // cerr<<class_map<<endl;
     calcuStudioDis();
-    cerr<<robots.size();
+    // cerr<<robots.size();
     cout<<"OK\n";
     cout.flush();
     int count = 0;
-    initRobortInfo();
+    initrobotInfo();
     init_studio_parameter();
     while (cin>>state.FrameID){
         cerr<<" time "<<state.FrameID<<endl;
