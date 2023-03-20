@@ -731,8 +731,8 @@ void control(vector<PayLoad> payLoad){
         }
         
     }
-    solveRobortsCollision();
-    // Collision_detection(payLoad);
+    // solveRobortsCollision();
+    Collision_detection(payLoad);
     updateLastRate();
     
     
