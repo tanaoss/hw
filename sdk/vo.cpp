@@ -4,6 +4,7 @@
 #include <string.h>
 #include <math.h>
 #include"vec.h"
+#include"class.h"
 using namespace std;
 const double eps = 1e-8;
 double Dis_o(Circle  circle,pair<double,double>pos){
@@ -52,8 +53,28 @@ vector<vector<Vec>> speed_set_difference(vector<Vec> v1,vector<Vec> v2){//求两
 
 }
 Vec suitable_speeds(Vec v,vector<vector<Vec>>v_set){//从速度集合中选取最接近原速度的v
+    Vec sub;
+    Vec close_v;     
+    double min=100;
+    double sub_v;
 
+    for(int i=0;i<v_set.size();i++){
+        for(int j=0;j<v_set[i].size();j++){
+            sub.x=v.x-v_set[i][j].x;               //集合中的速度与原速度向量相减
+            sub.y=v.y-v_set[i][j].y;
+            sub_v=sqrt(sub.x*sub.x+sub.y*sub.y);      //sub向量的绝对大小
+            if(min>sub_v){
+                min=sub_v;
+                close_v.x=v_set[i][j].x;
+                close_v.y=v_set[i][j].y;
+            }
+        }
+    }
+    return close_v
 }
 pair<double,double>  Calculation_results(Vec v,Vec v1){//计算从速度1变换到速度2需要下达的forwad指令和rotate指令
 
+}
+double Dis_o(Circle  circle,pair<double,double>pos){//计算圆心到原点的距离
+    return calcuDis(circle.pos,pos);
 }
