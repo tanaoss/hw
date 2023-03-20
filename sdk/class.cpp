@@ -1220,9 +1220,9 @@ double back_dis(int studio_id){
             min_subscript = material[studios[studio_id].type][i];
         }
     }
-    cerr<<studio_id<< ' '<<studios[studio_id].type<<' '<<min_subscript<<' '<<studios[min_subscript].type<<endl;
-    cerr<<studios[studio_id].pos.first<<' '<<studios[studio_id].pos.second<<' '<<studios[min_subscript].pos.first<<' '<<studios[min_subscript].pos.second<<' '<<endl;
-    cerr<<"back_dis = " <<min<<endl;
+    // cerr<<studio_id<< ' '<<studios[studio_id].type<<' '<<min_subscript<<' '<<studios[min_subscript].type<<endl;
+    // cerr<<studios[studio_id].pos.first<<' '<<studios[studio_id].pos.second<<' '<<studios[min_subscript].pos.first<<' '<<studios[min_subscript].pos.second<<' '<<endl;
+    // cerr<<"back_dis = " <<min<<endl;
     return min*0.2;
 }
 pair<int,double> pick_point(int robot_id, int state){
@@ -1665,7 +1665,7 @@ void robot_judge_sol(int threshold_lack,int full){
                 ins[i].buy = -1;
                 robots[i].lastSign=0;
                 robots[i].isTurn=0;
-                cerr<<"loss = "<<robots[i].time_val*robots[i].collision_val<<' '<<robots[i].time_val<<' '<<robots[i].collision_val<<' '<<robots[i].get_type<<' '<<(price[robots[i].get_type][1]*robots[i].time_val*robots[i].collision_val-price[robots[i].get_type][0])<<endl;
+                // cerr<<"loss = "<<robots[i].time_val*robots[i].collision_val<<' '<<robots[i].time_val<<' '<<robots[i].collision_val<<' '<<robots[i].get_type<<' '<<(price[robots[i].get_type][1]*robots[i].time_val*robots[i].collision_val-price[robots[i].get_type][0])<<endl;
                 //cerr<<"robots "<< i<<" sell "<<robots[i].get_type<<endl;
                 studios[robots[i].loc_id].bitSatus += (int)pow(2,robots[i].get_type);
                 //studios[robots[i].loc_id].r_id = -1;
@@ -2230,12 +2230,12 @@ int return_line_dire(int i1,int i2,int signBase){
     ,robots[i2].angular_velocity,sign)*-1;
     double canAngle_neg_z=get_at_v_z(min(fabs(Root.first),fabs(Root.second)),pl_g[i2].angular_acceleration
     ,robots[i2].angular_velocity,sign*-1)*-1;
-    if(state.FrameID>=5682&&state.FrameID<=5783&&i1==0&&i2==1){
-        cerr<<"can_angle: "<<canAngle_neg<<" "<<canAngle_pos<<"" <<endl;
-        cerr<<"Frame: "<<state.FrameID<<" "<<canAngle_pos_z<<" "<<canAngle_neg_z<<" "<<seta<<" "<<arf<<
-        " "<<robots[i2].angular_velocity<< " "<<flagSign<<endl;
-    }
-    cerr<<canAngle_pos_z<<" "<<canAngle_neg_z<<" "<<seta<<" "<<arf<<" "<<robots[i2].angular_velocity<<endl;
+    // if(state.FrameID>=5682&&state.FrameID<=5783&&i1==0&&i2==1){
+    //     cerr<<"can_angle: "<<canAngle_neg<<" "<<canAngle_pos<<"" <<endl;
+    //     cerr<<"Frame: "<<state.FrameID<<" "<<canAngle_pos_z<<" "<<canAngle_neg_z<<" "<<seta<<" "<<arf<<
+    //     " "<<robots[i2].angular_velocity<< " "<<flagSign<<endl;
+    // }
+    // cerr<<canAngle_pos_z<<" "<<canAngle_neg_z<<" "<<seta<<" "<<arf<<" "<<robots[i2].angular_velocity<<endl;
     if(flagSign==1){
         bool f1=false,f2=false;
         if(gt(sign*-1==-1?canAngle_neg:canAngle_pos,seta+arf)){
@@ -2276,11 +2276,11 @@ int return_line_dire(int i1,int i2,int signBase){
             f2=true;
             // return sign*-1;
         }else if(lt(fabs(seta-arf)+canAngle_pos_z,fabs(Pi-seta+arf)+canAngle_neg_z)){
-            cerr<<"can't raote "<<state.FrameID<<" "<<i1<<" "<<i2<<" Collision_point "<<Collision_point.first<<" "<<
+            // cerr<<"can't raote "<<state.FrameID<<" "<<i1<<" "<<i2<<" Collision_point "<<Collision_point.first<<" "<<
             Collision_point.second<<endl; 
             return sign;
         }else{
-            cerr<<"can't raote "<<state.FrameID<<" "<<i1<<" "<<i2<<" Collision_point "<<Collision_point.first<<" "<<
+            // cerr<<"can't raote "<<state.FrameID<<" "<<i1<<" "<<i2<<" Collision_point "<<Collision_point.first<<" "<<
             Collision_point.second<<endl; 
             return sign*-1;
         }  
