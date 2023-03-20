@@ -21,7 +21,7 @@ int main()
     cout<<"OK\n";
     cout.flush();
     int count = 0;
-    initRobortInfo();
+    initrobotInfo();
     init_studio_parameter();
     while (cin>>state.FrameID){
         // cerr<<" time "<<state.FrameID<<endl;
