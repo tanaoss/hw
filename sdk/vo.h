@@ -6,7 +6,7 @@
 #include"vec.h"
 using namespace std;
 const double eps = 1e-8;
-vector<Vec> get_rAndf(Circle  circle);//返回相对坐标下的碰撞速度
+vector<Vec> get_rAndf(Circle  circle,pair<double,double>pos);//返回相对坐标下的碰撞速度
 Vec transmit_v_v1(Vec v,Vec v1);//绝对速度转相对速度
 Vec transmit_v1_v(Vec v1,Vec v);//相对速度转绝对速度
 vector<Vec> achievable_speed(Vec v,double angular_acceleration,double acceleration);

@@ -8,6 +8,8 @@ struct Vec
 {
     double x;
     double y;
+    double theta;
+    Vec(){}
     Vec(double _x,double _y){
         x=_x;
         y=_y;
