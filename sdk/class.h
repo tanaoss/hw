@@ -201,7 +201,7 @@ bool isAcuteAngle(pair<double, double> a, double x);
 
 bool checkIsTrySeparate(int robotA_id, int robotB_id);   //
 bool checkrobotsCollison(int robotA_id, int robotB_id, double k); // 判断机器人a，b是否相撞
-void solverobotsCollison();                             // 解决机器人相撞
+void solveRobotsCollision();                             // 解决机器人相撞
 
 void printRobotInfo(int i);
 

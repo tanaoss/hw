@@ -23,14 +23,14 @@ int main()
     cerr<<studios[0].pos.first<<' '<<studios[0].pos.second<<endl;
     cerr<<class_map<<endl;
     calcuStudioDis();
-    cerr<<robots.size();
+    // cerr<<robots.size();
     cout<<"OK\n";
     cout.flush();
     int count = 0;
     initrobotInfo();
     init_studio_parameter();
     while (cin>>state.FrameID){
-        cerr<<" time "<<state.FrameID<<endl;
+        // cerr<<" time "<<state.FrameID<<endl;
         readStatusUntilOK() ;
         cout<<state.FrameID<<endl;
         //cerr<<"aaa"<<endl;

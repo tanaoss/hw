@@ -362,7 +362,7 @@ bool checkrobotsCollison(int robotA_id, int robotB_id, double k) {
     //          << endl;
     // }
 
-    return le(calcuDis(next_posA, next_posB), getRobotRadius(robotA_id) + getRobotRadius(robotB_id) + k);
+    return le(calcuDis(next_posA, next_posB), 1.06 + k);
 }
 
 // bool checkrobotsCollison(int robotA_id, int robotB_id, double dis, double k) {
@@ -377,10 +377,25 @@ bool checkRobortsCollison(int robotA_id, pair<double, double> next_pos, int robo
 
 bool checkIsTrySeparate(int robotA_id, int robotB_id) {
     Robot robotA = robots[robotA_id];
-    Robot robortB = robots[robotB_id];
+    Robot robotB = robots[robotB_id];
     pair<double, double> next_posA = getNextPos(robotA_id);
     pair<double, double> next_posB = getNextPos(robotB_id);
-    return gt(getRobotRadius(robotA_id) + getRobotRadius(robotB_id), calcuDis(next_posA, next_posB));
+    // if ((state.FrameID >= 613 && state.FrameID <= 620) && robotA_id == 1&& robotB_id == 3)
+    // {
+    //     cerr<<"time:613-620"<<endl;
+    //     printRobotInfo(robotA_id);
+    //     printRobotInfo(robotB_id);
+    //     cerr << "dis:" << calcuDis(robotA.pos, robotB.pos) << "*" << calcuDis(next_posA, next_posB) << endl;
+    //     cerr << calVectorProduct(robotA.xy_pos, transformVector(robotA.direction))
+    //         <<"**"<<calVectorProduct(robotB.xy_pos, transformVector(robotB.direction))<<endl<< endl;
+    //     cerr<<(lt(calcuDis(robotA.pos, robotB.pos), calcuDis(next_posA, next_posB)) &&
+    //        ge(calVectorProduct(robotA.xy_pos, transformVector(robotA.direction)), 0.0) &&
+    //        ge(calVectorProduct(robotB.xy_pos, transformVector(robotB.direction)), 0.0))<< endl<< endl;
+    // }
+    // return gt(getRobotRadius(robotA_id) + getRobotRadius(robotB_id), calcuDis(next_posA, next_posB));
+    return lt(calcuDis(robotA.pos, robotB.pos), calcuDis(next_posA, next_posB)) &&
+           ge(calVectorProduct(robotA.xy_pos, transformVector(robotA.direction)), 0.0) &&
+           ge(calVectorProduct(robotB.xy_pos, transformVector(robotB.direction)), 0.0);
 }
 
 double calNextTimeDistance(double speed, double time, double  acceleration) {
@@ -462,11 +477,9 @@ int getAvoidDirection(int goID, int stopID)
     double angle3 = angle2 - angle1;
 
     double included_angle = fabs(angle3);
-    included_angle = gt(angle3, Pi) ? 2 * Pi - angle3 : angle3;
-
-    // if (state.FrameID == 965)
-    //     cerr << "angle" << included_angle << "angle3:" << angle3 << endl;
-
+    included_angle = gt(included_angle, Pi) ? 2 * Pi - included_angle : included_angle;
+    int sign;
+        
     // 如果stopID-goID方向与goTD前进方向是锐角，go旋转
     // if (lt(fabs(included_angle), Pi / 2))
     // {
@@ -501,6 +514,7 @@ bool isAcuteAngle(pair<double, double> a, pair<double, double> b)
 
 bool isAcuteAngle(pair<double, double> a, double x)
 {
+    x = gt(x, 0) ? x: 2 * Pi + x;
     return gt(calVectorProduct(a, make_pair(cos(x), sin(x))), 0);
 }
 
@@ -547,7 +561,7 @@ bool checkForward(int id) {
 }
 
 
-void solverobotsCollision()
+void solveRobotsCollision()
 {
     int stopID, goID;
     double dis, angle;
@@ -944,8 +958,8 @@ void control(vector<PayLoad> payLoad){
         }
         
     }
-    // solveRobortsCollision();
-    Collision_detection(payLoad);
+    solveRobotsCollision();
+    // Collision_detection(payLoad);
     updateLastRate();
     
     
