@@ -25,6 +25,14 @@ struct PayLoad
         speed = _speed;
         sign = _sign;
     }
+    PayLoad(double _angle, double _angular_acceleration, double _acceleration, double _distance, int _sign)
+    {
+        angle = _angle;
+        angular_acceleration = _angular_acceleration;
+        acceleration = _acceleration;
+        distance = _distance;
+        sign = _sign;
+    }
 };
 
 struct State
@@ -221,7 +229,7 @@ bool is_less(int i1,int i2);
 bool who_isFirst(int i1,int i2);
 double return_v(int id);
 int Calculate_root(int i1,int i2);
-bool will_collision(int i1,int i2);
+bool will_collision(int i1,int i2,int ctr=0);
 bool will_collision_Careful(int i1,int i2);
 bool return_collision(int i1,int i2);
 pair<int,int> far_away(int i1,int i2,int base1,int base2);
@@ -242,3 +250,7 @@ int getSign(int i1,int i2);
 pair<double,double> return_seta(int i1,int i2);
 double return_type(int i1);
 void change_getType();
+bool can_Pass(int i1,double seta,double arf, double canAngle,
+double dis,double time,int ctr);
+double get_at_v(double t,double a,double v,int sign_v1);
+double get_at_v_z(double t,double a,double v,int sign_v1);
