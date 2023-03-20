@@ -2245,14 +2245,14 @@ int return_line_dire(int i1,int i2,int signBase){
             f1=true;
             // return sign;
         }else if(lt(fabs(Pi-seta-arf)+canAngle_pos_z,fabs(seta+arf)+canAngle_neg_z)){
-            cerr<<"can't raote "<<state.FrameID<<" "<<i1<<" "<<i2<<" Collision_point "<<Collision_point.first<<" "<<
-            Collision_point.second<<endl; 
+            // cerr<<"can't raote "<<state.FrameID<<" "<<i1<<" "<<i2<<" Collision_point "<<Collision_point.first<<" "<<
+            // Collision_point.second<<endl; 
 
             
             return sign;
         }else{
-            cerr<<"can't raote "<<state.FrameID<<" "<<i1<<" "<<i2<<" Collision_point "<<Collision_point.first<<" "<<
-            Collision_point.second<<endl; 
+            // cerr<<"can't raote "<<state.FrameID<<" "<<i1<<" "<<i2<<" Collision_point "<<Collision_point.first<<" "<<
+            // Collision_point.second<<endl; 
             return sign*-1;
         }
         if(f1&&f2){
@@ -2277,11 +2277,11 @@ int return_line_dire(int i1,int i2,int signBase){
             // return sign*-1;
         }else if(lt(fabs(seta-arf)+canAngle_pos_z,fabs(Pi-seta+arf)+canAngle_neg_z)){
             // cerr<<"can't raote "<<state.FrameID<<" "<<i1<<" "<<i2<<" Collision_point "<<Collision_point.first<<" "<<
-            Collision_point.second<<endl; 
+            // Collision_point.second<<endl; 
             return sign;
         }else{
             // cerr<<"can't raote "<<state.FrameID<<" "<<i1<<" "<<i2<<" Collision_point "<<Collision_point.first<<" "<<
-            Collision_point.second<<endl; 
+            // Collision_point.second<<endl; 
             return sign*-1;
         }  
         if(f1&&f2){
