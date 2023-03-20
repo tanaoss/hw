@@ -26,7 +26,12 @@ Vec transmit_v1_v(Vec v1,Vec v){
 vector<Vec> achievable_speed(Vec v,double angular_acceleration,double acceleration){//给定加速度角加速度的情况下，可达速度
 
 }
+vector<vector<Vec>> speed_set_difference(vector<Vec> v1,vector<Vec> v2){//求两个速度集合的差
 
-vector<vector<Vec>> speed_set_difference(vector<Vec> v1,vector<Vec> v2);//求两个速度集合的差
-Vec suitable_speeds(Vec v,vector<vector<Vec>>v_set);//从速度集合中选取最接近原速度的v
-pair<double,double>  Calculation_results(Vec v,Vec v1);//计算从速度1变换到速度2需要下达的forwad指令和rotate指令
+}
+Vec suitable_speeds(Vec v,vector<vector<Vec>>v_set){//从速度集合中选取最接近原速度的v
+
+}
+pair<double,double>  Calculation_results(Vec v,Vec v1){//计算从速度1变换到速度2需要下达的forwad指令和rotate指令
+
+}
