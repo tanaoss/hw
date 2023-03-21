@@ -986,8 +986,8 @@ void control(vector<PayLoad> payLoad){
         }
         
     }
-    // solveRobotsCollision();
-    Collision_detection(payLoad);
+    if(class_map != 3)solveRobotsCollision();
+    else Collision_detection(payLoad);
     updateLastRate();
     
     
@@ -1121,6 +1121,7 @@ void Collision_detection(vector<PayLoad> payLoad){
         }
         if(lt(tmpDis,5.5)&&will_collision(sel,sel_1)){
             int sign=return_line_dire(sel,sel_1,payLoad[sel_1].sign);
+            if(gt(pl_g[sel_1].angle,Pi/2)&&lt(sign*pl_g[sel_1].sign,0))continue; 
             if(sign==0)continue;
             // if(sign==0){
             //    sign=return_line_dire(sel_1,sel,payLoad[sel_1].sign); 
@@ -2379,6 +2380,7 @@ bool Check_for_balls_around(int pos){
     return true;
 }
 int return_line_dire(int i1,int i2,int signBase){
+    
     int try_aginF=0;
     bool l1=can_stop(robots[i1].pos,studios[robots[i1].target_id].pos,pl_g [i1].angle);
     bool l2=can_stop(robots[i2].pos,studios[robots[i2].target_id].pos,pl_g [i2].angle);
