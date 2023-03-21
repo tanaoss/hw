@@ -2432,10 +2432,6 @@ int return_line_dire(int i1,int i2,int signBase){
             f1=true;
             // return sign;
         }else if(lt(fabs(Pi-seta-arf)+canAngle_pos_z,fabs(seta+arf)+canAngle_neg_z)){
-            if(will_collision_Careful(i1,i2)&&try_aginF==0){
-                try_aginF=1;
-                goto try_agin;
-            }
             cerr<<"can't raote -"<<state.FrameID<<" "<<i1<<" "<<i2<<endl;
             cerr<<"can't raote  angle -"<<canAngle_pos_z<<" "<<canAngle_neg_z<<" "<<sign<<endl;
             //ins[i1].rotate=Pi*-1*sign;
@@ -2453,10 +2449,6 @@ int return_line_dire(int i1,int i2,int signBase){
             // cerr<<"0"<<endl;
             return sign;
         }else{
-            if(will_collision_Careful(i1,i2)&&try_aginF==0){
-                try_aginF=1;
-                goto try_agin;
-            }
             cerr<<"can't raote -"<<state.FrameID<<" "<<i1<<" "<<i2<<endl;
             cerr<<seta<<" "<<arf<<endl;
             cerr<<"can't raote  angle -"<<canAngle_pos_z<<" "<<canAngle_neg_z<<" "<<sign*-1<<endl;
