@@ -1113,6 +1113,12 @@ void Collision_detection(vector<PayLoad> payLoad){
         //     sel=id2;
         //     sel_1=id1;            
         // }
+        int speed_limit=5;
+        if(is_near_tar(sel_1)&&isWall(robots[sel_1].target_id)&&will_collision(sel,sel_1)&&gt(fabs(return_v(sel))-fabs(return_v(sel_1)),speed_limit)){
+            int tmp=sel;
+            sel=sel_1;
+            sel_1=tmp;
+        }
         if(lt(tmpDis,5.5)&&will_collision(sel,sel_1)){
             int sign=return_line_dire(sel,sel_1,payLoad[sel_1].sign);
             // if(sign==0){
@@ -2393,8 +2399,13 @@ int return_line_dire(int i1,int i2,int signBase){
             if(gt(v_1,4)&&gt(v_2,4)&&gt(fabs(ins[i1].rotate),Pi/2)){
                 // cerr<<"teshu1"<<endl;
                 if(will_collision_Careful(i1,i2)||lt(tmpDis,3))
+                    //if(!is_near_tar(i2))
                     ins[i2].forward=v_2/2;
+                    //if(!is_near_tar(i1))
                     ins[i1].forward=v_1/2;
+            }
+            if(is_near_tar(i2)&&isWall(robots[i2].target_id)){
+                ins[i1].forward=v_1/2;
             }
             // cerr<<"0"<<endl;
             return sign;
@@ -2406,10 +2417,16 @@ int return_line_dire(int i1,int i2,int signBase){
                 // cerr<<"teshu"<<endl;
                 if(will_collision_Careful(i1,i2)||lt(tmpDis,3)){
                     // cerr<<"teshu-"<<endl;
+                    //if(!is_near_tar(i2))
                     ins[i2].forward=v_2/2;
+                    //if(!is_near_tar(i1))
                     ins[i1].forward=v_1/2;
                 }
+
                 
+            }
+                if(is_near_tar(i2)&&isWall(robots[i2].target_id)){
+                ins[i1].forward=v_1/2;
             }
             ins[i1].rotate=Pi*sign*-1;
             return sign*-1;
@@ -2750,4 +2767,9 @@ double get_at_v_z(double t,double a,double v,int sign_v1){
         return -1*fabs(res);
     }
     return (s+sign_v1*Pi*t);
+}
+bool is_near_tar(int id){
+    double tmpDis=calcuDis(robots[id].pos,robots[robots[id].target_id].pos);
+    if(lt(tmpDis,2))return true;
+    return false;
 }
