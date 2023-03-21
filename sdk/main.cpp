@@ -20,6 +20,7 @@ int main()
     if(eq(studios[0].pos.first,4.75)&&eq(studios[0].pos.second,48.75)) class_map = 2;
     if(eq(studios[0].pos.first,25.25)&&eq(studios[0].pos.second,47.75)) class_map = 3;
     if(eq(studios[0].pos.first,24.75)&&eq(studios[0].pos.second,49.25)) class_map = 4;
+    for(int i = 0;i<studios.size();i++)studios[i].wait_time = 0;
     // cerr<<studios[0].pos.first<<' '<<studios[0].pos.second<<endl;
     // cerr<<class_map<<endl;
     calcuStudioDis();
