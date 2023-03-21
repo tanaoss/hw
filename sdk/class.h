@@ -175,7 +175,7 @@ bool gt(double a, double b);// >
 bool lt(double a, double b);// <
 bool ge(double a, double b);// >=
 bool le(double a, double b);// <=
-void initRobortInfo();
+void initrobotInfo();
 bool readMapUntilOK();                 // 读地图
 bool readStatusUntilOK();              // 读判题器输出
 void out_put();                        // 输出指令
@@ -184,7 +184,7 @@ void control(vector<PayLoad> payLoad); // 控制球体运行
 void first_pick_point();
 void robot_action();
 void process();
-PayLoad calPayload(int robortID,int studioID);                                                              // 计算机器人与目标之间的夹角、距离等信息
+PayLoad calPayload(int robotID,int studioID);                                                              // 计算机器人与目标之间的夹角、距离等信息
 vector<double> get_T_limits(pair<double, double> pos, int id, int ctr = -1, double dis = 0.0); // 靠近墙体时，需要把方向转到那个范围才能加速
 pair<double, double> subVector(pair<double, double> a, pair<double, double> b);                // 向量减（a-b）
 double calVectorProduct(pair<double, double> a, pair<double, double> b);                       // 向量乘
@@ -192,7 +192,7 @@ double calVectorSize(pair<double, double> a);                                   
 pair<double, double> transformVector(double direction);
 double calAngle(pair<double, double> a, pair<double, double> b);                               // calcu vectors' angle
 double calcuDis(pair<double, double> a, pair<double, double> b);                               // 计算点之间的距离
-double getRobotRadius(int robort_id);                                                          // 获取机器人当前的半径
+double getRobotRadius(int robot_id);                                                          // 获取机器人当前的半径
 double calNextTimeDistance(double speed, double time, double acceleration);                    // 计算time时间后运动的距离
 pair<double, double> getNextPos(int robot_id);
 
@@ -200,8 +200,8 @@ bool isAcuteAngle(pair<double, double> a, pair<double, double> b);//判断是否
 bool isAcuteAngle(pair<double, double> a, double x);
 
 bool checkIsTrySeparate(int robotA_id, int robotB_id);   //
-bool checkRobortsCollison(int robotA_id, int robotB_id, double k); // 判断机器人a，b是否相撞
-void solveRobortsCollison();                             // 解决机器人相撞
+bool checkrobotsCollison(int robotA_id, int robotB_id, double k); // 判断机器人a，b是否相撞
+void solveRobotsCollision();                             // 解决机器人相撞
 
 void printRobotInfo(int i);
 
@@ -229,7 +229,7 @@ bool is_less(int i1,int i2);
 bool who_isFirst(int i1,int i2);
 double return_v(int id);
 int Calculate_root(int i1,int i2);
-bool will_collision(int i1,int i2);
+bool will_collision(int i1,int i2,int ctr=0);
 bool will_collision_Careful(int i1,int i2);
 bool return_collision(int i1,int i2);
 pair<int,int> far_away(int i1,int i2,int base1,int base2);
