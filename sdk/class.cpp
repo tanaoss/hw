@@ -986,8 +986,8 @@ void control(vector<PayLoad> payLoad){
         }
         
     }
-    solveRobotsCollision();
-    // Collision_detection(payLoad);
+    // solveRobotsCollision();
+    Collision_detection(payLoad);
     updateLastRate();
     
     
@@ -1326,10 +1326,13 @@ double back_dis(int studio_id){
 }
 double studio_wait_time(int studio_id){
     double wait=0;
-    if(studios[studio_id].wait_time>300){
-        wait= 1-(double)(((double)studios[studio_id].wait_time)/300)*0.1;
-        // cerr<<"wait_time = "<<wait<<endl;
-        return wait;
+    if(class_map ==1){
+        if(studios[studio_id].wait_time>300){
+            wait= 1-(double)(((double)studios[studio_id].wait_time)/300)*0.1;
+            // cerr<<"wait_time = "<<wait<<endl;
+            return wait;
+        }
+        else return 1;
     }
     else return 1;
 }
