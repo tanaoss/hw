@@ -92,6 +92,12 @@ struct Robot
     int pre_rote;
     int pre_cnt;
     int wait;
+    bool operator!=(Robot s1){
+    if(s1.id!=id||target_id!=s1.target_id||s1.loc_id!=loc_id||xy_pos!=s1.xy_pos||pos!=s1.pos){
+            return true;
+        }
+        return false;
+    }
     Robot(int _id, int _loc_id, int _get_type, double _time_val, double _collision_val, double _angular_velocity, pair<double, double> &_xy_pos,
           double _direction, pair<double, double> &_pos, int _target_id = -1,int _wait = -1,int _lastSign = 0, int _isTurn = 0) : xy_pos(_xy_pos), pos(_pos)
     {
@@ -167,6 +173,12 @@ struct Studio
         r_time = _r_time;
         bitSatus = _bitSatus;
         pStatus = _pStatus;
+    }
+    bool operator!=(Studio s1){
+        if(pos!=s1.pos||s1.id!=id||type!=s1.type||s1.r_id!=r_id||r_time!=s1.r_time||bitSatus!=s1.bitSatus||s1.pStatus!=pStatus){
+            return true;
+        }
+        return false;
     }
 };
 struct Line { pair<double, double>  P; pair<double, double> v; };      // 直线（点向式）
