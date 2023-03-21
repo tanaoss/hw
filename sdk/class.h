@@ -268,3 +268,4 @@ double dis,double time,int ctr);
 double get_at_v(double t,double a,double v,int sign_v1);
 double get_at_v_z(double t,double a,double v,int sign_v1);
 bool is_near_tar(int id);
+double anger_to_length(int robot_id,int studio_id);
