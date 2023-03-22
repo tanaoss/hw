@@ -269,3 +269,7 @@ double get_at_v(double t,double a,double v,int sign_v1);
 double get_at_v_z(double t,double a,double v,int sign_v1);
 bool is_near_tar(int id);
 double anger_to_length(int robot_id,int studio_id);
+vector<pair<double,double>>Calculate_the_trajectory(Robot rob,int cnt,int tar);
+PayLoad calPayload_trajectory(Robot rob,int studioID);
+vector<pair<double,double>>Calculate_the_trajectory(Robot rob,Ins ins,vector<pair<double,double>> tra,int cnt,int tar);
+double get_at_stop(double t,double a,double v,int sign_v1);
