@@ -2162,8 +2162,8 @@ double return_v(int id){
     return sqrt(xy_pos.first*xy_pos.first+xy_pos.second*xy_pos.second);//合速度
 }
 double return_v(Robot rob){
-    auto xy_pos=rob.xy_pos;
-    return sqrt(xy_pos.first*xy_pos.first+xy_pos.second*xy_pos.second);//合速度
+    auto robot=rob;
+    return calVectorSize(robot.xy_pos) * (ge(calVectorProduct(robot.xy_pos, transformVector(robot.direction)), 0.0)? 1: -1);
 }
 int Calculate_root(int i1,int i2){
     double tmp= get_angle(robots[i1].xy_pos,robots[i2].xy_pos);
