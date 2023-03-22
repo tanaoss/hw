@@ -3114,6 +3114,8 @@ void collision_solve(int frame){
             }
             if(tmp_tra.size() == 0) continue;
             flag = false;
+
+            //检测是否会和其他小球发生碰撞
             for(j = 0; j < 4; ++j){
                 if(j == choose_id) continue;
                 if(checkNoCollision(tmp_tra, trajectory[j], payloads[ro[choose_id].id].radius + payloads[ro[j].id].radius)) {
@@ -3121,6 +3123,7 @@ void collision_solve(int frame){
                     break;
                 }
             }
+            //若和其他小球碰撞则更换策略
             if(flag) continue;
             dis_tmp = calcuDis(tmp_tra[24], studios[ro[choose_id].target_id].pos);
             if(lt(dis_tmp, dis)) {
