@@ -986,9 +986,19 @@ void control(vector<PayLoad> payLoad){
         }
         
     }
-    solveRobotsCollision();
+    //control
+    if(state.FrameID<15){
+        cerr<<"------------------------------------"<<endl;
+        auto tmp=Calculate_the_trajectory(robots[0],0,25);
+        for(auto t:tmp){
+            cerr<<t.first<<"-"<<t.second<<" ";
+        }
+        cerr<<endl;
+        cerr<<"------------------------------------"<<endl;
+    }
+    // solveRobotsCollision();
     // Collision_detection(payLoad);
-    updateLastRate();
+    // updateLastRate();
     
     
 //     vector<bool>vis(4,false);
@@ -2151,6 +2161,10 @@ double return_v(int id){
     auto xy_pos=robots[id].xy_pos;
     return sqrt(xy_pos.first*xy_pos.first+xy_pos.second*xy_pos.second);//合速度
 }
+double return_v(Robot rob){
+    auto xy_pos=rob.xy_pos;
+    return sqrt(xy_pos.first*xy_pos.first+xy_pos.second*xy_pos.second);//合速度
+}
 int Calculate_root(int i1,int i2){
     double tmp= get_angle(robots[i1].xy_pos,robots[i2].xy_pos);
     if(gt(tmp,0.9)&&!will_collision(i1,i2))return -1;
@@ -2858,4 +2872,70 @@ bool is_near_tar(int id){
     double tmpDis=calcuDis(robots[id].pos,robots[robots[id].target_id].pos);
     if(lt(tmpDis,2))return true;
     return false;
+}
+vector<pair<double,double>>Calculate_the_trajectory(Robot rob,int cnt,int tar){
+    double t=0.02;
+    PayLoad  pay=calPayload_trajectory(rob,rob.target_id);
+    if(can_stop(rob.pos,studios[rob.target_id].pos,pay.angle)||cnt>tar){
+        return {rob.pos};
+    }
+    cnt++;
+    Robot tmp=rob;
+    double seta=rob.direction;
+    double w=rob.angular_velocity==0?0.01:rob.angular_velocity;
+    double a=pay.angular_acceleration*pay.sign;
+    double changeAngle=get_at_v(t,pay.angular_acceleration,rob.angular_velocity,pay.sign);
+    double v=return_v(rob);
+    rob.pos.first=rob.pos.first+v*cos(seta)*t;
+    rob.pos.second=rob.pos.second+v*sin(seta)*t;
+    rob.angular_velocity=gt(fabs(rob.angular_velocity+a*t),Pi)?pay.sign*Pi:rob.angular_velocity+a*t;
+    
+    cerr<<rob.direction<<"-"<<rob.angular_velocity<<"-"<<a<<endl;
+    if(lt(v,6)){
+        rob.xy_pos.first=(v+pay.acceleration*t)*cos(rob.direction);
+        rob.xy_pos.second=(v+pay.acceleration*t)*sin(rob.direction);
+    }
+    rob.direction+=changeAngle;
+    if(gt(fabs(changeAngle),fabs(pay.angle))){
+        return {rob.pos};
+    }
+    auto res=Calculate_the_trajectory(rob,cnt,tar);
+    res.push_back(tmp.pos);
+    return res;
+}
+PayLoad calPayload_trajectory(Robot rob,int studioID){
+    Robot robot = rob;
+    Studio studio = studios[studioID];
+
+    // cerr << robotID << "--"<< robot.target_id<<endl;
+
+    double distance = calcuDis(robot.pos, studio.pos);
+    double angular_acceleration = robot.get_type == 0? angular_acceleration_no :angular_acceleration_has;
+    double acceleration = robot.get_type == 0? acceleration_no: acceleration_has;
+
+    // 计算机器人与目标点构成的向量与x轴正方向夹角
+    pair<double, double> robotToStudio = subVector(studio.pos, robot.pos);
+    double angle1 = calAngle(robotToStudio);
+
+    double angle2 = ge(robot.direction, 0.0) ? robot.direction: 2 * Pi + robot.direction;
+    // double angle2 = calAngle(robot.xy_pos);
+
+    double angle = angle2 - angle1;
+
+    double speed = calVectorSize(robot.xy_pos) * (ge(calVectorProduct(robot.xy_pos, transformVector(robot.direction)), 0.0)? 1: -1);
+
+    int sign;
+
+    if(ge(angle, 0) && lt(angle, Pi) || lt(angle, -Pi))
+        sign = -1;
+    else
+        sign = 1;
+    angle = fabs(angle);
+    angle  = gt(angle, Pi)? 2 * Pi - angle: angle;
+
+
+    // cerr<<"**"<< angle1<<"**dir:"<<robot.direction<<"**"<<angle2<<endl;
+    // cerr<<"**"<< angle << "**"<<distance<<"**"<<sign<<endl;
+
+    return PayLoad((robot.get_type == 0? 0.45: 0.53), angle, angular_acceleration, acceleration, distance, speed, sign);    
 }
