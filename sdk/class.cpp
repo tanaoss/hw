@@ -2913,7 +2913,7 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,int cnt,int tar){
     double w=rob.angular_velocity==0?0.01:rob.angular_velocity;
     double a=pay.angular_acceleration*pay.sign;
     double changeAngle=get_at_v(t,pay.angular_acceleration,rob.angular_velocity,pay.sign);
-    double v=return_v(rob);
+    double v=pay.speed;
     rob.pos.first=rob.pos.first+v*cos(seta)*t;
     rob.pos.second=rob.pos.second+v*sin(seta)*t;
     rob.angular_velocity=gt(fabs(rob.angular_velocity+a*t),Pi)?pay.sign*Pi:rob.angular_velocity+a*t;
