@@ -2890,6 +2890,7 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,int cnt,int tar){
     rob.pos.second=rob.pos.second+v*sin(seta)*t;
     rob.angular_velocity=gt(fabs(rob.angular_velocity+a*t),Pi)?pay.sign*Pi:rob.angular_velocity+a*t;
     
+
     cerr<<rob.direction<<"-"<<rob.angular_velocity<<"-"<<a<<endl;
     if(lt(v,6)){
         rob.xy_pos.first=(v+pay.acceleration*t)*cos(rob.direction);
