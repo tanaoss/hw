@@ -2841,6 +2841,34 @@ double get_at_v(double t,double a,double v,int sign_v1){
     }
     return (s+sign_v1*Pi*t);
 }
+double get_at_stop(double t,double a,double v,int sign_v1){
+    double lef_time=0;
+    double s=0;
+    a*=sign_v1;
+    if(lt(fabs(v),Pi)){
+        double tmpTime=(0-v)/(a);
+        double realTime=min(tmpTime,t);
+        s=v*realTime+0.5*a*realTime*realTime;
+        double res=(s);
+        if(le(t,tmpTime)){
+            if(gt(res*sign_v1,0)){
+                return fabs(res);
+            }
+            else{
+                return -1*fabs(res);
+            }
+            return (s);
+        }
+        t=t-realTime;
+    }
+    double res=(s+sign_v1*Pi*t);
+    if(gt(res*sign_v1,0)){
+        return fabs(res);
+    }else{
+        return -1*fabs(res);
+    }
+    return (s+sign_v1*Pi*t);
+}
 double get_at_v_z(double t,double a,double v,int sign_v1){
     double lef_time=0;
     double s=0;
@@ -2876,7 +2904,7 @@ bool is_near_tar(int id){
 vector<pair<double,double>>Calculate_the_trajectory(Robot rob,int cnt,int tar){
     double t=0.02;
     PayLoad  pay=calPayload_trajectory(rob,rob.target_id);
-    if(can_stop(rob.pos,studios[rob.target_id].pos,pay.angle)||cnt>tar){
+    if(cnt>tar){
         return {rob.pos};
     }
     cnt++;
@@ -2889,14 +2917,11 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,int cnt,int tar){
     rob.pos.first=rob.pos.first+v*cos(seta)*t;
     rob.pos.second=rob.pos.second+v*sin(seta)*t;
     rob.angular_velocity=gt(fabs(rob.angular_velocity+a*t),Pi)?pay.sign*Pi:rob.angular_velocity+a*t;
-    
-
-    cerr<<rob.direction<<"-"<<rob.angular_velocity<<"-"<<a<<endl;
     if(lt(v,6)){
         rob.xy_pos.first=(v+pay.acceleration*t)*cos(rob.direction);
         rob.xy_pos.second=(v+pay.acceleration*t)*sin(rob.direction);
     }
-    rob.direction+=changeAngle;
+    rob.direction+=changeAngle*pay.sign;
     if(gt(fabs(changeAngle),fabs(pay.angle))){
         return {rob.pos};
     }
