@@ -38,6 +38,7 @@ pair<double ,double> Root;
 pair<double ,double> Collision_point;
 vector<PayLoad> pl_g;
 double Compute_redundancy=0;
+Ins ins_set[6];
 void initrobotInfo() {
     double weightMin = 0.45 * 0.45 * Pi * 20.0;
     double weightMax = 0.53 * 0.53 * Pi * 20.0;
@@ -49,6 +50,14 @@ void initrobotInfo() {
 
     angular_acceleration_no = 50.0 / inertiaMin;
     angular_acceleration_has = 50.0 /inertiaMax;
+
+    for(int i = 0; i < 6; ++i) {
+        if(i < 3) ins[i].forward = 0;
+        else ins[i].forward = 6;
+        if(i % 3 == 0) ins[i].rotate = 0;
+        else if(i % 3 == 1) ins[i].rotate = Pi;
+        else ins[i].rotate = -Pi;
+    }
 
 
 }
@@ -998,7 +1007,8 @@ void control(vector<PayLoad> payLoad){
     }
     // solveRobotsCollision();
     // Collision_detection(payLoad);
-    // updateLastRate();
+    collision_solve();
+    updateLastRate();
     
     
 //     vector<bool>vis(4,false);
@@ -2964,4 +2974,36 @@ PayLoad calPayload_trajectory(Robot rob,int studioID){
     // cerr<<"**"<< angle << "**"<<distance<<"**"<<sign<<endl;
 
     return PayLoad((robot.get_type == 0? 0.45: 0.53), angle, angular_acceleration, acceleration, distance, speed, sign);    
+}
+
+bool cmp_robot(Robot a, Robot b) {
+
+}
+
+
+void collision_solve(){
+    int i, j;
+    vector<pair<double,double>> trajectory[4];
+    
+    for(i = 0; i < 4; ++i) trajectory[i] = Calculate_the_trajectory(robots[i], 0, 25);
+    for (i = 0; i < 4; i++)
+    {
+        for (j = i + 1; j < 4; j++)
+        {
+            if(checkNoCollision(i, trajectory[i], j, trajectory[j]))
+                continue;
+            
+        }
+    }
+}
+
+bool checkNoCollision(int a_id, vector<pair<double,double>> a, int b_id, vector<pair<double,double>> b) {
+    int count = min(a.size(), b.size());
+    double mindis = payloads[a_id].radius + payloads[b_id].radius;
+    for(int i = 0; i < count; ++i) {
+        if(le(calcuDis(a[i], b[i]), mindis))
+            return false;
+        
+    }
+    return true;
 }
