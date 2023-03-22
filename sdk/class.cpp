@@ -38,7 +38,7 @@ pair<double ,double> Root;
 pair<double ,double> Collision_point;
 vector<PayLoad> pl_g;
 double Compute_redundancy=0;
-Ins ins_set[6];
+Ins ins_set[7];
 void initrobotInfo() {
     double weightMin = 0.45 * 0.45 * Pi * 20.0;
     double weightMax = 0.53 * 0.53 * Pi * 20.0;
@@ -52,14 +52,12 @@ void initrobotInfo() {
     angular_acceleration_has = 49.9 /inertiaMax;
 
     for(int i = 0; i < 6; ++i) {
-        if(i < 3) ins[i].forward = 0;
-        else ins[i].forward = 6;
-        if(i % 3 == 0) ins[i].rotate = 0;
-        else if(i % 3 == 1) ins[i].rotate = Pi;
-        else ins[i].rotate = -Pi;
+        if(i < 3) ins_set[i].forward = 0;
+        if(i % 3 == 0) ins_set[i].rotate = 0;
+        else if(i % 3 == 1) ins_set[i].rotate = Pi;
+        else ins_set[i].rotate = -Pi;
     }
-
-
+    ins_set[6].forward = 0;
 }
 void init_studio_parameter(){
     for(int i=0;i<50;i++){
@@ -3035,33 +3033,162 @@ PayLoad calPayload_trajectory(Robot rob,int studioID){
 }
 
 bool cmp_robot(Robot a, Robot b) {
-
+    if((a.get_type != 0 && b.get_type !=0) || (a.get_type == 0 && b.get_type ==0))
+        return gt(payloads[a.id].distance, payloads[b.id].distance);
+    return a.get_type < b.get_type;
 }
 
 
-void collision_solve(){
-    int i, j;
+void collision_solve(int frame){
+    int i, j, k, z;
     vector<pair<double,double>> trajectory[4];
-    
-    for(i = 0; i < 4; ++i) trajectory[i] = Calculate_the_trajectory(robots[i], 0, 25);
+    vector<pair<double,double>> tmp_tra, tra;
+    vector<Robot> ro;
+    double mindis;
+    double dis, dis_tmp;
+    int ans, tmp;
+    vector<int> coll[4];
+    int coll_time[4][4];
+    int vis[4] = {0};
+    int choose_id = -1;
+    int x;
+    bool flag;
+
+
+    for(i = 0; i < 4; ++i)
+        ro.emplace_back(robots[i]);
+    sort(ro.begin(), ro.end(), cmp_robot);
+
+    for(i = 0; i < 4; ++i) trajectory[i] = Calculate_the_trajectory(ro[i], 0, frame);
+
     for (i = 0; i < 4; i++)
     {
         for (j = i + 1; j < 4; j++)
         {
-            if(checkNoCollision(i, trajectory[i], j, trajectory[j]))
-                continue;
-            
+            mindis = payloads[ro[i].id].radius + payloads[ro[j].id].radius;
+            tmp = checkNoCollision(trajectory[i], trajectory[j], mindis);
+            if(tmp == -1) continue;
+            coll[i].emplace_back(j);
+            coll[j].emplace_back(i);
+            coll_time[i][j] = tmp;
+            coll_time[j][i] = tmp;
         }
     }
+
+    x = -1;
+    for(i = 0; i < 2; ++i) {
+        choose_id = -1;
+        //选择碰撞最多的小球改变状态
+        for(j = 0; j < 4; ++j){
+            if(vis[j] || coll[j].size() == 0)
+                continue;
+            if(choose_id == -1 || coll[j].size() - (x == j) > coll[choose_id].size()) {
+                choose_id = j;
+            }
+        }
+        
+        //No collision
+        if(choose_id == -1)
+            break;
+
+        tmp = 0;
+        //避让最晚发生的碰撞
+        for(j = 0; j < coll[choose_id].size(); ++j) {
+            if(coll_time[choose_id][j] > tmp) {
+                x = j;
+                tmp = coll_time[choose_id][j];
+            }
+        }
+
+
+        ans = -1;
+        for(k = 0; k < 7; ++k) {
+            if(k < 3) {
+                tmp_tra = Calculate_the_trajectory(ro[choose_id], ins_set[k], 1, 1, trajectory[x], 0, 25);
+            }
+            else if(k < 6) {
+                tmp_tra = Calculate_the_trajectory(ro[choose_id], ins_set[k], 0, 1, trajectory[x], 0, 25);
+            }
+            else {
+                tmp_tra = Calculate_the_trajectory(ro[choose_id], ins_set[k], 1, 0, trajectory[x], 0, 25);
+            }
+            if(tmp_tra.size() == 0) continue;
+            flag = false;
+            for(j = 0; j < 4; ++j){
+                if(j == choose_id) continue;
+                if(checkNoCollision(tmp_tra, trajectory[j], payloads[ro[choose_id].id].radius + payloads[ro[j].id].radius)) {
+                    flag =true;
+                    break;
+                }
+            }
+            if(flag) continue;
+            dis_tmp = calcuDis(tmp_tra[24], studios[ro[choose_id].target_id].pos);
+            if(lt(dis_tmp, dis)) {
+                dis = dis_tmp;
+                ans = k;
+                tra = tmp_tra;
+            }
+        }
+        if(ans != -1) {
+            trajectory[choose_id] = tra;
+            updateIns(ro[choose_id].id, ans);
+            coll_time[x][choose_id] = 0;
+        }
+        else
+            cerr<<"no solution to avoid collision"<<ro[choose_id].id<<"-"<<x;
+
+    }
+
+
 }
 
-bool checkNoCollision(int a_id, vector<pair<double,double>> a, int b_id, vector<pair<double,double>> b) {
+
+
+
+
+
+void updateIns(int id, int i) {
+    if(i<3) {
+        ins[id].forward = ins_set[i].forward;
+        ins[id].rotate = ins_set[i].rotate;
+    }
+    else if(i<6)
+        ins[id].forward = ins_set[i].rotate;
+    else
+        ins[id].forward = ins_set[i].forward;
+}
+
+int choose_best_ins(int id, double mindis, vector<pair<double,double>> tra) {
+    int k;
+    int ans = 0;
+    vector<pair<double,double>> tmp;
+    double dis, dis_tmp;
+    dis = 1000;
+    for(k = 0; k < 7; ++k) {
+        if(k < 3) {
+            tmp = Calculate_the_trajectory(robots[id], ins_set[k], 1, 1, tra, 0, 25);
+        }
+        else if(k < 6) {
+            tmp = Calculate_the_trajectory(robots[id], ins_set[k], 0, 1, tra, 0, 25);
+        }
+        else {
+            tmp = Calculate_the_trajectory(robots[id], ins_set[k], 1, 0, tra, 0, 25);
+        }
+        dis_tmp = calcuDis(tmp[24], studios[robots[id].target_id].pos);
+        if(lt(dis_tmp, dis)) {
+            dis = dis_tmp;
+            ans = k;
+        }
+    }
+    return ans;
+}
+
+
+int checkNoCollision(vector<pair<double,double>> a, vector<pair<double,double>> b, double mindis) {
     int count = min(a.size(), b.size());
-    double mindis = payloads[a_id].radius + payloads[b_id].radius;
     for(int i = 0; i < count; ++i) {
         if(le(calcuDis(a[i], b[i]), mindis))
-            return false;
-        
+            return i;
     }
-    return true;
+    return -1;
 }

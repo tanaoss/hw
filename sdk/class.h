@@ -274,6 +274,6 @@ PayLoad calPayload_trajectory(Robot rob,int studioID);
 vector<pair<double,double>>Calculate_the_trajectory(Robot rob,Ins ins, int forward_change, int rotate_change,vector<pair<double,double>> tra,int cnt,int tar);
 double get_at_stop(double t,double a,double v,int sign_v1);
 
-void collision_solve();
-bool checkNoCollision(int a_id, vector<pair<double,double>> a, int b_id, vector<pair<double,double>> b);
+void collision_solve(int frame);
+int checkNoCollision(vector<pair<double,double>> a, vector<pair<double,double>> b, double mindis);
 
