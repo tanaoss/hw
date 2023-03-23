@@ -983,19 +983,19 @@ void control(vector<PayLoad> payLoad){
         }
         
     }
-    //control
-    if(state.FrameID<15){
-        cerr<<"------------------------------------"<<endl;
+    // //control
+    // if(state.FrameID<15){
+    //     cerr<<"------------------------------------"<<endl;
         auto tmp=Calculate_the_trajectory(robots[0],0,100);
-        auto iter=tmp.rbegin();
-        cerr<<tmp.size()<<endl;
-        for(iter;iter!=tmp.rend();iter++){
-            cerr<<iter->first<<"-"<<iter->second<<" ";
-        }
-        cerr<<endl;
-        cerr<<"------------------------------------"<<endl;
-    }
-    // solveRobotsCollision();
+    //     auto iter=tmp.rbegin();
+    //     cerr<<tmp.size()<<endl;
+    //     for(iter;iter!=tmp.rend();iter++){
+    //         cerr<<iter->first<<"-"<<iter->second<<" ";
+    //     }
+    //     cerr<<endl;
+    //     cerr<<"------------------------------------"<<endl;
+    // }
+    solveRobotsCollision();
     // Collision_detection(payLoad);
     // updateLastRate();
     
@@ -1351,9 +1351,9 @@ double precise_distance(int robot_id,int studio_id){
     double temp;
     pair<double,double> center1((robots[robot_id].pos.first+cos(robots[robot_id].direction+Pi/2)*r),(robots[robot_id].pos.second+sin(robots[robot_id].direction+Pi/2)*r));
     pair<double,double> center2((robots[robot_id].pos.first+cos(robots[robot_id].direction-Pi/2)*r),(robots[robot_id].pos.second+sin(robots[robot_id].direction-Pi/2)*r));
-    cerr<<(robots[robot_id].pos.first+cos(robots[robot_id].direction+Pi/2)*r)<<endl;
-    cerr<<(robots[robot_id].pos.first+cos(robots[robot_id].direction-Pi/2)*r)<<endl;
-    cerr<<robots[robot_id].direction<<endl;
+    // cerr<<(robots[robot_id].pos.first+cos(robots[robot_id].direction+Pi/2)*r)<<endl;
+    // cerr<<(robots[robot_id].pos.first+cos(robots[robot_id].direction-Pi/2)*r)<<endl;
+    // cerr<<robots[robot_id].direction<<endl;
     pair<double,double> center;
     double dist1 = calcuDis(center1,studios[studio_id].pos);
     double dist2 = calcuDis(center2,studios[studio_id].pos);
@@ -1416,6 +1416,20 @@ double target_obstacle_avoidance(int robot_id,int studio_id){
     }
     return count;
 }
+double ditstance(int  robot_id,int studio_id){
+    double dist = 0;
+    pair<double,double> inflection;
+    int target = robots[robot_id].target_id;
+    robots[robot_id].target_id = studio_id;
+    auto tmp=Calculate_the_trajectory(robots[robot_id],0,100);
+    inflection.first = tmp[0].first;
+    inflection.second = tmp[0].second;
+    dist =tmp.size()*0.02*6;
+    dist += calcuDis(inflection,studios[studio_id].pos);
+    robots[robot_id].target_id = target;
+    return dist;
+}
+
 pair<int,double> pick_point(int robot_id, int state){
     pair<double,double> pos = robots[robot_id].pos;
     double min = 1000;
@@ -1594,8 +1608,8 @@ pair<int,double> pick_point(int robot_id, int state){
             }
         }
     }
-    // double m =precise_distance(robot_id,min_subscript);
-    // if(min_subscript != -1)cerr<<"min_dist = "<<min<<" length = "<<m<<endl;
+    double m =ditstance(robot_id,min_subscript);
+    if(min_subscript != -1)cerr<<"min_dist = "<<min<<" length = "<<m<<endl;
     return pair<int,double>(min_subscript,min);
 }
 pair<int,double> choose_lack(int studio_id ,int threshold){
