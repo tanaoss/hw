@@ -1341,6 +1341,7 @@ double back_dis(int studio_id){
     // cerr<<studios[studio_id].pos.first<<' '<<studios[studio_id].pos.second<<' '<<studios[min_subscript].pos.first<<' '<<studios[min_subscript].pos.second<<' '<<endl;
     // cerr<<"back_dis = " <<min<<endl;
     return min*0.2/6;
+    // return 0;
 }
 double studio_wait_time(int studio_id){
     double wait=0;
@@ -3217,6 +3218,7 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,Ins ins_in, int fo
 }
 
 vector<pair<double,double>>Calculate_the_trajectory(Robot rob,int cnt,int tar){
+    cerr<<"aaaa"<<state.FrameID<<endl;
     double t=0.02;
     PayLoad  pay=calPayload_trajectory(rob,rob.target_id);
     Ins ins=contr_one_rob(rob,pay);
