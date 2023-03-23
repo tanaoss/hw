@@ -1008,7 +1008,7 @@ void control(vector<PayLoad> payLoad){
     //     cerr<<endl;
     //     cerr<<"------------------------------------"<<endl;
     // }
-    // solveRobotsCollision();
+    solveRobotsCollision();
     // Collision_detection(payLoad);
 
     // collision_solve(25);
@@ -3573,4 +3573,19 @@ int checkNoCollision(vector<pair<double,double>> a, vector<pair<double,double>> 
             return i;
     }
     return -1;
+}
+pair<double ,double> return_change_v(double w,double changeSeta,pair<double,double>v){
+    double v_value = sqrt(v.first*v.first+v.second*v.second);
+    double r = (v_value/fabs(w));
+    double l = fabs(w)*r;
+    double direct1 = acos(v.first);
+    double direct2;
+    if(asin(v.second<0))direct1 += Pi;
+    if(w>0)direct2 = direct1 + changeSeta;
+    else direct2 = direct1 - changeSeta;
+    if(direct2>(2*Pi))direct2 -= (2*Pi);
+    if(direct2<0)direct2 += (2*Pi);
+    double v_new = l/0.02;
+    return pair<double,double>((v_new*cos(direct2)),(v_new*sin(direct2)));
+
 }
