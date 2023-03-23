@@ -1015,18 +1015,22 @@ void control(vector<PayLoad> payLoad){
     solveRobotsCollision();
     // Collision_detection(payLoad);
 
-    collision_solve(25);
+    // collision_solve(25);
+
+    if(state.FrameID==2962){
+        cerr<<"------------------------------------"<<endl;
+        Calculate_the_trajectory(robots[3],0,20);
+        cerr<<"------------------------------------"<<endl;
+    }
 
     // if(state.FrameID==2962){
-    //     cerr<<"------------------------------------"<<endl;
-    //     Calculate_the_trajectory(robots[3],0,20);
-    //     cerr<<"------------------------------------"<<endl;
+    //     cerr<<ins[2].
     // }
     
 
-    // if(state.FrameID>=2962&&state.FrameID<=2980)cerr<<" && "<<state.FrameID<<": "
-    // <<robots[3].angular_velocity<<" "<<robots[3].direction<<" "<<robots[3].pos.first<<"-"<<robots[3].pos.second
-    // <<" "<<robots[3].xy_pos.first<<"-"<<robots[3].xy_pos.second<<  endl << payloads[3].speed<<endl;
+    if(state.FrameID>=2962&&state.FrameID<=2980)cerr<<" && "<<state.FrameID<<": "
+    <<robots[3].angular_velocity<<" "<<robots[3].direction<<" "<<robots[3].pos.first<<"-"<<robots[3].pos.second
+    <<" "<<robots[3].xy_pos.first<<"-"<<robots[3].xy_pos.second<<  endl << payloads[3].speed<<endl;
 
     // if(state.FrameID == 2940) {
     //     for(int i = 0;i<4;++i)
@@ -3198,7 +3202,7 @@ bool is_near_tar(int id){
     if(lt(tmpDis,2))return true;
     return false;
 }
-vector<pair<double,double>>Calculate_the_trajectory(Robot rob,Ins ins_in, int forward_change, int rotate_change,vector<pair<double,double>> tra,int cnt,int tar,double pre_dis){
+vector<pair<double,double>>Calculate_the_trajectory(Robot rob,Ins ins_in, int forward_change, int rotate_change,vector<pair<double,double>> tra,int cnt,int tar,double rob_dis,double pre_dis){
     double t=0.02;
     PayLoad  pay=calPayload_trajectory(rob,rob.target_id);
     Ins ins=contr_one_rob(rob,pay);
@@ -3215,9 +3219,13 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,Ins ins_in, int fo
         return {rob.pos};
     }
     double tmpDis=calcuDis(rob.pos,tra[cnt]);
-    // if(gt(tmpDis,pre_dis)){
-    //     return {rob.pos};
-    // }
+    if(gt(tmpDis,pre_dis)){
+        forward_change=0;
+        rotate_change=0;
+    }
+    if(lt(tmpDis,rob_dis + 0.2)){
+        return {};
+    }
     cnt++;
     Robot tmp=rob;
     double seta=rob.direction;
@@ -3244,7 +3252,8 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,Ins ins_in, int fo
     if(Flag_sumulate){
         return {rob.pos};
     }
-    auto res=Calculate_the_trajectory(rob,ins_in,forward_change,rotate_change,tra,cnt,tar,tmpDis);
+    auto res=Calculate_the_trajectory(rob,ins_in,forward_change,rotate_change,tra,cnt,tar,rob_dis,tmpDis);
+    if(res.size()>0)
     res.push_back(tmp.pos);
      if(cnt==1)reverse(res.begin(),res.end());
     return res;
@@ -3260,11 +3269,11 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,int cnt,int tar){
     if(cnt>tar){
         return {rob.pos};
     }
-    // if(state.FrameID==2962&&rob.id==3){
-    //     cerr<<cnt+1<<" "<<rob.target_id<<" "<<rob.id<<" "<<rob.angular_velocity<<" "<<rob.direction
-    //     <<" "<<rob.pos.first<<"-"<<rob.pos.second<<" "<<rob.xy_pos.first<<"-"<<rob.xy_pos.second<<  endl;
-    //     cerr<<pay.speed<<endl;
-    // }
+    if(state.FrameID==2962&&rob.id==3){
+        cerr<<cnt+1<<" "<<rob.target_id<<" "<<rob.id<<" "<<rob.angular_velocity<<" "<<rob.direction
+        <<" "<<rob.pos.first<<"-"<<rob.pos.second<<" "<<rob.xy_pos.first<<"-"<<rob.xy_pos.second<<  endl;
+        cerr<<pay.speed<<endl;
+    }
     cnt++;
     Robot tmp=rob;
     double seta=rob.direction;
@@ -3475,11 +3484,11 @@ void collision_solve(int frame){
             tmp = checkNoCollision(trajectory[i], trajectory[j], mindis);
             coll_time[i][j] = tmp;
             coll_time[j][i] = tmp;
-            if(tmp == -1) continue;
+            if(tmp == 9000) continue;
             coll[i].emplace_back(j);
             coll[j].emplace_back(i);
             cerr<<"time:"<<state.FrameID<<endl;
-            cerr<<i<<"-"<<j<<"collison"<<tmp<<endl;
+            cerr<<ro[i].id<<"-"<<ro[j].id<<"collison"<<tmp<<endl;
         }
     }
 
@@ -3499,10 +3508,10 @@ void collision_solve(int frame){
         if(choose_id == -1 || coll[choose_id].size() - (x == choose_id) == 0)
             break;
 
-        tmp = -1;
-        //避让最晚发生的碰撞
+        tmp = 9000;
+        //避让最zao发生的碰撞
         for(j = 0; j < coll[choose_id].size(); ++j) {
-            if(coll_time[choose_id][coll[choose_id][j]] > tmp) {
+            if(coll_time[choose_id][coll[choose_id][j]] < tmp) {
                 x = coll[choose_id][j];
                 tmp = coll_time[choose_id][coll[choose_id][j]];
             }
@@ -3515,19 +3524,21 @@ void collision_solve(int frame){
             break;
         }
 
+        cerr<<ro[choose_id].id<<"avoid"<< ro[x].id<<endl;
+
 
         ans = -1;
         dis = 1000;
         mindis = payloads[ro[choose_id].id].radius + payloads[ro[x].id].radius;
         for(k = 0; k < 7; ++k) {
             if(k < 3) {
-                tmp_tra = Calculate_the_trajectory(ro[choose_id], ins_set[k], 1, 1, trajectory[x], 0, 25, mindis);
+                tmp_tra = Calculate_the_trajectory(ro[choose_id], ins_set[k], 1, 1, trajectory[x], 0, 25, mindis, 0);
             }
             else if(k < 6) {
-                tmp_tra = Calculate_the_trajectory(ro[choose_id], ins_set[k], 0, 1, trajectory[x], 0, 25, mindis);
+                tmp_tra = Calculate_the_trajectory(ro[choose_id], ins_set[k], 0, 1, trajectory[x], 0, 25, mindis, 0);
             }
             else {
-                tmp_tra = Calculate_the_trajectory(ro[choose_id], ins_set[k], 1, 0, trajectory[x], 0, 25, mindis);
+                tmp_tra = Calculate_the_trajectory(ro[choose_id], ins_set[k], 1, 0, trajectory[x], 0, 25, mindis, 0);
             }
 
             cerr<<tmp_tra.size()<<endl;
@@ -3537,13 +3548,13 @@ void collision_solve(int frame){
             //检测是否会和其他小球发生碰撞
             for(j = 0; j < 4; ++j){
                 if(j == choose_id) continue;
-                if(checkNoCollision(tmp_tra, trajectory[j], payloads[ro[choose_id].id].radius + payloads[ro[j].id].radius) == -1) {
+                if(checkNoCollision(tmp_tra, trajectory[j], payloads[ro[choose_id].id].radius + payloads[ro[j].id].radius) == 9000) {
                     flag =true;
                     break;
                 }
             }
             //若和其他小球碰撞则更换策略
-            if(flag) continue;
+            // if(flag) continue;
             dis_tmp = calcuDis(tmp_tra[24], studios[ro[choose_id].target_id].pos);
             if(lt(dis_tmp, dis)) {
                 dis = dis_tmp;
@@ -3553,6 +3564,7 @@ void collision_solve(int frame){
         }
         if(ans != -1) {
             trajectory[choose_id] = tra;
+            cerr<<ans<<endl;
             updateIns(ro[choose_id].id, ans);
             coll_time[x][choose_id] = 0;
         }
@@ -3611,7 +3623,7 @@ int checkNoCollision(vector<pair<double,double>> a, vector<pair<double,double>> 
         if(lt(calcuDis(a[i], b[i]), mindis))
             return i;
     }
-    return -1;
+    return 9000;
 }
 pair<double ,double> return_change_v(double w,double changeSeta,pair<double,double>v){
     cerr<<v.first<<' '<<v.second<<endl;
