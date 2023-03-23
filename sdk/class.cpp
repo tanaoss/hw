@@ -1008,7 +1008,7 @@ void control(vector<PayLoad> payLoad){
     //     cerr<<endl;
     //     cerr<<"------------------------------------"<<endl;
     // }
-    solveRobotsCollision();
+    // solveRobotsCollision();
     // Collision_detection(payLoad);
 
     // collision_solve(25);
