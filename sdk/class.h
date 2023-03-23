@@ -281,6 +281,7 @@ double return_time_root_v(double a,double b,double c,double v,double a1);
 double get_at_v_limt(double t,double a,double v,double v1,int sign_v1);
 double return_ac(double a,double v1,double v2);
 
+void updateIns(int id, int i);
 void collision_solve(int frame);
 int checkNoCollision(vector<pair<double,double>> a, vector<pair<double,double>> b, double mindis);
 
