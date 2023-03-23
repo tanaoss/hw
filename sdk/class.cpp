@@ -3257,9 +3257,9 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,int cnt,int tar){
         rob.angular_velocity=limit_w;
     rob.direction+=changeAngle;
     // if(state.FrameID==1)cerr<<cnt-1<<" "<<changeAngle<<" "<<rob.direction<<endl;
-   
-    rob.xy_pos.first=min((v+pay.acceleration*t),v_next)*cos(rob.direction);
-    rob.xy_pos.second=min((v+pay.acceleration*t),v_next)*sin(rob.direction);
+    rob.xy_pos=return_change_v(w,changeAngle*pay.sign,rob.xy_pos);
+    // rob.xy_pos.first=min((v+pay.acceleration*t),v_next)*cos(rob.direction);
+    // rob.xy_pos.second=min((v+pay.acceleration*t),v_next)*sin(rob.direction);
     
     // if(Flag_sumulate){
     //     return {rob.pos};
