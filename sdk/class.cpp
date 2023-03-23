@@ -3257,9 +3257,9 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,int cnt,int tar){
         rob.angular_velocity=limit_w;
     rob.direction+=changeAngle;
     // if(state.FrameID==1)cerr<<cnt-1<<" "<<changeAngle<<" "<<rob.direction<<endl;
-   
-    rob.xy_pos.first=min((v+pay.acceleration*t),v_next)*cos(rob.direction);
-    rob.xy_pos.second=min((v+pay.acceleration*t),v_next)*sin(rob.direction);
+    rob.xy_pos=return_change_v(w,changeAngle*pay.sign,rob.xy_pos);
+    // rob.xy_pos.first=min((v+pay.acceleration*t),v_next)*cos(rob.direction);
+    // rob.xy_pos.second=min((v+pay.acceleration*t),v_next)*sin(rob.direction);
     
     // if(Flag_sumulate){
     //     return {rob.pos};
@@ -3573,4 +3573,18 @@ int checkNoCollision(vector<pair<double,double>> a, vector<pair<double,double>> 
             return i;
     }
     return -1;
+}
+pair<double ,double> return_change_v(double w,double changeSeta,pair<double,double>v){
+    double v_value = sqrt(v.first*v.first+v.second*v.second);
+    double r = (v_value/fabs(w));
+    double l = fabs(w)*r;
+    double direct1 = acos(v.first);
+    double direct2;
+    if(asin(v.second<0))direct1 += Pi;
+    direct2 = direct1 + changeSeta;
+    if(direct2>(2*Pi))direct2 -= (2*Pi);
+    if(direct2<0)direct2 += (2*Pi);
+    double v_new = l/0.02;
+    return pair<double,double>((v_new*cos(direct2)),(v_new*sin(direct2)));
+
 }
