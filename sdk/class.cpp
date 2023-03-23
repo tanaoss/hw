@@ -911,15 +911,19 @@ void control(vector<PayLoad> payLoad){
         if(gt(angle,payLoad[i].angle)||gt(Dev_val,payLoad[i].angle)){
             real_angle=get_at_v_limt(0.02,payLoad[i].angular_acceleration
     ,robots[i].angular_velocity,0,payLoad[i].sign);
-    // real_angle=payLoad[i].angle;
+    // cerr<<real_angle<<" ^ "<<payLoad[i].angular_acceleration<<" "<<payLoad[i].sign<<
+    // " "<<payLoad[i].angle<<endl;
+            if(gt(fabs(real_angle),0.1)&&gt(fabs(payLoad[i].angle),0.1)){
+                real_angle=get_at_v_limt(0.02,payLoad[i].angular_acceleration
+            ,robots[i].angular_velocity,0,payLoad[i].sign);
+            }else{
+                real_angle=payLoad[i].angle;
+            }
+            
             can_stop_flag=1;
             StopA=0;
-        }else if(gt(angle,payLoad[i].angle)&&!gt(Dev_val,payLoad[i].angle)){
-            can_stop_flag=1; 
-            StopA=Pi/4*payLoad[i].sign;
-            // cerr<<robots[i].angular_velocity<<" & "<<payLoad[i].sign<<" "<<Dev_val<<endl;
-                       
         }
+        
         double cmpAngle=fabs(payLoad[i].angle-real_angle);
         // if(class_map==1||class_map==3){
         //     cmpAngle=fabs(payLoad[i].angle);
@@ -983,13 +987,14 @@ void control(vector<PayLoad> payLoad){
         
     }
     //control
-    // if(state.FrameID<15){
+    // if(state.FrameID==87){
     //     cerr<<"------------------------------------"<<endl;
-    //     auto tmp=Calculate_the_trajectory(robots[0],0,100);
+    //     auto tmp=Calculate_the_trajectory(robots[0],0,25);
     //     auto iter=tmp.rbegin();
+    //     int pos=0;
     //     cerr<<tmp.size()<<endl;
     //     for(iter;iter!=tmp.rend();iter++){
-    //         cerr<<iter->first<<"-"<<iter->second<<" ";
+    //         cerr<<state.FrameID+pos<<": "<<iter->first<<"-"<<iter->second<<" ";
     //     }
     //     cerr<<endl;
     //     cerr<<"------------------------------------"<<endl;
@@ -1431,6 +1436,20 @@ double target_obstacle_avoidance(int robot_id,int studio_id){
     }
     return count;
 }
+double ditstance(int  robot_id,int studio_id){
+    double dist = 0;
+    pair<double,double> inflection;
+    int target = robots[robot_id].target_id;
+    robots[robot_id].target_id = studio_id;
+    auto tmp=Calculate_the_trajectory(robots[robot_id],0,100);
+    inflection.first = tmp[0].first;
+    inflection.second = tmp[0].second;
+    dist =tmp.size()*0.02*6;
+    dist += calcuDis(inflection,studios[studio_id].pos);
+    robots[robot_id].target_id = target;
+    return dist;
+}
+
 pair<int,double> pick_point(int robot_id, int state){
     pair<double,double> pos = robots[robot_id].pos;
     double min = 1000;
@@ -1609,8 +1628,8 @@ pair<int,double> pick_point(int robot_id, int state){
             }
         }
     }
-    // double m =precise_distance(robot_id,min_subscript);
-    // if(min_subscript != -1)cerr<<"min_dist = "<<min<<" length = "<<m<<endl;
+    double m =ditstance(robot_id,min_subscript);
+    if(min_subscript != -1)cerr<<"min_dist = "<<min<<" length = "<<m<<endl;
     return pair<int,double>(min_subscript,min);
 }
 pair<int,double> choose_lack(int studio_id ,int threshold){
@@ -3084,7 +3103,7 @@ bool is_near_tar(int id){
     if(lt(tmpDis,2))return true;
     return false;
 }
-vector<pair<double,double>>Calculate_the_trajectory(Robot rob,Ins ins_in, int forward_change, int rotate_change,vector<pair<double,double>> tra,int cnt,int tar){
+vector<pair<double,double>>Calculate_the_trajectory(Robot rob,Ins ins_in, int forward_change, int rotate_change,vector<pair<double,double>> tra,int cnt,int tar,double pre_dis){
     double t=0.02;
     PayLoad  pay=calPayload_trajectory(rob,rob.target_id);
     Ins ins=contr_one_rob(rob,pay);
@@ -3097,7 +3116,11 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,Ins ins_in, int fo
     if(rotate_change==1){
         w_next=ins.rotate;
     }
-    if(cnt>tar){
+    if(cnt>tar||cnt>=tra.size()){
+        return {rob.pos};
+    }
+    double tmpDis=calcuDis(rob.pos,tra[cnt]);
+    if(gt(tmpDis,pre_dis)){
         return {rob.pos};
     }
     cnt++;
@@ -3125,7 +3148,7 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,Ins ins_in, int fo
     if(Flag_sumulate){
         return {rob.pos};
     }
-    auto res=Calculate_the_trajectory(rob,cnt,tar);
+    auto res=Calculate_the_trajectory(rob,ins_in,forward_change,rotate_change,tra,cnt+1,tar,tmpDis);
     res.push_back(tmp.pos);
     return res;
 }
@@ -3161,10 +3184,10 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,int cnt,int tar){
         rob.xy_pos.first=min((v+pay.acceleration*t),v_next)*cos(rob.direction);
         rob.xy_pos.second=min((v+pay.acceleration*t),v_next)*sin(rob.direction);
     }
-    if(Flag_sumulate){
-        return {rob.pos};
-    }
-    auto res=Calculate_the_trajectory(rob,cnt,tar);
+    // if(Flag_sumulate){
+    //     return {rob.pos};
+    // }
+    auto res=Calculate_the_trajectory(rob,cnt+1,tar);
     res.push_back(tmp.pos);
     return res;
 }
@@ -3220,7 +3243,12 @@ Ins contr_one_rob(Robot robot ,PayLoad payload){
     if(gt(angle,payload.angle)||gt(Dev_val,payload.angle)){
             real_angle=get_at_v_limt(0.02,payload.angular_acceleration
     ,robot.angular_velocity,0,payload.sign);
-    // real_angle=payLoad[i].angle;
+            if(gt(fabs(real_angle),0.1)&&gt(fabs(payload.angle),0.1)){
+                real_angle=get_at_v_limt(0.02,payload.angular_acceleration
+            ,robot.angular_velocity,0,payload.sign);
+            }else{
+                real_angle=payload.angle;
+            }
             can_stop_flag=1;
             StopA=0;
         }else if(gt(angle,payload.angle)&&!gt(Dev_val,payload.angle)){
@@ -3433,30 +3461,30 @@ void updateIns(int id, int i) {
         ins[id].forward = ins_set[i].forward;
 }
 
-int choose_best_ins(int id, double mindis, vector<pair<double,double>> tra) {
-    int k;
-    int ans = 0;
-    vector<pair<double,double>> tmp;
-    double dis, dis_tmp;
-    dis = 1000;
-    for(k = 0; k < 7; ++k) {
-        if(k < 3) {
-            tmp = Calculate_the_trajectory(robots[id], ins_set[k], 1, 1, tra, 0, 25);
-        }
-        else if(k < 6) {
-            tmp = Calculate_the_trajectory(robots[id], ins_set[k], 0, 1, tra, 0, 25);
-        }
-        else {
-            tmp = Calculate_the_trajectory(robots[id], ins_set[k], 1, 0, tra, 0, 25);
-        }
-        dis_tmp = calcuDis(tmp[24], studios[robots[id].target_id].pos);
-        if(lt(dis_tmp, dis)) {
-            dis = dis_tmp;
-            ans = k;
-        }
-    }
-    return ans;
-}
+// int choose_best_ins(int id, double mindis, vector<pair<double,double>> tra) {
+//     int k;
+//     int ans = 0;
+//     vector<pair<double,double>> tmp;
+//     double dis, dis_tmp;
+//     dis = 1000;
+//     for(k = 0; k < 7; ++k) {
+//         if(k < 3) {
+//             tmp = Calculate_the_trajectory(robots[id], ins_set[k], 1, 1, tra, 0, 25);
+//         }
+//         else if(k < 6) {
+//             tmp = Calculate_the_trajectory(robots[id], ins_set[k], 0, 1, tra, 0, 25);
+//         }
+//         else {
+//             tmp = Calculate_the_trajectory(robots[id], ins_set[k], 1, 0, tra, 0, 25);
+//         }
+//         dis_tmp = calcuDis(tmp[24], studios[robots[id].target_id].pos);
+//         if(lt(dis_tmp, dis)) {
+//             dis = dis_tmp;
+//             ans = k;
+//         }
+//     }
+//     return ans;
+// }
 
 
 int checkNoCollision(vector<pair<double,double>> a, vector<pair<double,double>> b, double mindis) {
