@@ -797,8 +797,10 @@ void solveRobotsCollision()
             }           
 
             // // 如果两小球方向为锐角
-            else if (lt(angle, Pi / 2) && le(dis, 1.06 + max(15 * 0.02 * (relative_speed[goID] + relative_speed[stopID]), 0.5)))
+            else if (lt(angle, Pi / 2))
             {
+                if(le(relative_speed[i] + relative_speed[j], 0) && gt(dis, radius_sum))
+                    continue;
                 // 速度快的先减速
                 stopID = gt(relative_speed[stopID], relative_speed[goID])? stopID: goID;
                 goID = (stopID == i)? j: i;
@@ -1013,16 +1015,16 @@ void control(vector<PayLoad> payLoad){
 
     // collision_solve(25);
 
-    // if(state.FrameID==2940){
-    //     cerr<<"------------------------------------"<<endl;
-    //     Calculate_the_trajectory(robots[3],0,10);
-    //     cerr<<"------------------------------------"<<endl;
-    // }
+    if(state.FrameID==2940){
+        cerr<<"------------------------------------"<<endl;
+        Calculate_the_trajectory(robots[3],0,10);
+        cerr<<"------------------------------------"<<endl;
+    }
     
 
-    // if(state.FrameID>=2940&&state.FrameID<=2950)cerr<<" && "<<state.FrameID<<": "
-    // <<robots[3].angular_velocity<<" "<<robots[3].direction<<" "<<robots[3].pos.first<<"-"<<robots[3].pos.second
-    // <<" "<<robots[3].xy_pos.first<<"-"<<robots[3].xy_pos.second<<  endl;
+    if(state.FrameID>=2940&&state.FrameID<=2950)cerr<<" && "<<state.FrameID<<": "
+    <<robots[3].angular_velocity<<" "<<robots[3].direction<<" "<<robots[3].pos.first<<"-"<<robots[3].pos.second
+    <<" "<<robots[3].xy_pos.first<<"-"<<robots[3].xy_pos.second<<  endl << payloads[3].speed<<endl;
 
     // if(state.FrameID == 2940) {
     //     for(int i = 0;i<4;++i)
@@ -3227,10 +3229,11 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,int cnt,int tar){
     if(cnt>tar){
         return {rob.pos};
     }
-    // if(state.FrameID==2940&&rob.id==3){
-    //     cerr<<cnt+1<<" "<<rob.target_id<<" "<<rob.id<<" "<<rob.angular_velocity<<" "<<rob.direction
-    //     <<" "<<rob.pos.first<<"-"<<rob.pos.second<<" "<<rob.xy_pos.first<<"-"<<rob.xy_pos.second<<  endl;
-    // }
+    if(state.FrameID==2940&&rob.id==3){
+        cerr<<cnt+1<<" "<<rob.target_id<<" "<<rob.id<<" "<<rob.angular_velocity<<" "<<rob.direction
+        <<" "<<rob.pos.first<<"-"<<rob.pos.second<<" "<<rob.xy_pos.first<<"-"<<rob.xy_pos.second<<  endl;
+        cerr<<pay.speed<<endl;
+    }
     cnt++;
     Robot tmp=rob;
     double seta=rob.direction;
@@ -3257,9 +3260,9 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,int cnt,int tar){
         rob.angular_velocity=limit_w;
     rob.direction+=changeAngle;
     // if(state.FrameID==1)cerr<<cnt-1<<" "<<changeAngle<<" "<<rob.direction<<endl;
-    rob.xy_pos=return_change_v(w,changeAngle*pay.sign,rob.xy_pos);
-    // rob.xy_pos.first=min((v+pay.acceleration*t),v_next)*cos(rob.direction);
-    // rob.xy_pos.second=min((v+pay.acceleration*t),v_next)*sin(rob.direction);
+    // rob.xy_pos=return_change_v(w,changeAngle*pay.sign,rob.xy_pos);
+    rob.xy_pos.first=min((v+pay.acceleration*t),v_next)*cos(rob.direction);
+    rob.xy_pos.second=min((v+pay.acceleration*t),v_next)*sin(rob.direction);
     
     // if(Flag_sumulate){
     //     return {rob.pos};
