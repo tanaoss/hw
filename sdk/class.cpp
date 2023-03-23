@@ -1008,8 +1008,8 @@ void control(vector<PayLoad> payLoad){
     //     cerr<<endl;
     //     cerr<<"------------------------------------"<<endl;
     // }
-    solveRobotsCollision();
-    // Collision_detection(payLoad);
+    // solveRobotsCollision();
+    Collision_detection(payLoad);
     // collision_solve(25);
 
     // if(state.FrameID>=0&&state.FrameID<=10)cerr<<" && "<<state.FrameID<<": "<<robots[0].direction<<" "
@@ -1332,6 +1332,7 @@ double back_dis(int studio_id){
     // cerr<<studios[studio_id].pos.first<<' '<<studios[studio_id].pos.second<<' '<<studios[min_subscript].pos.first<<' '<<studios[min_subscript].pos.second<<' '<<endl;
     // cerr<<"back_dis = " <<min<<endl;
     return min*0.2/6;
+    // return 0;
 }
 double studio_wait_time(int studio_id){
     double wait=0;
