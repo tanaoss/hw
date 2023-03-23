@@ -909,26 +909,30 @@ void control(vector<PayLoad> payLoad){
         double StopA=0;
         double real_angle=angle;
         int can_stop_flag=0;
-        if(gt(angle,payLoad[i].angle)||gt(Dev_val,payLoad[i].angle)){
-            real_angle=get_at_v_limt(0.02,payLoad[i].angular_acceleration
-    ,robots[i].angular_velocity,0,payLoad[i].sign);
+        bool con1=false;
+        // if(class_map==1){
+        //     con1=gt(Dev_val,payLoad[i].angle);
+        // }
+        if(gt(angle,payLoad[i].angle)||con1){
+    //         real_angle=get_at_v_limt(0.02,payLoad[i].angular_acceleration
+    // ,robots[i].angular_velocity,0,payLoad[i].sign);
     // cerr<<real_angle<<" ^ "<<payLoad[i].angular_acceleration<<" "<<payLoad[i].sign<<
     // " "<<payLoad[i].angle<<endl;
-            if(gt(fabs(real_angle),0.1)&&gt(fabs(payLoad[i].angle),0.1)){
-                real_angle=get_at_v_limt(0.02,payLoad[i].angular_acceleration
-            ,robots[i].angular_velocity,0,payLoad[i].sign);
-            }else{
-                real_angle=payLoad[i].angle;
-            }
-            
+            // if(gt(fabs(real_angle),0.1)&&gt(fabs(payLoad[i].angle),0.1)){
+            //     real_angle=get_at_v_limt(0.02,payLoad[i].angular_acceleration
+            // ,robots[i].angular_velocity,0,payLoad[i].sign);
+            // }else{
+            //     real_angle=payLoad[i].angle;
+            // }
+            real_angle=payLoad[i].angle;
             can_stop_flag=1;
             StopA=0;
         }
         
         double cmpAngle=fabs(payLoad[i].angle-real_angle);
-        // if(class_map==1||class_map==3){
-        //     cmpAngle=fabs(payLoad[i].angle);
-        // }
+        if(class_map==1||class_map==3){
+            cmpAngle=fabs(payLoad[i].angle);
+        }
         bool can_st=can_stop(robots[i].pos,studios[robots[i].target_id].pos,cmpAngle);
         vector<double> tmp=get_T_limits(robots[i].pos,i);
         if(!eq(tmp[0],-7)&&(!is_range(robots[i].direction,tmp))){
@@ -988,21 +992,23 @@ void control(vector<PayLoad> payLoad){
         
     }
     //control
-    // if(state.FrameID==87){
-    //     cerr<<"------------------------------------"<<endl;
-    //     auto tmp=Calculate_the_trajectory(robots[0],0,25);
-    //     auto iter=tmp.rbegin();
-    //     int pos=0;
-    //     cerr<<tmp.size()<<endl;
-    //     for(iter;iter!=tmp.rend();iter++){
-    //         cerr<<state.FrameID+pos<<": "<<iter->first<<"-"<<iter->second<<" ";
-    //     }
-    //     cerr<<endl;
-    //     cerr<<"------------------------------------"<<endl;
-    // }
+    if(state.FrameID==87){
+        cerr<<"------------------------------------"<<endl;
+        auto tmp=Calculate_the_trajectory(robots[0],0,100);
+        auto iter=tmp.rbegin();
+        int pos=0;
+        
+        cerr<<tmp.size()<<endl;
+        for(iter;iter!=tmp.rend();iter++){
+            cerr<<state.FrameID+pos<<": "<<iter->first<<"-"<<iter->second<<" ";pos++;
+        }
+        
+        cerr<<endl;
+        cerr<<"------------------------------------"<<endl;
+    }
     // solveRobotsCollision();
-    // Collision_detection(payLoad);
-    // updateLastRate();
+    Collision_detection(payLoad);
+    updateLastRate();
     
     
 //     vector<bool>vis(4,false);
@@ -3045,18 +3051,19 @@ double get_at_stop(double t,double a,double v,int sign_v1){
 double get_at_v_z(double t,double a,double v,int sign_v1){
     double lef_time=0;
     double s=0;
-    a=fabs(a)*sign_v1;
+    a*=sign_v1;
     if(lt(fabs(v),Pi)){
-        double tmpTime=(sign_v1*Pi-v)/a;
+        double tmpTime=(sign_v1*Pi-v)/(a);
         double realTime=min(tmpTime,t);
         s=v*realTime+0.5*a*realTime*realTime;
         double res=(s);
         if(le(t,tmpTime)){
             if(gt(res*sign_v1,0)){
                 return fabs(res);
-            }else{
-            return -1*fabs(res);
-        }
+            }
+            else{
+                return -1*fabs(res);
+            }
             return (s);
         }
         t=t-realTime;
