@@ -1024,19 +1024,19 @@ void control(vector<PayLoad> payLoad){
     // <<robots[3].angular_velocity<<" "<<robots[3].direction<<" "<<robots[3].pos.first<<"-"<<robots[3].pos.second
     // <<" "<<robots[3].xy_pos.first<<"-"<<robots[3].xy_pos.second<<  endl;
 
-    // if(state.FrameID == 2940) {
-    //     for(int i = 0;i<4;++i)
-    //         trajectory[i]=Calculate_the_trajectory(robots[i], 0, 25);
-    // }
+    if(state.FrameID == 2940) {
+        for(int i = 0;i<4;++i)
+            trajectory[i]=Calculate_the_trajectory(robots[i], 0, 25);
+    }
 
-    // if(state.FrameID >= 2940 && state.FrameID < 2940+25) {
-    //     cerr<<endl<<state.FrameID<<endl;
-    //     for(int j=0;j<4;++j){
-    //         cerr<<robots[j].id<<":"<<endl<<robots[j].pos.first<<","<<robots[j].pos.second<<endl;
-    //         cerr<<"predict"<<endl;
-    //         cerr<<trajectory[j][state.FrameID -2940].first<<","<<trajectory[j][state.FrameID -2940].second<<endl;
-    //     }
-    // }
+    if(state.FrameID >= 2940 && state.FrameID < 2940+25) {
+        cerr<<endl<<state.FrameID<<endl;
+        for(int j=0;j<4;++j){
+            cerr<<robots[j].id<<":"<<endl<<robots[j].pos.first<<","<<robots[j].pos.second<<endl;
+            cerr<<"predict"<<endl;
+            cerr<<trajectory[j][state.FrameID -2940].first<<","<<trajectory[j][state.FrameID -2940].second<<endl;
+        }
+    }
     
     updateLastRate();
 
