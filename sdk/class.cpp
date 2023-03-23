@@ -921,11 +921,11 @@ void control(vector<PayLoad> payLoad){
         //     
         // }
         if(gt(angle,payLoad[i].angle)||con1){
-    //         real_angle=get_at_v_limt(0.02,payLoad[i].angular_acceleration
-    // ,robots[i].angular_velocity,0,payLoad[i].sign);
-    // cerr<<real_angle<<" ^ "<<payLoad[i].angular_acceleration<<" "<<payLoad[i].sign<<
-    // " "<<payLoad[i].angle<<endl;
-            real_angle=angle;
+            real_angle=get_at_v_limt(0.02,payLoad[i].angular_acceleration
+    ,robots[i].angular_velocity,0,payLoad[i].sign);
+    cerr<<real_angle<<" ^ "<<payLoad[i].angular_acceleration<<" "<<payLoad[i].sign<<
+    " "<<payLoad[i].angle<<endl;
+            // real_angle=angle;
             // real_angle=payLoad[i].angle;
             can_stop_flag=1;
             StopA=0;
