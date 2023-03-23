@@ -984,13 +984,14 @@ void control(vector<PayLoad> payLoad){
         
     }
     //control
-    if(state.FrameID<15){
+    if(state.FrameID==87){
         cerr<<"------------------------------------"<<endl;
-        auto tmp=Calculate_the_trajectory(robots[0],0,100);
+        auto tmp=Calculate_the_trajectory(robots[0],0,50);
         auto iter=tmp.rbegin();
+        int pos=0;
         cerr<<tmp.size()<<endl;
         for(iter;iter!=tmp.rend();iter++){
-            cerr<<iter->first<<"-"<<iter->second<<" ";
+            cerr<<state.FrameID+pos<<": "<<iter->first<<"-"<<iter->second<<" ";
         }
         cerr<<endl;
         cerr<<"------------------------------------"<<endl;
@@ -3069,7 +3070,7 @@ bool is_near_tar(int id){
     if(lt(tmpDis,2))return true;
     return false;
 }
-vector<pair<double,double>>Calculate_the_trajectory(Robot rob,Ins ins_in, int forward_change, int rotate_change,vector<pair<double,double>> tra,int cnt,int tar){
+vector<pair<double,double>>Calculate_the_trajectory(Robot rob,Ins ins_in, int forward_change, int rotate_change,vector<pair<double,double>> tra,int cnt,int tar,double pre_dis){
     double t=0.02;
     PayLoad  pay=calPayload_trajectory(rob,rob.target_id);
     Ins ins=contr_one_rob(rob,pay);
@@ -3082,7 +3083,11 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,Ins ins_in, int fo
     if(rotate_change==1){
         w_next=ins.rotate;
     }
-    if(cnt>tar){
+    if(cnt>tar||cnt>=tra.size()){
+        return {rob.pos};
+    }
+    double tmpDis=calcuDis(rob.pos,tra[cnt]);
+    if(gt(tmpDis,pre_dis)){
         return {rob.pos};
     }
     cnt++;
@@ -3110,7 +3115,7 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,Ins ins_in, int fo
     if(Flag_sumulate){
         return {rob.pos};
     }
-    auto res=Calculate_the_trajectory(rob,cnt,tar);
+    auto res=Calculate_the_trajectory(rob,ins_in,forward_change,rotate_change,tra,cnt+1,tar,tmpDis);
     res.push_back(tmp.pos);
     return res;
 }
@@ -3146,10 +3151,10 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,int cnt,int tar){
         rob.xy_pos.first=min((v+pay.acceleration*t),v_next)*cos(rob.direction);
         rob.xy_pos.second=min((v+pay.acceleration*t),v_next)*sin(rob.direction);
     }
-    if(Flag_sumulate){
-        return {rob.pos};
-    }
-    auto res=Calculate_the_trajectory(rob,cnt,tar);
+    // if(Flag_sumulate){
+    //     return {rob.pos};
+    // }
+    auto res=Calculate_the_trajectory(rob,cnt+1,tar);
     res.push_back(tmp.pos);
     return res;
 }
