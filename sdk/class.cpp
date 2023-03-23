@@ -3581,8 +3581,7 @@ pair<double ,double> return_change_v(double w,double changeSeta,pair<double,doub
     double direct1 = acos(v.first);
     double direct2;
     if(asin(v.second<0))direct1 += Pi;
-    if(w>0)direct2 = direct1 + changeSeta;
-    else direct2 = direct1 - changeSeta;
+    direct2 = direct1 + changeSeta;
     if(direct2>(2*Pi))direct2 -= (2*Pi);
     if(direct2<0)direct2 += (2*Pi);
     double v_new = l/0.02;
