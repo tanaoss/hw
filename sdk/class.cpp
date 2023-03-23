@@ -39,6 +39,7 @@ pair<double ,double> Root;
 pair<double ,double> Collision_point;
 vector<PayLoad> pl_g;
 double Compute_redundancy=0;
+Ins ins_set[7];
 void initrobotInfo() {
     double weightMin = 0.45 * 0.45 * Pi * 20.0;
     double weightMax = 0.53 * 0.53 * Pi * 20.0;
@@ -47,11 +48,19 @@ void initrobotInfo() {
 
     acceleration_no = 249.9 / weightMin;
     acceleration_has = 249.9/ weightMax;
+    acceleration_no = 249.9 / weightMin;
+    acceleration_has = 249.9/ weightMax;
 
     angular_acceleration_no = 49.9 / inertiaMin;
     angular_acceleration_has = 49.9 /inertiaMax;
 
-
+    for(int i = 0; i < 6; ++i) {
+        if(i < 3) ins_set[i].forward = 0;
+        if(i % 3 == 0) ins_set[i].rotate = 0;
+        else if(i % 3 == 1) ins_set[i].rotate = Pi;
+        else ins_set[i].rotate = -Pi;
+    }
+    ins_set[6].forward = 0;
 }
 void init_studio_parameter(){
     for(int i=0;i<50;i++){
@@ -1233,7 +1242,7 @@ bool check_send_dis(int studio_id ,double dist){
 }
 double wait_dis(int robot_id ,int studio_id){
     double dis;
-    double dist = calcuDis(robots[robot_id].pos,studios[studio_id].pos);
+    double dist = precise_distance(robot_id,studio_id);
     if(studios[studio_id].type>=4 && (!check_no_send(studio_id))&& (studios[studio_id].pStatus!=1)) return 100; 
     if((studios[studio_id].pStatus==1||checkEnough(robot_id,studio_id,studios[studio_id].r_time))){
         if(!check_send_dis(studio_id,dist)){
@@ -1302,10 +1311,11 @@ double Calc_collisions_dis(int robot_id,int studio_id){
     robots[robot_id].target_id = target;
     // cerr<<robots[robot_id].xy_pos.first<<' '<<robots[robot_id].xy_pos.second<<' '<<robots[robot_id].target_id<<' '<<robots[robot_id].pos.first<<' '<<robots[robot_id].pos.second<<endl;
     // cerr<<" dis = "<<dis<<endl;
-    if(class_map ==2 ||class_map ==4){
-        return 0;
-    }
+    // if(class_map ==2 ||class_map ==4){
+    //     return 0;
+    // }
     return dis;
+    // return 0;
 }
 double back_dis(int studio_id){
     int i;
@@ -1394,16 +1404,16 @@ double target_obstacle_avoidance(int robot_id,int studio_id){
     double dist1,dist2;
     int count = 0;
     dist1 = precise_distance(robot_id,studio_id);
-    // for(i=0;i<4;i++){
-    //     if(robot_id != i && robot_id != -1){
-    //         if(robots[i].target_id == studio_id){
-    //             dist2 = precise_distance(i,robots[i].target_id);
-    //             if(fabs(dist1-dist2)<10){
-    //                 count+=(6/acceleration_has*6);
-    //             }
-    //         }
-    //     }
-    // }
+    for(i=0;i<4;i++){
+        if(robot_id != i && robot_id != -1){
+            if(robots[i].target_id == studio_id){
+                dist2 = precise_distance(i,robots[i].target_id);
+                if(fabs(dist1-dist2)<5){
+                    count+=(6/acceleration_has*6);
+                }
+            }
+        }
+    }
     return count;
 }
 pair<int,double> pick_point(int robot_id, int state){
