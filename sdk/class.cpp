@@ -912,15 +912,19 @@ void control(vector<PayLoad> payLoad){
         if(gt(angle,payLoad[i].angle)||gt(Dev_val,payLoad[i].angle)){
             real_angle=get_at_v_limt(0.02,payLoad[i].angular_acceleration
     ,robots[i].angular_velocity,0,payLoad[i].sign);
-    // real_angle=payLoad[i].angle;
+    // cerr<<real_angle<<" ^ "<<payLoad[i].angular_acceleration<<" "<<payLoad[i].sign<<
+    // " "<<payLoad[i].angle<<endl;
+            if(gt(fabs(real_angle),0.1)&&gt(fabs(payLoad[i].angle),0.1)){
+                real_angle=get_at_v_limt(0.02,payLoad[i].angular_acceleration
+            ,robots[i].angular_velocity,0,payLoad[i].sign);
+            }else{
+                real_angle=payLoad[i].angle;
+            }
+            
             can_stop_flag=1;
             StopA=0;
-        }else if(gt(angle,payLoad[i].angle)&&!gt(Dev_val,payLoad[i].angle)){
-            can_stop_flag=1; 
-            StopA=Pi/4*payLoad[i].sign;
-            cerr<<robots[i].angular_velocity<<" & "<<payLoad[i].sign<<" "<<Dev_val<<endl;
-                       
         }
+        
         double cmpAngle=fabs(payLoad[i].angle-real_angle);
         // if(class_map==1||class_map==3){
         //     cmpAngle=fabs(payLoad[i].angle);
@@ -984,18 +988,18 @@ void control(vector<PayLoad> payLoad){
         
     }
     //control
-    if(state.FrameID==87){
-        cerr<<"------------------------------------"<<endl;
-        auto tmp=Calculate_the_trajectory(robots[0],0,50);
-        auto iter=tmp.rbegin();
-        int pos=0;
-        cerr<<tmp.size()<<endl;
-        for(iter;iter!=tmp.rend();iter++){
-            cerr<<state.FrameID+pos<<": "<<iter->first<<"-"<<iter->second<<" ";
-        }
-        cerr<<endl;
-        cerr<<"------------------------------------"<<endl;
-    }
+    // if(state.FrameID==87){
+    //     cerr<<"------------------------------------"<<endl;
+    //     auto tmp=Calculate_the_trajectory(robots[0],0,25);
+    //     auto iter=tmp.rbegin();
+    //     int pos=0;
+    //     cerr<<tmp.size()<<endl;
+    //     for(iter;iter!=tmp.rend();iter++){
+    //         cerr<<state.FrameID+pos<<": "<<iter->first<<"-"<<iter->second<<" ";
+    //     }
+    //     cerr<<endl;
+    //     cerr<<"------------------------------------"<<endl;
+    // }
     // solveRobotsCollision();
     // Collision_detection(payLoad);
     // updateLastRate();
@@ -1352,9 +1356,9 @@ double precise_distance(int robot_id,int studio_id){
     double temp;
     pair<double,double> center1((robots[robot_id].pos.first+cos(robots[robot_id].direction+Pi/2)*r),(robots[robot_id].pos.second+sin(robots[robot_id].direction+Pi/2)*r));
     pair<double,double> center2((robots[robot_id].pos.first+cos(robots[robot_id].direction-Pi/2)*r),(robots[robot_id].pos.second+sin(robots[robot_id].direction-Pi/2)*r));
-    cerr<<(robots[robot_id].pos.first+cos(robots[robot_id].direction+Pi/2)*r)<<endl;
-    cerr<<(robots[robot_id].pos.first+cos(robots[robot_id].direction-Pi/2)*r)<<endl;
-    cerr<<robots[robot_id].direction<<endl;
+    // cerr<<(robots[robot_id].pos.first+cos(robots[robot_id].direction+Pi/2)*r)<<endl;
+    // cerr<<(robots[robot_id].pos.first+cos(robots[robot_id].direction-Pi/2)*r)<<endl;
+    // cerr<<robots[robot_id].direction<<endl;
     pair<double,double> center;
     double dist1 = calcuDis(center1,studios[studio_id].pos);
     double dist2 = calcuDis(center2,studios[studio_id].pos);
@@ -3210,7 +3214,12 @@ Ins contr_one_rob(Robot robot ,PayLoad payload){
     if(gt(angle,payload.angle)||gt(Dev_val,payload.angle)){
             real_angle=get_at_v_limt(0.02,payload.angular_acceleration
     ,robot.angular_velocity,0,payload.sign);
-    // real_angle=payLoad[i].angle;
+            if(gt(fabs(real_angle),0.1)&&gt(fabs(payload.angle),0.1)){
+                real_angle=get_at_v_limt(0.02,payload.angular_acceleration
+            ,robot.angular_velocity,0,payload.sign);
+            }else{
+                real_angle=payload.angle;
+            }
             can_stop_flag=1;
             StopA=0;
         }else if(gt(angle,payload.angle)&&!gt(Dev_val,payload.angle)){
