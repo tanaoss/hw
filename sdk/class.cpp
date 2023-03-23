@@ -1638,7 +1638,7 @@ pair<int,double> pick_point(int robot_id, int state_type){
     //     // if(min_subscript != -1)cerr<<"min_dist = "<<min<<" length = "<<m<<endl;
     //     robots[robot_id].target_id =target;
     // }
-    cerr<<"min = "<<min<<endl;
+    // cerr<<"min = "<<min<<endl;
     return pair<int,double>(min_subscript,min);
 }
 pair<int,double> choose_lack(int studio_id ,int threshold){
