@@ -44,8 +44,8 @@ Ins ins_set[7];
 void initrobotInfo() {
     double weightMin = 0.45 * 0.45 * Pi * 20.0;
     double weightMax = 0.53 * 0.53 * Pi * 20.0;
-    double inertiaMin = weightMin * 0.45 * 0.45;
-    double inertiaMax = weightMax * 0.53 * 0.53;
+    double inertiaMin = weightMin * 0.45 * 0.45*0.5;
+    double inertiaMax = weightMax * 0.53 * 0.53*0.5;
 
     acceleration_no = 249.9 / weightMin;
     acceleration_has = 249.9/ weightMax;
@@ -986,30 +986,31 @@ void control(vector<PayLoad> payLoad){
         
     }
     //control
-    if(state.FrameID==1){
-        cerr<<"------------------------------------"<<endl;
-        auto tmp=Calculate_the_trajectory(robots[0],0,100);
-        auto iter=tmp.rbegin();
-        int pos=0;
+    // if(state.FrameID==1){
+    //     cerr<<"------------------------------------"<<endl;
+    //     auto tmp=Calculate_the_trajectory(robots[0],0,100);
+    //     auto iter=tmp.rbegin();
+    //     int pos=0;
         
-        cerr<<tmp.size()<<endl;
-        for(iter;iter!=tmp.rend();iter++){
-            cerr<<state.FrameID+pos<<": "<<iter->first<<"-"<<iter->second<<" ";pos++;
-        }
+    //     cerr<<tmp.size()<<endl;
+    //     for(iter;iter!=tmp.rend();iter++){
+    //         cerr<<state.FrameID+pos<<": "<<iter->first<<"-"<<iter->second<<" ";pos++;
+    //     }
         
-        cerr<<endl;
-        cerr<<"------------------------------------"<<endl;
-    }
+    //     cerr<<endl;
+    //     cerr<<"------------------------------------"<<endl;
+    // }
     // solveRobotsCollision();
-    Collision_detection(payLoad);
+    // Collision_detection(payLoad);
     // collision_solve(25);
-
-    // if(state.FrameID == 2) {
+    if(state.FrameID>=0&&state.FrameID<=10)cerr<<" && "<<state.FrameID<<": "<<robots[0].direction<<" "
+    <<robots[0].angular_velocity<<endl;
+    // if(state.FrameID == 1) {
     //     for(int i = 0;i<4;++i)
     //         trajectory[i]=Calculate_the_trajectory(robots[i], 0, 25);
     // }
 
-    // if(state.FrameID > 2 && state.FrameID < 28) {
+    // if(state.FrameID > 1 && state.FrameID < 27) {
     //     cerr<<state.FrameID<<endl;
     //     for(int j=0;j<4;++j){
     //         cerr<<robots[j].id<<":"<<endl<<robots[j].pos.first<<","<<robots[j].pos.second<<endl;
@@ -1018,7 +1019,7 @@ void control(vector<PayLoad> payLoad){
     //     }
     // }
     
-    updateLastRate();
+    // updateLastRate();
 
     out_put();
 }
@@ -1408,7 +1409,7 @@ double ditstance(int  robot_id,int studio_id){
     pair<double,double> inflection;
     int target = robots[robot_id].target_id;
     robots[robot_id].target_id = studio_id;
-    auto tmp=Calculate_the_trajectory(robots[robot_id],0,100);
+    auto tmp=Calculate_the_trajectory(robots[robot_id],0,10);
     inflection.first = tmp[0].first;
     inflection.second = tmp[0].second;
     dist =tmp.size()*0.02*6;
@@ -1596,7 +1597,7 @@ pair<int,double> pick_point(int robot_id, int state){
         }
     }
     double m =ditstance(robot_id,min_subscript);
-    if(min_subscript != -1)cerr<<"min_dist = "<<min<<" length = "<<m<<endl;
+    //if(min_subscript != -1)cerr<<"min_dist = "<<min<<" length = "<<m<<endl;
     return pair<int,double>(min_subscript,min);
 }
 pair<int,double> choose_lack(int studio_id ,int threshold){
@@ -2964,7 +2965,10 @@ double get_at_v_limt(double t,double a,double v,double v1,int sign_v1){
    
     double tmpTime=(v1-v)/(a);
     double realTime=min(tmpTime,t);
-    s=v*realTime+0.5*a*realTime*realTime;
+    s=v*realTime+a*realTime*realTime;
+    if(state.FrameID==1){
+        cerr<<a<<" ^ "<<" "<<v<<" "<<tmpTime<<" "<<realTime<<" "<<s<<endl;
+    }
     double res=(s);
     if(le(t,tmpTime)){
         if(gt(res*sign_v1,0)){
@@ -3116,7 +3120,7 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,Ins ins_in, int fo
     if(Flag_sumulate){
         return {rob.pos};
     }
-    auto res=Calculate_the_trajectory(rob,ins_in,forward_change,rotate_change,tra,cnt+1,tar,tmpDis);
+    auto res=Calculate_the_trajectory(rob,ins_in,forward_change,rotate_change,tra,cnt,tar,tmpDis);
     res.push_back(tmp.pos);
     return res;
 }
@@ -3130,12 +3134,18 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,int cnt,int tar){
     if(cnt>tar){
         return {rob.pos};
     }
+    if(state.FrameID==1){
+        cerr<<cnt+1<<" "<<rob.target_id<<" "<<rob.id<<" "<<rob.angular_velocity<<" "<<rob.direction<<endl;
+    }
     cnt++;
     Robot tmp=rob;
     double seta=rob.direction;
     double w=rob.angular_velocity==0?0.00001:rob.angular_velocity;
     double a=return_ac(pay.angular_acceleration,rob.angular_velocity,w_next);
     double changeAngle=get_at_v_limt(t,pay.angular_acceleration,rob.angular_velocity,w_next,pay.sign);
+    if(state.FrameID==1){
+        cerr<<changeAngle<<endl;
+    }
     double v=pay.speed;
     double a_v=return_ac(pay.acceleration,v,v_next);
     rob.pos.first=rob.pos.first+v*cos(seta+changeAngle/2)*t;
@@ -3143,11 +3153,16 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,int cnt,int tar){
     int sign1=ge((rob.angular_velocity+a*t)*w_next,0)?1:-1;
     int sign2=ge((rob.angular_velocity+a*t),0)?1:-1;
     double limit_w=gt(fabs(rob.angular_velocity+a*t),fabs(Pi))?Pi*sign2:rob.angular_velocity+a*t;
+    // if(state.FrameID==1){
+    //     cerr<<cnt+1<<" - "<<rob.angular_velocity+a*t<<" "<<w_next<<" "
+    //     <<a<<" "<<changeAngle<<endl;
+    // }
     if(sign1==1)
         rob.angular_velocity=gt(fabs(limit_w),fabs(w_next))?w_next:limit_w;
     else
         rob.angular_velocity=limit_w;
     rob.direction+=changeAngle;
+    // if(state.FrameID==1)cerr<<cnt-1<<" "<<changeAngle<<" "<<rob.direction<<endl;
     if(lt(v,v_next)){
         rob.xy_pos.first=min((v+pay.acceleration*t),v_next)*cos(rob.direction);
         rob.xy_pos.second=min((v+pay.acceleration*t),v_next)*sin(rob.direction);
@@ -3155,7 +3170,7 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,int cnt,int tar){
     // if(Flag_sumulate){
     //     return {rob.pos};
     // }
-    auto res=Calculate_the_trajectory(rob,cnt+1,tar);
+    auto res=Calculate_the_trajectory(rob,cnt,tar);
     res.push_back(tmp.pos);
     return res;
 }
