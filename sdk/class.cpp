@@ -799,8 +799,10 @@ void solveRobotsCollision()
             }           
 
             // // 如果两小球方向为锐角
-            else if (lt(angle, Pi / 2) && le(dis, 1.06 + max(10 * 0.02 * (relative_speed[goID] + relative_speed[stopID]), 0.5)))
+            else if (lt(angle, Pi / 2))
             {
+                if(le(relative_speed[i] + relative_speed[j], 0) && gt(dis, radius_sum))
+                    continue;
                 // 速度快的先减速
                 stopID = gt(relative_speed[stopID], relative_speed[goID])? stopID: goID;
                 goID = (stopID == i)? j: i;
@@ -1013,18 +1015,18 @@ void control(vector<PayLoad> payLoad){
     solveRobotsCollision();
     // Collision_detection(payLoad);
 
-    // collision_solve(25);
+    collision_solve(25);
 
-    // if(state.FrameID==2940){
+    // if(state.FrameID==2962){
     //     cerr<<"------------------------------------"<<endl;
-    //     Calculate_the_trajectory(robots[3],0,10);
+    //     Calculate_the_trajectory(robots[3],0,20);
     //     cerr<<"------------------------------------"<<endl;
     // }
     
 
-    // if(state.FrameID>=2940&&state.FrameID<=2950)cerr<<" && "<<state.FrameID<<": "
+    // if(state.FrameID>=2962&&state.FrameID<=2980)cerr<<" && "<<state.FrameID<<": "
     // <<robots[3].angular_velocity<<" "<<robots[3].direction<<" "<<robots[3].pos.first<<"-"<<robots[3].pos.second
-    // <<" "<<robots[3].xy_pos.first<<"-"<<robots[3].xy_pos.second<<  endl;
+    // <<" "<<robots[3].xy_pos.first<<"-"<<robots[3].xy_pos.second<<  endl << payloads[3].speed<<endl;
 
     // if(state.FrameID == 2940) {
     //     for(int i = 0;i<4;++i)
@@ -3213,15 +3215,15 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,Ins ins_in, int fo
         return {rob.pos};
     }
     double tmpDis=calcuDis(rob.pos,tra[cnt]);
-    if(gt(tmpDis,pre_dis)){
-        return {rob.pos};
-    }
+    // if(gt(tmpDis,pre_dis)){
+    //     return {rob.pos};
+    // }
     cnt++;
     Robot tmp=rob;
     double seta=rob.direction;
     double w=rob.angular_velocity==0?0.00001:rob.angular_velocity;
     double a=return_ac(pay.angular_acceleration,rob.angular_velocity,w_next);
-    double changeAngle=get_at_v_limt(t,pay.angular_acceleration,rob.angular_velocity,w_next,pay.sign);
+    double changeAngle=get_at_v_limt(t,pay.angular_acceleration,rob.angular_velocity,w_next,pay.sign)*pay.sign;
     double v=pay.speed;
     double a_v=return_ac(pay.acceleration,v,v_next);
     rob.pos.first=rob.pos.first+v*cos(seta+changeAngle/2)*t;
@@ -3233,11 +3235,12 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,Ins ins_in, int fo
         rob.angular_velocity=gt(fabs(limit_w),fabs(w_next))?w_next:limit_w;
     else
         rob.angular_velocity=limit_w;
+    // rob.direction+=changeAngle;
+    rob.xy_pos.first=min((v+pay.acceleration*t),v_next)*cos(rob.direction);
+    rob.xy_pos.second=min((v+pay.acceleration*t),v_next)*sin(rob.direction);
     rob.direction+=changeAngle;
-    if(lt(v,v_next)){
-        rob.xy_pos.first=min((v+pay.acceleration*t),v_next)*cos(rob.direction);
-        rob.xy_pos.second=min((v+pay.acceleration*t),v_next)*sin(rob.direction);
-    }
+    rob.xy_pos.first=(rob.xy_pos.first*cos(changeAngle)-rob.xy_pos.second*sin(changeAngle))*cos(rob.direction);
+    rob.xy_pos.second=(rob.xy_pos.first*sin(changeAngle)+rob.xy_pos.second*cos(changeAngle))*sin(rob.direction);
     if(Flag_sumulate){
         return {rob.pos};
     }
@@ -3257,16 +3260,17 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,int cnt,int tar){
     if(cnt>tar){
         return {rob.pos};
     }
-    // if(state.FrameID==2940&&rob.id==3){
+    // if(state.FrameID==2962&&rob.id==3){
     //     cerr<<cnt+1<<" "<<rob.target_id<<" "<<rob.id<<" "<<rob.angular_velocity<<" "<<rob.direction
     //     <<" "<<rob.pos.first<<"-"<<rob.pos.second<<" "<<rob.xy_pos.first<<"-"<<rob.xy_pos.second<<  endl;
+    //     cerr<<pay.speed<<endl;
     // }
     cnt++;
     Robot tmp=rob;
     double seta=rob.direction;
     double w=rob.angular_velocity==0?0.00001:rob.angular_velocity;
     double a=return_ac(pay.angular_acceleration,rob.angular_velocity,w_next);
-    double changeAngle=get_at_v_limt(t,pay.angular_acceleration,rob.angular_velocity,w_next,pay.sign);
+    double changeAngle=get_at_v_limt(t,pay.angular_acceleration,rob.angular_velocity,w_next,pay.sign)*pay.sign;
     // if(state.FrameID==1){
     //     cerr<<changeAngle<<endl;
     // }
@@ -3285,12 +3289,15 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,int cnt,int tar){
         rob.angular_velocity=gt(fabs(limit_w),fabs(w_next))?w_next:limit_w;
     else
         rob.angular_velocity=limit_w;
-    rob.direction+=changeAngle;
+    
     // if(state.FrameID==1)cerr<<cnt-1<<" "<<changeAngle<<" "<<rob.direction<<endl;
-   
+    // rob.xy_pos=return_change_v(w,changeAngle*pay.sign,rob.xy_pos);
     rob.xy_pos.first=min((v+pay.acceleration*t),v_next)*cos(rob.direction);
     rob.xy_pos.second=min((v+pay.acceleration*t),v_next)*sin(rob.direction);
-    
+    rob.direction+=changeAngle;
+    rob.xy_pos.first=(rob.xy_pos.first*cos(changeAngle)-rob.xy_pos.second*sin(changeAngle))*cos(rob.direction);
+    rob.xy_pos.second=(rob.xy_pos.first*sin(changeAngle)+rob.xy_pos.second*cos(changeAngle))*sin(rob.direction);
+    // rob.xy_pos.second=v_tmp.y;
     // if(Flag_sumulate){
     //     return {rob.pos};
     // }
@@ -3522,13 +3529,15 @@ void collision_solve(int frame){
             else {
                 tmp_tra = Calculate_the_trajectory(ro[choose_id], ins_set[k], 1, 0, trajectory[x], 0, 25, mindis);
             }
+
+            cerr<<tmp_tra.size()<<endl;
             if(tmp_tra.size() == 0) continue;
             flag = false;
 
             //检测是否会和其他小球发生碰撞
             for(j = 0; j < 4; ++j){
                 if(j == choose_id) continue;
-                if(checkNoCollision(tmp_tra, trajectory[j], payloads[ro[choose_id].id].radius + payloads[ro[j].id].radius)) {
+                if(checkNoCollision(tmp_tra, trajectory[j], payloads[ro[choose_id].id].radius + payloads[ro[j].id].radius) == -1) {
                     flag =true;
                     break;
                 }
@@ -3548,7 +3557,7 @@ void collision_solve(int frame){
             coll_time[x][choose_id] = 0;
         }
         else
-            cerr<<"no solution to avoid collision"<<ro[choose_id].id<<"-"<<x<<endl;
+            cerr<<"no solution to avoid collision"<<ro[choose_id].id<<"-"<<ro[x].id<<endl;
     }
 
 
