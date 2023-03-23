@@ -580,7 +580,7 @@ void solveRobotsCollision()
     int sign;
     bool cerr_flag = false;
 
-    // if(state.FrameID >= 0 && state.FrameID <= 100) cerr_flag = true;
+    if(state.FrameID >= 0 && state.FrameID <= 100) cerr_flag = true;
 
     for (int i = 0; i < 4; i++)
     {
@@ -797,7 +797,7 @@ void solveRobotsCollision()
             }           
 
             // // 如果两小球方向为锐角
-            else if (lt(angle, Pi / 2) && le(dis, 1.06 + max(10 * 0.02 * (relative_speed[goID] + relative_speed[stopID]), 0.5)))
+            else if (lt(angle, Pi / 2) && le(dis, 1.06 + max(15 * 0.02 * (relative_speed[goID] + relative_speed[stopID]), 0.5)))
             {
                 // 速度快的先减速
                 stopID = gt(relative_speed[stopID], relative_speed[goID])? stopID: goID;
@@ -922,9 +922,9 @@ void control(vector<PayLoad> payLoad){
         // }
         if(gt(angle,payLoad[i].angle)||con1){
             real_angle=get_at_v_limt(0.02,payLoad[i].angular_acceleration
-    ,robots[i].angular_velocity,0,payLoad[i].sign);
-    cerr<<real_angle<<" ^ "<<payLoad[i].angular_acceleration<<" "<<payLoad[i].sign<<
-    " "<<payLoad[i].angle<<endl;
+                ,robots[i].angular_velocity,0,payLoad[i].sign);
+    // cerr<<real_angle<<" ^ "<<payLoad[i].angular_acceleration<<" "<<payLoad[i].sign<<
+    // " "<<payLoad[i].angle<<endl;
             // real_angle=angle;
             // real_angle=payLoad[i].angle;
             can_stop_flag=1;
@@ -1008,7 +1008,7 @@ void control(vector<PayLoad> payLoad){
     //     cerr<<endl;
     //     cerr<<"------------------------------------"<<endl;
     // }
-    solveRobotsCollision();
+    // solveRobotsCollision();
     // Collision_detection(payLoad);
 
     // collision_solve(25);
@@ -1923,7 +1923,7 @@ void robot_judge_sol(int threshold_lack,int full){
                     robots[i].lastSign=0;
                     robots[i].isTurn=0;
                     robots[i].get_type = studios[robots[i].loc_id].type;
-                    cerr<<"robots "<< i<<" buy "<<studios[robots[i].target_id].type<<endl;
+                    // cerr<<"robots "<< i<<" buy "<<studios[robots[i].target_id].type<<endl;
                     studios[robots[i].loc_id].r_id = -1;
                     //cerr<<"dddd"<<endl;
                     robots[i].target_id = pick_point(i,5).first;
@@ -1959,7 +1959,7 @@ void robot_judge_sol(int threshold_lack,int full){
                 robots[i].lastSign=0;
                 robots[i].isTurn=0;
                 // cerr<<"loss = "<<robots[i].time_val*robots[i].collision_val<<' '<<robots[i].time_val<<' '<<robots[i].collision_val<<' '<<robots[i].get_type<<' '<<(price[robots[i].get_type][1]*robots[i].time_val*robots[i].collision_val-price[robots[i].get_type][0])<<endl;
-                cerr<<"robots "<< i<<" sell "<<robots[i].get_type<<endl;
+                // cerr<<"robots "<< i<<" sell "<<robots[i].get_type<<endl;
                 studios[robots[i].loc_id].bitSatus += (int)pow(2,robots[i].get_type);
                 //studios[robots[i].loc_id].r_id = -1;
                 studios_rid[robots[i].loc_id][robots[i].get_type] = -1;
@@ -2094,13 +2094,13 @@ void robot_judge_sol(int threshold_lack,int full){
         // for(int l = 0;l<studios.size();l++){
         //     if(studios[l].r_id == 0)cerr<<"studio : "<<l<<" type = "<<studios[l].type<<endl;
         // }
-        if(robots[i].target_id != -1){
-            if(robots[i].get_type==0)cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<studios[robots[i].target_id].type<<"studios r_id = "<<studios[robots[i].target_id].r_id<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
-            else cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
-        }
-        else{
-            cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
-        }
+        // if(robots[i].target_id != -1){
+        //     if(robots[i].get_type==0)cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<studios[robots[i].target_id].type<<"studios r_id = "<<studios[robots[i].target_id].r_id<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
+        //     else cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
+        // }
+        // else{
+        //     cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
+        // }
         // if(robots[i].target_id == -1){
         //     cerr<<endl;
         //     cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
