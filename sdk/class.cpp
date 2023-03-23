@@ -1009,7 +1009,7 @@ void control(vector<PayLoad> payLoad){
     //     cerr<<"------------------------------------"<<endl;
     // }
     // solveRobotsCollision();
-    Collision_detection(payLoad);
+    // Collision_detection(payLoad);
 
     // collision_solve(25);
 
@@ -1432,8 +1432,8 @@ pair<double,double> distance(int  robot_id,int studio_id){
     // auto tmp=Calculate_the_trajectory(robots[robot_id],0,10);
     // inflection.first = tmp[0].first;
     // inflection.second = tmp[0].second;
-    if(state.FrameID<-1) {
-        int target = robots[robot_id].target_id;
+    // if(state.FrameID<5) {
+         int target = robots[robot_id].target_id;
         robots[robot_id].target_id = studio_id;
         auto tmp=Calculate_the_trajectory(robots[robot_id],0,0);
         inflection.first = tmp[tmp.size()-1].first;
@@ -1442,12 +1442,12 @@ pair<double,double> distance(int  robot_id,int studio_id){
         dist += calcuDis(inflection,studios[studio_id].pos);
         robots[robot_id].target_id = target;
         time = tmp.size()*0.02+calcuDis(inflection,studios[studio_id].pos)/6;
-    }
+    // }
     double dist2 = precise_distance(robot_id,studio_id);
-    // if(fabs(dist-dist2)>10){ 
+    if(fabs(dist-dist2)>10){ 
         dist = dist2;
         time = dist/6;
-    // }
+    }
     return pair<double,double>(time,dist);
 }
 
@@ -3218,6 +3218,7 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,Ins ins_in, int fo
 }
 
 vector<pair<double,double>>Calculate_the_trajectory(Robot rob,int cnt,int tar){
+    // cerr<<"aaaa"<<state.FrameID<<endl;
     double t=0.02;
     PayLoad  pay=calPayload_trajectory(rob,rob.target_id);
     Ins ins=contr_one_rob(rob,pay);
