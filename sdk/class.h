@@ -284,5 +284,4 @@ double return_ac(double a,double v1,double v2);
 void collision_solve(int frame);
 int checkNoCollision(vector<pair<double,double>> a, vector<pair<double,double>> b, double mindis);
 
-
-double precise_distance(int robot_id,int studio_id);
+pair<double,double> distance(int  robot_id,int studio_id);
