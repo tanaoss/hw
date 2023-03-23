@@ -3236,7 +3236,7 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,int cnt,int tar){
     double seta=rob.direction;
     double w=rob.angular_velocity==0?0.00001:rob.angular_velocity;
     double a=return_ac(pay.angular_acceleration,rob.angular_velocity,w_next);
-    double changeAngle=get_at_v_limt(t,pay.angular_acceleration,rob.angular_velocity,w_next,pay.sign);
+    double changeAngle=get_at_v_limt(t,pay.angular_acceleration,rob.angular_velocity,w_next,pay.sign)*pay.sign;
     // if(state.FrameID==1){
     //     cerr<<changeAngle<<endl;
     // }
@@ -3257,10 +3257,12 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,int cnt,int tar){
         rob.angular_velocity=limit_w;
     rob.direction+=changeAngle;
     // if(state.FrameID==1)cerr<<cnt-1<<" "<<changeAngle<<" "<<rob.direction<<endl;
-    rob.xy_pos=return_change_v(w,changeAngle*pay.sign,rob.xy_pos);
-    // rob.xy_pos.first=min((v+pay.acceleration*t),v_next)*cos(rob.direction);
-    // rob.xy_pos.second=min((v+pay.acceleration*t),v_next)*sin(rob.direction);
-    
+    // rob.xy_pos=return_change_v(w,changeAngle*pay.sign,rob.xy_pos);
+    rob.xy_pos.first=min((v+pay.acceleration*t),v_next)*cos(rob.direction);
+    rob.xy_pos.second=min((v+pay.acceleration*t),v_next)*sin(rob.direction);
+    rob.xy_pos.first=rob.xy_pos.first*cos(changeAngle)-rob.xy_pos.second*sin(changeAngle);
+    rob.xy_pos.second=rob.xy_pos.first*sin(changeAngle)+rob.xy_pos.second*cos(changeAngle);
+    rob.xy_pos.second=v_tmp.y;
     // if(Flag_sumulate){
     //     return {rob.pos};
     // }
