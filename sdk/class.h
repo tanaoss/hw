@@ -266,6 +266,7 @@ void change_getType();
 bool can_Pass(int i1,double seta,double arf, double canAngle,
 double dis,double time,int ctr);
 double get_at_v(double t,double a,double v,int sign_v1);
+double get_at_v_canSet(double t,double a,double v,double v1,int sign_v1);
 double get_at_v_z(double t,double a,double v,int sign_v1);
 bool is_near_tar(int id);
 double anger_to_length(int robot_id,int studio_id);
@@ -273,3 +274,9 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,int cnt,int tar);
 PayLoad calPayload_trajectory(Robot rob,int studioID);
 vector<pair<double,double>>Calculate_the_trajectory(Robot rob,Ins ins,vector<pair<double,double>> tra,int cnt,int tar);
 double get_at_stop(double t,double a,double v,int sign_v1);
+Ins contr_one_rob(Robot robot ,PayLoad payload);
+vector<double>  get_T_limits(pair<double,double>pos,Robot robot);
+double get_at_stop_a(double t,double x,double v,int sign_v1);
+double return_time_root_v(double a,double b,double c,double v,double a1);
+double get_at_v_limt(double t,double a,double v,double v1,int sign_v1);
+double return_ac(double a,double v1,double v2);
