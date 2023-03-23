@@ -287,3 +287,4 @@ int checkNoCollision(vector<pair<double,double>> a, vector<pair<double,double>> 
 
 
 double precise_distance(int robot_id,int studio_id);
+double get_at_stop_test(double t,double a,double v,int sign_v1);
