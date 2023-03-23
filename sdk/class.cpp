@@ -1406,18 +1406,23 @@ double target_obstacle_avoidance(int robot_id,int studio_id){
     return count;
 }
 pair<double,double> distance(int  robot_id,int studio_id){
-    double dist = 0;
+    double dist = 100000;
     double time;
     pair<double,double> inflection;
-    int target = robots[robot_id].target_id;
-    robots[robot_id].target_id = studio_id;
-    auto tmp=Calculate_the_trajectory(robots[robot_id],0,10);
-    inflection.first = tmp[0].first;
-    inflection.second = tmp[0].second;
-    dist =tmp.size()*0.02*6;
-    dist += calcuDis(inflection,studios[studio_id].pos);
-    robots[robot_id].target_id = target;
-    time = tmp.size()*0.02+calcuDis(inflection,studios[studio_id].pos)/6;
+    // auto tmp=Calculate_the_trajectory(robots[robot_id],0,10);
+    // inflection.first = tmp[0].first;
+    // inflection.second = tmp[0].second;
+    if(state.FrameID<5) {
+         int target = robots[robot_id].target_id;
+        robots[robot_id].target_id = studio_id;
+        auto tmp=Calculate_the_trajectory(robots[robot_id],0,10);
+        inflection.first = tmp[0].first;
+        inflection.second = tmp[0].second;
+        dist=tmp.size()*0.02*6;
+        dist += calcuDis(inflection,studios[studio_id].pos);
+        robots[robot_id].target_id = target;
+        time = tmp.size()*0.02+calcuDis(inflection,studios[studio_id].pos)/6;
+    }
     double dist2 = precise_distance(robot_id,studio_id);
     if(fabs(dist-dist2)>10){ 
         dist = dist2;
