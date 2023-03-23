@@ -913,11 +913,11 @@ void control(vector<PayLoad> payLoad){
         //     
         // }
         if(gt(angle,payLoad[i].angle)||con1){
-    //         real_angle=get_at_v_limt(0.02,payLoad[i].angular_acceleration
-    // ,robots[i].angular_velocity,0,payLoad[i].sign);
-    // cerr<<real_angle<<" ^ "<<payLoad[i].angular_acceleration<<" "<<payLoad[i].sign<<
-    // " "<<payLoad[i].angle<<endl;
-            real_angle=angle;
+            real_angle=get_at_v_limt(0.02,payLoad[i].angular_acceleration
+    ,robots[i].angular_velocity,0,payLoad[i].sign);
+    cerr<<real_angle<<" ^ "<<payLoad[i].angular_acceleration<<" "<<payLoad[i].sign<<
+    " "<<payLoad[i].angle<<endl;
+            // real_angle=angle;
             // real_angle=payLoad[i].angle;
             can_stop_flag=1;
             StopA=0;
@@ -1001,10 +1001,10 @@ void control(vector<PayLoad> payLoad){
     //     cerr<<"------------------------------------"<<endl;
     // }
     // solveRobotsCollision();
-    // Collision_detection(payLoad);
+    Collision_detection(payLoad);
     // collision_solve(25);
-    if(state.FrameID>=0&&state.FrameID<=10)cerr<<" && "<<state.FrameID<<": "<<robots[0].direction<<" "
-    <<robots[0].angular_velocity<<endl;
+    // if(state.FrameID>=0&&state.FrameID<=10)cerr<<" && "<<state.FrameID<<": "<<robots[0].direction<<" "
+    // <<robots[0].angular_velocity<<endl;
     // if(state.FrameID == 1) {
     //     for(int i = 0;i<4;++i)
     //         trajectory[i]=Calculate_the_trajectory(robots[i], 0, 25);
@@ -3032,9 +3032,9 @@ double get_at_v_limt(double t,double a,double v,double v1,int sign_v1){
     double tmpTime=(v1-v)/(a);
     double realTime=min(tmpTime,t);
     s=v*realTime+a*realTime*realTime;
-    if(state.FrameID==1){
-        cerr<<a<<" ^ "<<" "<<v<<" "<<tmpTime<<" "<<realTime<<" "<<s<<endl;
-    }
+    // if(state.FrameID==1){
+    //     cerr<<a<<" ^ "<<" "<<v<<" "<<tmpTime<<" "<<realTime<<" "<<s<<endl;
+    // }
     double res=(s);
     if(le(t,tmpTime)){
         if(gt(res*sign_v1,0)){
