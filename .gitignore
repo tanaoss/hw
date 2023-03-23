@@ -1,0 +1,19 @@
+# Ignore everything
+*/
+*.bat
+*.exe
+*.dll
+*.sh
+*.txt
+Robot*
+
+# But not these files...
+!.gitignore
+!maps/
+!sdk/
+!README.md
+
+sdk/main
+sdk/*.cmake
+sdk/*cache.txt
+sdk/Makefile
