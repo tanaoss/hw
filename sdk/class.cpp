@@ -38,6 +38,7 @@ int collision_sign[4][4] = {0};
 int robot_last_last_state[4][2];
 int robot_last_state[4][2];
 int Flag_sumulate=0;
+int last_count[50];
 double new_cllo_time=0;
 pair<double ,double> Root;
 pair<double ,double> Collision_point;
@@ -66,6 +67,7 @@ void initrobotInfo() {
 }
 void init_studio_parameter(){
     for(int i=0;i<50;i++){
+        last_count[i]=0;
         for(int j=0;j<8;j++)studios_rid[i][j]=-1;
     }
     studio_material[0][0]=2;
@@ -441,7 +443,7 @@ bool checkEnough(int robot_id, int target_id, int frame)
     {
         double time = distance(robot_id,target_id).first/0.02; // 剩余秒数
         // cerr<<"time = "<<time<<" least time = "<<frame<<endl;
-        if (time > ((frame)+5))
+        if (time > ((frame)+2))
             return true;
         else
             return false;
@@ -1284,21 +1286,26 @@ bool check_send_dis(int studio_id ,double dist){
     return false;
 }
 double wait_dis(int robot_id ,int studio_id){
-    double dis;
+    double dis=0;
     double dist_time = distance(robot_id,studio_id).first;
     double dist = distance(robot_id,studio_id).second;
     if(studios[studio_id].type>=4 && (!check_no_send(studio_id))&& (studios[studio_id].pStatus!=1)) return 100; 
     if((studios[studio_id].pStatus==1||checkEnough(robot_id,studio_id,studios[studio_id].r_time))){
-        if(!check_send_dis(studio_id,dist)){
+        cerr << "robot " << robot_id << " studio " << studio_id << " check_enough or studios[studio_id].pStatus==1" << checkEnough(robot_id, studio_id, studios[studio_id].r_time) << ' ' << studios[studio_id].pStatus << endl;
+        if (!check_send_dis(studio_id, dist))
+        {
             return 0;
         }
         else return 100/6;
     }
     else{
         // cerr<<" studios[studio_id].r_time = "<<studios[studio_id].r_time<<" (dist/6.0/0.02) "<<(dist/6.0/0.02)<<endl;
-        dis = studios[studio_id].r_time*0.02-dist_time;
-        if(dis>1)return 100/6; 
-        //cerr<<" wait dis = "<<dis<<endl;
+        if(class_map == 1)dis = 1000;
+        else{
+            dis = studios[studio_id].r_time*0.02-dist_time;
+            if(dis>1)return 1000; 
+        }
+        cerr<<" wait dis = "<<dis<<endl;
     }
     return dis;  
 }
@@ -1382,9 +1389,9 @@ double back_dis(int studio_id){
 double studio_wait_time(int studio_id){
     double wait=1;
     if(class_map == 1){
-        if(studios[studio_id].wait_time>200){
-            wait= 1-(double)(((double)studios[studio_id].wait_time)/200)*0.1;
-            cerr<<"wait_time = "<<wait<<endl;
+        if(studios[studio_id].wait_time>100){
+            wait= 1-(double)(((double)studios[studio_id].wait_time)/100)*0.1;
+            // cerr<<"wait_time = "<<wait<<endl;
             return wait;
             // return 1;
         }
@@ -1694,7 +1701,8 @@ pair<int, double>pick_point(int robot_id, int state_type)
             if(studios[i].type == 9){
                 // dist=(calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i))*close_threshold(robot_id,i,1.0);
                 // dist=calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i);
-                dist= distance(robot_id,i).first;
+                // if(class_map ==1 ||class_map ==2||class_map==)
+                dist= distance(robot_id,i).first*2;
                 // dist=(calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i))*studio_wait_time(i);
                 // dist=calcuDis(robots[robot_id].pos,studios[i].pos);
                 if(dist<min){
@@ -2218,10 +2226,17 @@ void robot_action(){
                     }
                 }
                 // cerr<<count<<endl;
-                if ((count == studio_material[studios[i].type - 4][0] + 1)||count == 0)studios[i].wait_time = 0;
-                else if (count > 0)studios[i].wait_time++;
+                if ((count == studio_material[studios[i].type - 4][0] + 1) || count == 0) studios[i].wait_time = 0;
+                else{
+                    if (last_count[i] < count && last_count[i] >= 1)
+                        studios[i].wait_time *= 2;
+                    if (count > 0)
+                        studios[i].wait_time += count;
+                }
+                //  if (count > 0)studios[i].wait_time+=count;
                 // if(studios[i].wait_time != 0)
                     // cerr << i<<' '<<studios[i].wait_time<<endl;
+                last_count[i]=count;
             }
         }
     }
