@@ -35,8 +35,8 @@ int material_send[8][3];
 int RootFlag=-2;
 int Adjust_the_same_direction[4][2];
 int collision_sign[4][4] = {0};
-int robot_last_state[4][2];
 int robot_last_last_state[4][2];
+int robot_last_state[4][2];
 int Flag_sumulate=0;
 pair<double ,double> Root;
 pair<double ,double> Collision_point;
@@ -1011,7 +1011,7 @@ void control(vector<PayLoad> payLoad){
     //     cerr<<endl;
     //     cerr<<"------------------------------------"<<endl;
     // }
-    solveRobotsCollision();
+    // solveRobotsCollision();
     // Collision_detection(payLoad);
 
     // collision_solve(25);
@@ -3082,8 +3082,15 @@ void change_getType(){
 double return_ac(double a,double v,double v1){
     int si1=ge(v,0)?1:-1;
     int si2=ge(v1,0)?1:-1;
-    // a*=lt(si1*si2,0)||gt(si1*si2,0)&&gt(fabs(v),fabs(v1));
-    if(lt(si1*si2,0)){
+    //a*=lt(si1*si2,0)||gt(si1*si2,0)&&gt(fabs(v),fabs(v1));
+    // if(state.FrameID==2962){
+    //     cerr<<v<<":"<<si1<<endl;
+    //     cerr<<v1<<":"<<si2<<endl;
+    //     cerr<<(eq(v,v1))<<endl;
+    // }
+    if(eq(v,v1)){
+        return 0;
+    }if(lt(si1*si2,0)){
         a*=si2;
     }else if(gt(si1*si2,0)&&gt(fabs(v),fabs(v1))){
         a*=si2*-1;
@@ -3254,17 +3261,51 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,Ins ins_in, int fo
     rob.pos.second=rob.pos.second+v*sin(seta+changeAngle/2)*t;
     int sign1=ge((rob.angular_velocity+a*t)*w_next,0)?1:-1;
     int sign2=ge((rob.angular_velocity+a*t),0)?1:-1;
-    double limit_w=gt(fabs(rob.angular_velocity+a*t),fabs(Pi))?Pi*sign2:rob.angular_velocity+a*t;
-    if(sign1==1)
-        rob.angular_velocity=gt(fabs(limit_w),fabs(w_next))?w_next:limit_w;
-    else
-        rob.angular_velocity=limit_w;
+    double limit_w=0.0;
+    if(lt(a,0)){
+        limit_w=lt(rob.angular_velocity+a*t,w_next)?w_next:rob.angular_velocity+a*t;
+    }else{
+        limit_w=gt(rob.angular_velocity+a*t,w_next)?w_next:rob.angular_velocity+a*t;
+    }
+    // if(state.FrameID==1){
+    //     cerr<<cnt+1<<" - "<<rob.angular_velocity+a*t<<" "<<w_next<<" "
+    //     <<a<<" "<<changeAngle<<endl;
+    // }
+    rob.angular_velocity=limit_w;
+    
+    // if(state.FrameID==1)cerr<<cnt-1<<" "<<changeAngle<<" "<<rob.direction<<endl;
+    // rob.xy_pos=return_change_v(w,changeAngle*pay.sign,rob.xy_pos);
+    int signv_1=ge((v+a_v*t)*v_next,0)?1:-1;
+    int signv_2=ge((v+a_v*t),0)?1:-1;
+    double limit_v=gt(fabs(v+a_v*t),fabs(6))?6*sign2:v+a_v*t;
+    if(lt(a_v,0)){
+        limit_v=lt(v+a_v*t,v_next)?v_next:v+a_v*t;
+    }else{
+        limit_v=gt(v+a_v*t,v_next)?v_next:v+a_v*t;
+    }
+
+    v=limit_v;
     // rob.direction+=changeAngle;
-    rob.xy_pos.first=min((v+pay.acceleration*t),v_next)*cos(rob.direction);
-    rob.xy_pos.second=min((v+pay.acceleration*t),v_next)*sin(rob.direction);
+    if(state.FrameID==2962&&rob.id==3){
+        cerr<<pay.speed<<" "<<v<<" ^ "<<changeAngle<<" "<<v_next<<" "<<a_v<< endl;
+        cerr<<rob.xy_pos.first<<"-"<<rob.xy_pos.second<<endl;
+    }
+    rob.xy_pos.first=v*cos(rob.direction);
+    rob.xy_pos.second=v*sin(rob.direction);
     rob.direction+=changeAngle;
-    rob.xy_pos.first=(rob.xy_pos.first*cos(changeAngle)-rob.xy_pos.second*sin(changeAngle))*cos(rob.direction);
-    rob.xy_pos.second=(rob.xy_pos.first*sin(changeAngle)+rob.xy_pos.second*cos(changeAngle))*sin(rob.direction);
+    rob.direction=rob.direction>Pi?rob.direction-2*Pi:rob.direction; 
+    // if(rob.direction>Pi)changeAngle=2*Pi-changeAngle;
+    
+
+    rob.xy_pos.first=(rob.xy_pos.first*cos(changeAngle)-rob.xy_pos.second*sin(changeAngle));
+    rob.xy_pos.second=(rob.xy_pos.first*sin(changeAngle)+rob.xy_pos.second*cos(changeAngle));
+    // if(state.FrameID==2962&&rob.id==3){
+    //     cerr<<rob.xy_pos.first<<"-"<<rob.xy_pos.second<<endl;
+    // }
+    // rob.xy_pos.second=v_tmp.y;
+    if(Flag_sumulate){
+        return {rob.pos};
+    }
     if(Flag_sumulate){
         return {rob.pos};
     }
@@ -3305,27 +3346,51 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,int cnt,int tar){
     rob.pos.second=rob.pos.second+v*sin(seta+changeAngle/2)*t;
     int sign1=ge((rob.angular_velocity+a*t)*w_next,0)?1:-1;
     int sign2=ge((rob.angular_velocity+a*t),0)?1:-1;
-    double limit_w=gt(fabs(rob.angular_velocity+a*t),fabs(Pi))?Pi*sign2:rob.angular_velocity+a*t;
+    double limit_w=0.0;
+    if(lt(a,0)){
+        limit_w=lt(rob.angular_velocity+a*t,w_next)?w_next:rob.angular_velocity+a*t;
+    }else{
+        limit_w=gt(rob.angular_velocity+a*t,w_next)?w_next:rob.angular_velocity+a*t;
+    }
     // if(state.FrameID==1){
     //     cerr<<cnt+1<<" - "<<rob.angular_velocity+a*t<<" "<<w_next<<" "
     //     <<a<<" "<<changeAngle<<endl;
     // }
-    if(sign1==1)
-        rob.angular_velocity=gt(fabs(limit_w),fabs(w_next))?w_next:limit_w;
-    else
-        rob.angular_velocity=limit_w;
+    rob.angular_velocity=limit_w;
     
     // if(state.FrameID==1)cerr<<cnt-1<<" "<<changeAngle<<" "<<rob.direction<<endl;
     // rob.xy_pos=return_change_v(w,changeAngle*pay.sign,rob.xy_pos);
-    rob.xy_pos.first=min((v+pay.acceleration*t),v_next)*cos(rob.direction);
-    rob.xy_pos.second=min((v+pay.acceleration*t),v_next)*sin(rob.direction);
+    int signv_1=ge((v+a_v*t)*v_next,0)?1:-1;
+    int signv_2=ge((v+a_v*t),0)?1:-1;
+    double limit_v=gt(fabs(v+a_v*t),fabs(6))?6*sign2:v+a_v*t;
+    if(lt(a_v,0)){
+        limit_v=lt(v+a_v*t,v_next)?v_next:v+a_v*t;
+    }else{
+        limit_v=gt(v+a_v*t,v_next)?v_next:v+a_v*t;
+    }
+
+    v=limit_v;
+    // rob.direction+=changeAngle;
+    if(state.FrameID==2962&&rob.id==3){
+        cerr<<pay.speed<<" "<<v<<" ^ "<<changeAngle<<" "<<v_next<<" "<<a_v<< endl;
+        cerr<<rob.xy_pos.first<<"-"<<rob.xy_pos.second<<endl;
+    }
+    rob.xy_pos.first=v*cos(rob.direction);
+    rob.xy_pos.second=v*sin(rob.direction);
     rob.direction+=changeAngle;
-    rob.xy_pos.first=(rob.xy_pos.first*cos(changeAngle)-rob.xy_pos.second*sin(changeAngle))*cos(rob.direction);
-    rob.xy_pos.second=(rob.xy_pos.first*sin(changeAngle)+rob.xy_pos.second*cos(changeAngle))*sin(rob.direction);
-    // rob.xy_pos.second=v_tmp.y;
-    // if(Flag_sumulate){
-    //     return {rob.pos};
+    rob.direction=rob.direction>Pi?rob.direction-2*Pi:rob.direction; 
+    // if(rob.direction>Pi)changeAngle=2*Pi-changeAngle;
+    
+
+    rob.xy_pos.first=(rob.xy_pos.first*cos(changeAngle)-rob.xy_pos.second*sin(changeAngle));
+    rob.xy_pos.second=(rob.xy_pos.first*sin(changeAngle)+rob.xy_pos.second*cos(changeAngle));
+    // if(state.FrameID==2962&&rob.id==3){
+    //     cerr<<rob.xy_pos.first<<"-"<<rob.xy_pos.second<<endl;
     // }
+    // rob.xy_pos.second=v_tmp.y;
+    if(Flag_sumulate){
+        return {rob.pos};
+    }
     auto res=Calculate_the_trajectory(rob,cnt,tar);
     res.push_back(tmp.pos);
     if(cnt==1)reverse(res.begin(),res.end());
