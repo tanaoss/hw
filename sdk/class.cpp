@@ -2560,7 +2560,7 @@ bool can_speed_z(int stuID,pair<double,double>xy_pos,pair<double,double>pos,doub
     double dis4=sqrt(0.4*0.4-dis1*dis1);//圆截线的长度
     double dis5=sqrt(dis2*dis2-dis1*dis1);//射线的长度
     //cerr<<stuID<<" "<<dis3<<" "<<dis4<<" "<<dis5<<" "<<dis1<<endl;
-    if(gt(dis3,dis5-dis4))return true;
+    if(gt(dis3,sqrt(dis5-dis4)-0.1))return true;
     return false;
 }
 bool isWall(int stuID){
