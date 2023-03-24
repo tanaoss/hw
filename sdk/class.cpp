@@ -214,8 +214,8 @@ bool readStatusUntilOK() {
         robots[rob_id].collision_val_pre=robots[rob_id].collision_val;
         robots[rob_id].set(rob_id,tmp[0],tmp[1],tmp[2],tmp[3],tmp[4],pair<double,double>(tmp[5],tmp[6]),tmp[7],
         pair<double,double>(tmp[8],tmp[9]));
-        // if(gt(robots[rob_id].collision_val_pre, robots[rob_id].collision_val) && robots[rob_id].get_type != 0)
-        //     cerr<<"time:"<< state.FrameID <<"collision" <<rob_id<< endl<<endl;
+        if(gt(robots[rob_id].collision_val_pre, robots[rob_id].collision_val) && robots[rob_id].get_type != 0)
+            cerr<<"time:"<< state.FrameID <<"collision" <<rob_id<< endl<<endl;
         rob_id++;
     }
     cin>>line;
@@ -1029,7 +1029,17 @@ void control(vector<PayLoad> payLoad){
     // solveRobotsCollision();
     // Collision_detection(payLoad);
 
+    // if(state.FrameID >= 148 && state.FrameID < 170) {
+    //     cerr<<state.FrameID<<endl;
+    //     cerr<<"ins:"<<ins[1].forward<<"  "<<ins[1].rotate<<endl;
+    // }
+
     collision_solve(25);
+
+    // if(state.FrameID >= 148 && state.FrameID < 170) {
+    //     cerr<<state.FrameID<<endl;
+    //     cerr<<"ins:"<<ins[1].forward<<"  "<<ins[1].rotate<<endl;
+    // }
     // for(int i=3;i<=3;i++){
     //     if(state.FrameID==479){
     //         cerr<<"------------------"<<i<<"------------------"<<endl;
@@ -3242,17 +3252,25 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,Ins ins_in, int fo
         v_next=ins_in.forward;
     }
     if(rotate_change==1){
-        w_next=ins.rotate;
+        w_next=ins_in.rotate;
     }
     if(cnt>tar||cnt>=tra.size()){
         return {rob.pos};
     }
     double tmpDis=calcuDis(rob.pos,tra[cnt]);
-    if(gt(tmpDis,pre_dis)){
+    if(gt(tmpDis,pre_dis+0.4)){
         forward_change=0;
         rotate_change=0;
+        // cerr<<state.FrameID+cnt<<": "<<"epos1: "<<rob.pos.first<<"-"<<rob.pos.second<<" epos2:  "<<tra[cnt].first<<"-"<<tra[cnt].second<<endl;
+        // cerr<<tmpDis<<"--"<<pre_dis<<endl;
+        return {rob.pos};
     }
-    if(lt(tmpDis,rob_dis + 0.2)){
+    if(lt(tmpDis,rob_dis+0.2)){
+        // if(state.FrameID==148)
+        // cerr<<"vispos1: "<<rob.pos.first<<"-"<<rob.pos.second<<" vispos2:  "<<tra[cnt].first<<"-"<<tra[cnt].second<<endl;
+        // cerr<<"ins: "<<forward_change<<"-"<<rotate_change<<endl;
+        // cerr<<calcuDis(rob.pos, tra[cnt])<<" "<<rob_dis<<endl;
+        // cerr<<state.FrameID+cnt<<endl;
         new_cllo_time=cnt*0.02;
         return {};
     }
@@ -3313,9 +3331,9 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,Ins ins_in, int fo
     // if(Flag_sumulate){
     //     return {rob.pos};
     // }
-    if(Flag_sumulate){
-        return {rob.pos};
-    }
+    // if(Flag_sumulate){
+    //     return {rob.pos};
+    // }
     auto res=Calculate_the_trajectory(rob,ins_in,forward_change,rotate_change,tra,cnt,tar,rob_dis,tmpDis);
     if(res.size()>0)
     res.push_back(tmp.pos);
@@ -3620,13 +3638,13 @@ void collision_solve(int frame){
         mindis = payloads[ro[choose_id].id].radius + payloads[ro[x].id].radius;
         for(k = 0; k < 7; ++k) {
             if(k < 3) {
-                tmp_tra = Calculate_the_trajectory(ro[choose_id], ins_set[k], 1, 1, trajectory[x], 0, 25, mindis, 0);
+                tmp_tra = Calculate_the_trajectory(ro[choose_id], ins_set[k], 1, 1, trajectory[x], 0, 25, mindis, 100);
             }
             else if(k < 6) {
-                tmp_tra = Calculate_the_trajectory(ro[choose_id], ins_set[k], 0, 1, trajectory[x], 0, 25, mindis, 0);
+                tmp_tra = Calculate_the_trajectory(ro[choose_id], ins_set[k], 0, 1, trajectory[x], 0, 25, mindis, 100);
             }
             else {
-                tmp_tra = Calculate_the_trajectory(ro[choose_id], ins_set[k], 1, 0, trajectory[x], 0, 25, mindis, 0);
+                tmp_tra = Calculate_the_trajectory(ro[choose_id], ins_set[k], 1, 0, trajectory[x], 0, 25, mindis, 100);
             }
 
             cerr<<tmp_tra.size()<<endl;
@@ -3656,8 +3674,11 @@ void collision_solve(int frame){
             updateIns(ro[choose_id].id, ans);
             coll_time[x][choose_id] = 0;
         }
-        else
+        else{
             cerr<<"no solution to avoid collision"<<ro[choose_id].id<<"-"<<ro[x].id<<endl;
+            updateIns(ro[choose_id].id, 5);
+        }
+            
     }
 
 
@@ -3674,7 +3695,7 @@ void updateIns(int id, int i) {
         ins[id].rotate = ins_set[i].rotate;
     }
     else if(i<6)
-        ins[id].forward = ins_set[i].rotate;
+        ins[id].rotate = ins_set[i].rotate;
     else
         ins[id].forward = ins_set[i].forward;
 }
@@ -3708,7 +3729,7 @@ void updateIns(int id, int i) {
 int checkNoCollision(vector<pair<double,double>> a, vector<pair<double,double>> b, double mindis) {
     int count = min(a.size(), b.size());
     for(int i = 0; i < count; ++i) {
-        if(lt(calcuDis(a[i], b[i]), mindis))
+        if(lt(calcuDis(a[i], b[i]), mindis + 0.2))
             return i;
     }
     return 9000;
