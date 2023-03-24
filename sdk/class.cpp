@@ -1193,7 +1193,7 @@ void Collision_detection(vector<PayLoad> payLoad){
                     ins[sel_1].rotate=Pi*sign; 
                 }
             }else{
-                ins[sel_1].rotate=Pi*sign; 
+                ins[sel_1].rotate=Pi/4*sign; 
             }
             
         }
