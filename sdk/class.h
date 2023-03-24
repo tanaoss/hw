@@ -272,7 +272,7 @@ bool is_near_tar(int id);
 double anger_to_length(int robot_id,int studio_id);
 vector<pair<double,double>>Calculate_the_trajectory(Robot rob,int cnt,int tar);
 PayLoad calPayload_trajectory(Robot rob,int studioID);
-vector<pair<double,double>>Calculate_the_trajectory(Robot rob,Ins ins, int forward_change, int rotate_change,vector<pair<double,double>> tra,int cnt,int tar,double pre_dis);
+vector<pair<double,double>>Calculate_the_trajectory(Robot rob,Ins ins, int forward_change, int rotate_change,vector<pair<double,double>> tra,int cnt,int tar,double rob_dis,double pre_dis);
 double get_at_stop(double t,double a,double v,int sign_v1);
 Ins contr_one_rob(Robot robot ,PayLoad payload);
 vector<double>  get_T_limits(pair<double,double>pos,Robot robot);
@@ -287,4 +287,4 @@ int checkNoCollision(vector<pair<double,double>> a, vector<pair<double,double>> 
 
 pair<double,double> distance(int  robot_id,int studio_id);
 double get_at_stop_test(double t,double a,double v,int sign_v1);
-pair<double ,double> return_change_v(double w,double dire,double changeSeta,pair<double,double>v);
+pair<double ,double> return_change_v(double w,double changeSeta,pair<double,double>v);
