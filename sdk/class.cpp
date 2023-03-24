@@ -2562,7 +2562,11 @@ bool can_speed_z(int stuID,pair<double,double>xy_pos,pair<double,double>pos,doub
     double dis4=sqrt(0.4*0.4-dis1*dis1);//圆截线的长度
     double dis5=sqrt(dis2*dis2-dis1*dis1);//射线的长度
     //cerr<<stuID<<" "<<dis3<<" "<<dis4<<" "<<dis5<<" "<<dis1<<endl;
-    if(gt(dis3,sqrt(dis5-dis4)-0.1))return true;
+    double rudi=0.1;
+    if(class_map==2){
+        rudi=0.1;
+    }
+    if(gt(dis3,sqrt(dis5-dis4)-rudi))return true;
     return false;
 }
 bool isWall(int stuID){
@@ -3862,7 +3866,6 @@ void collision_solve(int frame){
         }
         else{
             if(cerr_falg) cerr<<"no solution to avoid collision"<<ro[choose_id].id<<"-"<<ro[x].id<<endl;
-
             adjust_collo_new(ro[choose_id].id, ro[x].id, payloads[ro[choose_id].id].sign);
         }
             
