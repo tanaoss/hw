@@ -3262,7 +3262,7 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,int cnt,int tar){
     rob.xy_pos.second=min((v+pay.acceleration*t),v_next)*sin(rob.direction);
     rob.xy_pos.first=rob.xy_pos.first*cos(changeAngle)-rob.xy_pos.second*sin(changeAngle);
     rob.xy_pos.second=rob.xy_pos.first*sin(changeAngle)+rob.xy_pos.second*cos(changeAngle);
-    rob.xy_pos.second=v_tmp.y;
+    // rob.xy_pos.second=v_tmp.y;
     // if(Flag_sumulate){
     //     return {rob.pos};
     // }
