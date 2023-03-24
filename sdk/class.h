@@ -290,3 +290,5 @@ double get_at_stop_test(double t,double a,double v,int sign_v1);
 pair<double ,double> return_change_v(double w,double changeSeta,pair<double,double>v);
 double will_Collo_new(int i1,int i2);
 void adjust_collo_new(int i1,int i2,int baseSign);
+bool check_wall_r(int i);
+bool  isWall_r(int id);
