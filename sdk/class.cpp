@@ -1048,6 +1048,9 @@ void control(vector<PayLoad> payLoad){
 
     collision_solve(25);
 
+    if(state.FrameID >= 4354 && state.FrameID <= 4400)
+        cerr<<"hello"<< robots[1].target_id<<endl;
+
     // if(state.FrameID >= 148 && state.FrameID < 170) {
     //     cerr<<state.FrameID<<endl;
     //     cerr<<"ins:"<<ins[1].forward<<"  "<<ins[1].rotate<<endl;
