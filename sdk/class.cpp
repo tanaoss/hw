@@ -2089,14 +2089,15 @@ void robot_judge_sol(int threshold_lack,int full){
                     if (class_map == 1){
                         cerr<<studios[robots[i].loc_id].r_id<<endl;
                         if (studios[robots[i].loc_id].r_id >= 50)studios[robots[i].loc_id].r_id -=50;
-                        else 
-                    studios[robots[i].loc_id].r_id = -1;
+                        else studios[robots[i].loc_id].r_id = -1;
                     }
-                     else studios[robots[i].loc_id].r_id = -1;
-                    //cerr<<"dddd"<<endl;
-                    robots[i].target_id = pick_point(i,5).first;
-                    //cerr<<"kkkk"<<endl;
-                    if(robots[i].target_id!= -1){
+                    else studios[robots[i].loc_id].r_id = -1;
+                    studios[robots[i].loc_id].pStatus = 0;
+                         // cerr<<"dddd"<<endl;
+                    robots[i].target_id = pick_point(i, 5).first;
+                     // cerr<<"kkkk"<<endl;
+                     if (robots[i].target_id != -1)
+                     {
                         //studios[robots[i].target_id].r_id = i;
                         robot_get_type[studios[robots[i].target_id].type]++;
                         if(studios[robots[i].target_id].type!=8&&studios[robots[i].target_id].type!=9)studios_rid[robots[i].target_id][robots[i].get_type] = i;
@@ -2291,11 +2292,14 @@ void robot_judge_sol(int threshold_lack,int full){
         // for(int l = 0;l<studios.size();l++){
         //     if(studios[l].r_id == 0)cerr<<"studio : "<<l<<" type = "<<studios[l].type<<endl;
         // }
-        // if(state.FrameID>3500 && state.FrameID<4500&&i==1){
+        if(state.FrameID>2300 && state.FrameID<2500&&i==3){
         //     // print_matr();
-        //     cerr<<" time "<<state.FrameID<<' '<<k<<endl;
-        //     cerr<<studios[2].r_id<<endl;
-        // }
+            cerr<<" time "<<state.FrameID<<' '<<k<<endl;
+            cerr<<calcuDis(robots[i].pos,studios[robots[i].target_id].pos)<<' '<<robots[i].loc_id<<' '<<studios[robots[i].target_id].pStatus<<"studios r_id = "<<studios[robots[i].target_id].r_id<<endl;
+            cerr<<studios[40].r_id<<endl;
+                if(robots[i].get_type==0)cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<studios[robots[i].target_id].type<<"studios r_id = "<<studios[robots[i].target_id].r_id<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
+                else cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
+        }
         // // if(robots[i].target_id != -1){
         //     if(robots[i].get_type==0)cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<studios[robots[i].target_id].type<<"studios r_id = "<<studios[robots[i].target_id].r_id<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
         //     else cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
