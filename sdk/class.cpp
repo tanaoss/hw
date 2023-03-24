@@ -1021,7 +1021,7 @@ void control(vector<PayLoad> payLoad){
         }
         if(isWall_r(i,payLoad[i].angle)){
                 ins[i].rotate=can_stop_flag?StopA:Pi*payLoad[i].sign;
-                ins[i].forward=can_stop_flag?6:1;
+                ins[i].forward=can_stop_flag?6:0;
                 // if(ins[i].forward==6)cerr<<"PPPP"<<state.FrameID<<endl;
                 robots[i].lastRate=ins[i].rotate;   
                 continue;     
@@ -1029,8 +1029,9 @@ void control(vector<PayLoad> payLoad){
         // int can_st_flag=1;
         double stop_dis=(robots[i].xy_pos.first*robots[i].xy_pos.first+robots[i].xy_pos.second*robots[i].xy_pos.second)
         /(2*payLoad[i].acceleration);
-        
+        double tarDis=calcuDis(robots[i].pos,studios[robStuID].pos);
         if( isWall(robStuID)&&can_st&&ins[i].rotate==0){
+            
             if(can_speed_z(robStuID,robots[i].xy_pos,robots[i].pos,payLoad[i].acceleration)){
                 ins[i].forward=0;
                 // can_st_flag=0;
@@ -1042,6 +1043,7 @@ void control(vector<PayLoad> payLoad){
             ins[i].forward=0;
         }
         else{
+            
             ins[i].forward=6.0;
         }
         if(can_st){
@@ -3656,7 +3658,7 @@ Ins contr_one_rob(const Robot& robot , const PayLoad& payload){
         }
     if(isWall_r(id,payload.angle)){
             ins.rotate=can_stop_flag?StopA:Pi*payload.sign;
-            ins.forward=can_stop_flag?6:1;
+            ins.forward=can_stop_flag?6:0;
             // if(ins.forward==6)cerr<<"PPPP"<<state.FrameID<<endl;  
     }
     double stop_dis=(robot.xy_pos.first*robot.xy_pos.first+robot.xy_pos.second*robot.xy_pos.second)
