@@ -3620,10 +3620,12 @@ void collision_solve(int frame){
         for(j = 0; j < 4; ++j){
             if(vis[j] || coll[j].size() == 0)
                 continue;
-            if(choose_id == -1 || coll[j].size() - (x == j) > coll[choose_id].size()) {
+            if(choose_id == -1 || coll[j].size() - ((x == j)) > coll[choose_id].size()) {
                 choose_id = j;
             }
         }
+
+        vis[choose_id] = 1;
         
         //No collision
         if(choose_id == -1 || coll[choose_id].size() - (x == choose_id) == 0)
@@ -3685,13 +3687,12 @@ void collision_solve(int frame){
         }
         if(ans != -1) {
             trajectory[choose_id] = tra;
-            cerr<<ans<<endl;
             updateIns(ro[choose_id].id, ans);
             coll_time[x][choose_id] = 0;
         }
         else{
             cerr<<"no solution to avoid collision"<<ro[choose_id].id<<"-"<<ro[x].id<<endl;
-            updateIns(ro[choose_id].id, 5);
+            // updateIns(ro[choose_id].id, 5);
         }
             
     }
@@ -3708,11 +3709,16 @@ void updateIns(int id, int i) {
     if(i<3) {
         ins[id].forward = ins_set[i].forward;
         ins[id].rotate = ins_set[i].rotate;
+        cerr<<"chose solution11:"<<ins[id].forward<<"**"<<ins[id].rotate<<endl;
     }
-    else if(i<6)
+    else if(i<6) {
         ins[id].rotate = ins_set[i].rotate;
-    else
+        cerr<<"chose solution01:"<<ins[id].forward<<"**"<<ins[id].rotate<<endl;
+    }
+    else {
         ins[id].forward = ins_set[i].forward;
+        cerr<<"chose solution10:"<<ins[id].forward<<"**"<<ins[id].rotate<<endl;
+    }
 }
 
 // int choose_best_ins(int id, double mindis, vector<pair<double,double>> tra) {
