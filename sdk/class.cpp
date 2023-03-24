@@ -917,7 +917,7 @@ void control(vector<PayLoad> payLoad){
         return false;
     };//判断是否有可能撞墙
     for(int i=0;i<4;i++){
-        robStuID=robots[i].target_id;
+        int robStuID=robots[i].target_id;
         if(robStuID==-1){
             robStuID=0;
         }
