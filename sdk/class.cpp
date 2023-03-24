@@ -3313,6 +3313,7 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,Ins ins_in, int fo
     //Calculate_the_trajectory_2
     double t=0.02;
     PayLoad  pay=calPayload_trajectory(rob,rob.target_id);
+    if(rob.target_id==-1)rob.target_id=0;
     Ins ins=contr_one_rob(rob,pay);
     Flag_sumulate=0;
     double w_next=ins.rotate;
