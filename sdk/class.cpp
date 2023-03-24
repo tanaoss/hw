@@ -38,6 +38,7 @@ int collision_sign[4][4] = {0};
 int robot_last_last_state[4][2];
 int robot_last_state[4][2];
 int Flag_sumulate=0;
+double new_cllo_time=0;
 pair<double ,double> Root;
 pair<double ,double> Collision_point;
 vector<PayLoad> pl_g;
@@ -581,7 +582,7 @@ void solveRobotsCollision()
     int sign;
     bool cerr_flag = false;
 
-    // if(state.FrameID >= 0 && state.FrameID <= 100) cerr_flag = true;
+    if(state.FrameID >= 1500 && state.FrameID <= 1600) cerr_flag = true;
 
     for (int i = 0; i < 4; i++)
     {
@@ -591,6 +592,8 @@ void solveRobotsCollision()
                 collision_sign[i][j] = 0;
                 continue;
             }
+
+            
 
             // if(cerr_flag && i == 1 && j == 3) cerr<<state.FrameID<<"aaa";
                 
@@ -603,15 +606,27 @@ void solveRobotsCollision()
             relative_speed[goID] = calVectorProduct(subVector(robots[stopID].pos, robots[goID].pos), robots[goID].xy_pos) / dis;
             relative_speed[stopID] = calVectorProduct(subVector(robots[goID].pos, robots[stopID].pos), robots[stopID].xy_pos) / dis;
 
+            // if(cerr_flag && i==0 && j==1) {
+            //     cerr<<stopID<<endl;
+            //     cerr<<calAngle(robots[stopID].xy_pos)<<endl;
+            //     cerr<<robots[stopID].direction<<endl;
+            //     cerr<<state.FrameID<<endl<<relative_speed[goID]<<"**"<<relative_speed[stopID]<<endl;
+            //     cerr<<dis<<"**"<<1.06 + max(15 * 0.02 * (relative_speed[goID] + relative_speed[stopID]), 0.5)<<endl;
+            // }
+
             if (!le(dis, 1.06 + max(15 * 0.02 * (relative_speed[goID] + relative_speed[stopID]), 0.5))) {
                 collision_sign[i][j] = 0;
                 continue;
             }
 
+            
+
             if(le(relative_speed[goID], 0) && le(relative_speed[stopID], 0) && gt(dis, radius_sum)) {
                 collision_sign[i][j] = 0;
                 continue;
             }
+
+            
 
             // if (!will_collision(i,j)) {
             //     collision_sign[i][j] = 0;
@@ -797,7 +812,7 @@ void solveRobotsCollision()
                 ins[j].forward = -2;
             }           
 
-            // // 如果两小球方向为锐角
+            // 如果两小球方向为锐角
             else if (lt(angle, Pi / 2))
             {
                 if(le(relative_speed[i] + relative_speed[j], 0) && gt(dis, radius_sum))
@@ -1015,6 +1030,13 @@ void control(vector<PayLoad> payLoad){
     Collision_detection(payLoad);
 
     // collision_solve(25);
+    // for(int i=3;i<=3;i++){
+    //     if(state.FrameID==479){
+    //         cerr<<"------------------"<<i<<"------------------"<<endl;
+    //         Calculate_the_trajectory(robots[i],0,25);
+    //         cerr<<"------------------"<<i<<"------------------"<<endl;
+    //     }        
+    // }
 
     // if(state.FrameID==2962){
     //     cerr<<"------------------------------------"<<endl;
@@ -1026,10 +1048,16 @@ void control(vector<PayLoad> payLoad){
     //     cerr<<ins[2].
     // }
     
+    // if(state.FrameID>=479&&state.FrameID<=502)
+    // {
+    //     for(int i=3;i<=3;i++){
+    //     cerr<<" && "<<state.FrameID<<":real_wv  "
+    //     <<robots[i].angular_velocity<<" real_dire: "<<robots[i].direction<<" real_pos "<<robots[i].pos.first<<"-"<<robots[i].pos.second
+    //     <<" real_v_xy "<<robots[i].xy_pos.first<<"-"<<robots[i].xy_pos.second<<endl ;
+    //     cerr<< payloads[i].speed<<endl;       
+    //     }
 
-    // if(state.FrameID>=2962&&state.FrameID<=2980)cerr<<" && "<<state.FrameID<<": "
-    // <<robots[3].angular_velocity<<" "<<robots[3].direction<<" "<<robots[3].pos.first<<"-"<<robots[3].pos.second
-    // <<" "<<robots[3].xy_pos.first<<"-"<<robots[3].xy_pos.second<<  endl << payloads[3].speed<<endl;
+    // }
 
     // if(state.FrameID == 2940) {
     //     for(int i = 0;i<4;++i)
@@ -1115,8 +1143,8 @@ void Collision_detection(vector<PayLoad> payLoad){
     for(int i=0;i<arr.size();i++){
         int id1=arr[i][0],id2=arr[i][1];
         double tmpDis=calcuDis(robots[id1].pos,robots[id2].pos);
-        bool Flag_line1=lt(fabs(payLoad[id1].angle),0.2)||can_stop(robots[id1].pos,studios[robots[id1].target_id].pos,payLoad[id1].angle);
-        bool Flag_line2=lt(fabs(payLoad[id2].angle),0.2)||can_stop(robots[id2].pos,studios[robots[id2].target_id].pos,payLoad[id2].angle);
+        // bool Flag_line1=lt(fabs(payLoad[id1].angle),0.2)||can_stop(robots[id1].pos,studios[robots[id1].target_id].pos,payLoad[id1].angle);
+        // bool Flag_line2=lt(fabs(payLoad[id2].angle),0.2)||can_stop(robots[id2].pos,studios[robots[id2].target_id].pos,payLoad[id2].angle);
         // cerr<<"id: "<<state.FrameID<<" "<<id1<<" "<<id2<<" "
         // <<will_collision(id1,id2)<< " "<<Flag_line1<<" "<<Flag_line2<<
         // " "<<tmpDis<<" "<<endl;
@@ -1137,13 +1165,14 @@ void Collision_detection(vector<PayLoad> payLoad){
         //     sel_1=id1;            
         // }
         int speed_limit=5;
-        if(is_near_tar(sel_1)&&isWall(robots[sel_1].target_id)&&will_collision(sel,sel_1)&&gt(fabs(return_v(sel))-fabs(return_v(sel_1)),speed_limit)){
-            int tmp=sel;
-            sel=sel_1;
-            sel_1=tmp;
-        }
-        if(lt(tmpDis,5.5)&&will_collision(sel,sel_1)){
+        // if(is_near_tar(sel_1)&&isWall(robots[sel_1].target_id)&&will_collision(sel,sel_1)&&gt(fabs(return_v(sel))-fabs(return_v(sel_1)),speed_limit)){
+        //     int tmp=sel;
+        //     sel=sel_1;
+        //     sel_1=tmp;
+        // }
+        if(lt(tmpDis,5)){
             int sign=return_line_dire(sel,sel_1,payLoad[sel_1].sign);
+            cerr<<"FrameID  "<<state.FrameID<<" collosion: "<<sel_1<<"-> "<<sel<<" "<<sign<<endl;
             if(sign==0)continue;
             // if(sign==0){
             //    sign=return_line_dire(sel_1,sel,payLoad[sel_1].sign); 
@@ -2739,7 +2768,10 @@ int return_line_dire(int i1,int i2,int signBase){
     // double canAngle=min(fabs(Root.first),fabs(Root.second))*40*0.3;
     // double stop_time= (fabs(robots[i2].angular_velocity))/(pl_g[i2].angular_acceleration);
     // double subVal=stop_time*40*0.36;
-    double real_time=min(fabs(gt(Root.first,0)?Root.first:7),fabs(gt(Root.second,0)?Root.second:7));
+    double real_time=will_Collo_new(i1,i2);
+    if(lt(real_time,0)){
+        return 0;
+    }
     double canAngle_neg=get_at_v(real_time,pl_g[i2].angular_acceleration
     ,robots[i2].angular_velocity,-1);
     double canAngle_pos=get_at_v(real_time,pl_g[i2].angular_acceleration
@@ -2777,54 +2809,16 @@ int return_line_dire(int i1,int i2,int signBase){
             f1=true;
             // return sign;
         }else if(lt(fabs(Pi-seta-arf)+canAngle_pos_z,fabs(seta+arf)+canAngle_neg_z)){
-            if(will_collision_Careful(i1,i2)&&try_aginF==0){
-                try_aginF=1;
-                goto try_agin;
-            }
             // cerr<<"can't raote -"<<state.FrameID<<" "<<i1<<" "<<i2<<endl;
             // cerr<<"can't raote  angle -"<<canAngle_pos_z<<" "<<canAngle_neg_z<<" "<<sign<<endl;
             //ins[i1].rotate=Pi*-1*sign;
-            if(gt(v_1,4)&&gt(v_2,4)&&gt(fabs(ins[i1].rotate),Pi/2)){
-                // cerr<<"teshu1"<<endl;
-                if(will_collision_Careful(i1,i2)||lt(tmpDis,3))
-                    //if(!is_near_tar(i2))
-                    ins[i2].forward=v_2/2;
-                    //if(!is_near_tar(i1))
-                    ins[i1].forward=v_1/2;
-            }
-            if(is_near_tar(i2)&&isWall(robots[i2].target_id)){
-                ins[i1].forward=v_1/2;
-            }
             // cerr<<"0"<<endl;
             return sign;
         }else{
-            if(will_collision_Careful(i1,i2)&&try_aginF==0){
-                try_aginF=1;
-                goto try_agin;
-            }
             // cerr<<"can't raote -"<<state.FrameID<<" "<<i1<<" "<<i2<<endl;
             // cerr<<seta<<" "<<arf<<endl;
             // cerr<<"can't raote  angle -"<<canAngle_pos_z<<" "<<canAngle_neg_z<<" "<<sign*-1<<endl;
             // cerr<<"1"<<endl;
-            if(robots[i1].target_id==robots[i2].target_id){
-                if(gt(fabs(ins[i1].rotate),Pi/2)){
-                    return 0;
-                }
-            }
-            if(gt(v_1,4)&&gt(v_2,4)&&gt(fabs(ins[i1].rotate),Pi/2)){
-                // cerr<<"teshu"<<endl;
-                if(will_collision_Careful(i1,i2)||lt(tmpDis,3))
-                    // cerr<<"teshu-"<<endl;
-                    //if(!is_near_tar(i2))
-                    ins[i2].forward=v_2/2;
-                    //if(!is_near_tar(i1))
-                    ins[i1].forward=v_1/2;
-                
-            }
-            if(is_near_tar(i2)&&isWall(robots[i2].target_id)){
-                ins[i1].forward=v_1/2;
-            }
-            ins[i1].rotate=Pi*sign*-1;
             return sign*-1;
         }
         if(f1&&f2){
@@ -2850,32 +2844,10 @@ int return_line_dire(int i1,int i2,int signBase){
         }else if(lt(fabs(seta-arf)+canAngle_pos_z,fabs(Pi-seta+arf)+canAngle_neg_z)){
             // cerr<<"can't raote "<<state.FrameID<<" "<<i1<<" "<<i2<<endl;
             // cerr<<"can't raote  angle "<<canAngle_pos_z<<" "<<canAngle_neg_z<<" "<<sign<<endl;
-            if(gt(v_1,4)&&gt(v_2,4)&&gt(fabs(ins[i1].rotate),Pi/2)){
-                // cerr<<"teshu1"<<endl;
-                if(will_collision_Careful(i1,i2)||lt(tmpDis,3))
-                    //if(!is_near_tar(i2))
-                    ins[i2].forward=v_2/2;
-                    //if(!is_near_tar(i1))
-                    ins[i1].forward=v_1/2;
-            }
-            if(is_near_tar(i2)&&isWall(robots[i2].target_id)){
-                ins[i1].forward=v_1/2;
-            }
             return sign;
         }else{
             // cerr<<"can't raote "<<state.FrameID<<" "<<i1<<" "<<i2<<endl;
             // cerr<<"can't raote  angle "<<canAngle_pos_z<<" "<<canAngle_neg_z<<" "<<sign*-1<<endl;
-            if(gt(v_1,4)&&gt(v_2,4)&&gt(fabs(ins[i1].rotate),Pi/2)){
-            // cerr<<"teshu1"<<endl;
-            if(will_collision_Careful(i1,i2)||lt(tmpDis,3))
-                    //if(!is_near_tar(i2))
-                    ins[i2].forward=v_2/2;
-                    //if(!is_near_tar(i1))
-                    ins[i1].forward=v_1/2;
-            }
-            if(is_near_tar(i2)&&isWall(robots[i2].target_id)){
-                ins[i1].forward=v_1/2;
-            }
             return sign*-1;
         }  
         if(f1&&f2){
@@ -2891,25 +2863,6 @@ int return_line_dire(int i1,int i2,int signBase){
             return sign*-1;
         }
     } 
-    // double canAngle=min(fabs(Root.first),fabs(Root.second))*40*0.3;
-    // double need_angle_1=min(fabs(Root.first),fabs(Root.second))*fabs(robots[i1].angular_velocity);
-    // double need_angle=get_rotation(i1,i2);
-    // auto tmp= subVector(robots[i1].pos, robots[i2].pos);
-    // int sa=addSign(i1,i2,lt(robots[i1].angular_velocity,0.0)?-1:1);
-    // Vec v1(tmp);
-    // Vec v2(robots[i2].xy_pos);
-    // double tmpAngle=acos(cos_t(v1,v2));
-    // auto tmp1= subVector(robots[i2].pos, robots[i1].pos);
-    // Vec v3(tmp1);
-    // Vec v4(robots[i1].xy_pos);
-    // double tmpAngle_1=acos(cos_t(v3,v4));
-    // cerr<<"id"<<i1<<" "<<i2<<endl;
-    // cerr<<tmpAngle<<"-"<<need_angle<<endl;
-    // int sign= (lt(v1^v2,0))?-1:1;
-    // if(sign*signBase==-1&&gt(canAngle,Pi-tmpAngle_1+tmpAngle+need_angle_1*sa)){
-    //     sign*=-1;
-    // }
-    // return sign;
 }
 int return_line_dire(int i1,int i2){
     will_collision(i1,i2);
@@ -3278,6 +3231,7 @@ bool is_near_tar(int id){
     return false;
 }
 vector<pair<double,double>>Calculate_the_trajectory(Robot rob,Ins ins_in, int forward_change, int rotate_change,vector<pair<double,double>> tra,int cnt,int tar,double rob_dis,double pre_dis){
+    //Calculate_the_trajectory_2
     double t=0.02;
     PayLoad  pay=calPayload_trajectory(rob,rob.target_id);
     Ins ins=contr_one_rob(rob,pay);
@@ -3299,6 +3253,7 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,Ins ins_in, int fo
         rotate_change=0;
     }
     if(lt(tmpDis,rob_dis + 0.2)){
+        new_cllo_time=cnt*0.02;
         return {};
     }
     cnt++;
@@ -3338,10 +3293,10 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,Ins ins_in, int fo
 
     v=limit_v;
     // rob.direction+=changeAngle;
-    if(state.FrameID==2962&&rob.id==3){
-        cerr<<pay.speed<<" "<<v<<" ^ "<<changeAngle<<" "<<v_next<<" "<<a_v<< endl;
-        cerr<<rob.xy_pos.first<<"-"<<rob.xy_pos.second<<endl;
-    }
+    // if(state.FrameID==2962&&rob.id==3){
+    //     cerr<<pay.speed<<" "<<v<<" ^ "<<changeAngle<<" "<<v_next<<" "<<a_v<< endl;
+    //     cerr<<rob.xy_pos.first<<"-"<<rob.xy_pos.second<<endl;
+    // }
     rob.xy_pos.first=v*cos(rob.direction);
     rob.xy_pos.second=v*sin(rob.direction);
     rob.direction+=changeAngle;
@@ -3355,9 +3310,9 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,Ins ins_in, int fo
     //     cerr<<rob.xy_pos.first<<"-"<<rob.xy_pos.second<<endl;
     // }
     // rob.xy_pos.second=v_tmp.y;
-    if(Flag_sumulate){
-        return {rob.pos};
-    }
+    // if(Flag_sumulate){
+    //     return {rob.pos};
+    // }
     if(Flag_sumulate){
         return {rob.pos};
     }
@@ -3378,10 +3333,10 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,int cnt,int tar){
     if(cnt>tar){
         return {rob.pos};
     }
-    if(state.FrameID==2962&&rob.id==3){
-        // cerr<<cnt+1<<" "<<rob.target_id<<" "<<rob.id<<" "<<rob.angular_velocity<<" "<<rob.direction
-        // <<" "<<rob.pos.first<<"-"<<rob.pos.second<<" "<<rob.xy_pos.first<<"-"<<rob.xy_pos.second<<  endl;
-        // cerr<<pay.speed<<endl;
+    if(state.FrameID==479){
+        cerr<<" Framid: "<<state.FrameID+cnt<<" tarID: "<<rob.target_id<<" robId: "<<rob.id<<" w_v: "<<rob.angular_velocity<<" dirc: "<<rob.direction
+        <<" pos_xy: "<<rob.pos.first<<"-"<<rob.pos.second<<" v_xy "<<rob.xy_pos.first<<"-"<<rob.xy_pos.second<<  endl;
+        cerr<<"v: "<<pay.speed<<endl;
     }
     cnt++;
     Robot tmp=rob;
@@ -3423,10 +3378,10 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,int cnt,int tar){
 
     v=limit_v;
     // rob.direction+=changeAngle;
-    if(state.FrameID==2962&&rob.id==3){
-        cerr<<pay.speed<<" "<<v<<" ^ "<<changeAngle<<" "<<v_next<<" "<<a_v<< endl;
-        cerr<<rob.xy_pos.first<<"-"<<rob.xy_pos.second<<endl;
-    }
+    // if(state.FrameID==1){
+    //     cerr<<pay.speed<<" "<<v<<" ^ "<<changeAngle<<" "<<v_next<<" "<<a_v<< endl;
+    //     cerr<<rob.xy_pos.first<<"-"<<rob.xy_pos.second<<endl;
+    // }
     rob.xy_pos.first=v*cos(rob.direction);
     rob.xy_pos.second=v*sin(rob.direction);
     rob.direction+=changeAngle;
@@ -3440,9 +3395,9 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,int cnt,int tar){
     //     cerr<<rob.xy_pos.first<<"-"<<rob.xy_pos.second<<endl;
     // }
     // rob.xy_pos.second=v_tmp.y;
-    if(Flag_sumulate){
-        return {rob.pos};
-    }
+    // if(Flag_sumulate){
+    //     return {rob.pos};
+    // }
     auto res=Calculate_the_trajectory(rob,cnt,tar);
     res.push_back(tmp.pos);
     if(cnt==1)reverse(res.begin(),res.end());
@@ -3778,4 +3733,12 @@ pair<double ,double> return_change_v(double w,double changeSeta,pair<double,doub
     double v_new = l/0.02;
     return pair<double,double>((v_new*cos(direct2)),(v_new*sin(direct2)));
 
+}
+double will_Collo_new(int i1,int i2){
+    new_cllo_time=-8;
+    Ins ins;
+    auto res1= Calculate_the_trajectory(robots[i2],0,25);
+    auto res2= Calculate_the_trajectory(robots[i1],ins,0,0,res1,0,25,getRobotRadius(i1)+getRobotRadius(i2)+0.2);
+    
+    return new_cllo_time;
 }
