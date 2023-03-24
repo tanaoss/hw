@@ -3808,13 +3808,13 @@ int checkNoCollision(vector<pair<double,double>> a, vector<pair<double,double>> 
     return 9000;
 }
 pair<double ,double> return_change_v(double w,double changeSeta,pair<double,double>v){
-    cerr<<v.first<<' '<<v.second<<endl;
+    // cerr<<v.first<<' '<<v.second<<endl;
 
     double v_value = sqrt(v.first*v.first+v.second*v.second);
     double r = (v_value/fabs(w));
     double l = fabs(w)*r;
-    cerr<<(v.first/v_value)<<endl;
-    cerr<<(v.second/v_value)<<endl;
+    // cerr<<(v.first/v_value)<<endl;
+    // cerr<<(v.second/v_value)<<endl;
     double direct1 = acos(v.first/v_value);
     // cerr<<"direct1 = "<<direct1<<endl;
     double direct2;
