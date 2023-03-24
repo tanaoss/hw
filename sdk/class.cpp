@@ -3478,7 +3478,7 @@ PayLoad calPayload_trajectory(Robot rob,int studioID){
 
     return PayLoad((robot.get_type == 0? 0.45: 0.53), angle, angular_acceleration, acceleration, distance, speed, sign);    
 }
-Ins contr_one_rob(Robot robot ,PayLoad payload){
+Ins contr_one_rob(Robot& robot ,PayLoad& payload){
     Flag_sumulate=0;
     double min_max_v=7;
     double min_max_dis=calcuDis(robot.pos,studios[robot.target_id].pos);
