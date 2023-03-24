@@ -581,7 +581,7 @@ void solveRobotsCollision()
     int sign;
     bool cerr_flag = false;
 
-    // if(state.FrameID >= 0 && state.FrameID <= 100) cerr_flag = true;
+    if(state.FrameID >= 1500 && state.FrameID <= 1600) cerr_flag = true;
 
     for (int i = 0; i < 4; i++)
     {
@@ -591,6 +591,8 @@ void solveRobotsCollision()
                 collision_sign[i][j] = 0;
                 continue;
             }
+
+            
 
             // if(cerr_flag && i == 1 && j == 3) cerr<<state.FrameID<<"aaa";
                 
@@ -603,15 +605,27 @@ void solveRobotsCollision()
             relative_speed[goID] = calVectorProduct(subVector(robots[stopID].pos, robots[goID].pos), robots[goID].xy_pos) / dis;
             relative_speed[stopID] = calVectorProduct(subVector(robots[goID].pos, robots[stopID].pos), robots[stopID].xy_pos) / dis;
 
+            // if(cerr_flag && i==0 && j==1) {
+            //     cerr<<stopID<<endl;
+            //     cerr<<calAngle(robots[stopID].xy_pos)<<endl;
+            //     cerr<<robots[stopID].direction<<endl;
+            //     cerr<<state.FrameID<<endl<<relative_speed[goID]<<"**"<<relative_speed[stopID]<<endl;
+            //     cerr<<dis<<"**"<<1.06 + max(15 * 0.02 * (relative_speed[goID] + relative_speed[stopID]), 0.5)<<endl;
+            // }
+
             if (!le(dis, 1.06 + max(15 * 0.02 * (relative_speed[goID] + relative_speed[stopID]), 0.5))) {
                 collision_sign[i][j] = 0;
                 continue;
             }
 
+            
+
             if(le(relative_speed[goID], 0) && le(relative_speed[stopID], 0) && gt(dis, radius_sum)) {
                 collision_sign[i][j] = 0;
                 continue;
             }
+
+            
 
             // if (!will_collision(i,j)) {
             //     collision_sign[i][j] = 0;
@@ -797,7 +811,7 @@ void solveRobotsCollision()
                 ins[j].forward = -2;
             }           
 
-            // // 如果两小球方向为锐角
+            // 如果两小球方向为锐角
             else if (lt(angle, Pi / 2))
             {
                 if(le(relative_speed[i] + relative_speed[j], 0) && gt(dis, radius_sum))
@@ -1011,25 +1025,25 @@ void control(vector<PayLoad> payLoad){
     //     cerr<<endl;
     //     cerr<<"------------------------------------"<<endl;
     // }
-    // solveRobotsCollision();
+    solveRobotsCollision();
     // Collision_detection(payLoad);
 
     // collision_solve(25);
 
-    if(state.FrameID==2962){
-        cerr<<"------------------------------------"<<endl;
-        Calculate_the_trajectory(robots[3],0,20);
-        cerr<<"------------------------------------"<<endl;
-    }
+    // if(state.FrameID==2962){
+    //     cerr<<"------------------------------------"<<endl;
+    //     Calculate_the_trajectory(robots[3],0,20);
+    //     cerr<<"------------------------------------"<<endl;
+    // }
 
     // if(state.FrameID==2962){
     //     cerr<<ins[2].
     // }
     
 
-    if(state.FrameID>=2962&&state.FrameID<=2980)cerr<<" && "<<state.FrameID<<": "
-    <<robots[3].angular_velocity<<" "<<robots[3].direction<<" "<<robots[3].pos.first<<"-"<<robots[3].pos.second
-    <<" "<<robots[3].xy_pos.first<<"-"<<robots[3].xy_pos.second<<  endl << payloads[3].speed<<endl;
+    // if(state.FrameID>=2962&&state.FrameID<=2980)cerr<<" && "<<state.FrameID<<": "
+    // <<robots[3].angular_velocity<<" "<<robots[3].direction<<" "<<robots[3].pos.first<<"-"<<robots[3].pos.second
+    // <<" "<<robots[3].xy_pos.first<<"-"<<robots[3].xy_pos.second<<  endl << payloads[3].speed<<endl;
 
     // if(state.FrameID == 2940) {
     //     for(int i = 0;i<4;++i)
