@@ -35,8 +35,8 @@ int material_send[8][3];
 int RootFlag=-2;
 int Adjust_the_same_direction[4][2];
 int collision_sign[4][4] = {0};
-int robot_last_state[4][2];
 int robot_last_last_state[4][2];
+int robot_last_state[4][2];
 int Flag_sumulate=0;
 double new_cllo_time=0;
 pair<double ,double> Root;
@@ -582,7 +582,7 @@ void solveRobotsCollision()
     int sign;
     bool cerr_flag = false;
 
-    // if(state.FrameID >= 0 && state.FrameID <= 100) cerr_flag = true;
+    if(state.FrameID >= 1500 && state.FrameID <= 1600) cerr_flag = true;
 
     for (int i = 0; i < 4; i++)
     {
@@ -592,6 +592,8 @@ void solveRobotsCollision()
                 collision_sign[i][j] = 0;
                 continue;
             }
+
+            
 
             // if(cerr_flag && i == 1 && j == 3) cerr<<state.FrameID<<"aaa";
                 
@@ -604,15 +606,27 @@ void solveRobotsCollision()
             relative_speed[goID] = calVectorProduct(subVector(robots[stopID].pos, robots[goID].pos), robots[goID].xy_pos) / dis;
             relative_speed[stopID] = calVectorProduct(subVector(robots[goID].pos, robots[stopID].pos), robots[stopID].xy_pos) / dis;
 
+            // if(cerr_flag && i==0 && j==1) {
+            //     cerr<<stopID<<endl;
+            //     cerr<<calAngle(robots[stopID].xy_pos)<<endl;
+            //     cerr<<robots[stopID].direction<<endl;
+            //     cerr<<state.FrameID<<endl<<relative_speed[goID]<<"**"<<relative_speed[stopID]<<endl;
+            //     cerr<<dis<<"**"<<1.06 + max(15 * 0.02 * (relative_speed[goID] + relative_speed[stopID]), 0.5)<<endl;
+            // }
+
             if (!le(dis, 1.06 + max(15 * 0.02 * (relative_speed[goID] + relative_speed[stopID]), 0.5))) {
                 collision_sign[i][j] = 0;
                 continue;
             }
 
+            
+
             if(le(relative_speed[goID], 0) && le(relative_speed[stopID], 0) && gt(dis, radius_sum)) {
                 collision_sign[i][j] = 0;
                 continue;
             }
+
+            
 
             // if (!will_collision(i,j)) {
             //     collision_sign[i][j] = 0;
@@ -798,7 +812,7 @@ void solveRobotsCollision()
                 ins[j].forward = -2;
             }           
 
-            // // 如果两小球方向为锐角
+            // 如果两小球方向为锐角
             else if (lt(angle, Pi / 2))
             {
                 if(le(relative_speed[i] + relative_speed[j], 0) && gt(dis, radius_sum))
@@ -1024,6 +1038,11 @@ void control(vector<PayLoad> payLoad){
     //     }        
     // }
 
+    // if(state.FrameID==2962){
+    //     cerr<<"------------------------------------"<<endl;
+    //     Calculate_the_trajectory(robots[3],0,20);
+    //     cerr<<"------------------------------------"<<endl;
+    // }
 
     // if(state.FrameID==2962){
     //     cerr<<ins[2].
@@ -1362,15 +1381,18 @@ double back_dis(int studio_id){
 }
 double studio_wait_time(int studio_id){
     double wait=0;
-    if(class_map ==1){
-        if(studios[studio_id].wait_time>300){
-            wait= 1-(double)(((double)studios[studio_id].wait_time)/300)*0.1;
-            // cerr<<"wait_time = "<<wait<<endl;
+    if(class_map == 1){
+        if(studios[studio_id].wait_time>200){
+            wait= 1-(double)(((double)studios[studio_id].wait_time)/200)*0.1;
+            cerr<<"wait_time = "<<wait<<endl;
             return wait;
+            // return 1;
         }
         else return 1;
     }
     else return 1;
+    // double wait_time = 0;
+
 }
 double precise_distance(int robot_id,int studio_id){
     double r = 6/Pi;
@@ -2005,18 +2027,18 @@ void robot_judge_sol(int threshold_lack,int full){
                             }
                         }
                         //cerr<<"min = "<<min_subscript<<' '<<min_dist<<endl;
-                        if(class_map==1){
-                            if(temp1.second<min_dist+10){
-                                min_dist=temp1.second;
-                                min_subscript=temp1.first;
-                            }
-                        }
-                        else{
+                        // if(class_map==1){
+                        //     if(temp1.second<min_dist+10){
+                        //         min_dist=temp1.second;
+                        //         min_subscript=temp1.first;
+                        //     }
+                        // }
+                        // else{
                             if(temp1.second<min_dist*1.5){
                                 min_dist=temp1.second;
                                 min_subscript=temp1.first;
                             }
-                        }
+                        // }
                     }
                     else{
                         for(int j=2;j<=4;j++){
@@ -2159,12 +2181,26 @@ void robot_action(){
     if(class_map ==1){
         for(int i = 0;i<studios.size();i++){
             if(studios[i].type>=3&&studios[i].type<=7){
-                if(studios[i].r_time==-1){
-                    studios[i].wait_time++;
+                // if(studios[i].r_time==-1){
+                //     studios[i].wait_time++;
+                // }
+                // if(studios[i].r_time>=0){
+                //     studios[i].wait_time = 0;
+                // }
+                int count = 0;
+                // cerr << studios[i].type << ' ' << studios[i].bitSatus << endl;
+                for (int j = 1; j <= studio_material[studios[i].type - 4][0]; j++){
+                    // cerr << studio_material[studios[i].type - 4][j] << ' ' << ((int)pow(2, studio_material[studios[i].type - 4][j]))<<endl;
+                    if ((studios[i].bitSatus & ((int)pow(2, studio_material[studios[i].type - 4][j]))) == ((int)pow(2, studio_material[studios[i].type - 4][j])))
+                    {
+                        count++;
+                    }
                 }
-                if(studios[i].r_time>=0){
-                    studios[i].wait_time = 0;
-                }
+                // cerr<<count<<endl;
+                if ((count == studio_material[studios[i].type - 4][0] + 1)||count == 0)studios[i].wait_time = 0;
+                else if (count > 0)studios[i].wait_time++;
+                // if(studios[i].wait_time != 0)
+                    // cerr << i<<' '<<studios[i].wait_time<<endl;
             }
         }
     }
