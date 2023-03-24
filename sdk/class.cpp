@@ -239,8 +239,8 @@ bool readStatusUntilOK() {
         robots[rob_id].collision_val_pre=robots[rob_id].collision_val;
         robots[rob_id].set(rob_id,tmp[0],tmp[1],tmp[2],tmp[3],tmp[4],pair<double,double>(tmp[5],tmp[6]),tmp[7],
         pair<double,double>(tmp[8],tmp[9]));
-        // if(gt(robots[rob_id].collision_val_pre, robots[rob_id].collision_val) && robots[rob_id].get_type != 0)
-        //     cerr<<"time-collision:"<< state.FrameID <<"collision" <<rob_id<< endl<<endl;
+        if(gt(robots[rob_id].collision_val_pre, robots[rob_id].collision_val) && robots[rob_id].get_type != 0)
+            cerr<<"time-collision:"<< state.FrameID <<"collision" <<rob_id<< endl<<endl;
         rob_id++;
     }
     cin>>line;
@@ -3693,6 +3693,10 @@ Ins contr_one_rob(const Robot& robot , const PayLoad& payload){
 
 
 bool cmp_robot(Robot a, Robot b) {
+    // if(state.FrameID >= 2083 && state.FrameID <= 2100 && a.id == 1)
+    //     return false;
+    // else if(state.FrameID >= 2083 && state.FrameID <= 2100 && b.id == 1)
+    //     return true;
     if((a.get_type != 0 && b.get_type !=0) || (a.get_type == 0 && b.get_type ==0))
         return gt(payloads[a.id].distance, payloads[b.id].distance);
     return a.get_type < b.get_type;
@@ -3717,8 +3721,8 @@ void collision_solve(int frame){
     bool cerr_falg = false;
 
 
-    if(state.FrameID >= 650 && state.FrameID <= 700)
-        cerr_falg = true;
+    // if(state.FrameID >= 2020 && state.FrameID <= 2130)
+    //     cerr_falg = true;
 
 
     for(i = 0; i < 4; ++i)
