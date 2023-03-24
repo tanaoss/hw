@@ -37,6 +37,8 @@ int Adjust_the_same_direction[4][2];
 int collision_sign[4][4] = {0};
 int robot_last_state[4][2];
 int robot_last_last_state[4][2];
+int robot_last_state[4][2];
+int robot_last_last_state[4][2];
 int Flag_sumulate=0;
 pair<double ,double> Root;
 pair<double ,double> Collision_point;
@@ -262,8 +264,7 @@ double calcuDis(pair<double, double> a, pair<double, double> b)
 
 
 
-void calcuStudioDis()
-{
+void calcuStudioDis(){
     int num = studios.size();
     int i, j;
     for (i = 0; i < num; i++)
@@ -283,11 +284,11 @@ void print_matr(){
         // for(j=0;j<material[i].size();j++) 
         //     cerr<<"mater "<<i<<"studio "<<material[i][j]<<endl;
     }
-    for(i = 1 ; i <= 7; i++){
+    // for(i = 1 ; i <= 7; i++){
         // cerr<<"product i"<<i<<" size = "<<product[i].size()<<endl;
         // for(j=0;j<product[i].size();j++) 
             // cerr<<"mater "<<i<<"studio "<<product[i][j]<<endl;
-    }
+    // }
 }
 
 double calAngle(pair<double, double> a, pair<double, double> b) {
@@ -1028,9 +1029,9 @@ void control(vector<PayLoad> payLoad){
     // }
     
 
-    // if(state.FrameID>=2962&&state.FrameID<=2980)cerr<<" && "<<state.FrameID<<": "
-    // <<robots[3].angular_velocity<<" "<<robots[3].direction<<" "<<robots[3].pos.first<<"-"<<robots[3].pos.second
-    // <<" "<<robots[3].xy_pos.first<<"-"<<robots[3].xy_pos.second<<  endl << payloads[3].speed<<endl;
+    if(state.FrameID>=2962&&state.FrameID<=2980)cerr<<" && "<<state.FrameID<<": "
+    <<robots[3].angular_velocity<<" "<<robots[3].direction<<" "<<robots[3].pos.first<<"-"<<robots[3].pos.second
+    <<" "<<robots[3].xy_pos.first<<"-"<<robots[3].xy_pos.second<<  endl << payloads[3].speed<<endl;
 
     // if(state.FrameID == 2940) {
     //     for(int i = 0;i<4;++i)
