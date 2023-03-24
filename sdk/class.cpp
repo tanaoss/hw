@@ -3356,7 +3356,7 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,Ins ins_in, int fo
     return res;
 }
 
-vector<pair<double,double>>Calculate_the_trajectory(Robot rob,int cnt,int tar){
+vector<pair<double,double>>Calculate_the_trajectory(Robot rob,int cnt,int tar,int ctrF){
     // cerr<<"aaaa"<<state.FrameID<<endl;
     double t=0.02;
     PayLoad  pay=calPayload_trajectory(rob,rob.target_id);
@@ -3428,9 +3428,10 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,int cnt,int tar){
     //     cerr<<rob.xy_pos.first<<"-"<<rob.xy_pos.second<<endl;
     // }
     // rob.xy_pos.second=v_tmp.y;
-    // if(Flag_sumulate){
-    //     return {rob.pos};
-    // }
+    if (Flag_sumulate && ctrF)
+    {
+        return {rob.pos};
+    }
     auto res=Calculate_the_trajectory(rob,cnt,tar);
     res.push_back(tmp.pos);
     if(cnt==1)reverse(res.begin(),res.end());
