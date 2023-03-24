@@ -986,7 +986,7 @@ void control(vector<PayLoad> payLoad){
         // }
         if(gt(angle,payLoad[i].angle)||con1){
             real_angle=get_at_v_limt(0.02,payLoad[i].angular_acceleration
-    ,robots[i].angular_velocity,0,payLoad[i].sign);
+                ,robots[i].angular_velocity,0,payLoad[i].sign);
     // cerr<<real_angle<<" ^ "<<payLoad[i].angular_acceleration<<" "<<payLoad[i].sign<<
     // " "<<payLoad[i].angle<<endl;
             // real_angle=angle;
@@ -1087,8 +1087,8 @@ void control(vector<PayLoad> payLoad){
 
     collision_solve(25);
 
-    // if(state.FrameID >= 4354 && state.FrameID <= 4400)
-    //     cerr<<"hello"<< robots[1].target_id<<endl;
+    // if(state.FrameID >= 720 && state.FrameID <= 730)
+    //     cerr<<"hello"<< robots[2].target_id<<endl;
 
     // if(state.FrameID >= 4330 && state.FrameID < 4336) {
     //     cerr<<state.FrameID<<endl;
@@ -3709,8 +3709,10 @@ void collision_solve(int frame){
     bool flag;
 
     bool cerr_falg = false;
-    // if(state.FrameID >= 5300 && state.FrameID <= 5550)
-    //     cerr_falg = true;
+
+
+    if(state.FrameID >= 650 && state.FrameID <= 700)
+        cerr_falg = true;
 
 
     for(i = 0; i < 4; ++i)
@@ -3838,15 +3840,27 @@ void collision_solve(int frame){
             }
         }
         if(ans != -1) {
+            if(cerr_falg) {
+                cerr<<"old solution:"<<ins[ro[choose_id].id].forward<<"**"<<ins[ro[choose_id].id].rotate<<endl;
+            }
             trajectory[choose_id] = tra;
             updateIns(ro[choose_id].id, ans);
             coll_time[x][choose_id] = 0;
             if(cerr_falg) {
-                cerr<<"choose solution:"<<ans<<endl;
+                if(ans<3) {
+                    cerr<<"chose solution11:"<<ins[ro[choose_id].id].forward<<"**"<<ins[ro[choose_id].id].rotate<<endl;
+                }
+                else if(ans<6) {
+                    cerr<<"chose solution01:"<<ins[ro[choose_id].id].forward<<"**"<<ins[ro[choose_id].id].rotate<<endl;
+                }
+                else {
+                    cerr<<"chose solution10:"<<ins[ro[choose_id].id].forward<<"**"<<ins[ro[choose_id].id].rotate<<endl;
+                }
             }
         }
         else{
             if(cerr_falg) cerr<<"no solution to avoid collision"<<ro[choose_id].id<<"-"<<ro[x].id<<endl;
+
             adjust_collo_new(ro[choose_id].id, ro[x].id, payloads[ro[choose_id].id].sign);
         }
             
