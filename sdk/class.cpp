@@ -217,7 +217,7 @@ bool readStatusUntilOK() {
         robots[rob_id].set(rob_id,tmp[0],tmp[1],tmp[2],tmp[3],tmp[4],pair<double,double>(tmp[5],tmp[6]),tmp[7],
         pair<double,double>(tmp[8],tmp[9]));
         if(gt(robots[rob_id].collision_val_pre, robots[rob_id].collision_val) && robots[rob_id].get_type != 0)
-            cerr<<"time:"<< state.FrameID <<"collision" <<rob_id<< endl<<endl;
+            cerr<<"time-collision:"<< state.FrameID <<"collision" <<rob_id<< endl<<endl;
         rob_id++;
     }
     cin>>line;
@@ -1184,7 +1184,7 @@ void Collision_detection(vector<PayLoad> payLoad){
         // }
         if(lt(tmpDis,5)){
             int sign=return_line_dire(sel,sel_1,payLoad[sel_1].sign);
-            cerr<<"FrameID  "<<state.FrameID<<" collosion: "<<sel_1<<"-> "<<sel<<" "<<sign<<endl;
+            // cerr<<"FrameID  "<<state.FrameID<<" collosion: "<<sel_1<<"-> "<<sel<<" "<<sign<<endl;
             if(sign==0)continue;
             // if(sign==0){
             //    sign=return_line_dire(sel_1,sel,payLoad[sel_1].sign); 
@@ -1301,7 +1301,7 @@ double wait_dis(int robot_id ,int studio_id){
     double dist = distance(robot_id,studio_id).second;
     if(studios[studio_id].type>=4 && (!check_no_send(studio_id))&& (studios[studio_id].pStatus!=1)) return 100; 
     if((studios[studio_id].pStatus==1||checkEnough(robot_id,studio_id,studios[studio_id].r_time))){
-        cerr << "robot " << robot_id << " studio " << studio_id << " check_enough or studios[studio_id].pStatus==1" << checkEnough(robot_id, studio_id, studios[studio_id].r_time) << ' ' << studios[studio_id].pStatus << endl;
+        // cerr << "robot " << robot_id << " studio " << studio_id << " check_enough or studios[studio_id].pStatus==1" << checkEnough(robot_id, studio_id, studios[studio_id].r_time) << ' ' << studios[studio_id].pStatus << endl;
         if (!check_send_dis(studio_id, dist))
         {
             return 0;
@@ -1315,7 +1315,7 @@ double wait_dis(int robot_id ,int studio_id){
             dis = studios[studio_id].r_time*0.02-dist_time;
             if(dis>1)return 1000; 
         }
-        cerr<<" wait dis = "<<dis<<endl;
+        // cerr<<" wait dis = "<<dis<<endl;
     }
     return dis;  
 }
@@ -3495,7 +3495,8 @@ Ins contr_one_rob(Robot robot ,PayLoad payload){
     //         }else{
     //             real_angle=payload.angle;
     //         }
-            real_angle=angle;
+         real_angle=get_at_v_limt(0.02,payload.angular_acceleration
+    ,robot.angular_velocity,0,payload.sign);
             can_stop_flag=1;
             StopA=0;
         }else if(gt(angle,payload.angle)&&!gt(Dev_val,payload.angle)){
@@ -3621,10 +3622,12 @@ void collision_solve(int frame){
         for(j = 0; j < 4; ++j){
             if(vis[j] || coll[j].size() == 0)
                 continue;
-            if(choose_id == -1 || coll[j].size() - (x == j) > coll[choose_id].size()) {
+            if(choose_id == -1 || coll[j].size() - ((x == j)) > coll[choose_id].size()) {
                 choose_id = j;
             }
         }
+
+        vis[choose_id] = 1;
         
         //No collision
         if(choose_id == -1 || coll[choose_id].size() - (x == choose_id) == 0)
@@ -3686,13 +3689,12 @@ void collision_solve(int frame){
         }
         if(ans != -1) {
             trajectory[choose_id] = tra;
-            cerr<<ans<<endl;
             updateIns(ro[choose_id].id, ans);
             coll_time[x][choose_id] = 0;
         }
         else{
             cerr<<"no solution to avoid collision"<<ro[choose_id].id<<"-"<<ro[x].id<<endl;
-            updateIns(ro[choose_id].id, 5);
+            // updateIns(ro[choose_id].id, 5);
         }
             
     }
@@ -3709,11 +3711,16 @@ void updateIns(int id, int i) {
     if(i<3) {
         ins[id].forward = ins_set[i].forward;
         ins[id].rotate = ins_set[i].rotate;
+        cerr<<"chose solution11:"<<ins[id].forward<<"**"<<ins[id].rotate<<endl;
     }
-    else if(i<6)
+    else if(i<6) {
         ins[id].rotate = ins_set[i].rotate;
-    else
+        cerr<<"chose solution01:"<<ins[id].forward<<"**"<<ins[id].rotate<<endl;
+    }
+    else {
         ins[id].forward = ins_set[i].forward;
+        cerr<<"chose solution10:"<<ins[id].forward<<"**"<<ins[id].rotate<<endl;
+    }
 }
 
 // int choose_best_ins(int id, double mindis, vector<pair<double,double>> tra) {
@@ -3778,4 +3785,24 @@ double will_Collo_new(int i1,int i2){
     auto res2= Calculate_the_trajectory(robots[i1],ins,0,0,res1,0,25,getRobotRadius(i1)+getRobotRadius(i2)+0.2);
     
     return new_cllo_time;
+}
+void adjust_collo_new(int i1,int i2,int baseSign){
+    double tmpDis=calcuDis(robots[i1].pos,robots[i2].pos);
+    int sel=i1,sel_1=i2;
+    if(lt(tmpDis,5)){
+        int sign=return_line_dire(sel,sel_1,baseSign);
+        cerr<<"FrameID  "<<state.FrameID<<" collosion: "<<sel_1<<"-> "<<sel<<" "<<sign<<endl;
+        if(sign==0)return;
+        vector<double> tmp=get_T_limits(robots[sel_1].pos,sel_1);
+        if(!eq(tmp[0],-7)&&(!is_range(robots[sel_1].direction,tmp))){
+            if(lt(sign*baseSign,0)){
+                ins[sel_1].forward=2; 
+            }else{
+                    ins[sel_1].rotate=Pi*sign; 
+            }
+            }else{
+                ins[sel_1].rotate=Pi/4*sign; 
+            }
+            
+        }    
 }
