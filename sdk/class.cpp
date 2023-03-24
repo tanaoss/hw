@@ -262,8 +262,7 @@ double calcuDis(pair<double, double> a, pair<double, double> b)
 
 
 
-void calcuStudioDis()
-{
+void calcuStudioDis(){
     int num = studios.size();
     int i, j;
     for (i = 0; i < num; i++)
@@ -283,11 +282,11 @@ void print_matr(){
         // for(j=0;j<material[i].size();j++) 
         //     cerr<<"mater "<<i<<"studio "<<material[i][j]<<endl;
     }
-    for(i = 1 ; i <= 7; i++){
+    // for(i = 1 ; i <= 7; i++){
         // cerr<<"product i"<<i<<" size = "<<product[i].size()<<endl;
         // for(j=0;j<product[i].size();j++) 
             // cerr<<"mater "<<i<<"studio "<<product[i][j]<<endl;
-    }
+    // }
 }
 
 double calAngle(pair<double, double> a, pair<double, double> b) {
