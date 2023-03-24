@@ -3921,7 +3921,7 @@ void updateIns(int id, int i) {
 // }
 
 
-int checkNoCollision(vector<pair<double,double>> a, vector<pair<double,double>> b, double mindis) {
+int checkNoCollision(const vector<pair<double,double>> &a, const vector<pair<double,double>> &b, double mindis) {
     int count = min(a.size(), b.size());
     for(int i = 0; i < count; ++i) {
         if(lt(calcuDis(a[i], b[i]), mindis + 0.2))
