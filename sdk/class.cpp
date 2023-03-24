@@ -966,7 +966,10 @@ void control(vector<PayLoad> payLoad){
         }
       
         double dis=calcuDis(robots[i].pos,studios[robots[i].target_id].pos);
-        if(lt(dis,(getRobotRadius(i)+2))&&!can_st){
+        int sle_dis=2;
+        if(class_map==3)
+        sle_dis=3;
+        if(lt(dis,(getRobotRadius(i)+sle_dis))&&!can_st){
                 ins[i].rotate=can_stop_flag?StopA:Pi*payLoad[i].sign;
                 ins[i].forward=0;
                 robots[i].lastRate=ins[i].rotate;   
