@@ -274,7 +274,7 @@ vector<pair<double, double>> Calculate_the_trajectory(Robot rob, int cnt, int ta
 PayLoad calPayload_trajectory(Robot rob,int studioID);
 vector<pair<double,double>>Calculate_the_trajectory(Robot rob,Ins ins, int forward_change, int rotate_change,vector<pair<double,double>> tra,int cnt,int tar,double rob_dis,double pre_dis=100);
 double get_at_stop(double t,double a,double v,int sign_v1);
-Ins contr_one_rob(Robot& robot ,PayLoad& payload);
+Ins contr_one_rob(const Robot& robot ,const PayLoad& payload);
 vector<double>  get_T_limits(pair<double,double>pos,Robot robot);
 double get_at_stop_a(double t,double x,double v,int sign_v1);
 double return_time_root_v(double a,double b,double c,double v,double a1);

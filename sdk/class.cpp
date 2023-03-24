@@ -8,7 +8,6 @@
 // #include "line.h"
 
 using namespace std;
-vector<pair<double,double>> trajectory[4];
 vector<vector<double>> dis(50, vector<double>(50, 0));
 vector<Studio> studios;
 vector<Robot> robots;
@@ -311,7 +310,11 @@ PayLoad calPayload(int robotID,int studioID) {
     //cerr << robotID << target<<endl;
 
     Robot robot = robots[robotID];
+    if(studioID == -1) {
+        studioID = 0;
+    }
     Studio studio = studios[studioID];
+
 
     // cerr << robotID << "--"<< robot.target_id<<endl;
 
@@ -914,8 +917,12 @@ void control(vector<PayLoad> payLoad){
         return false;
     };//判断是否有可能撞墙
     for(int i=0;i<4;i++){
-        double min_max_dis=calcuDis(robots[i].pos,studios[robots[i].target_id].pos);
-        double min_max_v=fabs(min_max_dis/(studios[robots[i].target_id].r_time/50.0))+2;
+        robStuID=robots[i].target_id;
+        if(robStuID==-1){
+            robStuID=0;
+        }
+        double min_max_dis=calcuDis(robots[i].pos,studios[robStuID].pos);
+        double min_max_v=fabs(min_max_dis/(studios[robStuID].r_time/50.0))+2;
         if(robots[i].get_type!=0)min_max_v=6.0;
         min_max_v=6.0;
         int robID=robots[i].id;
@@ -955,7 +962,7 @@ void control(vector<PayLoad> payLoad){
         // if(class_map==1||class_map==3){
         //     cmpAngle=fabs(payLoad[i].angle);
         // }
-        bool can_st=can_stop(robots[i].pos,studios[robots[i].target_id].pos,cmpAngle);
+        bool can_st=can_stop(robots[i].pos,studios[robStuID].pos,cmpAngle);
         vector<double> tmp=get_T_limits(robots[i].pos,i);
         if(!eq(tmp[0],-7)&&(!is_range(robots[i].direction,tmp))){
             ins[i].rotate=can_stop_flag?StopA:Pi*payLoad[i].sign;
@@ -965,7 +972,7 @@ void control(vector<PayLoad> payLoad){
             continue;
         }
       
-        double dis=calcuDis(robots[i].pos,studios[robots[i].target_id].pos);
+        double dis=calcuDis(robots[i].pos,studios[robStuID].pos);
         int sle_dis=2;
         if(class_map==3)
         sle_dis=3;
@@ -986,8 +993,8 @@ void control(vector<PayLoad> payLoad){
         double stop_dis=(robots[i].xy_pos.first*robots[i].xy_pos.first+robots[i].xy_pos.second*robots[i].xy_pos.second)
         /(2*payLoad[i].acceleration);
         
-        if( isWall(robots[i].target_id)&&can_st&&ins[i].rotate==0){
-            if(can_speed_z(robots[i].target_id,robots[i].xy_pos,robots[i].pos,payLoad[i].acceleration)){
+        if( isWall(robStuID)&&can_st&&ins[i].rotate==0){
+            if(can_speed_z(robStuID,robots[i].xy_pos,robots[i].pos,payLoad[i].acceleration)){
                 ins[i].forward=0;
                 // can_st_flag=0;
             }else{
@@ -3520,7 +3527,7 @@ PayLoad calPayload_trajectory(Robot rob,int studioID){
 
     return PayLoad((robot.get_type == 0? 0.45: 0.53), angle, angular_acceleration, acceleration, distance, speed, sign);    
 }
-Ins contr_one_rob(Robot& robot ,PayLoad& payload){
+Ins contr_one_rob(const Robot& robot , const PayLoad& payload){
     Flag_sumulate=0;
     double min_max_v=7;
     double min_max_dis=calcuDis(robot.pos,studios[robot.target_id].pos);
@@ -3649,7 +3656,7 @@ void collision_solve(int frame){
             tmp = checkNoCollision(trajectory[i], trajectory[j], mindis);
             coll_time[i][j] = tmp;
             coll_time[j][i] = tmp;
-            if(tmp == 9000) continue;
+            if(tmp == 9000 || gt(calcuDis(ro[i].pos, ro[j].pos), 8)) continue;
             coll[i].emplace_back(j);
             coll[j].emplace_back(i);
             // cerr<<"time:"<<state.FrameID<<endl;
