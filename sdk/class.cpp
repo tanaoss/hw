@@ -1012,7 +1012,7 @@ void control(vector<PayLoad> payLoad){
     //     cerr<<"------------------------------------"<<endl;
     // }
     // solveRobotsCollision();
-    // Collision_detection(payLoad);
+    Collision_detection(payLoad);
 
     // collision_solve(25);
 
@@ -1351,7 +1351,7 @@ double back_dis(int studio_id){
     // return 0;
 }
 double studio_wait_time(int studio_id){
-    double wait=0;
+    double wait=1;
     if(class_map == 1){
         if(studios[studio_id].wait_time>200){
             wait= 1-(double)(((double)studios[studio_id].wait_time)/200)*0.1;
@@ -1361,10 +1361,27 @@ double studio_wait_time(int studio_id){
         }
         else return 1;
     }
+    else if(class_map == 4){
+        if(studios[studio_id].type == 4){
+            wait = 0.1;
+        }
+        return wait;
+    }
     else return 1;
     // double wait_time = 0;
-
 }
+
+double get_lack(int studio_id){
+    double lack = 1;
+    // if ((class_map == 4)){
+    //     if (studios[studio_id].type == 4)
+    //     {
+    //         lack = 0.1;
+    //     }
+    // }
+    return lack;
+}
+
 double precise_distance(int robot_id,int studio_id){
     double r = 6/Pi;
     double temp;
@@ -1461,7 +1478,9 @@ pair<double,double> distance(int  robot_id,int studio_id){
     return pair<double,double>(time,dist);
 }
 
-pair<int,double> pick_point(int robot_id, int state_type){
+
+pair<int, double>pick_point(int robot_id, int state_type)
+{
     pair<double,double> pos = robots[robot_id].pos;
     double min = 1000;
     int min_subscript = -1;
@@ -1504,8 +1523,8 @@ pair<int,double> pick_point(int robot_id, int state_type){
                     // dist=(calcuDis(robots[robot_id].pos,studios[full_product[i]].pos)+anger_to_length(robot_id,full_product[i]));
                     // dist=calcuDis(robots[robot_id].pos,studios[full_product[i]].pos);
                     // dist= precise_distance(robot_id,full_product[i])+wait_dis(robot_id,full_product[i])+target_obstacle_avoidance(robot_id,full_product[i]);
-                    dist= distance(robot_id,full_product[i]).first+wait_dis(robot_id,full_product[i])+back_dis(full_product[i])+target_obstacle_avoidance(robot_id,full_product[i]);
-                    // dist= precise_distance(robot_id,full_product[i])+wait_dis(robot_id,full_product[i])+back_dis(full_product[i])+target_obstacle_avoidance(robot_id,full_product[i]);
+                        dist = (distance(robot_id, full_product[i]).first + wait_dis(robot_id, full_product[i]) + back_dis(full_product[i]) + target_obstacle_avoidance(robot_id, full_product[i])) * get_lack(full_product[i]);
+                        // dist= precise_distance(robot_id,full_product[i])+wait_dis(robot_id,full_product[i])+back_dis(full_product[i])+target_obstacle_avoidance(robot_id,full_product[i]);
                         // dist=(calcuDis(robots[robot_id].pos,studios[full_product[i]].pos)+anger_to_length(robot_id,full_product[i]))+wait_dis(robot_id,full_product[i]);
                         if(dist<min){
                             min=dist;
@@ -1531,7 +1550,7 @@ pair<int,double> pick_point(int robot_id, int state_type){
                         // dist=(calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i));
                         // dist= precise_distance(robot_id,i)+wait_dis(robot_id,i)+target_obstacle_avoidance(robot_id,i);
                         // dist= precise_distance(robot_id,i)+wait_dis(robot_id,i)+back_dis(i)+target_obstacle_avoidance(robot_id,i);
-                        dist= distance(robot_id,i).first+wait_dis(robot_id,i)+back_dis(i)+target_obstacle_avoidance(robot_id,i);
+                        dist= (distance(robot_id,i).first+wait_dis(robot_id,i)+back_dis(i)+target_obstacle_avoidance(robot_id,i))*get_lack(i);
                         // dist=(calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i))+wait_dis(robot_id,i)+back_dis(i);
                         // dist=(calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i))+wait_dis(robot_id,i)+Calc_collisions_dis(robot_id,i)+back_dis(i);
                         // cerr<<calcuDis(robots[robot_id].pos,studios[i].pos)<<' '<<anger_to_length(robot_id,i)<<' '<<wait_dis(robot_id,i)<<endl;
@@ -1562,7 +1581,8 @@ pair<int,double> pick_point(int robot_id, int state_type){
                         // dist=calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i);
                         // dist= precise_distance(robot_id,i)+wait_dis(robot_id,i)+target_obstacle_avoidance(robot_id,i);
                         // dist= precise_distance(robot_id,i)+wait_dis(robot_id,i)+back_dis(i)+target_obstacle_avoidance(robot_id,i);
-                        dist= distance(robot_id,i).first+wait_dis(robot_id,i)+back_dis(i)+target_obstacle_avoidance(robot_id,i);
+                        // dist= distance(robot_id,i).first+wait_dis(robot_id,i)+back_dis(i)+target_obstacle_avoidance(robot_id,i);
+                        dist = (distance(robot_id, i).first + wait_dis(robot_id, i) + back_dis(i) + target_obstacle_avoidance(robot_id, i)) * get_lack(i);
                         // dist= precise_distance(robot_id,i)+wait_dis(robot_id,i);
                         // dist=(calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i))+wait_dis(robot_id,i)+back_dis(i);
                         // dist=(calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i))+wait_dis(robot_id,i)+Calc_collisions_dis(robot_id,i)+back_dis(i);
@@ -1594,7 +1614,8 @@ pair<int,double> pick_point(int robot_id, int state_type){
                         // dist=calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i);
                         // dist= precise_distance(robot_id,i)+wait_dis(robot_id,i)+target_obstacle_avoidance(robot_id,i);
                         // dist= precise_distance(robot_id,i)+wait_dis(robot_id,i)+back_dis(i)+target_obstacle_avoidance(robot_id,i);
-                        dist= distance(robot_id,i).first+wait_dis(robot_id,i)+back_dis(i)+target_obstacle_avoidance(robot_id,i);
+                        // dist= distance(robot_id,i).first+wait_dis(robot_id,i)+back_dis(i)+target_obstacle_avoidance(robot_id,i);
+                        dist = (distance(robot_id, i).first + wait_dis(robot_id, i) + back_dis(i) + target_obstacle_avoidance(robot_id, i)) * get_lack(i);
                         // dist=(calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i))+wait_dis(robot_id,i)+back_dis(i);
                         // dist=(calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i))+wait_dis(robot_id,i)+Calc_collisions_dis(robot_id,i)+back_dis(i);
                         // dist=calcuDis(robots[robot_id].pos,studios[i].pos);
@@ -2172,6 +2193,37 @@ void robot_action(){
                 else if (count > 0)studios[i].wait_time++;
                 // if(studios[i].wait_time != 0)
                     // cerr << i<<' '<<studios[i].wait_time<<endl;
+            }
+        }
+    }
+    if(class_map == 4){
+        for (int i = 0; i < studios.size(); i++)
+        {
+            if (studios[i].type >= 3 && studios[i].type <= 7)
+            {
+                if(studios[i].r_time==-1){
+                    studios[i].wait_time++;
+                }
+                if(studios[i].r_time>=0){
+                    studios[i].wait_time = 0;
+                }
+                // int count = 0;
+                // // cerr << studios[i].type << ' ' << studios[i].bitSatus << endl;
+                // for (int j = 1; j <= studio_material[studios[i].type - 4][0]; j++)
+                // {
+                //     // cerr << studio_material[studios[i].type - 4][j] << ' ' << ((int)pow(2, studio_material[studios[i].type - 4][j]))<<endl;
+                //     if ((studios[i].bitSatus & ((int)pow(2, studio_material[studios[i].type - 4][j]))) == ((int)pow(2, studio_material[studios[i].type - 4][j])))
+                //     {
+                //         count++;
+                //     }
+                // }
+                // // cerr<<count<<endl;
+                // if ((count == studio_material[studios[i].type - 4][0] + 1) || count == 0)
+                //     studios[i].wait_time = 0;
+                // else if (count > 0)
+                //     studios[i].wait_time++;
+                // if(studios[i].wait_time != 0)
+                // cerr << i<<' '<<studios[i].wait_time<<endl;
             }
         }
     }
