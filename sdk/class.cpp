@@ -217,7 +217,7 @@ bool readStatusUntilOK() {
         robots[rob_id].set(rob_id,tmp[0],tmp[1],tmp[2],tmp[3],tmp[4],pair<double,double>(tmp[5],tmp[6]),tmp[7],
         pair<double,double>(tmp[8],tmp[9]));
         if(gt(robots[rob_id].collision_val_pre, robots[rob_id].collision_val) && robots[rob_id].get_type != 0)
-            cerr<<"time:"<< state.FrameID <<"collision" <<rob_id<< endl<<endl;
+            cerr<<"time-collision:"<< state.FrameID <<"collision" <<rob_id<< endl<<endl;
         rob_id++;
     }
     cin>>line;
@@ -1184,7 +1184,7 @@ void Collision_detection(vector<PayLoad> payLoad){
         // }
         if(lt(tmpDis,5)){
             int sign=return_line_dire(sel,sel_1,payLoad[sel_1].sign);
-            cerr<<"FrameID  "<<state.FrameID<<" collosion: "<<sel_1<<"-> "<<sel<<" "<<sign<<endl;
+            // cerr<<"FrameID  "<<state.FrameID<<" collosion: "<<sel_1<<"-> "<<sel<<" "<<sign<<endl;
             if(sign==0)continue;
             // if(sign==0){
             //    sign=return_line_dire(sel_1,sel,payLoad[sel_1].sign); 
@@ -1301,7 +1301,7 @@ double wait_dis(int robot_id ,int studio_id){
     double dist = distance(robot_id,studio_id).second;
     if(studios[studio_id].type>=4 && (!check_no_send(studio_id))&& (studios[studio_id].pStatus!=1)) return 100; 
     if((studios[studio_id].pStatus==1||checkEnough(robot_id,studio_id,studios[studio_id].r_time))){
-        cerr << "robot " << robot_id << " studio " << studio_id << " check_enough or studios[studio_id].pStatus==1" << checkEnough(robot_id, studio_id, studios[studio_id].r_time) << ' ' << studios[studio_id].pStatus << endl;
+        // cerr << "robot " << robot_id << " studio " << studio_id << " check_enough or studios[studio_id].pStatus==1" << checkEnough(robot_id, studio_id, studios[studio_id].r_time) << ' ' << studios[studio_id].pStatus << endl;
         if (!check_send_dis(studio_id, dist))
         {
             return 0;
@@ -1315,7 +1315,7 @@ double wait_dis(int robot_id ,int studio_id){
             dis = studios[studio_id].r_time*0.02-dist_time;
             if(dis>1)return 1000; 
         }
-        cerr<<" wait dis = "<<dis<<endl;
+        // cerr<<" wait dis = "<<dis<<endl;
     }
     return dis;  
 }
