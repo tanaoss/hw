@@ -3494,7 +3494,8 @@ Ins contr_one_rob(Robot robot ,PayLoad payload){
     //         }else{
     //             real_angle=payload.angle;
     //         }
-            real_angle=angle;
+         real_angle=get_at_v_limt(0.02,payload.angular_acceleration
+    ,robot.angular_velocity,0,payload.sign);
             can_stop_flag=1;
             StopA=0;
         }else if(gt(angle,payload.angle)&&!gt(Dev_val,payload.angle)){
@@ -3783,4 +3784,24 @@ double will_Collo_new(int i1,int i2){
     auto res2= Calculate_the_trajectory(robots[i1],ins,0,0,res1,0,25,getRobotRadius(i1)+getRobotRadius(i2)+0.2);
     
     return new_cllo_time;
+}
+void adjust_collo_new(int i1,int i2,int baseSign){
+    double tmpDis=calcuDis(robots[i1].pos,robots[i2].pos);
+    int sel=i1,sel_1=i2;
+    if(lt(tmpDis,5)){
+        int sign=return_line_dire(sel,sel_1,baseSign);
+        cerr<<"FrameID  "<<state.FrameID<<" collosion: "<<sel_1<<"-> "<<sel<<" "<<sign<<endl;
+        if(sign==0)return;
+        vector<double> tmp=get_T_limits(robots[sel_1].pos,sel_1);
+        if(!eq(tmp[0],-7)&&(!is_range(robots[sel_1].direction,tmp))){
+            if(lt(sign*baseSign,0)){
+                ins[sel_1].forward=2; 
+            }else{
+                    ins[sel_1].rotate=Pi*sign; 
+            }
+            }else{
+                ins[sel_1].rotate=Pi/4*sign; 
+            }
+            
+        }    
 }
