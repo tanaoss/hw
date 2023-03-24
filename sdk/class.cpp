@@ -3693,7 +3693,7 @@ void collision_solve(int frame){
         }
         else{
             cerr<<"no solution to avoid collision"<<ro[choose_id].id<<"-"<<ro[x].id<<endl;
-            // updateIns(ro[choose_id].id, 5);
+            
         }
             
     }
