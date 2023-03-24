@@ -239,8 +239,8 @@ bool readStatusUntilOK() {
         robots[rob_id].collision_val_pre=robots[rob_id].collision_val;
         robots[rob_id].set(rob_id,tmp[0],tmp[1],tmp[2],tmp[3],tmp[4],pair<double,double>(tmp[5],tmp[6]),tmp[7],
         pair<double,double>(tmp[8],tmp[9]));
-        // if(gt(robots[rob_id].collision_val_pre, robots[rob_id].collision_val) && robots[rob_id].get_type != 0)
-        //     cerr<<"time-collision:"<< state.FrameID <<"collision" <<rob_id<< endl<<endl;
+        if(gt(robots[rob_id].collision_val_pre, robots[rob_id].collision_val) && robots[rob_id].get_type != 0)
+            cerr<<"time-collision:"<< state.FrameID <<"collision" <<rob_id<< endl<<endl;
         rob_id++;
     }
     cin>>line;
@@ -305,15 +305,15 @@ void print_matr(){
     int j;
     //cerr<<"begin"<<endl;
     for(i = 1 ; i <= 7; i++){
-        cerr<<"product i"<<i<<" size = "<<product[i].size()<<endl;
+        // cerr<<"product i"<<i<<" size = "<<product[i].size()<<endl;
         // for(j=0;j<material[i].size();j++) 
         //     cerr<<"mater "<<i<<"studio "<<material[i][j]<<endl;
     
     // cerr<<endl;
     // for(i = 1 ; i <= 7; i++){
         // cerr<<"product i"<<i<<" size = "<<product[i].size()<<endl;
-        for(j=0;j<product[i].size();j++) 
-            cerr<<"mater "<<i<<"studio "<<product[i][j]<<endl;
+        // for(j=0;j<product[i].size();j++) 
+        //     cerr<<"mater "<<i<<"studio "<<product[i][j]<<endl;
     }
 }
 
@@ -613,7 +613,7 @@ void solveRobotsCollision()
     int sign;
     bool cerr_flag = false;
 
-    if(state.FrameID >= 100 && state.FrameID <= 150) cerr_flag = true;
+    // if(state.FrameID >= 100 && state.FrameID <= 150) cerr_flag = true;
 
     for (int i = 0; i < 4; i++)
     {
@@ -1077,7 +1077,7 @@ void control(vector<PayLoad> payLoad){
     //     cerr<<endl;
     //     cerr<<"------------------------------------"<<endl;
     // }
-    // solveRobotsCollision();
+    solveRobotsCollision();
     // Collision_detection(payLoad);
 
     // if(state.FrameID >= 4330 && state.FrameID < 4336) {
@@ -1085,7 +1085,7 @@ void control(vector<PayLoad> payLoad){
     //     cerr<<"ins:"<<ins[0].forward<<"  "<<ins[0].rotate<<endl;
     // }
 
-    collision_solve(25);
+    // collision_solve(25);
 
     // if(state.FrameID >= 720 && state.FrameID <= 730)
     //     cerr<<"hello"<< robots[2].target_id<<endl;
@@ -1819,11 +1819,12 @@ pair<int, double>pick_point(int robot_id, int state_type)
                     {
                         dist = distance(robot_id, i).first + back_dis(i)*5;
                         if(dist<((9000-state.FrameID)*0.02)){
-                            if (dist < min)
-                            {
-                                min = dist;
-                                min_subscript = i;
-                            }
+                            if(studios[i].type==7)dist=dist*0.7;
+                                if (dist < min)
+                                {
+                                    min = dist;
+                                    min_subscript = i;
+                                }
                         }
                     }
                 }
@@ -2178,7 +2179,7 @@ void robot_judge_sol(int threshold_lack,int full){
                     robots[i].get_type = studios[robots[i].loc_id].type;
                     // cerr<<"robots "<< i<<" buy "<<studios[robots[i].target_id].type<<endl;
                     if (class_map == 1){
-                        cerr<<studios[robots[i].loc_id].r_id<<endl;
+                        // cerr<<studios[robots[i].loc_id].r_id<<endl;
                         if (studios[robots[i].loc_id].r_id >= 50)studios[robots[i].loc_id].r_id -=50;
                         else studios[robots[i].loc_id].r_id = -1;
                     }
@@ -2682,6 +2683,12 @@ bool isWall_r(int robID,double angle){
     int j=robots[robID].pos.second;
     if(i-1<=0||j-2<=0||i+2>=50||j+2>=50)return true;
     return false;   
+}
+bool  isWall_r(int id){
+    int i=robots[id].pos.first;
+    int j=robots[id].pos.second;
+    if(i-1<=0||j-2<=0||i+2>=50||j+2>=50)return true;
+    return false;       
 }
 bool will_impact(int robID,double dis){
     vector<double> tmp=get_T_limits(robots[robID].pos,robID,1,dis);
@@ -3794,6 +3801,10 @@ Ins contr_one_rob(const Robot& robot , const PayLoad& payload){
 
 
 bool cmp_robot(Robot a, Robot b) {
+    // if(state.FrameID >= 2083 && state.FrameID <= 2100 && a.id == 1)
+    //     return false;
+    // else if(state.FrameID >= 2083 && state.FrameID <= 2100 && b.id == 1)
+    //     return true;
     if((a.get_type != 0 && b.get_type !=0) || (a.get_type == 0 && b.get_type ==0))
         return gt(payloads[a.id].distance, payloads[b.id].distance);
     return a.get_type < b.get_type;
@@ -3818,8 +3829,8 @@ void collision_solve(int frame){
     bool cerr_falg = false;
 
 
-    if(state.FrameID >= 650 && state.FrameID <= 700)
-        cerr_falg = true;
+    // if(state.FrameID >= 2020 && state.FrameID <= 2130)
+    //     cerr_falg = true;
 
 
     for(i = 0; i < 4; ++i)
@@ -4022,7 +4033,7 @@ void updateIns(int id, int i) {
 // }
 
 
-int checkNoCollision(vector<pair<double,double>> a, vector<pair<double,double>> b, double mindis) {
+int checkNoCollision(const vector<pair<double,double>> &a, const vector<pair<double,double>> &b, double mindis) {
     int count = min(a.size(), b.size());
     for(int i = 0; i < count; ++i) {
         if(lt(calcuDis(a[i], b[i]), mindis + 0.2))
@@ -4078,4 +4089,11 @@ void adjust_collo_new(int i1,int i2,int baseSign){
             }
             
         }    
+}
+bool check_wall_r(int i){
+    vector<double> tmp=get_T_limits(robots[i].pos,robots[i]);
+    if(!eq(tmp[0],-7)&&(!is_range(robots[i].direction,tmp))&&isWall_r(i)){
+        return true;
+    }    
+    return false;
 }

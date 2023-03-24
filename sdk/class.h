@@ -283,10 +283,12 @@ double return_ac(double a,double v1,double v2);
 
 void updateIns(int id, int i);
 void collision_solve(int frame);
-int checkNoCollision(vector<pair<double,double>> a, vector<pair<double,double>> b, double mindis);
+int checkNoCollision(const vector<pair<double,double>> &a, const vector<pair<double,double>> &b, double mindis);
 
 pair<double,double> distance(int  robot_id,int studio_id);
 double get_at_stop_test(double t,double a,double v,int sign_v1);
 pair<double ,double> return_change_v(double w,double changeSeta,pair<double,double>v);
 double will_Collo_new(int i1,int i2);
 void adjust_collo_new(int i1,int i2,int baseSign);
+bool check_wall_r(int i);
+bool  isWall_r(int id);
