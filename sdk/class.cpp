@@ -1027,9 +1027,9 @@ void control(vector<PayLoad> payLoad){
     //     cerr<<"------------------------------------"<<endl;
     // }
     // solveRobotsCollision();
-    Collision_detection(payLoad);
+    // Collision_detection(payLoad);
 
-    // collision_solve(25);
+    collision_solve(25);
     // for(int i=3;i<=3;i++){
     //     if(state.FrameID==479){
     //         cerr<<"------------------"<<i<<"------------------"<<endl;
@@ -3333,11 +3333,11 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,int cnt,int tar){
     if(cnt>tar){
         return {rob.pos};
     }
-    if(state.FrameID==479){
-        cerr<<" Framid: "<<state.FrameID+cnt<<" tarID: "<<rob.target_id<<" robId: "<<rob.id<<" w_v: "<<rob.angular_velocity<<" dirc: "<<rob.direction
-        <<" pos_xy: "<<rob.pos.first<<"-"<<rob.pos.second<<" v_xy "<<rob.xy_pos.first<<"-"<<rob.xy_pos.second<<  endl;
-        cerr<<"v: "<<pay.speed<<endl;
-    }
+    // if(state.FrameID==479){
+    //     cerr<<" Framid: "<<state.FrameID+cnt<<" tarID: "<<rob.target_id<<" robId: "<<rob.id<<" w_v: "<<rob.angular_velocity<<" dirc: "<<rob.direction
+    //     <<" pos_xy: "<<rob.pos.first<<"-"<<rob.pos.second<<" v_xy "<<rob.xy_pos.first<<"-"<<rob.xy_pos.second<<  endl;
+    //     cerr<<"v: "<<pay.speed<<endl;
+    // }
     cnt++;
     Robot tmp=rob;
     double seta=rob.direction;
