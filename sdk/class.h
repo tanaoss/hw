@@ -296,3 +296,6 @@ double will_Collo_new(int i1,int i2);
 void adjust_collo_new(int i1,int i2,int baseSign);
 bool check_wall_r(int i);
 bool  isWall_r(int id);
+double get_Angle_xy(Robot& rob);
+double Calculate_the_projection_speed(Robot& rob);
+void cal_matrix(vector<vector<double>>&c,double angle1_w,double angle2);
