@@ -1328,7 +1328,7 @@ double Calc_collisions_dis(int robot_id,int studio_id){
     // cerr<<robots[robot_id].xy_pos.first<<' '<<robots[robot_id].xy_pos.second<<' '<<robots[robot_id].target_id<<' '<<robots[robot_id].pos.first<<' '<<robots[robot_id].pos.second<<endl;
     // cerr<<" dis = "<<dis<<endl;
     // if(class_map ==2 ||class_map ==4){
-    //     return 0;
+    //     return 0;ait_time
     // }
     return dis;
     // return 0;
@@ -2353,14 +2353,14 @@ void robot_judge_sol(int threshold_lack,int full){
         // for(int l = 0;l<studios.size();l++){
         //     if(studios[l].r_id == 0)cerr<<"studio : "<<l<<" type = "<<studios[l].type<<endl;
         // }
-        // if(state.FrameID>8500 && state.FrameID<9000){
-        // // // //     // print_matr();
-        //     cerr<<" time "<<state.FrameID<<' '<<k<<endl;
-        // // //     cerr<<calcuDis(robots[i].pos,studios[robots[i].target_id].pos)<<' '<<robots[i].loc_id<<' '<<studios[robots[i].target_id].pStatus<<"studios r_id = "<<studios[robots[i].target_id].r_id<<endl;
-        // // //     cerr<<studios[40].r_id<<endl;
-        // // //         if(robots[i].get_type==0)cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<studios[robots[i].target_id].type<<"studios r_id = "<<studios[robots[i].target_id].r_id<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
-        // // //         else cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
-        // // // }
+        // if(state.FrameID>1000 && state.FrameID<2000 &&i==1){
+        // // // // //     // print_matr();
+        //     cerr<<" time "<<state.FrameID<<' '<<endl;
+        // // // //     cerr<<calcuDis(robots[i].pos,studios[robots[i].target_id].pos)<<' '<<robots[i].loc_id<<' '<<studios[robots[i].target_id].pStatus<<"studios r_id = "<<studios[robots[i].target_id].r_id<<endl;
+        // // // //     cerr<<studios[40].r_id<<endl;
+        // // // //         if(robots[i].get_type==0)cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<studios[robots[i].target_id].type<<"studios r_id = "<<studios[robots[i].target_id].r_id<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
+        // // // //         else cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
+        // // // // }
         // if(robots[i].target_id != -1){
         //     if(robots[i].get_type==0)cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<studios[robots[i].target_id].type<<"studios r_id = "<<studios[robots[i].target_id].r_id<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
         //     else cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
@@ -2368,7 +2368,7 @@ void robot_judge_sol(int threshold_lack,int full){
         // else{
         //     cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
         // }
-        // //     // cerr<<calcuDis(robots[i].pos,studios[robots[i].target_id].pos)<<' '<<robots[i].loc_id<<' '<<studios[robots[i].target_id].pStatus<<"studios r_id = "<<studios[robots[i].target_id].r_id<<endl;
+        // // //     // cerr<<calcuDis(robots[i].pos,studios[robots[i].target_id].pos)<<' '<<robots[i].loc_id<<' '<<studios[robots[i].target_id].pStatus<<"studios r_id = "<<studios[robots[i].target_id].r_id<<endl;
         
         // }
         // if(robots[i].target_id == -1){
@@ -3841,8 +3841,12 @@ void collision_solve(int frame){
     // if(state.FrameID >= 1885 && state.FrameID <= 1900)
     //     cerr_falg = true;
 
-    // if(state.FrameID >= 2872 && state.FrameID <= 2930)
+    // if(state.FrameID >= 1050 && state.FrameID <= 1200)
     //     cerr_falg = true;
+
+    // if(cerr_falg) {
+    //     cerr<<state.FrameID<<"ins:"<<ins[1].forward<<endl;
+    // }
 
 
     for(i = 0; i < 4; ++i)
