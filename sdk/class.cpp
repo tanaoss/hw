@@ -984,8 +984,8 @@ void control(vector<PayLoad> payLoad){
     //     cerr<<state.FrameID<<endl;
     //     cerr<<"ins:"<<ins[0].forward<<"  "<<ins[0].rotate<<endl;
     // }
-    // if(state.FrameID>=335&&state.FrameID<=350){
-    //     cerr<<state.FrameID<<" ins befoer "<<ins[2].forward<<endl;
+    // if(state.FrameID>=1640&&state.FrameID<=1650){
+    //     cerr<<state.FrameID<<" ins befoer "<<ins[0].forward<<endl;
     // }
     collision_solve(25);
 
@@ -1043,8 +1043,8 @@ void control(vector<PayLoad> payLoad){
     //         cerr<<trajectory[j][state.FrameID -2940].first<<","<<trajectory[j][state.FrameID -2940].second<<endl;
     //     }
     // }
-    if(state.FrameID>=335&&state.FrameID<=350){
-        cerr<<state.FrameID<<" ins after "<<ins[1].forward<<endl;
+    if(state.FrameID>=1640&&state.FrameID<=1650){
+        cerr<<state.FrameID<<" ins after "<<ins[0].forward<<endl;
     }
     updateLastRate();
 
