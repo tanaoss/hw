@@ -41,6 +41,7 @@ int Flag_sumulate=0;
 int lack_material[8];
 int produce_product[8];
 int priority[8]; 
+int max_wait_time[4];
 double new_cllo_time = 0;
 pair<double ,double> Root;
 pair<double ,double> Collision_point;
@@ -180,6 +181,9 @@ bool readStatusUntilOK() {
         lack_material[i]=0;
         priority[i]=0;
     }
+    for(int i=0;i<4;i++){
+        max_wait_time[i]=0;
+    }
     while (K--)
     {
         vector<double> tmp(6,0);
@@ -240,8 +244,8 @@ bool readStatusUntilOK() {
         robots[rob_id].collision_val_pre=robots[rob_id].collision_val;
         robots[rob_id].set(rob_id,tmp[0],tmp[1],tmp[2],tmp[3],tmp[4],pair<double,double>(tmp[5],tmp[6]),tmp[7],
         pair<double,double>(tmp[8],tmp[9]));
-        if(gt(robots[rob_id].collision_val_pre, robots[rob_id].collision_val) && robots[rob_id].get_type != 0)
-            cerr<<"time-collision:"<< state.FrameID <<"collision" <<rob_id<< endl<<endl;
+        // if(gt(robots[rob_id].collision_val_pre, robots[rob_id].collision_val) && robots[rob_id].get_type != 0)
+        //     cerr<<"time-collision:"<< state.FrameID <<"collision" <<rob_id<< endl<<endl;
         rob_id++;
     }
     cin>>line;
@@ -1328,7 +1332,7 @@ double Calc_collisions_dis(int robot_id,int studio_id){
     // cerr<<robots[robot_id].xy_pos.first<<' '<<robots[robot_id].xy_pos.second<<' '<<robots[robot_id].target_id<<' '<<robots[robot_id].pos.first<<' '<<robots[robot_id].pos.second<<endl;
     // cerr<<" dis = "<<dis<<endl;
     // if(class_map ==2 ||class_map ==4){
-    //     return 0;ait_time
+    //     return 0;
     // }
     return dis;
     // return 0;
@@ -2434,6 +2438,7 @@ void robot_action(){
                 if ((count == (studio_material[studios[i].type - 4][0] + 1)) || count == 0) studios[i].wait_time = 0;
                 else{
                     studios[i].wait_time++;
+                    if (max_wait_time[studios[i].type-4] < studios[i].wait_time) max_wait_time[studios[i].type-4] = studios[i].wait_time;
                     // if (last_count[i] < count && last_count[i] >= 1)
                     //     studios[i].wait_time *= 2;
                     // if (count > 0)
@@ -2445,6 +2450,13 @@ void robot_action(){
                 // last_count[i]=count;
             }
         }
+        // if(class_map==2){
+        //     for (int i = 0; i < studios.size(); i++)
+        //     {
+        //         if (studios[i].wait_time > 0)
+        //             studios[i].wait_time = max_wait_time[studios[i].type-4];
+        //     }
+        // }
     }
     if(class_map == 4){
         for (int i = 0; i < studios.size(); i++)
@@ -2656,7 +2668,6 @@ bool will_impact(int robID,double dis){
     // //     cerr<<"__"<<is_range(robots[robID].direction,tmp)<<" "<<(fabs(robots[robID].xy_pos.first)>1||fabs(robots[robID].xy_pos.second)>1)<<endl;
     // // cerr<<tmp[0]<<" "<<tmp[1]<<endl;
     // // cerr<<robots[robID].direction<<endl;
-    
     // }
     if(!eq(tmp[0],-7)&&(!is_range(robots[robID].direction,tmp)))
     {//在墙附件，并且会撞上
@@ -4029,8 +4040,7 @@ void collision_solve(int frame){
             // if(cerr_falg) updateIns(ro[choose_id].id, 7);
             // else
             adjust_collo_new(ro[choose_id].id, ro[x].id, payloads[ro[choose_id].id].sign);
-            // solveNoSolution(ro[choose_id].id, ro[x].id);
-            // cerr<<state.FrameID<<"no solution to avoid collision"<<ro[choose_id].id<<"-"<<ro[x].id<<"*"<<coll_time[choose_id][x]<<endl;
+            if(cerr_falg) cerr<<state.FrameID<<"no solution to avoid collision"<<ro[choose_id].id<<"-"<<ro[x].id<<endl;
         }
 
 
@@ -4069,11 +4079,7 @@ void collision_solve(int frame){
 }
 
 
-void solveNoSolution(int x, int y) {
-    int stopID, goID;
-    ins[x].forward = -2;
-    ins[y].forward = -2;
-}
+
 
 
 
