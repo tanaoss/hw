@@ -1668,13 +1668,15 @@ pair<int, double>pick_point(int robot_id, int state_type)
             if(class_map == 1 ||class_map == 4){
                 if(studios[i].type >= 1 && studios[i].type <= 3){
                     if (((studios[i].r_id != -1)&&((studios[i].r_id < 50)))){
-                        dist = distance(robot_id, i).first;
-                        if((dist - distance(studios[i].r_id, i).first)>2){
-                            dist = (distance(robot_id, i).first + wait_dis(robot_id, i) + back_dis(i) + target_obstacle_avoidance(robot_id, i)) * calc_priority(i);
-                            if (dist < min){
-                                // cerr << "dist = " << dist << " studio = " << i << endl;
-                                min = dist;
-                                min_subscript = i;
+                        if(robot_get_type[studios[i].type]< material[studios[i].type].size()){
+                            dist = distance(robot_id, i).first;
+                            if((dist - distance(studios[i].r_id, i).first)>2){
+                                dist = (distance(robot_id, i).first + wait_dis(robot_id, i) + back_dis(i) + target_obstacle_avoidance(robot_id, i)) * calc_priority(i);
+                                if (dist < min){
+                                    // cerr << "dist = " << dist << " studio = " << i << endl;
+                                    min = dist;
+                                    min_subscript = i;
+                                }
                             }
                         }
                     }
