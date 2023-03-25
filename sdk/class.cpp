@@ -984,10 +984,10 @@ void control(vector<PayLoad> payLoad){
     // solveRobotsCollision();
     // Collision_detection(payLoad);
 
-    // if(state.FrameID >= 4330 && state.FrameID < 4336) {
-    //     cerr<<state.FrameID<<endl;
-    //     cerr<<"ins:"<<ins[0].forward<<"  "<<ins[0].rotate<<endl;
-    // }
+    if(state.FrameID >= 6651 && state.FrameID < 6825) {
+        cerr<<state.FrameID<<endl;
+        cerr<<"ins:"<<ins[3].forward<<"  "<<ins[0].rotate<<endl;
+    }
     // if(state.FrameID>=854&&state.FrameID<=858){
     //     cerr<<state.FrameID<<" ins befoer "<<ins[0].forward<<endl;
     //     cerr<<check_will_colloWithWall(robots[0])<<endl;
@@ -3810,6 +3810,9 @@ Ins contr_one_rob(const Robot& robot , const PayLoad& payload){
             // ins[i].rotate=((isSame==1)?Pi*payLoad[i].sign:max(0.5,Dec_val_ra*lastRate)*payLoad[i].sign);
             ins_t.forward=0;
             if(class_map==3&&(robot.target_id==0||robot.target_id==1)&&lt(dis,1.5)){
+                ins_t.forward=1;
+            }
+            if(robot.get_type!=0&&lt(dis,1.5)){
                 ins_t.forward=1;
             }
             return ins_t;
