@@ -2660,7 +2660,7 @@ bool isWall_r(int robID,double angle){
     int i=robots[robID].pos.first;
     int j=robots[robID].pos.second;
     double rudi=getRobotRadius(robID);
-    if(i-rudi-0.01<=0||j-rudi-0.01<=0||i+rudi+0.01>=50||j+2>=rudi+0.01)return true;
+    if(i-rudi-0.01<=0||j-rudi-0.01<=0||i+rudi+0.01>=50||j+rudi+0.01>=50)return true;
     return false;   
 }
 bool will_impact(int robID,double dis){
