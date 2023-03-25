@@ -983,7 +983,7 @@ void control(vector<PayLoad> payLoad){
     //     cerr<<"ins:"<<ins[0].forward<<"  "<<ins[0].rotate<<endl;
     // }
     // for(int i=3;i<=3;i++){
-    //     if(state.FrameID==479){
+    //     if(state.FrameID==1800){
     //         cerr<<"------------------"<<i<<"------------------"<<endl;
     //         Calculate_the_trajectory(robots[i],0,25);
     //         cerr<<"------------------"<<i<<"------------------"<<endl;
@@ -1005,9 +1005,9 @@ void control(vector<PayLoad> payLoad){
     //     cerr<<ins[2].
     // }
     
-    // if(state.FrameID>=5490&&state.FrameID<=5510)
+    // if(state.FrameID>=1800&&state.FrameID<=1825)
     // {
-    //     for(int i=0;i<=0;i++){
+    //     for(int i=3;i<=3;i++){
     //     cerr<<" && "<<state.FrameID<<":real_wv  "
     //     <<robots[i].angular_velocity<<" real_dire: "<<robots[i].direction<<" real_pos "<<robots[i].pos.first<<"-"<<robots[i].pos.second
     //     <<" real_v_xy "<<robots[i].xy_pos.first<<"-"<<robots[i].xy_pos.second<<endl ;
@@ -1463,7 +1463,7 @@ pair<double,double> distance(int  robot_id,int studio_id){
     // if(state.FrameID<-5) {
          int target = robots[robot_id].target_id;
         robots[robot_id].target_id = studio_id;
-        auto tmp=Calculate_the_trajectory(robots[robot_id],0,50);
+        auto tmp=Calculate_the_trajectory(robots[robot_id],0,25);
         inflection.first = tmp[tmp.size()-1].first;
         inflection.second = tmp[tmp.size()-1].second;
         dist=tmp.size()*0.02*6;
@@ -3475,7 +3475,7 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,Ins ins_in, int fo
     double w=rob.angular_velocity==0?0.00001:rob.angular_velocity;
     double a=return_ac(pay.angular_acceleration,rob.angular_velocity,w_next);
     double changeAngle=get_at_v_limt(t,pay.angular_acceleration,rob.angular_velocity,w_next,pay.sign)*pay.sign;
-    double v=pay.speed;
+    double v=Calculate_the_projection_speed(rob);
     double a_v=return_ac(pay.acceleration,v,v_next);
     rob.pos.first=rob.pos.first+v*cos(seta+changeAngle/2)*t;
     rob.pos.second=rob.pos.second+v*sin(seta+changeAngle/2)*t;
@@ -3510,16 +3510,25 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,Ins ins_in, int fo
     //     cerr<<pay.speed<<" "<<v<<" ^ "<<changeAngle<<" "<<v_next<<" "<<a_v<< endl;
     //     cerr<<rob.xy_pos.first<<"-"<<rob.xy_pos.second<<endl;
     // }
-    rob.xy_pos.first=v*cos(rob.direction);
-    rob.xy_pos.second=v*sin(rob.direction);
+    double xy_angle=get_Angle_xy(rob);
+    rob.xy_pos.first=v*cos(xy_angle);
+    rob.xy_pos.second=v*sin(xy_angle);
+    double xy_angle_next=get_Angle_xy(rob);
+    double cal_angle=xy_angle_next-xy_angle;
+    vector<vector<double>>mat(4,vector<double>(4,0));
+    cal_matrix(mat,changeAngle,cal_angle);
+
+    // if(state.FrameID==1800){
+    //     cerr<<"v "<<v<<" old: "<<rob.xy_pos.first<<"-"<<rob.xy_pos.second<<" "<<xy_angle<<" "<<rob.direction<<"-"<< Calculate_the_projection_speed(rob)<< endl;
+    // }
     rob.direction+=changeAngle;
     rob.direction=rob.direction>Pi?rob.direction-2*Pi:rob.direction; 
     // if(rob.direction>Pi)changeAngle=2*Pi-changeAngle;
-    
-
-    rob.xy_pos.first=(rob.xy_pos.first*cos(changeAngle)-rob.xy_pos.second*sin(changeAngle));
-    rob.xy_pos.second=(rob.xy_pos.first*sin(changeAngle)+rob.xy_pos.second*cos(changeAngle));
-    // if(state.FrameID==2962&&rob.id==3){
+    double t1=rob.xy_pos.first,t2=rob.xy_pos.second;
+    rob.xy_pos.first=(t1*mat[0][0]+t2*mat[0][1]);
+    rob.xy_pos.second=(t1*mat[1][0]+t2*mat[1][1]);
+    // rob.xy_pos.first=(t1*cos(changeAngle+cal_angle)-t2*sin(changeAngle+cal_angle));
+    // rob.xy_pos.second=(t1*sin(changeAngle+cal_angle)+t2*cos(changeAngle+cal_angle));
     //     cerr<<rob.xy_pos.first<<"-"<<rob.xy_pos.second<<endl;
     // }
     // rob.xy_pos.second=v_tmp.y;
@@ -3546,7 +3555,7 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,int cnt,int tar,in
     if(cnt>tar){
         return {rob.pos};
     }
-    // if(state.FrameID==5490){
+    // if(state.FrameID==1800){
     //     cerr<<" Framid: "<<state.FrameID+cnt<<" tarID: "<<rob.target_id<<" robId: "<<rob.id<<" w_v: "<<rob.angular_velocity<<" dirc: "<<rob.direction
     //     <<" pos_xy: "<<rob.pos.first<<"-"<<rob.pos.second<<" v_xy "<<rob.xy_pos.first<<"-"<<rob.xy_pos.second<<  endl;
     //     cerr<<"v: "<<pay.speed<<endl;
@@ -3560,7 +3569,7 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,int cnt,int tar,in
     // if(state.FrameID==1){
     //     cerr<<changeAngle<<endl;
     // }
-    double v=pay.speed;
+    double v=Calculate_the_projection_speed(rob);
     double a_v=return_ac(pay.acceleration,v,v_next);
     rob.pos.first=rob.pos.first+v*cos(seta+changeAngle/2)*t;
     rob.pos.second=rob.pos.second+v*sin(seta+changeAngle/2)*t;
@@ -3595,17 +3604,28 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,int cnt,int tar,in
     //     cerr<<pay.speed<<" "<<v<<" ^ "<<changeAngle<<" "<<v_next<<" "<<a_v<< endl;
     //     cerr<<rob.xy_pos.first<<"-"<<rob.xy_pos.second<<endl;
     // }
-    rob.xy_pos.first=v*cos(rob.direction);
-    rob.xy_pos.second=v*sin(rob.direction);
+    double xy_angle=get_Angle_xy(rob);
+    rob.xy_pos.first=v*cos(xy_angle);
+    rob.xy_pos.second=v*sin(xy_angle);
+    double xy_angle_next=get_Angle_xy(rob);
+    double cal_angle=xy_angle_next-xy_angle;
+    vector<vector<double>>mat(4,vector<double>(4,0));
+    cal_matrix(mat,changeAngle,cal_angle);
+
+    // if(state.FrameID==1800){
+    //     cerr<<"v "<<v<<" old: "<<rob.xy_pos.first<<"-"<<rob.xy_pos.second<<" "<<xy_angle<<" "<<rob.direction<<"-"<< Calculate_the_projection_speed(rob)<< endl;
+    // }
     rob.direction+=changeAngle;
     rob.direction=rob.direction>Pi?rob.direction-2*Pi:rob.direction; 
     // if(rob.direction>Pi)changeAngle=2*Pi-changeAngle;
-    
-
-    rob.xy_pos.first=(rob.xy_pos.first*cos(changeAngle)-rob.xy_pos.second*sin(changeAngle));
-    rob.xy_pos.second=(rob.xy_pos.first*sin(changeAngle)+rob.xy_pos.second*cos(changeAngle));
-    // if(state.FrameID==2962&&rob.id==3){
-    //     cerr<<rob.xy_pos.first<<"-"<<rob.xy_pos.second<<endl;
+    double t1=rob.xy_pos.first,t2=rob.xy_pos.second;
+    rob.xy_pos.first=(t1*mat[0][0]+t2*mat[0][1]);
+    rob.xy_pos.second=(t1*mat[1][0]+t2*mat[1][1]);
+    // rob.xy_pos.first=(t1*cos(changeAngle+cal_angle)-t2*sin(changeAngle+cal_angle));
+    // rob.xy_pos.second=(t1*sin(changeAngle+cal_angle)+t2*cos(changeAngle+cal_angle));
+    // if(state.FrameID==514&&rob.id==3){
+    //     cerr<<mat[0][0]<<"-"<<mat[0][1]<<endl;
+    //     cerr<<mat[1][0]<<"-"<<mat[1][1]<<endl;
     // }
     // rob.xy_pos.second=v_tmp.y;
     if (Flag_sumulate && ctrF)
@@ -3802,7 +3822,7 @@ void collision_solve(int frame){
     // if(state.FrameID >= 1885 && state.FrameID <= 1900)
     //     cerr_falg = true;
 
-    // if(state.FrameID >= 3760 && state.FrameID <= 3797)
+    // if(state.FrameID >= 1753 && state.FrameID <= 1770)
     //     cerr_falg = true;
 
 
@@ -4086,7 +4106,7 @@ void adjust_collo_new(int i1,int i2,int baseSign){
     int sel=i1,sel_1=i2;
     if(lt(tmpDis,5)){
         int sign=return_line_dire(sel,sel_1,baseSign);
-        cerr<<"FrameID  "<<state.FrameID<<" collosion: "<<sel_1<<"-> "<<sel<<" "<<sign<<endl;
+        //cerr<<"FrameID  "<<state.FrameID<<" collosion: "<<sel_1<<"-> "<<sel<<" "<<sign<<endl;
         if(sign==0)return;
         vector<double> tmp=get_T_limits(robots[sel_1].pos,sel_1);
         if(!eq(tmp[0],-7)&&(!is_range(robots[sel_1].direction,tmp))){
@@ -4107,4 +4127,42 @@ bool check_wall_r(int i){
         return true;
     }    
     return false;
+}
+double get_Angle_xy(Robot& rob){
+    if(lt(fabs(rob.xy_pos.first),0.1)&&lt(fabs(rob.xy_pos.second),0.1)){
+        return rob.direction;
+    }
+    Vec v1;
+    v1.x=1;
+    v1.y=0;
+    Vec v2(rob.xy_pos);
+    double angle=acos(cos_t(v1,v2));
+    int sign=lt(rob.xy_pos.second,0)?-1:1;
+    return angle*sign;
+}
+double Calculate_the_projection_speed(Robot& rob){
+    Vec v1;
+    v1.x=cos(rob.direction);
+    v1.y=sin(rob.direction);;
+    Vec v2(rob.xy_pos);
+    return v1*v2;  
+}
+void cal_matrix(vector<vector<double>>&c,double angle1_w,double angle2){
+     double a[2][2];
+     double b[2][2];
+    a[0][0]=cos(angle1_w);
+    a[0][1]=-1*sin(angle1_w);
+    a[1][0]=sin(angle1_w);
+    a[1][1]=cos(angle1_w);
+    b[0][0]=cos(angle2);
+    b[0][1]=-1*sin(angle2);
+    b[1][0]=sin(angle2);
+    b[1][1]=cos(angle2);
+    for (int i = 0; i < 2; i++) {
+        for (int j = 0; j < 2; j++) {
+            for (int k = 0; k < 2; k++) {
+                c[i][j] += a[i][k] * b[k][j];
+            }
+        }
+    }    
 }
