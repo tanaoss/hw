@@ -250,8 +250,8 @@ bool readStatusUntilOK() {
         robots[rob_id].collision_val_pre=robots[rob_id].collision_val;
         robots[rob_id].set(rob_id,tmp[0],tmp[1],tmp[2],tmp[3],tmp[4],pair<double,double>(tmp[5],tmp[6]),tmp[7],
         pair<double,double>(tmp[8],tmp[9]));
-        // if(gt(robots[rob_id].collision_val_pre, robots[rob_id].collision_val) && robots[rob_id].get_type != 0)
-        //     cerr<<"time-collision:"<< state.FrameID <<"collision" <<rob_id<< endl<<endl;
+        if(gt(robots[rob_id].collision_val_pre, robots[rob_id].collision_val) && robots[rob_id].get_type != 0)
+            cerr<<"time-collision:"<< state.FrameID <<"collision" <<rob_id<< endl<<endl;
         rob_id++;
     }
     cin>>line;
@@ -1020,10 +1020,10 @@ void control(vector<PayLoad> payLoad){
     solveRobotsCollision();
     // Collision_detection(payLoad);
 
-    if(state.FrameID >= 6651 && state.FrameID < 6825) {
-        cerr<<state.FrameID<<endl;
-        cerr<<"ins:"<<ins[3].forward<<"  "<<ins[0].rotate<<endl;
-    }
+    // if(state.FrameID >= 6651 && state.FrameID < 6825) {
+    //     cerr<<state.FrameID<<endl;
+    //     cerr<<"ins:"<<ins[3].forward<<"  "<<ins[0].rotate<<endl;
+    // }
     // if(state.FrameID>=854&&state.FrameID<=858){
     //     cerr<<state.FrameID<<" ins befoer "<<ins[0].forward<<endl;
     //     cerr<<check_will_colloWithWall(robots[0])<<endl;
@@ -1087,6 +1087,13 @@ void control(vector<PayLoad> payLoad){
     // if(state.FrameID>=4855&&state.FrameID<=4900){
     //     cerr<<state.FrameID<<" ins after "<<ins[1].forward<<endl;
     // }
+
+    // for(int i =0;i<4;++i){
+    //     if(lt(payloads[i].speed, 3)) {
+    //         cerr<<state.FrameID<<":"<<i<<"speed:"<<payloads[i].speed<<endl;
+    //     }
+    // }
+
     updateLastRate();
 
     out_put();
@@ -2632,6 +2639,7 @@ vector<double>  get_T_limits(pair<double,double>pos,int id,int ctr,double dis){
     vector<double> tmp{-7,-7};
     int spSign=ge(robots[id].xy_pos.second,0)?1:-1;
     double redundancy= (ctr==-1?0.4:dis)+radius;//冗余，避免频繁转向
+    if(class_map==4)redundancy=1.3;
     int sign_x=gt(robots[id].xy_pos.first,0)?1:-1;
     int sign_y=gt(robots[id].xy_pos.second,0)?1:-1;
   
@@ -3855,10 +3863,11 @@ Ins contr_one_rob(const Robot& robot , const PayLoad& payload){
     }
     ins_t.rotate=can_stop_flag?StopA:Pi*payload.sign;
     ins_t.forward=6;
-    if(isNearWall(robot.id)&&robot.get_type==0&&gt(payload.angle,Pi/3)){
-        ins_t.forward=3;
-    }
     double dis=calcuDis(robot.pos,studios[robStuID].pos);
+    if(isNearWall(robot.id)&&robot.get_type==0&&gt(dis,3)){
+        ins_t.forward=1;
+    }
+    
     // if(state.FrameID>=223&&state.FrameID<=243&&robot.id==1){
     //     cerr<<" FrameID: "<<state.FrameID<<" isWall_r?: "<<isWall_r(robot.id,payload.angle)<<" can_st: "<<can_st<<" isWall: "<<isWall(robStuID)<<" ins_t.rotate: "<<
     //     ins_t.rotate<<" payload.angle "<<payload.angle<<" real_angle: "<<real_angle<<" sign "<<payload.sign<<
@@ -3871,7 +3880,7 @@ Ins contr_one_rob(const Robot& robot , const PayLoad& payload){
             ins_t.rotate=can_stop_flag?Pi/2*payload.sign:Pi*payload.sign;
             // ins[i].rotate=((isSame==1)?Pi*payLoad[i].sign:max(0.5,Dec_val_ra*lastRate)*payLoad[i].sign);
             ins_t.forward=0;
-            if(robot.get_type!=0&&(isWall(robStuID))&&lt(dis,1.5)){
+            if((isWall(robStuID))&&lt(dis,1.5)){
                 ins_t.forward=1;
             }
             return ins_t;
@@ -3882,6 +3891,10 @@ Ins contr_one_rob(const Robot& robot , const PayLoad& payload){
         if(class_map==3)
         sle_dis=3;
         if(lt(dis,(getRobotRadius(robot.id)+sle_dis))&&!can_st){
+            if(contr_print_flag&&state.FrameID>=6469&&state.FrameID<=6479&&robot.id==2){
+                cerr<<"contr bug"<<endl;
+                cerr<<payload.angle<<" "<<real_angle<<endl;
+            }
             ins_t.rotate=can_stop_flag?StopA:Pi*payload.sign;
             ins_t.forward=0;
 
@@ -3941,18 +3954,21 @@ bool cmp_robot(Robot a, Robot b) {
         // cerr<<state.FrameID<<"both near wall :"<<a.id<<"-"<<b.id<<endl;
         return gt(payloads[a.id].distance, payloads[b.id].distance);
     }
-    else if(lt(fabs(payloads[a.id].speed), 2) && lt(fabs(payloads[b.id].speed), 2)) {
+    
+    if(a.target_id == b.target_id && a.target_id != -1) {
+        if(lt(fabs(payloads[a.id].distance - payloads[b.id].distance), 1))
+            return a.get_type < b.get_type;
+        return gt(payloads[a.id].distance, payloads[b.id].distance);
+    }
+
+    if(lt(fabs(payloads[a.id].speed), 2) && lt(fabs(payloads[b.id].speed), 2)) {
         return gt(payloads[a.id].speed, fabs(payloads[b.id].speed));
     }
     else if(check_wall_r(a.id) || (lt(fabs(payloads[a.id].speed), 2)) )
         return false;
     else if(check_wall_r(b.id) || (lt(fabs(payloads[b.id].speed), 2)) )
         return true;
-    if(a.target_id == b.target_id && a.target_id != -1) {
-        if(lt(fabs(payloads[a.id].distance - payloads[b.id].distance), 1))
-            return a.get_type < b.get_type;
-        return gt(payloads[a.id].distance, payloads[b.id].distance);
-    }
+
     if((a.get_type != 0 && b.get_type !=0) || (a.get_type == 0 && b.get_type ==0))
         return gt(payloads[a.id].distance, payloads[b.id].distance);
     return a.get_type < b.get_type;
@@ -3979,7 +3995,7 @@ void collision_solve(int frame){
     bool cerr_falg = false;
 
 
-    // if(state.FrameID >= 5696 && state.FrameID <= 5720 && 999==999)
+    // if(state.FrameID >= 5934 && state.FrameID <= 5970 && 999==999)
     //     cerr_falg = true;
 
 
@@ -4068,9 +4084,7 @@ void collision_solve(int frame){
             }
         }
 
-        vis[choose_id] = 1;
-
-        
+              
         
         //No collision
         if(choose_id == -1 || coll[choose_id].size() - (x == choose_id) == 0)
@@ -4081,9 +4095,11 @@ void collision_solve(int frame){
             cerr<<state.FrameID<<endl;
             cerr<<check_wall_r(1)<<endl;
             for(j=0;j<4;++j){
-                cerr<<ro[j].id<<":"<<payloads[ro[j].id].speed<<endl;
+                cerr<<ro[j].id<<":"<<payloads[ro[j].id].speed<<" target:"<<ro[j].target_id<<endl;
             }
         }
+
+
 
         tmp = 9000;
         //避让最zao发生的碰撞
@@ -4094,6 +4110,14 @@ void collision_solve(int frame){
             }
         }
 
+        if(cmp_robot(ro[x], ro[choose_id])) {
+            tmp = x;
+            x = choose_id;
+            choose_id = x;
+        }
+
+        vis[choose_id] = 1;
+
         
         if(x == -1) {
             if(cerr_falg)
@@ -4102,8 +4126,11 @@ void collision_solve(int frame){
             break;
         }
 
-        if(cerr_falg)
+        if(cerr_falg) {
+            cerr<<ro[choose_id].id<<"target:"<<ro[choose_id].target_id<<" angle:"<<payloads[ro[choose_id].id].angle<<endl;
+            cerr<<ro[x].id<<"target:"<<ro[x].target_id<<" angle:"<<payloads[ro[x].id].angle<<endl;
             cerr<<ro[choose_id].id<<"avoid"<< ro[x].id<<endl;
+        }
 
 
         ans = -1;
