@@ -285,8 +285,10 @@ void updateIns(int id, int i);
 void collision_solve(int frame);
 int checkNoCollision(const vector<pair<double,double>> &a, const vector<pair<double,double>> &b, double mindis);
 void solveNoSolution(int x, int y);
+int getTimeToStudio(int id, const vector<pair<double,double>> &a);
 
 void printRobotsDis(int i, int j);
+void printRobotsDis(Robot ro, pair<double,double> a);
 void printPredictRobotsDis(const vector<pair<double,double>> &a, const vector<pair<double,double>> &b);
 
 pair<double,double> distance(int  robot_id,int studio_id);
