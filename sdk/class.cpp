@@ -3805,7 +3805,7 @@ void collision_solve(int frame){
     // if(state.FrameID >= 1885 && state.FrameID <= 1900)
     //     cerr_falg = true;
 
-    // if(state.FrameID >= 2872 && state.FrameID <= 2930)
+    // if(state.FrameID >= 1686 && state.FrameID <= 1700 && 999==999)
     //     cerr_falg = true;
 
 
@@ -3988,11 +3988,28 @@ void collision_solve(int frame){
             // }
             // if(cerr_falg) updateIns(ro[choose_id].id, 7);
             // else
-            adjust_collo_new(ro[choose_id].id, ro[x].id, payloads[ro[choose_id].id].sign);
-            if(cerr_falg) cerr<<state.FrameID<<"no solution to avoid collision"<<ro[choose_id].id<<"-"<<ro[x].id<<endl;
+            // adjust_collo_new(ro[choose_id].id, ro[x].id, payloads[ro[choose_id].id].sign);
+            solveNoSolution(ro[choose_id].id, ro[x].id);
+            // cerr<<state.FrameID<<"no solution to avoid collision"<<ro[choose_id].id<<"-"<<ro[x].id<<"*"<<coll_time[choose_id][x]<<endl;
         }
+
+
             
     }
+
+    // if(state.FrameID == 1686) {
+    //     int a,b;
+    //     for(i = 0; i < 4; ++i){
+    //         if(ro[i].id == 1) a = i;
+    //         if(ro[i].id == 3) b =i;
+    //     }
+    //     printPredictRobotsDis(trajectory[a], trajectory[b]);
+    // }
+
+    // if(cerr_falg) {
+    //     cerr<<state.FrameID;
+    //     printRobotsDis(1,3);
+    // }
 
 
     // int stopID, goID;
@@ -4012,7 +4029,11 @@ void collision_solve(int frame){
 }
 
 
-
+void solveNoSolution(int x, int y) {
+    int stopID, goID;
+    ins[x].forward = -2;
+    ins[y].forward = -2;
+}
 
 
 
@@ -4121,4 +4142,17 @@ bool check_wall_r(int i){
         return true;
     }    
     return false;
+}
+
+void printRobotsDis(int i, int j){
+    cerr<<"pos:("<<robots[i].pos.first<<", "<<robots[i].pos.second<<")--("<<robots[j].pos.first<<", "<<robots[j].pos.second<<") dis:"<<calcuDis(robots[i].pos, robots[j].pos)<<endl;
+}
+
+void printPredictRobotsDis(const vector<pair<double,double>> &a, const vector<pair<double,double>> &b) {
+    int count = min(a.size(), b.size());
+    for(int i = 0; i < count; ++i) {
+        cerr<<state.FrameID+i;
+        cerr<<"pos:("<<a[i].first<<", "<<a[i].second<<")--("<<b[i].first<<", "<<b[i].second<<") dis:"<<calcuDis(a[i], b[i])<<endl;
+    }
+    cerr<<"-----------"<<endl;
 }
