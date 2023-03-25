@@ -1015,10 +1015,10 @@ void control(vector<PayLoad> payLoad){
     solveRobotsCollision();
     // Collision_detection(payLoad);
 
-    // if(state.FrameID >= 4330 && state.FrameID < 4336) {
-    //     cerr<<state.FrameID<<endl;
-    //     cerr<<"ins:"<<ins[0].forward<<"  "<<ins[0].rotate<<endl;
-    // }
+    if(state.FrameID >= 6651 && state.FrameID < 6825) {
+        cerr<<state.FrameID<<endl;
+        cerr<<"ins:"<<ins[3].forward<<"  "<<ins[0].rotate<<endl;
+    }
     // if(state.FrameID>=854&&state.FrameID<=858){
     //     cerr<<state.FrameID<<" ins befoer "<<ins[0].forward<<endl;
     //     cerr<<check_will_colloWithWall(robots[0])<<endl;
@@ -3838,6 +3838,9 @@ Ins contr_one_rob(const Robot& robot , const PayLoad& payload){
     }
     ins_t.rotate=can_stop_flag?StopA:Pi*payload.sign;
     ins_t.forward=6;
+    if(isNearWall(robot.id)&&robot.get_type==0&&gt(payload.angle,Pi/3)){
+        ins_t.forward=3;
+    }
     double dis=calcuDis(robot.pos,studios[robStuID].pos);
     // if(state.FrameID>=223&&state.FrameID<=243&&robot.id==1){
     //     cerr<<" FrameID: "<<state.FrameID<<" isWall_r?: "<<isWall_r(robot.id,payload.angle)<<" can_st: "<<can_st<<" isWall: "<<isWall(robStuID)<<" ins_t.rotate: "<<
@@ -3851,7 +3854,7 @@ Ins contr_one_rob(const Robot& robot , const PayLoad& payload){
             ins_t.rotate=can_stop_flag?Pi/2*payload.sign:Pi*payload.sign;
             // ins[i].rotate=((isSame==1)?Pi*payLoad[i].sign:max(0.5,Dec_val_ra*lastRate)*payLoad[i].sign);
             ins_t.forward=0;
-            if(class_map==3&&(robot.target_id==0||robot.target_id==1)&&lt(dis,1.5)){
+            if(robot.get_type!=0&&(isWall(robStuID))&&lt(dis,1.5)){
                 ins_t.forward=1;
             }
             return ins_t;
@@ -4002,9 +4005,11 @@ void collision_solve(int frame){
             if(tmp == 9000 || gt(calcuDis(ro[i].pos, ro[j].pos), 8)) continue;
             coll[i].emplace_back(j);
             coll[j].emplace_back(i);
+            // cerr_falg=true;
             if(cerr_falg)
             {cerr<<"time:"<<state.FrameID<<endl;
             cerr<<ro[i].id<<"-"<<ro[j].id<<"collison"<<tmp<<endl;}
+            // cerr_falg=false;
         }
     }
 
