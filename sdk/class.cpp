@@ -1486,7 +1486,7 @@ pair<double,double> distance(int  robot_id,int studio_id){
          int target = robots[robot_id].target_id;
         robots[robot_id].target_id = studio_id;
         auto tmp=Calculate_the_trajectory(robots[robot_id],0,25);
-
+     
         inflection.first = tmp[tmp.size()-1].first;
         inflection.second = tmp[tmp.size()-1].second;
         dist=tmp.size()*0.02*6;
