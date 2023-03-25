@@ -42,6 +42,7 @@ int lack_material[8];
 int produce_product[8];
 int priority[8]; 
 int max_wait_time[4];
+int contr_print_flag=0;
 double new_cllo_time = 0;
 pair<double ,double> Root;
 pair<double ,double> Collision_point;
@@ -949,6 +950,7 @@ double calc_priority(int studio_id){
 }
 
 void control(vector<PayLoad> payLoad){
+    contr_print_flag=1;
      for(int i=0;i<4;i++){
         
         auto tins=contr_one_rob(robots[i],payLoad[i]);
@@ -957,6 +959,8 @@ void control(vector<PayLoad> payLoad){
         ins[i].robID=i;
         
     }
+       
+     contr_print_flag=0;
     for(int i=0;i<4;i++){
         if(ins[i].forward==-1||ins[i].rotate==-1){
             cerr<<"io err"<<endl;
@@ -984,11 +988,12 @@ void control(vector<PayLoad> payLoad){
     //     cerr<<state.FrameID<<endl;
     //     cerr<<"ins:"<<ins[0].forward<<"  "<<ins[0].rotate<<endl;
     // }
-    if(state.FrameID>=1640&&state.FrameID<=1650){
-        cerr<<state.FrameID<<" ins befoer "<<ins[0].forward<<endl;
-    }
+    // if(state.FrameID>=854&&state.FrameID<=858){
+    //     cerr<<state.FrameID<<" ins befoer "<<ins[0].forward<<endl;
+    //     cerr<<check_will_colloWithWall(robots[0])<<endl;
+    // }
     collision_solve(25);
-
+  
     // if(state.FrameID >= 720 && state.FrameID <= 730)
     //     cerr<<"hello"<< robots[2].target_id<<endl;
 
@@ -1043,9 +1048,9 @@ void control(vector<PayLoad> payLoad){
     //         cerr<<trajectory[j][state.FrameID -2940].first<<","<<trajectory[j][state.FrameID -2940].second<<endl;
     //     }
     // }
-    if(state.FrameID>=1640&&state.FrameID<=1650){
-        cerr<<state.FrameID<<" ins after "<<ins[0].forward<<endl;
-    }
+    // if(state.FrameID>=4855&&state.FrameID<=4900){
+    //     cerr<<state.FrameID<<" ins after "<<ins[1].forward<<endl;
+    // }
     updateLastRate();
 
     out_put();
@@ -2616,7 +2621,7 @@ vector<double>  get_T_limits(pair<double,double>pos,int id,int ctr,double dis){
 bool can_stop(pair<double,double>p1,pair<double,double>p2,double angle){
     if(gt(angle,Pi/2))return false;
     double dis=calcuDis(p1,p2);
-    if(lt(sin(angle)*dis,0.2)){
+    if(lt(sin(angle)*dis,0.4)){
         return true;
     }
     return false;
@@ -3790,19 +3795,24 @@ Ins contr_one_rob(const Robot& robot , const PayLoad& payload){
     }
     ins_t.rotate=can_stop_flag?StopA:Pi*payload.sign;
     ins_t.forward=6;
+    double dis=calcuDis(robot.pos,studios[robStuID].pos);
     // if(state.FrameID>=223&&state.FrameID<=243&&robot.id==1){
     //     cerr<<" FrameID: "<<state.FrameID<<" isWall_r?: "<<isWall_r(robot.id,payload.angle)<<" can_st: "<<can_st<<" isWall: "<<isWall(robStuID)<<" ins_t.rotate: "<<
     //     ins_t.rotate<<" payload.angle "<<payload.angle<<" real_angle: "<<real_angle<<" sign "<<payload.sign<<
     //     " robw "<<robot.angular_velocity <<endl;
     // }
+    
         vector<double> tmp=get_T_limits(robot.pos,robot.id);
         if(!eq(tmp[0],-7)&&(!is_range(robot.direction,tmp))){
+
             ins_t.rotate=can_stop_flag?Pi/2*payload.sign:Pi*payload.sign;
             // ins[i].rotate=((isSame==1)?Pi*payLoad[i].sign:max(0.5,Dec_val_ra*lastRate)*payLoad[i].sign);
             ins_t.forward=0;
+            if(class_map==3&&(robot.target_id==0||robot.target_id==1)&&lt(dis,1.5)){
+                ins_t.forward=1;
+            }
             return ins_t;
         }
-        double dis=calcuDis(robot.pos,studios[robStuID].pos);
         double stop_dis=(robot.xy_pos.first*robot.xy_pos.first+robot.xy_pos.second*robot.xy_pos.second)
         /(2*payload.acceleration);
         int sle_dis=2;
@@ -3811,15 +3821,11 @@ Ins contr_one_rob(const Robot& robot , const PayLoad& payload){
         if(lt(dis,(getRobotRadius(robot.id)+sle_dis))&&!can_st){
             ins_t.rotate=can_stop_flag?StopA:Pi*payload.sign;
             ins_t.forward=0;
+
             return ins_t;         
         }
+    
 
-        if(check_will_colloWithWall(robot)){
-                ins_t.rotate=can_stop_flag?StopA:Pi*payload.sign;
-                ins_t.forward=can_stop_flag?6:0;
-                // if(ins[i].forward==6)cerr<<"PPPP"<<state.FrameID<<endl;
-                return ins_t;     
-        }
         // int can_st_flag=1;
         double tarDis=calcuDis(robot.pos,studios[robStuID].pos);
         if( isWall(robStuID)&&can_st&&ins_t.rotate==0){
@@ -3832,14 +3838,22 @@ Ins contr_one_rob(const Robot& robot , const PayLoad& payload){
                 ins_t.rotate=can_stop_flag?StopA:Pi*payload.sign;
                 ins_t.forward=6;
             }
+            
         }else if(will_impact(robID,stop_dis)&&can_st&&robot.get_type!=0){
             // cerr<<stop_dis<<"~"<<endl;
             ins_t.rotate=can_stop_flag?StopA:Pi*payload.sign;
             ins_t.forward=0;
+
         }
         else{
             ins_t.rotate=can_stop_flag?StopA:Pi*payload.sign;
             ins_t.forward=6.0;
+    
+        }
+        if(isNearWall(robot.id)&&isWall(robot.id)&&lt(dis,1)){
+                ins_t.forward=min(1.0,ins_t.forward);
+                // if(ins[i].forward==6)cerr<<"PPPP"<<state.FrameID<<endl;
+                return ins_t;     
         }
         if(can_st){
             // if(i==0)
@@ -3853,7 +3867,7 @@ Ins contr_one_rob(const Robot& robot , const PayLoad& payload){
                 // if(i==0)
                 // cerr<<"+"<<ins[i].rotate<<" "<<isSame<<"+"<<payLoad[i].angle<<"+" <<Dec_val_ra*lastRate*payLoad[i].sign<<endl;
         }
-        
+         
         return ins_t;
 }
 
@@ -4275,12 +4289,11 @@ void cal_matrix(vector<vector<double>>&c,double angle1_w,double angle2){
     }    
 }
 bool check_will_colloWithWall(const Robot& rob){
-    double a_v=return_ac(pl_g[rob.id].acceleration,pl_g[rob.id].speed,0);
-    double a_x=a_v*cos(rob.direction);
-    double a_y=a_v*sin(rob.direction);
-    double sport_x=pow(rob.xy_pos.first,2)/(2*a_x);
-    double sport_y=pow(rob.xy_pos.second,2)/(2*a_y);
-    if(rob.pos.first+sport_x<=0.1||rob.pos.first+sport_x>=49.9||rob.pos.second+sport_y<=0.1||rob.pos.second+sport_y>=49.9){
+    int tarid=rob.target_id==-1?0:rob.target_id;
+    double dis=calcuDis(rob.pos,studios[tarid].pos);
+    double stop_dis=(rob.xy_pos.first*rob.xy_pos.first+rob.xy_pos.second*rob.xy_pos.second)
+        /(2*payloads[rob.id].acceleration);
+    if(isWall(tarid)&&gt(stop_dis+0.2,dis)){
         return true;
     }
     return false;
