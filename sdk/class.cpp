@@ -2202,7 +2202,7 @@ void robot_judge_sol(int threshold_lack,int full){
                             // cerr<<"bbb"<<endl;
                             if (class_map == 1)
                             {
-                                cerr << studios[robots[i].target_id].r_id << endl;
+                                // cerr << studios[robots[i].target_id].r_id << endl;
                                 if (studios[robots[i].target_id].r_id != -1 && studios[robots[i].target_id].r_id != i)
                                     studios[robots[i].target_id].r_id += 50;
                                 else
@@ -3869,11 +3869,9 @@ void collision_solve(int frame){
     bool cerr_falg = false;
 
 
-    // if(state.FrameID >= 1885 && state.FrameID <= 1900)
+    // if(state.FrameID >= 1660 && state.FrameID <= 1690)
     //     cerr_falg = true;
 
-    // if(state.FrameID >= 1753 && state.FrameID <= 1770)
-    //     cerr_falg = true;
 
     // if(cerr_falg) {
     //     cerr<<state.FrameID<<"ins:"<<ins[1].forward<<endl;
