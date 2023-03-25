@@ -1486,7 +1486,7 @@ pair<double,double> distance(int  robot_id,int studio_id){
          int target = robots[robot_id].target_id;
         robots[robot_id].target_id = studio_id;
         auto tmp=Calculate_the_trajectory(robots[robot_id],0,25);
-        auto tmp=Calculate_the_trajectory(robots[robot_id],0,25);
+
         inflection.first = tmp[tmp.size()-1].first;
         inflection.second = tmp[tmp.size()-1].second;
         dist=tmp.size()*0.02*6;
@@ -2647,7 +2647,8 @@ bool isWall_r(int robID,double angle){
     if(lt(angle,(double)Pi/6.0))return false;
     int i=robots[robID].pos.first;
     int j=robots[robID].pos.second;
-    if(i-2<=0||j-2<=0||i+2>=50||j+2>=50)return true;
+    double rudi=getRobotRadius(robID);
+    if(i-rudi-0.01<=0||j-rudi-0.01<=0||i+rudi+0.01>=50||j+2>=rudi+0.01)return true;
     return false;   
 }
 bool will_impact(int robID,double dis){
@@ -3778,6 +3779,7 @@ Ins contr_one_rob(const Robot& robot , const PayLoad& payload){
             ins_t.forward=0;
             return ins_t;         
         }
+
         if(isWall_r(robot.id,payload.angle)){
                 ins_t.rotate=can_stop_flag?StopA:Pi*payload.sign;
                 ins_t.forward=can_stop_flag?6:0;
