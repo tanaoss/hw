@@ -363,7 +363,10 @@ PayLoad calPayload(int robotID,int studioID) {
     double angle = angle2 - angle1;
 
     double speed = calVectorSize(robot.xy_pos) * (ge(calVectorProduct(robot.xy_pos, transformVector(robot.direction)), 0.0)? 1: -1);
-
+    // if(state.FrameID==7010&& robotID==2) {
+    //     printPair(robot.xy_pos);
+    //     cerr<<"payload-speed:"<<speed<<endl;
+    // }
     int sign;
 
     if(ge(angle, 0) && lt(angle, Pi) || lt(angle, -Pi))
@@ -981,7 +984,9 @@ void control(vector<PayLoad> payLoad){
     //     cerr<<state.FrameID<<endl;
     //     cerr<<"ins:"<<ins[0].forward<<"  "<<ins[0].rotate<<endl;
     // }
-
+    if(state.FrameID>=335&&state.FrameID<=350){
+        cerr<<state.FrameID<<" ins befoer "<<ins[2].forward<<endl;
+    }
     collision_solve(25);
 
     // if(state.FrameID >= 720 && state.FrameID <= 730)
@@ -1038,7 +1043,9 @@ void control(vector<PayLoad> payLoad){
     //         cerr<<trajectory[j][state.FrameID -2940].first<<","<<trajectory[j][state.FrameID -2940].second<<endl;
     //     }
     // }
-    
+    if(state.FrameID>=335&&state.FrameID<=350){
+        cerr<<state.FrameID<<" ins after "<<ins[1].forward<<endl;
+    }
     updateLastRate();
 
     out_put();
@@ -2570,7 +2577,12 @@ vector<double>  get_T_limits(pair<double,double>pos,int id,int ctr,double dis){
         dis=0.0;
     }
     vector<double> tmp{-7,-7};
-    double redundancy= (ctr==-1?0.2:dis)+radius;//冗余，避免频繁转向
+    int spSign=ge(robots[id].xy_pos.second,0)?1:-1;
+    double redundancy= (ctr==-1?0.4:dis)+radius;//冗余，避免频繁转向
+    int sign_x=gt(robots[id].xy_pos.first,0)?1:-1;
+    int sign_y=gt(robots[id].xy_pos.second,0)?1:-1;
+  
+
     if(gt(pos.first-redundancy,0)&&lt(pos.second-redundancy,0)){//只靠近下方x轴
         tmp[0]=0;
         tmp[1]=Pi;
@@ -2669,7 +2681,7 @@ bool isWall_r(int robID,double angle){
     int i=robots[robID].pos.first;
     int j=robots[robID].pos.second;
     double rudi=getRobotRadius(robID);
-    if(i-rudi-0.01<=0||j-rudi-0.01<=0||i+rudi+0.01>=50||j+rudi+0.01>=50)return true;
+    if(i-2<=0||j-2<=0||i+2>=50||j+2>=50)return true;
     return false;   
 }
 bool will_impact(int robID,double dis){
@@ -3785,12 +3797,14 @@ Ins contr_one_rob(const Robot& robot , const PayLoad& payload){
     // }
         vector<double> tmp=get_T_limits(robot.pos,robot.id);
         if(!eq(tmp[0],-7)&&(!is_range(robot.direction,tmp))){
-            ins_t.rotate=can_stop_flag?StopA:Pi*payload.sign;
+            ins_t.rotate=can_stop_flag?Pi/2*payload.sign:Pi*payload.sign;
             // ins[i].rotate=((isSame==1)?Pi*payLoad[i].sign:max(0.5,Dec_val_ra*lastRate)*payLoad[i].sign);
             ins_t.forward=0;
             return ins_t;
         }
         double dis=calcuDis(robot.pos,studios[robStuID].pos);
+        double stop_dis=(robot.xy_pos.first*robot.xy_pos.first+robot.xy_pos.second*robot.xy_pos.second)
+        /(2*payload.acceleration);
         int sle_dis=2;
         if(class_map==3)
         sle_dis=3;
@@ -3800,15 +3814,13 @@ Ins contr_one_rob(const Robot& robot , const PayLoad& payload){
             return ins_t;         
         }
 
-        if(isWall_r(robot.id,payload.angle)){
+        if(check_will_colloWithWall(robot)){
                 ins_t.rotate=can_stop_flag?StopA:Pi*payload.sign;
                 ins_t.forward=can_stop_flag?6:0;
                 // if(ins[i].forward==6)cerr<<"PPPP"<<state.FrameID<<endl;
                 return ins_t;     
         }
         // int can_st_flag=1;
-        double stop_dis=(robot.xy_pos.first*robot.xy_pos.first+robot.xy_pos.second*robot.xy_pos.second)
-        /(2*payload.acceleration);
         double tarDis=calcuDis(robot.pos,studios[robStuID].pos);
         if( isWall(robStuID)&&can_st&&ins_t.rotate==0){
             
@@ -4261,4 +4273,15 @@ void cal_matrix(vector<vector<double>>&c,double angle1_w,double angle2){
             }
         }
     }    
+}
+bool check_will_colloWithWall(const Robot& rob){
+    double a_v=return_ac(pl_g[rob.id].acceleration,pl_g[rob.id].speed,0);
+    double a_x=a_v*cos(rob.direction);
+    double a_y=a_v*sin(rob.direction);
+    double sport_x=pow(rob.xy_pos.first,2)/(2*a_x);
+    double sport_y=pow(rob.xy_pos.second,2)/(2*a_y);
+    if(rob.pos.first+sport_x<=0.1||rob.pos.first+sport_x>=49.9||rob.pos.second+sport_y<=0.1||rob.pos.second+sport_y>=49.9){
+        return true;
+    }
+    return false;
 }
