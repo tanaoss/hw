@@ -287,6 +287,7 @@ int checkNoCollision(const vector<pair<double,double>> &a, const vector<pair<dou
 void solveNoSolution(int x, int y);
 int getTimeToStudio(int id, const vector<pair<double,double>> &a);
 
+void printPair(pair<double,double> a);
 void printRobotsDis(int i, int j);
 void printRobotsDis(Robot ro, pair<double,double> a);
 void printPredictRobotsDis(const vector<pair<double,double>> &a, const vector<pair<double,double>> &b);
@@ -301,3 +302,4 @@ bool  isWall_r(int id);
 double get_Angle_xy(Robot& rob);
 double Calculate_the_projection_speed(Robot& rob);
 void cal_matrix(vector<vector<double>>&c,double angle1_w,double angle2);
+bool check_will_colloWithWall(const Robot& rob);
