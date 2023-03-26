@@ -165,6 +165,7 @@ struct Studio
     int bitSatus; // 原材料格状态
     int pStatus;  // 产品格状态
     int wait_time; //等待时间
+    int area;
     Studio(int _id, int _type, int _r_id, pair<double, double> &_pos, int _r_time, int _bitSatus, int _pStatus) : id(_id), type(_type), r_id(_r_id), pos(_pos), r_time(_r_time), bitSatus(_bitSatus), pStatus(_pStatus)
     {
     }

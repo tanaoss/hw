@@ -30,7 +30,8 @@ int main()
     int count = 0;
     initrobotInfo();
     init_studio_parameter();
-    while (cin>>state.FrameID){
+     while (cin >> state.FrameID)
+    {
         // cerr<<" time "<<state.FrameID<<endl;
         readStatusUntilOK() ;
         cout<<state.FrameID<<endl;
