@@ -1641,6 +1641,7 @@ pair<int, double>pick_point(int robot_id, int state_type)
         }
     }
     else if(state_type == 2){
+        //qu 123
         for(i=0;i<studios.size();i++){
             // if(studios[i].type >= 1 && studios[i].type <= 3)cerr<< i<<' '<<studios[i].type<<studios[i].r_id<<endl;
             if(studios[i].type >= 1 && studios[i].type <= 3 && (studios[i].r_id==-1 ) ){  //123 and no robot choose ,get
@@ -1697,6 +1698,7 @@ pair<int, double>pick_point(int robot_id, int state_type)
         }
     }
     else if(state_type == 3){
+        //qu 456
         for(i=0;i<studios.size();i++){
             if(studios[i].type >= 4 && studios[i].type <= 6 && (studios[i].r_id==-1 )){  //456 and no robot choose ,get
                 // if(studios[i].pStatus == 1 ||(studios[i].r_time>0&&(checkEnough(robot_id,i,studios[i].r_time)))){
@@ -1738,6 +1740,7 @@ pair<int, double>pick_point(int robot_id, int state_type)
         }
     }
     else if(state_type == 4){
+        //qu 7
         for(i=0;i<studios.size();i++){
             if(studios[i].type ==7 && (studios[i].r_id==-1)){  //7 and no robot choose ,get
                 // if(studios[i].pStatus == 1 ||(studios[i].r_time>0&&(checkEnough(robot_id,i,studios[i].r_time)))){
