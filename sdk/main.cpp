@@ -47,6 +47,9 @@ int main()
         pl_g=payloads;
         control(payloads);
         count++;
+        for(int i = 0; i < 4; ++i) {
+            cerr<<"robots_target["<<state.FrameID<<"]["<<i<<"] = "<<robots[i].target_id<<";"<<endl;
+        }
     }
     return 0;
    
