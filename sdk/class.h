@@ -92,6 +92,7 @@ struct Robot
     int pre_rote;
     int pre_cnt;
     int wait;
+    int last_get_type;
     bool operator!=(Robot s1){
     if(s1.id!=id||target_id!=s1.target_id||s1.loc_id!=loc_id||xy_pos!=s1.xy_pos||pos!=s1.pos){
             return true;
@@ -112,6 +113,7 @@ struct Robot
         lastSign = _lastSign;
         isTurn = _isTurn;
         pre_cnt=0;
+        last_get_type = 0;
         wait=_wait;
     }
     void set(int _id, int _loc_id, int _get_type, double _time_val, double _collision_val, double _angular_velocity, pair<double, double> &&_xy_pos,
@@ -280,6 +282,7 @@ double get_at_stop_a(double t,double x,double v,int sign_v1);
 double return_time_root_v(double a,double b,double c,double v,double a1);
 double get_at_v_limt(double t,double a,double v,double v1,int sign_v1);
 double return_ac(double a,double v1,double v2);
+void updateGetType();
 
 void updateIns(int id, int i);
 void collision_solve(int frame);
