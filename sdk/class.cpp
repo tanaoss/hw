@@ -249,7 +249,9 @@ bool readStatusUntilOK() {
             }
         }
         if (studios[studio_id].type >= 4 && studios[studio_id].type<=7){
-            if (studios[studio_id].bitSatus != 0 ){
+            if(class_map == 3 && (studios[studio_id].type == 4 || isWall(studio_id)))
+                {}
+            else if (studios[studio_id].bitSatus != 0 ){
                 for(int i = 1; i <= studio_material[studios[studio_id].type-4][0]; i++){
                     if ((studios[studio_id].bitSatus & (int)pow(2, studio_material[studios[studio_id].type-4][i]))==0){
                         lack_material[studio_material[studios[studio_id].type - 4][i]]++;
@@ -260,12 +262,16 @@ bool readStatusUntilOK() {
         if (studios[studio_id].type > 3)
         {
             if(studios[studio_id].type < 8){
-                for(int i = 0;i < 4;i++){
-                    if(studios[studio_id].type == i+4){
-                        for(int j = 0;j<studio_material[i][0];j++){
-                            if((studios[studio_id].bitSatus & (int)pow(2,studio_material[i][j+1])) == 0){
-                                // if(studios_rid[studio_id][studio_material[i][j+1]] == -1)material[studio_material[i][j+1]].push_back(studio_id);
-                                material[studio_material[i][j+1]].push_back(studio_id);
+                if(class_map == 3 && (studios[studio_id].type == 4 || isWall(studio_id)))
+                {}
+                else{
+                    for(int i = 0;i < 4;i++){
+                        if(studios[studio_id].type == i+4){
+                            for(int j = 0;j<studio_material[i][0];j++){
+                                if((studios[studio_id].bitSatus & (int)pow(2,studio_material[i][j+1])) == 0){
+                                    // if(studios_rid[studio_id][studio_material[i][j+1]] == -1)material[studio_material[i][j+1]].push_back(studio_id);
+                                    material[studio_material[i][j+1]].push_back(studio_id);
+                                }
                             }
                         }
                     }
@@ -979,6 +985,11 @@ void updateLastRate()
 
 double calc_priority(int studio_id){
     double priority_value = 1;
+    // if(class_map == 3) {
+    //     if(studios[studio_id].type == 5 || studios[studio_id].type == 6) {
+    //         priority_value = 0.1;
+    //     }
+    // }
     if (class_map == 4)
     {
 
@@ -1068,9 +1079,9 @@ void control(vector<PayLoad> payLoad){
     // solveRobotsCollision();
     // Collision_detection(payLoad);
 
-    // if(state.FrameID >= 1069 && state.FrameID < 1220) {
+    // if(state.FrameID >= 5600 && state.FrameID < 5610) {
     //     cerr<<state.FrameID<<endl;
-    //     cerr<<payloads[2].angle<<payloads[2].sign<<endl;
+    //     // cerr<<payloads[2].angle<<payloads[2].sign<<endl;
     //     cerr<<"ins:"<<ins[2].forward<<"  "<<ins[2].rotate<<endl;
     // }
     // if(state.FrameID>=854&&state.FrameID<=858){
@@ -1079,9 +1090,7 @@ void control(vector<PayLoad> payLoad){
     // }
     collision_solve(25);
 
-    // if(state.FrameID >= 1069 && state.FrameID < 1220) {
-    //     cerr<<state.FrameID<<endl;
-    //     cerr<<payloads[2].angle<<payloads[2].sign<<endl;
+    // if(state.FrameID >= 5600 && state.FrameID < 5610) {
     //     cerr<<"~ins:"<<ins[2].forward<<"  "<<ins[2].rotate<<endl;
     // }
 
@@ -1632,26 +1641,44 @@ pair<double,double> distance(int  robot_id,int studio_id){
         time = tmp.size()*0.02+calcuDis(inflection,studios[studio_id].pos)/6;
     }
     double dist2 = precise_distance(robot_id,studio_id);
+
+    if(class_map == 3 && state.FrameID <= 8000) 
+        dist2 = calcuDis(robots[robot_id].pos,studios[studio_id].pos);
+
     if(fabs(dist-dist2)>10){ 
         dist = dist2;
         time = dist/6;
     }
+    
     return pair<double,double>(time,dist);
 }
 
 bool check_area(int robot_id,int studio_id){
+    int count = 0;
     for(int i =0;i<4;i++){
         if(i!=robot_id){
             if (studios[studio_id].area == robot_area[i] && robot_area[i]!=0)
             {
-                return false;
+                count++;
+                
             }
         }
+    }
+    if(count>=2)return false;
+    return true;
+}
+
+bool check_area_right(int studio_id) {
+    if (studios[studio_id].area == 2|| studios[studio_id].area == 4)
+    {
+        return false;
     }
     return true;
 }
 double change_area(int robot_id,int studio_id){
     if(studios[robots[robot_id].target_id].type <=3){
+        if(studios[studio_id].area == 2 || studios[studio_id].area == 4)
+            return 1000;
         if (robot_area[robot_id] != studios[studio_id].area){
             return 2;
         }
@@ -1747,9 +1774,8 @@ pair<int, double>pick_point(int robot_id, int state_type)
                     if(robot_get_type[studios[i].type]< material[studios[i].type].size()){
                         if (class_map == 3)
                         {
-                            if (check_area(robot_id, i) && i!= 7 &&i!=21 &&i!=20 && i!=39 && i!=35)
-                            {
-                                dist = (distance(robot_id, i).first + wait_dis(robot_id, i)) * calc_priority(i);
+                            if (check_area(robot_id, i)){
+                                dist = ((distance(robot_id, i).first + wait_dis(robot_id, i)) * calc_priority(i))*change_area(robot_id, i);
                                 if (dist < min)
                                 {
                                     // cerr << "dist = " << dist << " studio = " << i << endl;
@@ -1757,6 +1783,7 @@ pair<int, double>pick_point(int robot_id, int state_type)
                                     min_subscript = i;
                                 }
                             }
+                            
                         }
                         else{
                                 // cerr<<"bbb"<<endl;
@@ -1913,10 +1940,14 @@ pair<int, double>pick_point(int robot_id, int state_type)
                             // dist=(calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i));
                             // dist = distance(robot_id, i).first * studio_wait_time(i) ;
                             // if (class_map == 1)
+                            if(class_map==3 && state.FrameID <8500){
+                                if(studios[i].type == 4) continue;
+                                if(isWall(i)) continue;
+                                if(!check_area_right(i)) continue;
+                            }
                             if (class_map == 3)
                             {
-                                if (check_area(robot_id, i))
-                                {
+                                if (check_area(robot_id, i)){
                                     dist = (distance(robot_id, i).first * studio_wait_time(robot_id, i)) * change_area(robot_id, i);
                                     // cerr << calc_priority(i) << ' ' << (distance(robot_id, i).first * studio_wait_time(i)) << endl;
                                     // dist=calcuDis(robots[robot_id].pos,studios[i].pos);
@@ -1962,12 +1993,15 @@ pair<int, double>pick_point(int robot_id, int state_type)
                 // dist=(calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i))*close_threshold(robot_id,i,1.0);
                 // dist=calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i);
                 // if(class_map ==1 ||class_map ==2||class_map==)
-                dist= distance(robot_id,i).first*2;
+                if(robots[robot_id].get_type<4 && class_map == 3)
+                     dist= distance(robot_id,i).first*9;
+                else dist= distance(robot_id,i).first*2;
                 if (class_map == 1)
                     dist = distance(robot_id, i).first * 3;
                 // dist=(calcuDis(robots[robot_id].pos,studios[i].pos)+anger_to_length(robot_id,i))*studio_wait_time(i);
                 // dist=calcuDis(robots[robot_id].pos,studios[i].pos);
                 if(dist<min){
+
                     min=dist;
                     min_subscript=i;
                 }
@@ -2180,7 +2214,7 @@ bool judge_full(int level, double threshold)
                             }
                         }
                         v = (double)full_count / (double)count;
-                        cerr<<" full_count = "<<full_count<<" count = "<<count<<" bilu "<<v<<endl;
+                        // cerr<<" full_count = "<<full_count<<" count = "<<count<<" bilu "<<v<<endl;
                         if (v >= threshold)
                         {
                             // print_matr();
@@ -2767,14 +2801,14 @@ void robot_action(){
     // cerr <<endl;
     int full = 0;
     
-    if(judge_full(2,0.1))full = 1;   //4,5,6 full threshold
+    if(judge_full(2,0.01))full = 1;   //4,5,6 full threshold
     // if (class_map == 3) full = 0;
         // if(judge_full(3,0.2))full = 2;   //7 full threshold Higher priority
         // cerr<<" full = "<<full<<endl;
         // if(full!=0);
         // robot_judge(full,1.3,4.5);
         // cerr<<studios[0].r_id<<"aaa"<<endl;
-        robot_judge_sol(15, full);
+        robot_judge_sol(5, full);
     for(int i=0;i<4;i++){
         if(flag ==0){
             robot_last_last_state[i][0]=robot_last_state[i][0];
@@ -4265,8 +4299,8 @@ void collision_solve(int frame){
     bool cerr_falg = false;
 
 
-    if(state.FrameID >= 828 && state.FrameID <= 830 && 999==999)
-        cerr_falg = true;
+    // if(state.FrameID >= 5600 && state.FrameID <= 5630 && 999==999)
+    //     cerr_falg = true;
 
 
     // if(cerr_falg) {
@@ -4466,9 +4500,10 @@ void collision_solve(int frame){
 
                 reachTime[ro[x].id] = getTimeToStudio(ro[x].id, trajectory[x]);
                     
-                stopID = choose_id;
-                goID = x;
+                stopID = ro[choose_id].id;
+                goID = ro[x].id;
                 ins[stopID].forward = min(payloads[stopID].distance / (reachTime[goID]*0.02 + 0.5), ins[stopID].forward);
+
 
                     if(cerr_falg) {
                         // cerr<<"time:"<<state.FrameID<<endl;
