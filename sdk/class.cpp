@@ -4737,9 +4737,11 @@ void adjust_collo_new(int i1,int i2,int baseSign){
     }
 }
 bool check_wall_r(int i){
-    double stop_dis=(robots[i].xy_pos.first*robots[i].xy_pos.first+robots[i].xy_pos.second*robots[i].xy_pos.second)/(2*payloads[i].acceleration);
-    vector<double> tmp=get_T_limits(robots[i].pos,robots[i],1,stop_dis);
-    if(!eq(tmp[0],-7)&&(!is_range(robots[i].direction,tmp))){
+    Robot robot=robots[i];
+    vector<double> tmp=get_T_limits(robot);
+    bool con1=robot.need_rote_wall;
+    bool con2=!eq(tmp[0],-7)&&(!is_range(robot.direction,tmp))&&ge(payloads[i].angle,Pi/6);
+    if(con1&&con2){
         return true;
     }    
     return false;
