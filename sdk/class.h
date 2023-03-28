@@ -280,7 +280,7 @@ PayLoad calPayload_trajectory(Robot rob,int studioID);
 vector<pair<double,double>>Calculate_the_trajectory(Robot& rob,Ins ins, int forward_change, int rotate_change,const vector<pair<double,double>>& tra,int cnt,int tar,double rob_dis,double pre_dis=100);
 double get_at_stop(double t,double a,double v,int sign_v1);
 Ins contr_one_rob(Robot& robot ,const PayLoad& payload);
-vector<double>  get_T_limits(pair<double,double>pos);
+vector<double>  get_T_limits(Robot& rob);
 double get_at_stop_a(double t,double x,double v,int sign_v1);
 double return_time_root_v(double a,double b,double c,double v,double a1);
 double get_at_v_limt(double t,double a,double v,double v1,int sign_v1);
