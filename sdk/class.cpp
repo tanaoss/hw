@@ -67,6 +67,9 @@ void initrobotInfo() {
     angular_acceleration_no = 50 / inertiaMin;
     angular_acceleration_has = 50 /inertiaMax;
 
+    cerr<<acceleration_no<<endl<<acceleration_has<<endl;
+    cerr<<angular_acceleration_no<<endl<<angular_acceleration_has<<endl;
+
     memset(last_solution, -1, sizeof(last_solution));
 
 
@@ -216,10 +219,10 @@ bool readMapUntilOK() {
             }
             if (line[i] == '#')
             {
-                graph[row][i] = -2;
+                graph[99-row][i] = -2;
             }
             else
-                graph[row][i] = 0;
+                graph[99-row][i] = 0;
         }
         row++;
 	    count++;
