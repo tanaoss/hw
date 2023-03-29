@@ -4,7 +4,6 @@
 #include <cmath>
 #include "class.h"
 using namespace std;
-extern vector<vector<double>> dis;
 extern vector<Studio> studios;
 extern vector<Robot> robots;
 extern State state;//当前帧数，全局可见
@@ -36,8 +35,8 @@ int main()
         readStatusUntilOK() ;
         cout<<state.FrameID<<endl;
         //cerr<<"aaa"<<endl;
-        if(count == 0)first_action();
-        else robot_action();
+        // if(count == 0)first_action();
+        // else robot_action();
         //cerr<<"bbb"<<endl;
         payloads.clear();
         for(int i=0;i<4;++i){
