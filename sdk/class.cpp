@@ -47,7 +47,7 @@ int priority[8];
 int max_wait_time[4];
 int robot_area[4];
 int contr_print_flag=0;
-int map[100][100];
+int graph[100][100];
 int dis[100][100];
 double new_cllo_time = 0;
 pair<double ,double> Root;
@@ -216,10 +216,10 @@ bool readMapUntilOK() {
             }
             if (line[i] == '#')
             {
-                map[row][i] = -2;
+                graph[row][i] = -2;
             }
             else
-                map[row][i] = 0;
+                graph[row][i] = 0;
         }
         row++;
 	    count++;
