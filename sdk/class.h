@@ -93,6 +93,7 @@ struct Robot
     int pre_cnt;
     int wait;
     int last_get_type;
+    bool need_rote_wall;
     bool operator!=(Robot s1){
     if(s1.id!=id||target_id!=s1.target_id||s1.loc_id!=loc_id||xy_pos!=s1.xy_pos||pos!=s1.pos){
             return true;
@@ -115,6 +116,7 @@ struct Robot
         pre_cnt=0;
         last_get_type = 0;
         wait=_wait;
+        need_rote_wall=false;
     }
     void set(int _id, int _loc_id, int _get_type, double _time_val, double _collision_val, double _angular_velocity, pair<double, double> &&_xy_pos,
              double _direction, pair<double, double> &&_pos)
@@ -201,7 +203,7 @@ void first_pick_point();
 void robot_action();
 void process();
 PayLoad calPayload(int robotID,int studioID);                                                              // 计算机器人与目标之间的夹角、距离等信息
-vector<double> get_T_limits(pair<double, double> pos, int id, int ctr = -1, double dis = 0.0); // 靠近墙体时，需要把方向转到那个范围才能加速
+vector<double> get_T_limits(pair<double, double> pos,const Robot& robot, int ctr = -1, double dis = 0.0); // 靠近墙体时，需要把方向转到那个范围才能加速
 pair<double, double> subVector(pair<double, double> a, pair<double, double> b);                // 向量减（a-b）
 double calVectorProduct(pair<double, double> a, pair<double, double> b);                       // 向量乘
 double calVectorSize(pair<double, double> a);                                                  // 计算向量大小
@@ -226,16 +228,16 @@ void robot_action();                                                           /
 pair<int, double> pick_point(int robot_id, int state);                         // Robot selection point
 bool judge_full(int level, double threshold);                                  // Set the load factor to determine whether the 4567 product is full
 void robot_judge(int full);                                                    // The robot makes buy and sell judgments based on the current state
-bool can_stop(pair<double, double> p1, pair<double, double> p2, double angle); // 能够停止转动
+bool can_stop(pair<double, double> p1, pair<double, double> p2, double angle,bool isWall); // 能够停止转动
 bool is_range(double dire, vector<double> &tmp);                               // 判断角度是否在范围内123
 pair<double, double> set_af(int robID);                                        // 给出机器人的速度和角度
 bool can_speed_z(int stuID, pair<double, double> xy_pos, pair<double, double> pos, double acceleration);
 double get_dis(pair<double, double> P, Line l);
 bool isWall(int stuID);
-bool will_impact(int robID, double dis = 0.0);
+bool will_impact(const Robot& robot, double dis = 0.0);
 double return_cal(pair<double, double> p1, pair<double, double> p2, double angle);
 void init_studio_parameter();
-bool isWall_r(int robID,double angle);
+bool isWall_r(const Robot& robot,double angle);
 int special_test(int robID1,int robID2);
 double get_angle_1(double s1,double s2);
 double get_angle_1(pair<double,double> p1,pair<double,double> p2);
@@ -273,12 +275,12 @@ double get_at_v_canSet(double t,double a,double v,double v1,int sign_v1);
 double get_at_v_z(double t,double a,double v,int sign_v1);
 bool is_near_tar(int id);
 double anger_to_length(int robot_id,int studio_id);
-vector<pair<double, double>> Calculate_the_trajectory(Robot rob, int cnt, int tar,  int ctrF=1);
+vector<pair<double, double>> Calculate_the_trajectory(Robot& rob, int cnt, int tar,  int ctrF=1);
 PayLoad calPayload_trajectory(Robot rob,int studioID);
-vector<pair<double,double>>Calculate_the_trajectory(Robot rob,Ins ins, int forward_change, int rotate_change,const vector<pair<double,double>>& tra,int cnt,int tar,double rob_dis,double pre_dis=100);
+vector<pair<double,double>>Calculate_the_trajectory(Robot& rob,Ins ins, int forward_change, int rotate_change,const vector<pair<double,double>>& tra,int cnt,int tar,double rob_dis,double pre_dis=100);
 double get_at_stop(double t,double a,double v,int sign_v1);
-Ins contr_one_rob(const Robot& robot ,const PayLoad& payload);
-vector<double>  get_T_limits(pair<double,double>pos,Robot robot);
+Ins contr_one_rob(Robot& robot ,const PayLoad& payload);
+vector<double>  get_T_limits(Robot& rob);
 double get_at_stop_a(double t,double x,double v,int sign_v1);
 double return_time_root_v(double a,double b,double c,double v,double a1);
 double get_at_v_limt(double t,double a,double v,double v1,int sign_v1);
