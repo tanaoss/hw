@@ -257,12 +257,7 @@ bool Check_for_balls_around(int i);
 int return_line_dire(int i1,int i2,int signBase);
 int return_line_dire(int i1,int i2);
 pair<double,bool> return_int_dis(int base);
-vector<int> return_int_pos(int base);
-int return_int_neg(int base);
-void Collision_detection(vector<PayLoad> payLoad);
 bool check_material_full(int studio_id);
-void Detect_codirection();
-bool is_same_direction(int i1,int i2);
 double get_rotation(int i1,int i2);
 int addSign(int i1,int i2,int baseSign);
 int getSign(int i1,int i2);
@@ -287,18 +282,15 @@ double return_time_root_v(double a,double b,double c,double v,double a1);
 double get_at_v_limt(double t,double a,double v,double v1,int sign_v1);
 double return_ac(double a,double v1,double v2);
 void updateGetType();
-
 void updateIns(int id, int i);
 void collision_solve(int frame);
 int checkNoCollision(const vector<pair<double,double>> &a, const vector<pair<double,double>> &b, double mindis);
 void solveNoSolution(int x, int y);
 int getTimeToStudio(int id, const vector<pair<double,double>> &a);
-
 void printPair(pair<double,double> a);
 void printRobotsDis(int i, int j);
 void printRobotsDis(Robot ro, pair<double,double> a);
 void printPredictRobotsDis(const vector<pair<double,double>> &a, const vector<pair<double,double>> &b);
-
 pair<double,double> distance(int  robot_id,int studio_id);
 double get_at_stop_test(double t,double a,double v,int sign_v1);
 pair<double ,double> return_change_v(double w,double changeSeta,pair<double,double>v);
@@ -309,4 +301,3 @@ bool  isWall_r(int id);
 double get_Angle_xy(Robot& rob);
 double Calculate_the_projection_speed(Robot& rob);
 void cal_matrix(vector<vector<double>>&c,double angle1_w,double angle2);
-bool check_will_colloWithWall(const Robot& rob);
