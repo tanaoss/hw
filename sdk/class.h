@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <cmath>
 using namespace std;
 
 #define Pi 3.141592653589793
