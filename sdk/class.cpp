@@ -812,39 +812,7 @@ double get_at_stop_test(double t,double a,double v,int sign_v1){
     }
     return (s+sign_v1*Pi*t);
 }
-void Collision_detection(vector<PayLoad> payLoad){
-    int selct1=3;
-    double minDis=60;
-    void change_getType();
-    int sel_flag=1;
-    for(int i=1;i<(1<<4);i++){
-        if(__builtin_popcount(i)==2){
-            pair<double,bool> tmpF=return_int_dis(i);
-            if(lt(tmpF.first,minDis)&&tmpF.second){
-                sel_flag=0;
-                selct1=i;
-                minDis=tmpF.first;
-            }
-        }
-    } 
-    vector<vector<int>>arr{return_int_pos(selct1),return_int_pos(((1<<4)-1)^selct1)};
-    for(int i=0;i<arr.size();i++){
-        int id1=arr[i][0],id2=arr[i][1];
-        double tmpDis=calcuDis(robots[id1].pos,robots[id2].pos);
-        int sel=return_type(id1)>return_type(id2)&&robots[id1].get_type==robots[id2].get_type
-        ||robots[id1].get_type>robots[id2].get_type?id1:id2;
-        int sel_1=return_type(id1)>return_type(id2)&&robots[id1].get_type==robots[id2].get_type
-        ||robots[id1].get_type>robots[id2].get_type?id2:id1;
-        int speed_limit=5;
-        if(lt(tmpDis,5)){
-            int sign=return_line_dire(sel,sel_1,payLoad[sel_1].sign);
-            if(sign==0)continue;
-            ins[sel_1].rotate=Pi/4*sign; 
-        }
-    }
-    
-    Detect_codirection();
-}
+
 double anger_to_length(int robot_id,int studio_id){
     double length;
     double anger = calPayload(robot_id, studio_id).angle;
@@ -1010,13 +978,8 @@ double Calc_collisions_dis(int robot_id,int studio_id){
     robots[robot_id].xy_pos.first = line_speed.first;
     robots[robot_id].xy_pos.second = line_speed.second;
     robots[robot_id].target_id = target;
-    // cerr<<robots[robot_id].xy_pos.first<<' '<<robots[robot_id].xy_pos.second<<' '<<robots[robot_id].target_id<<' '<<robots[robot_id].pos.first<<' '<<robots[robot_id].pos.second<<endl;
-    // cerr<<" dis = "<<dis<<endl;
-    // if(class_map ==2 ||class_map ==4){
-    //     return 0;
-    // }
+
     return dis;
-    // return 0;
 }
 double back_dis(int studio_id){
     int i;
@@ -1030,11 +993,7 @@ double back_dis(int studio_id){
             min_subscript = material[studios[studio_id].type][i];
         }
     }
-    // cerr<<studio_id<< ' '<<studios[studio_id].type<<' '<<min_subscript<<' '<<studios[min_subscript].type<<endl;
-    // cerr<<studios[studio_id].pos.first<<' '<<studios[studio_id].pos.second<<' '<<studios[min_subscript].pos.first<<' '<<studios[min_subscript].pos.second<<' '<<endl;
-    // cerr<<"back_dis = " <<min<<endl;
     return min*0.2/6;
-    // return 0;
 }
 double studio_wait_time(int robot_id,int studio_id){
     double wait=1;
@@ -2995,48 +2954,10 @@ pair<double,bool>  return_int_dis(int base){
     will_collision(arr[0],arr[1])
     );
 }
-vector<int> return_int_pos(int base){
-    vector<int>arr(2);
-    int pos=0;
-    for(int i=0;i<4;i++){
-        if((base>>i)&1){
-            arr[pos++]=i;
-        }
-    }
-    return arr;
-}
-void Detect_codirection(){
-    for(int i=1;i<(1<<4);i++){
-        if(__builtin_popcount(i)==2){
-            return_int_neg(i);
-        }
-    } 
-}
-int return_int_neg(int base){
-    // vector<int>arr(2);
-    // int pos=0;
-    // for(int i=0;i<4;i++){
-    //     if((base>>i)&1){
-    //         arr[pos++]=i;
-    //     }
-    // }
-    // int tmp=Calculate_root(arr[0],arr[1]);
-    // int id1=arr[0],id2=arr[1];
-    // double dis=calcuDis(robots[id1].pos,robots[id2].pos);
-    // if(tmp==-1&&lt(dis,3)){
-    //     int sel=robots[id1].get_type>robots[id2].get_type?id1:id2;
-    //     int sel_1=robots[id1].get_type>robots[id2].get_type?id2:id1;
-    //     int sign1=return_line_dire(sel,sel_1);
-    //     ins[sel_1].forward=-2;
-        
-    // }
-    return  1;
-}
-bool is_same_direction(int i1,int i2){
-    Vec v1(pair<double,double>(cos(robots[i1].direction),sin(robots[i1].direction)));
-    Vec v2(pair<double,double>(cos(robots[i2].direction),sin(robots[i2].direction)));
-    return gt(cos_t(v1,v2),0.0);
-}
+
+
+
+
 double get_rotation(int i1,int i2){
     Vec v1(pair<double,double>(cos(robots[i1].direction),sin(robots[i1].direction)));
     Vec v2(subVector(robots[i1].pos, robots[i2].pos));
@@ -4260,15 +4181,6 @@ void cal_matrix(vector<vector<double>>&c,double angle1_w,double angle2){
         }
     }    
 }
-bool check_will_colloWithWall(const Robot& rob){
-    int tarid=rob.target_id==-1?0:rob.target_id;
-    double dis=calcuDis(rob.pos,studios[tarid].pos);
-    double stop_dis=(rob.xy_pos.first*rob.xy_pos.first+rob.xy_pos.second*rob.xy_pos.second)
-        /(2*payloads[rob.id].acceleration);
-    if(isWall(tarid)&&gt(stop_dis+0.2,dis)){
-        return true;
-    }
-    return false;
-}
+
 
 
