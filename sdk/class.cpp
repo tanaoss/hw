@@ -3028,6 +3028,12 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot& rob,Ins ins_in, int f
     if(rotate_change==1){
         w_next=ins_in.rotate;
     }
+
+    // 撞障碍物，返回空
+    if(checkNearBar(rob.pos, rob.radius)){
+        return {};
+    }
+
     if(cnt>tar||cnt>=tra.size()){
         // if(forward_change == 0) {
         //     return {};

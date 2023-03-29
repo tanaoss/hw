@@ -95,6 +95,7 @@ struct Robot
     int wait;
     int last_get_type;
     bool need_rote_wall;
+    double radius;
     bool operator!=(Robot s1){
     if(s1.id!=id||target_id!=s1.target_id||s1.loc_id!=loc_id||xy_pos!=s1.xy_pos||pos!=s1.pos){
             return true;
@@ -102,7 +103,7 @@ struct Robot
         return false;
     }
     Robot(int _id, int _loc_id, int _get_type, double _time_val, double _collision_val, double _angular_velocity, pair<double, double> &_xy_pos,
-          double _direction, pair<double, double> &_pos, int _target_id = -1,int _wait = -1,int _lastSign = 0, int _isTurn = 0) : xy_pos(_xy_pos), pos(_pos)
+          double _direction, pair<double, double> &_pos, int _target_id = -1,int _wait = -1,int _lastSign = 0, int _isTurn = 0, double _radius = 0.45) : xy_pos(_xy_pos), pos(_pos)
     {
         id = _id;
         loc_id = _loc_id;
@@ -118,6 +119,7 @@ struct Robot
         last_get_type = 0;
         wait=_wait;
         need_rote_wall=false;
+        radius = _radius;
     }
     void set(int _id, int _loc_id, int _get_type, double _time_val, double _collision_val, double _angular_velocity, pair<double, double> &&_xy_pos,
              double _direction, pair<double, double> &&_pos)

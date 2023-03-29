@@ -42,6 +42,8 @@ int main()
         for(int i=0;i<4;++i){
             payloads.push_back(calPayload(i,robots[i].target_id));
         }
+        //update radius
+        for(int i=0;i<4;++i) robots[i].radius = payloads[i].radius;
         //cerr<<"kkk"<<endl;
         pl_g=payloads;
         control(payloads);
