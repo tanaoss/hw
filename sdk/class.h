@@ -301,3 +301,6 @@ bool  isWall_r(int id);
 double get_Angle_xy(Robot& rob);
 double Calculate_the_projection_speed(Robot& rob);
 void cal_matrix(vector<vector<double>>&c,double angle1_w,double angle2);
+
+
+bool checkNearBar(const pair<double,double> &a, double radius);
