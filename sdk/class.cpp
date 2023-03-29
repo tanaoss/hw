@@ -2975,6 +2975,40 @@ bool is_near_tar(int id){
     if(lt(tmpDis,2))return true;
     return false;
 }
+
+
+
+
+bool checkNearBar(const pair<double,double> &a, double radius){
+    int i, j;
+    double x1, x2, y1, y2;
+    double cross_y1, cross_y2, dis, radius2, dis1;
+    int x_min, x_max, y_min, y_max;
+    x1 = a.first - radius;
+    x2 = a.first + radius;
+
+    x_min = (int)(x1 / 0.5);
+    x_max = (int)(x2 / 0.5);
+
+    for(i = x_min; i <= x_max + 1; ++i) {
+        dis1 = min(fabs(a.first - (i + 1) * 0.5), fabs(a.first - i * 0.5));
+        // 没有交点
+        if(gt(dis1, radius)) continue;
+        dis = sqrt(radius2 - dis1 * dis1);
+        y1 = a.second - dis;
+        y2 = a.second + dis;
+        y_min = (int)(y1 / 0.5);
+        y_max = (int)(y2 / 0.5);
+
+        for(j = y_min; j < y_max; ++j) {
+            if(graph[i][j] == -2)
+                return false;
+        }
+    }
+
+    return true;
+}
+
 vector<pair<double,double>>Calculate_the_trajectory(Robot& rob,Ins ins_in, int forward_change, int rotate_change,const vector<pair<double,double>>&  tra,int cnt,int tar,double rob_dis,double pre_dis){
     //Calculate_the_trajectory_2
     // if(state.FrameID==4330&&state.FrameID==4330&&rob.id==0){
