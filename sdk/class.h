@@ -190,6 +190,14 @@ struct Studio
         return false;
     }
 };
+
+struct pane
+{
+    int id;                   // 空格id
+    pair<double, double> pos; // 空格中心点坐标
+    int type;                 // 空格类型
+};
+
 struct Line { pair<double, double>  P; pair<double, double> v; };      // 直线（点向式）
 bool eq(double a, double b);// ==
 bool gt(double a, double b);// >
@@ -306,3 +314,5 @@ void cal_matrix(vector<vector<double>>&c,double angle1_w,double angle2);
 
 
 bool checkNearBar(const pair<double,double> &a, double radius);
+void floyd();
+void print_queue();
