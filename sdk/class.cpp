@@ -3144,7 +3144,7 @@ pair<double,bool> get_w_now(const Robot& robot, const PayLoad& payload){
     } 
     double cmpAngle=fabs(payload.angle-real_angle);
     
-    bool can_st=can_stop(robot.pos,studios[robStuID].pos,cmpAngle,isWall(robStuID));
+    bool can_st=can_stop(robot.pos,robot.virtual_pos,cmpAngle,false);
     if(can_st){
         can_stop_flag=1;
         StopA=0;        
