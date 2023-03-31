@@ -36,8 +36,6 @@ int studio_material[4][4];
 int studio_level[5][2];
 int material_send[8][3];
 int RootFlag=-2;
-int Adjust_the_same_direction[4][2];
-int collision_sign[4][4] = {0};
 int robot_last_last_state[4][2];
 int robot_last_state[4][2];
 int Flag_sumulate=0;
@@ -49,7 +47,6 @@ int max_wait_time[4];
 int robot_area[4];
 int contr_print_flag=0;
 int graph[100][100];
-double dis[10000][10000];
 int target_sequence[500][500];
 int wail[101][101];
 double dis_area[500][500];
@@ -73,9 +70,6 @@ void initrobotInfo() {
 
     angular_acceleration_no = 50 / inertiaMin;
     angular_acceleration_has = 50 /inertiaMax;
-
-    cerr<<acceleration_no<<endl<<acceleration_has<<endl;
-    cerr<<angular_acceleration_no<<endl<<angular_acceleration_has<<endl;
 
     memset(last_solution, -1, sizeof(last_solution));
 
@@ -205,7 +199,6 @@ bool readMapUntilOK() {
     }
     while (cin.getline(line,sizeof(line))) {
         if (line[0] == 'O' && line[1] == 'K') {
-            calcuStudioDis();
             return true;
         }
         //do something
@@ -390,17 +383,17 @@ double calcuDis(pair<double, double> a, pair<double, double> b)
 
 
 
-void calcuStudioDis(){
-    int num = studios.size();
-    int i, j;
-    for (i = 0; i < num; i++)
-    {
-        for (j = 0; j < i; j++)
-        {
-            dis[j][i] = dis[i][j] = calcuDis(studios[i].pos, studios[j].pos);
-        }
-    }
-}
+// void calcuStudioDis(){
+//     int num = studios.size();
+//     int i, j;
+//     for (i = 0; i < num; i++)
+//     {
+//         for (j = 0; j < i; j++)
+//         {
+//             dis[j][i] = dis[i][j] = calcuDis(studios[i].pos, studios[j].pos);
+//         }
+//     }
+// }
 
 void print_matr(){
     int i = 0;
@@ -1395,8 +1388,7 @@ void first_action()
     {
         robots[i].target_id = pick_point(i, 1).first;
     }
-    // if(robots[i].get_type==0)cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<studios[robots[i].target_id].type<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
-    // else cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
+
     for (i = 0; i < robots.size(); i++)
     {
         studios[robots[i].target_id].r_id = i;
@@ -1423,7 +1415,7 @@ void first_action()
     }
     for (i = 0; i < robots.size(); i++)
     {
-         if(robots[i].target_id != -1){
+        if(robots[i].target_id != -1){
             if(robots[i].robot_area_type != studios[robots[i].target_id].studio_area_type){
                 robots[i].virtual_pos = types[robots[i].robot_area_type].entrance[target_sequence[robots[i].robot_area_type][studios[robots[i].target_id].studio_area_type]];
             }
@@ -1431,7 +1423,10 @@ void first_action()
                 robots[i].virtual_pos = studios[robots[i].target_id].pos;
             }
             studios[robots[i].target_id].r_id = i;
-         }
+            if(robots[i].get_type==0)cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<studios[robots[i].target_id].type<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
+            else cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
+        }
+        else robots[i].virtual_pos = pair<double,double>(0,0);
     }
 }
 
@@ -1531,13 +1526,22 @@ void robot_judge_sol(int threshold_lack,int full){
     int i,k,m;
     int target,min_subscript=-1;
     double min_dist=1000,dist;
+    int x,y;
     pair<int,double> temp1;
     pair<int,double> temp2;
     //cerr<<robots.size()<<endl;
     for(i = 0; i < robots.size(); i++){
+        cerr<<"robot :"<<i<<"distance : "<<calcuDis(robots[i].pos,robots[i].virtual_pos)<<endl;
         if(calcuDis(robots[i].pos,robots[i].virtual_pos)<0.4){
             if(robots[i].robot_area_type != studios[robots[i].target_id].studio_area_type){
-                robots[i].virtual_pos = types[robots[i].robot_area_type].entrance[target_sequence[robots[i].robot_area_type][studios[robots[i].target_id].studio_area_type]];
+                x= robots[i].robot_area_type;
+                y= target_sequence[robots[i].robot_area_type][studios[robots[i].target_id].studio_area_type];
+                if(x != y){
+                    robots[i].virtual_pos = types[y].entrance[x];
+                }
+                else{
+                    robots[i].virtual_pos = types[x].entrance[y];
+                }
             }
             else{
                 robots[i].virtual_pos = studios[robots[i].target_id].pos;
@@ -1553,11 +1557,16 @@ void robot_judge_sol(int threshold_lack,int full){
                     studios[robots[i].loc_id].pStatus = 0;
                     robots[i].pane_id = studios[robots[i].loc_id].pane_id;
                     robots[i].target_id = pick_point(i, 5).first;
+                    // cerr<<"target_id "<<robots[i].target_id<<endl;
                     if (robots[i].target_id != -1)
                      {
                         //studios[robots[i].target_id].r_id = i;
-                        if(robots[i].robot_area_type != studios[robots[i].target_id].studio_area_type){
-                            robots[i].virtual_pos = types[robots[i].robot_area_type].entrance[target_sequence[robots[i].robot_area_type][studios[robots[i].target_id].studio_area_type]];
+                        x= robots[i].robot_area_type;
+                        y= studios[robots[i].target_id].studio_area_type;
+                        if(x != y){
+                            robots[i].virtual_pos = types[x].entrance[target_sequence[x][y]];
+                            // cerr<<"sss"<<i<<' '<<x<<' '<<y<<endl;
+                            // printPair(robots[i].virtual_pos);
                         }
                         else{
                             robots[i].virtual_pos = studios[robots[i].target_id].pos;
@@ -1660,7 +1669,14 @@ void robot_judge_sol(int threshold_lack,int full){
                             // cerr<<"aaa"<<endl;
                         if(min_subscript != -1){
                             if(robots[i].robot_area_type != studios[robots[i].target_id].studio_area_type){
-                                robots[i].virtual_pos = types[robots[i].robot_area_type].entrance[target_sequence[robots[i].robot_area_type][studios[robots[i].target_id].studio_area_type]];
+                                x= robots[i].robot_area_type;
+                                y= target_sequence[robots[i].robot_area_type][studios[robots[i].target_id].studio_area_type];
+                                if(x != y){
+                                    robots[i].virtual_pos = types[y].entrance[x];
+                                }
+                                else{
+                                    robots[i].virtual_pos = types[x].entrance[y];
+                                }
                             }
                             else{
                                 robots[i].virtual_pos = studios[robots[i].target_id].pos;
@@ -1679,7 +1695,9 @@ void robot_judge_sol(int threshold_lack,int full){
             ins[i].sell = -1;
             ins[i].destroy = -1;
         }
-        // if(robots[i].target_id == -1){
+        if(robots[i].target_id == -1){
+            robots[i].virtual_pos = pair<double,double>(0,0);
+        }
         //     min_dist=1000;
         //     min_subscript = -1;
         //     if(robots[i].get_type ==0){
@@ -1730,9 +1748,10 @@ void robot_judge_sol(int threshold_lack,int full){
 void robot_action(){
     int col,row;
     for(int i=0;i<robots.size();i++){
-        col = (robots[i].pos.first-2.5)/0.5;
-        row = (robots[i].pos.second-2.5)/0.5;
+        col = (robots[i].pos.first-0.25)/0.5;
+        row = (robots[i].pos.second-0.25)/0.5;
         robots[i].robot_area_type = graph[row][col];
+        // cerr<<"robot :"<<i<<"target_id : "<<robots[i].target_id<<endl;
         // printPair(robots[i].virtual_pos);
     }
     robot_judge_sol(5, 0);
@@ -3730,42 +3749,42 @@ bool check_barrier(int start,int end,int carry){
     return true;
 
 }
-void init_dis(){
-    int i,j;
-    for(i=0;i<10000;i++){
-        for(j=i;j<10000;j++){
-            if (i == j)
-                dis[j][i] = 0;
-            else{
-                if (check_barrier(i,j,0)){
-            //         // cerr<<"cc"<<endl;
-                    dis[i][j] = calcuDis(panes[i].pos, panes[j].pos);
-                    dis[j][i] = dis[i][j];
-                    // if(j==9999){
-                    //     cerr<<i<<' '<<j<<' '<<dis[i][j]<<endl;
-                    //     dis[j][i] = dis[i][j];
-                    // }
-                    target_sequence[i][j] = j;
+// void init_dis(){
+//     int i,j;
+//     for(i=0;i<10000;i++){
+//         for(j=i;j<10000;j++){
+//             if (i == j)
+//                 dis[j][i] = 0;
+//             else{
+//                 if (check_barrier(i,j,0)){
+//             //         // cerr<<"cc"<<endl;
+//                     dis[i][j] = calcuDis(panes[i].pos, panes[j].pos);
+//                     dis[j][i] = dis[i][j];
+//                     // if(j==9999){
+//                     //     cerr<<i<<' '<<j<<' '<<dis[i][j]<<endl;
+//                     //     dis[j][i] = dis[i][j];
+//                     // }
+//                     target_sequence[i][j] = j;
 
-                    target_sequence[j][i] = i;
-                }
-                else{
-                    dis[i][j] = 1000;
-                    dis[j][i] = dis[i][j];
-                    target_sequence[i][j] = -1;
-                    target_sequence[j][i] = -1;
-                }
-            //     // cerr<<"bb"<<endl;
-            }
-            // if(i>=3728)
-            // cerr<<"j = "<<j<<endl;
-        }
-        cerr<<i<<endl;
-    }
-}
+//                     target_sequence[j][i] = i;
+//                 }
+//                 else{
+//                     dis[i][j] = 1000;
+//                     dis[j][i] = dis[i][j];
+//                     target_sequence[i][j] = -1;
+//                     target_sequence[j][i] = -1;
+//                 }
+//             //     // cerr<<"bb"<<endl;
+//             }
+//             // if(i>=3728)
+//             // cerr<<"j = "<<j<<endl;
+//         }
+//         cerr<<i<<endl;
+//     }
+// }
 
 void floyd(){
-    init_dis();
+    // init_dis();
     cerr<<"AA"<<endl;
     // for(int i = 0;i<10000;i++){
     //     for(int j = 0;j<10000;j++){
@@ -3781,15 +3800,15 @@ void floyd(){
     // }
 
 }
-void print_queue(){
-    for(int i=0;i<10000;i++){
-        for(int j = 0; j<10000;j++){
-            cerr<<i<<' '<<j<<' '<<dis[i][j]<<endl;
-            cerr<<target_sequence[i][j];
-        }
-        cerr<<endl;
-    }
-}
+// void print_queue(){
+//     for(int i=0;i<10000;i++){
+//         for(int j = 0; j<10000;j++){
+//             cerr<<i<<' '<<j<<' '<<dis[i][j]<<endl;
+//             cerr<<target_sequence[i][j];
+//         }
+//         cerr<<endl;
+//     }
+// }
 
 void divide_space(){
     int i,j,k,type = 0,count1,count2,count;
@@ -3921,15 +3940,37 @@ void divide_space(){
     floyd_area();
     // for(int i=0;i<types.size();i++){
     //     for(int j=0;j<types.size();j++){
-    //         cerr<<i<<' '<<j<<' '<< "dis = "<<target_sequence[i][j]<<endl;
+    //         cerr<<i<<' '<<j<<' '<< "dis = "<<dis_area[i][j]<<endl;
     //     }
     // }
+    // print_target(0, 93);
     studio_distance();
+    
     // for(int i=0;i<studios.size();i++){
     //     for(int j=0;j<studios.size();j++){
     //         cerr<<i<<' '<<j<<' '<< "studios_distance = "<<studio_dis[i][j]<<endl;
     //     }
     // }
+}
+
+
+void print_target(int i, int j) {
+    int k;
+    int start = i;
+    double dist=0;
+    cerr<<i;
+    if(eq(dis_area[i][j], 1000)) return;
+    while(i != j) {
+        k = target_sequence[i][j];
+        cerr<<"->"<<k;
+        if(k==j) dist += dis_area[i][k];
+        else
+            dist += dis_area[i][k] + calcuDis(types[k].entrance[i], types[k].entrance[target_sequence[k][j]]);
+        // cerr<<"dist "<<start<<"->"<<k<<" = "<<dist<<endl;
+        i = k;
+    }
+    cerr<<endl;
+    cerr<<dist<<"*"<<dis_area[start][j]<<endl;
 }
 void init_area(){
     for(int i=0;i<types.size();i++){
@@ -3953,20 +3994,29 @@ void floyd_area(){
     double dist;
     init_area();
     for(int i=0;i<types.size();i++){
-        for(int j=0;j<types.size();j++){
+        for(int j= i + 1;j<types.size();j++){
             for(int k=0;k<types.size();k++){
-                if(j==k)continue;
-                if(types[i].entrance.count(j)!=0 &&types[i].entrance.count(k)!=0){
+                if(j==k || i==k)continue;
+                if(lt(dis_area[i][k], 1000) && lt(dis_area[k][j], 1000)){
                     // cerr<<j<<endl;
                     // printPair(types[i].entrance[j]);
                     // cerr<<k<<endl;
                     // printPair(types[i].entrance[k]);
-                    dist = calcuDis(types[i].entrance[j],types[i].entrance[k]);
-                    // cerr<<"dist = "<<dist<<endl;
-                    if(gt(dis_area[j][k],dis_area[j][i]+dis_area[i][k]+dist)){
-                        dis_area[j][k] = dis_area[j][i]+dis_area[i][k]+dist;
-                        target_sequence[j][k]=target_sequence[j][i];
+                    
+                    dist = dis_area[i][k] + dis_area[k][j] + calcuDis(types[k].entrance[target_sequence[k][i]], types[k].entrance[target_sequence[k][j]]);
+                    if(gt(dis_area[i][j], dist)) {
+                        dis_area[i][j] = dis_area[j][i] = dist;
+                        target_sequence[i][j] = target_sequence[i][k];
+                        target_sequence[j][i] = target_sequence[j][k];
                     }
+
+
+                    // dist = calcuDis(types[i].entrance[j],types[i].entrance[k]);
+                    // // cerr<<"dist = "<<dist<<endl;
+                    // if(gt(dis_area[j][k],dis_area[j][i]+dis_area[i][k]+dist)){
+                    //     dis_area[j][k] = dis_area[j][i]+dis_area[i][k]+dist;
+                    //     target_sequence[j][k]=target_sequence[j][i];
+                    // }
                 }
             }
         }
@@ -3974,21 +4024,25 @@ void floyd_area(){
 }
 void studio_distance(){
     int row,col;
+    int x, y;
     for(int i=0;i<studios.size();i++){
-        col = (studios[i].pos.first-2.5)/0.5;
-        row = (studios[i].pos.second-2.5)/0.5;
+        col = (studios[i].pos.first-0.25)/0.5;
+        row = (studios[i].pos.second-0.25)/0.5;
         studios[i].studio_area_type = graph[row][col];
     }
     for(int i=0;i<robots.size();i++){
-        col = (robots[i].pos.first-2.5)/0.5;
-        row = (robots[i].pos.second-2.5)/0.5;
+        col = (robots[i].pos.first-0.25)/0.5;
+        row = (robots[i].pos.second-0.25)/0.5;
+        cerr<<col<<' '<<row<<endl;
         robots[i].robot_area_type = graph[row][col];
     }
     for(int i=0;i<studios.size();i++){
-        for(int j=0;j<studios.size();j++){
+        x = studios[i].studio_area_type;
+        for(int j=i+1;j<studios.size();j++){
+            y = studios[j].studio_area_type;
             if(lt(dis_area[studios[i].studio_area_type][studios[j].studio_area_type],1000)){
                 if(studios[i].studio_area_type!=studios[j].studio_area_type){
-                    studio_dis[i][j]=dis_area[studios[i].studio_area_type][studios[j].studio_area_type]+calcuDis(studios[i].pos,types[i].entrance[target_sequence[i][j]]);//少了
+                    studio_dis[i][j] = calcuDis(studios[i].pos, types[x].entrance[target_sequence[x][y]]) + dis_area[x][y] + calcuDis(studios[j].pos, types[y].entrance[target_sequence[y][x]]);
                 }
                 else{
                     studio_dis[i][j]=calcuDis(studios[i].pos,studios[j].pos);
@@ -3997,13 +4051,16 @@ void studio_distance(){
             else{
                 studio_dis[i][j] = 1000;
             }
+            studio_dis[j][i] = studio_dis[i][j];
         }
     }
     for(int i=0;i<robots.size();i++){
+        x = robots[i].robot_area_type;
         for(int j=0;j<studios.size();j++){
-            if(lt(dis_area[robots[i].robot_area_type][studios[j].studio_area_type],1000)){
-                if(robots[i].robot_area_type!=studios[j].studio_area_type){
-                    init_robot_dis[i][j]=dis_area[robots[i].robot_area_type][studios[j].studio_area_type]+calcuDis(robots[i].pos,types[i].entrance[target_sequence[i][j]]);//少了
+            y = studios[j].studio_area_type;
+            if(lt(dis_area[x][y],1000)){
+                if(x != y){
+                    init_robot_dis[i][j] = calcuDis(robots[i].pos, types[x].entrance[target_sequence[x][y]]) + dis_area[x][y] + calcuDis(studios[j].pos, types[y].entrance[target_sequence[y][x]]);
                 }
                 else{
                     init_robot_dis[i][j]=calcuDis(robots[i].pos,studios[j].pos);
@@ -4014,5 +4071,12 @@ void studio_distance(){
             }
         }
     }
+    for(int i=0;i<robots.size();i++){
+        for(int j=0;j<studios.size();j++){
+            cerr<<i<<' '<<j<<' '<< "robot_distance = "<<init_robot_dis[i][j]<<endl;
+        }
+    }
+
+    // cerr<<"type"<<robots[0].robot_area_type<<endl;
 
 }

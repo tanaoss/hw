@@ -220,7 +220,7 @@ void initrobotInfo();
 bool readMapUntilOK();                 // 读地图
 bool readStatusUntilOK();              // 读判题器输出
 void out_put();                        // 输出指令
-void calcuStudioDis();                 // 计算工作台之间的距离
+
 void control(vector<PayLoad> payLoad); // 控制球体运行
 void first_pick_point();
 void robot_action();
@@ -333,3 +333,5 @@ void print_queue();
 void divide_space();
 void floyd_area();
 void studio_distance();
+
+void print_target(int i, int j);
