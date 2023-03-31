@@ -8,7 +8,6 @@ struct Vec
 {
     double x;
     double y;
-    double theta;
     Vec(){}
     Vec(double _x,double _y){
         x=_x;
@@ -19,6 +18,8 @@ struct Vec
         y=p1.second;
     }
 };
+using Point = Vec;                    
+struct Line_Ta { Point P; Vec v; };      
 struct Circle{
     double r;
     pair<double,double>pos;

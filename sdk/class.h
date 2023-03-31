@@ -301,3 +301,6 @@ bool  isWall_r(int id);
 double get_Angle_xy(Robot& rob);
 double Calculate_the_projection_speed(Robot& rob);
 void cal_matrix(vector<vector<double>>&c,double angle1_w,double angle2);
+pair<double ,double> get_v_w_dirft(const Robot& robot);
+pair<double,bool> get_w_now(const Robot& robot, const PayLoad& payload);
+double get_v_now(const Robot& robot, const PayLoad& payload);
