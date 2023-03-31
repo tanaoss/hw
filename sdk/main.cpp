@@ -15,6 +15,7 @@ int main()
     std::ios::sync_with_stdio(false);   
     std::cin.tie(0);    // IO
     readMapUntilOK();
+    divide_space();
     // floyd();
     // print_queue();
     // cerr<<robots.size();
@@ -28,17 +29,13 @@ int main()
         // cerr<<" time "<<state.FrameID<<endl;
         readStatusUntilOK() ;
         cout<<state.FrameID<<endl;
-        //cerr<<"aaa"<<endl;
-        // if(count == 0)first_action();
-        // else robot_action();
-        //cerr<<"bbb"<<endl;
+        if(count == 0)first_action();
+        else robot_action();
         payloads.clear();
         for(int i=0;i<4;++i){
             payloads.push_back(calPayload(i,robots[i].target_id));
         }
-        //update radius
         for(int i=0;i<4;++i) robots[i].radius = payloads[i].radius;
-        //cerr<<"kkk"<<endl;
         pl_g=payloads;
         control(payloads);
         count++;
