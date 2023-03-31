@@ -420,7 +420,7 @@ double calAngle(pair<double, double> a) {
 }
 
 
-PayLoad calPayload(int robotID,int studioID) {
+PayLoad calPayload(int robotID) {
     
     //int target = rand() % ((int)studios.size());
     //robots[robotID].target_id = target;
@@ -428,20 +428,17 @@ PayLoad calPayload(int robotID,int studioID) {
     //cerr << robotID << target<<endl;
 
     Robot robot = robots[robotID];
-    if(studioID == -1) {
-        studioID = 0;
-    }
-    Studio studio = studios[studioID];
+    pair<double, double> virtual_pos = robots[robotID].virtual_pos;
 
 
     // cerr << robotID << "--"<< robot.target_id<<endl;
 
-    double distance = calcuDis(robot.pos, studio.pos);
+    double distance = calcuDis(robot.pos, virtual_pos);
     double angular_acceleration = robot.get_type == 0? angular_acceleration_no :angular_acceleration_has;
     double acceleration = robot.get_type == 0? acceleration_no: acceleration_has;
 
     // 计算机器人与目标点构成的向量与x轴正方向夹角
-    pair<double, double> robotToStudio = subVector(studio.pos, robot.pos);
+    pair<double, double> robotToStudio = subVector(virtual_pos, robot.pos);
     double angle1 = calAngle(robotToStudio);
 
     double angle2 = ge(robot.direction, 0.0) ? robot.direction: 2 * Pi + robot.direction;
@@ -843,7 +840,7 @@ double get_at_stop_test(double t,double a,double v,int sign_v1){
 
 double anger_to_length(int robot_id,int studio_id){
     double length;
-    double anger = calPayload(robot_id, studio_id).angle;
+    double anger = calPayload(robot_id).angle;
     length = anger/Pi*6;
     // cerr<<"length = "<<length<<endl;
     return length;
@@ -1127,7 +1124,7 @@ double precise_distance(int robot_id,int studio_id){
         temp = -1;
     }
     double studio_point_tangency = acos(temp);
-    double robot_studio_angle = calPayload(robot_id, studio_id).angle;
+    double robot_studio_angle = calPayload(robot_id).angle;
     double rounded_corner;
     if(robot_studio_angle<(Pi/2)){
         rounded_corner = angle_robot_center_studio - studio_point_tangency;
