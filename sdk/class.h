@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <cmath>
+#include <map>
 using namespace std;
 
 #define Pi 3.141592653589793
@@ -95,6 +96,10 @@ struct Robot
     int wait;
     int last_get_type;
     bool need_rote_wall;
+    double radius;
+    int pane_id;
+    pair<double,double> virtual_pos;
+    int robot_area_type;
     bool operator!=(Robot s1){
     if(s1.id!=id||target_id!=s1.target_id||s1.loc_id!=loc_id||xy_pos!=s1.xy_pos||pos!=s1.pos){
             return true;
@@ -102,7 +107,7 @@ struct Robot
         return false;
     }
     Robot(int _id, int _loc_id, int _get_type, double _time_val, double _collision_val, double _angular_velocity, pair<double, double> &_xy_pos,
-          double _direction, pair<double, double> &_pos, int _target_id = -1,int _wait = -1,int _lastSign = 0, int _isTurn = 0) : xy_pos(_xy_pos), pos(_pos)
+          double _direction, pair<double, double> &_pos, int _target_id = -1,int _wait = -1,int _lastSign = 0, int _isTurn = 0, double _radius = 0.45) : xy_pos(_xy_pos), pos(_pos)
     {
         id = _id;
         loc_id = _loc_id;
@@ -118,6 +123,7 @@ struct Robot
         last_get_type = 0;
         wait=_wait;
         need_rote_wall=false;
+        radius = _radius;
     }
     void set(int _id, int _loc_id, int _get_type, double _time_val, double _collision_val, double _angular_velocity, pair<double, double> &&_xy_pos,
              double _direction, pair<double, double> &&_pos)
@@ -169,6 +175,8 @@ struct Studio
     int pStatus;  // 产品格状态
     int wait_time; //等待时间
     int area;
+    int studio_area_type;
+    int pane_id;
     Studio(int _id, int _type, int _r_id, pair<double, double> &_pos, int _r_time, int _bitSatus, int _pStatus) : id(_id), type(_type), r_id(_r_id), pos(_pos), r_time(_r_time), bitSatus(_bitSatus), pStatus(_pStatus)
     {
     }
@@ -188,6 +196,20 @@ struct Studio
         return false;
     }
 };
+
+struct pane
+{
+    int id;                   // 空格id
+    pair<double, double> pos; // 空格中心点坐标
+    int type;                 // 空格类型
+};
+struct type_area
+{
+    int type;
+    int height;
+    map<int,pair<double,double>> entrance;
+};
+
 struct Line { pair<double, double>  P; pair<double, double> v; };      // 直线（点向式）
 bool eq(double a, double b);// ==
 bool gt(double a, double b);// >
@@ -301,6 +323,13 @@ bool  isWall_r(int id);
 double get_Angle_xy(Robot& rob);
 double Calculate_the_projection_speed(Robot& rob);
 void cal_matrix(vector<vector<double>>&c,double angle1_w,double angle2);
-pair<double ,double> get_v_w_dirft(const Robot& robot);
 pair<double,bool> get_w_now(const Robot& robot, const PayLoad& payload);
 double get_v_now(const Robot& robot, const PayLoad& payload);
+
+
+bool checkNearBar(const pair<double,double> &a, double radius);
+void floyd();
+void print_queue();
+void divide_space();
+void floyd_area();
+void studio_distance();
