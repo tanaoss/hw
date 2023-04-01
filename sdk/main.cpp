@@ -14,8 +14,11 @@ int main()
 {
     std::ios::sync_with_stdio(false);   
     std::cin.tie(0);    // IO
+    cerr<<"sss"<<endl;
     readMapUntilOK();
+    cerr << "sss" << endl;
     divide_space();
+    cerr << "sss" << endl;
     // floyd();
     // print_queue();
     // cerr<<robots.size();
@@ -26,7 +29,7 @@ int main()
     init_studio_parameter();
      while (cin >> state.FrameID)
     {
-        // cerr<<" time "<<state.FrameID<<endl;
+        cerr<<" time "<<state.FrameID<<endl;
         readStatusUntilOK() ;
         cout<<state.FrameID<<endl;
         if(count == 0)first_action();

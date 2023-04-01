@@ -1423,8 +1423,8 @@ void first_action()
                 robots[i].virtual_pos = studios[robots[i].target_id].pos;
             }
             studios[robots[i].target_id].r_id = i;
-            if(robots[i].get_type==0)cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<studios[robots[i].target_id].type<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
-            else cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
+            // if(robots[i].get_type==0)cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<studios[robots[i].target_id].type<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
+            // else cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
         }
         else robots[i].virtual_pos = pair<double,double>(0,0);
     }
@@ -1531,7 +1531,7 @@ void robot_judge_sol(int threshold_lack,int full){
     pair<int,double> temp2;
     //cerr<<robots.size()<<endl;
     for(i = 0; i < robots.size(); i++){
-        cerr<<"robot :"<<i<<"distance : "<<calcuDis(robots[i].pos,robots[i].virtual_pos)<<endl;
+        // cerr<<"robot :"<<i<<"distance : "<<calcuDis(robots[i].pos,robots[i].virtual_pos)<<endl;
         if(calcuDis(robots[i].pos,robots[i].virtual_pos)<0.4){
             if(robots[i].robot_area_type != studios[robots[i].target_id].studio_area_type){
                 x= robots[i].robot_area_type;
@@ -1751,8 +1751,9 @@ void robot_action(){
         col = (robots[i].pos.first-0.25)/0.5;
         row = (robots[i].pos.second-0.25)/0.5;
         robots[i].robot_area_type = graph[row][col];
-        // cerr<<"robot :"<<i<<"target_id : "<<robots[i].target_id<<endl;
-        // printPair(robots[i].virtual_pos);
+        cerr<<"robot :"<<i<<"target_id : "<<robots[i].target_id<<endl;
+        cerr<<"virtual_pos: ";
+        printPair(robots[i].virtual_pos);
     }
     robot_judge_sol(5, 0);
 }
@@ -3809,16 +3810,115 @@ void floyd(){
 //         cerr<<endl;
 //     }
 // }
+ bool check_side(int i,int j,int flag){
+    int count1,count2,k;
+    j = j + flag;
+    count1=0;
+    count2=0;
+    for(k=j;k<100;k++){
+        if (count1 == 0 && graph[i - 1][k] != graph[i - 1][k+1]){
+            count1 = k-j+1;
+        }
+        if (count2 == 0 && graph[i][k] != graph[i][k + 1])
+        {
+            count2 = k - j + 1;
+        }
+        if(count1!=0&&count2!=0)break;
+    }
+    if(abs(count1-count2)>3)return false;
+    count1 = 0;
+    count2 = 0;
+    if(flag == 0){
+        for (k = j; k >=0; k--)
+        {
+            if (count1 == 0 && graph[i - 1][k-1] != graph[i - 1][k])
+            {
+                count1 = j - k + 1;
+                break;
+            }
+        }
+    }
+    if(count1>3)return false;
+    return true;
+ }
+ pair<double, double> check_wail_change(int i, int j, int type)
+ {
+    double x, y;
+    if (graph[i][j] != type)
+    {
+        if (graph[i][j - 2] == type)
+        {
+            j = j - 2;
+            if (graph[i][j + 1] == -2)
+            {
+                j = j - 1;
+            }
+            else if (graph[i][j - 1] == -2)
+            {
+                j = j + 1;
+            }
+        }
+        else if (graph[i][j + 2] == type)
+        {
+            j = j + 2;
+            if (graph[i][j + 1] == -2)
+            {
+                j = j - 1;
+            }
+            else if (graph[i][j - 1] == -2)
+            {
+                j = j + 1;
+            }
+        }
+    }
+    else if (graph[i][j + 1] == -2)
+    {
+        j = j - 1;
+    }
+    else if (graph[i][j - 1] == -2)
+    {
+        j = j + 1;
+    }
+
+    x = j * 0.5 + 0.25;
+    y = i * 0.5 + 0.25;
+    return pair<double, double>(x, y);
+ }
 
 void divide_space(){
     int i,j,k,type = 0,count1,count2,count;
+    int flag =0;
     double first,second;
+    pair<double,double>temp;
     for(i=0;i<100;i++){
         for(j=0;j<100;j++){
+            // cerr << "ffff" << endl;
             if(graph[i][j]==-2)continue;
+            flag = 0;
+            // cerr<<"aaaa"<<endl;
             if(i==0||graph[i-1][j]==-2){
+                // cerr<<"bbbb"<<endl;
                 if(j==0||graph[i][j-1]==-2){
-                    graph[i][j]=type;
+                    if (graph[i][j - 1] == -2 &&j<98){
+                        if (graph[i - 1][j + 1] != -2 ){ 
+                            flag = 1;
+                            if(check_side(i,j,1)){
+                                graph[i][j] = graph[i - 1][j + 1];
+                                continue;
+                            }
+                        }
+                        else if (graph[i-1][j +2] != -2 ){
+                            flag = 2;
+                            if (check_side(i, j, 2))
+                            {
+                                graph[i][j] = graph[i - 1][j + 2];
+                                continue;
+                            }
+                        }
+                    }
+                    // cerr<<"111"<<endl;
+                    graph[i][j] = type;
+                    // cerr<<type<<endl;
                     type_area temp;
                     temp.type = type;
                     temp.height=1;
@@ -3832,36 +3932,18 @@ void divide_space(){
             else{
                 if(j==0||graph[i][j-1]==-2){
                     if(graph[i-1][j] != -2){
-                        count1 = 0;
-                        count2 = 0;
-                        for(k=0;k<100;k++){
-                            if((graph[i-1][k]== graph[i-1][j])){
-                                count1++;
-                            }
-                            if(count1>0 &&graph[i-1][k]!= graph[i-1][j])break;
-                        }
-                        for(k=j;k<100;k++){
-                            if(graph[i][k]==-2)break;
-                            count2++;
-                        }
-                        // cerr<<count1<<' '<<count2<<' '<<graph[i-1][j]<<' '<<abs(count1-count2)<<endl;
-                        if(count1<=1){
-                            graph[i][j] = -2;
+                        if(check_side(i,j,0)){
+                            graph[i][j] = graph[i - 1][j];
+                            types[graph[i][j]].height++;
                         }
                         else{
-                            if(abs(count1-count2)>3){
-                                graph[i][j]=type;
-                                type_area temp;
-                                temp.type = type;
-                                temp.height=1;
-                                types.push_back(temp);
+                            graph[i][j]=type;
+                            type_area temp;
+                            temp.type = type;
+                            temp.height=1;
+                            types.push_back(temp);
                                 // cerr<<type<<endl;
-                                type ++;
-                            }
-                            else{
-                                graph[i][j]=graph[i-1][j];
-                                types[graph[i][j]].height++;
-                            }
+                            type ++;
                         }
                     }
                 }
@@ -3878,13 +3960,13 @@ void divide_space(){
         // }
         // cerr<<endl;
     }
-    // for(i=99;i>=0;i--){
-    //     for(j=0;j<100;j++){
-    //         fprintf(stderr,"%4d",graph[i][j]);
-    //         // cerr<<graph[i][j]<<' ';
-    //     }
-    //     cerr<<endl;
-    // }
+    for(i=99;i>=0;i--){
+        for(j=0;j<100;j++){
+            fprintf(stderr,"%4d",graph[i][j]);
+            // cerr<<graph[i][j]<<' ';
+        }
+        cerr<<endl;
+    }
     for(i=0;i<100;i++){
         for(j=0;j<100;j++){
             if(graph[i][j]==-2)continue;
@@ -3901,17 +3983,26 @@ void divide_space(){
                         first = (j+count/2)*0.5+0.25;
                         if(types[graph[i][j]].height>2){
                             second = ((i)*0.5+0.25)+0.5;
+                            temp = check_wail_change(i + 1, (j + count / 2), graph[i][j]);
                         }
-                        else second = ((i)*0.5+0.25);
-                        if(types[graph[i][j]].entrance.count(graph[i-1][j])==0){
-                        types[graph[i][j]].entrance.insert({graph[i-1][j],pair<double,double>(first,second)});
+                        else {
+                            second = ((i)*0.5+0.25);
+                            temp = check_wail_change(i + 1, (j + count / 2), graph[i][j]);
+                        }
+                        if (types[graph[i][j]].entrance.count(graph[i - 1][j]) == 0)
+                        {
+                            types[graph[i][j]].entrance.insert({graph[i - 1][j],temp});
                         }
                         if(types[graph[i-1][j]].height>2){
                             second = ((i-1)*0.5+0.25)-0.5;
+                            temp = check_wail_change(i - 2, (j + count / 2), graph[i-1][j]);
                         }
-                        else second = ((i-1)*0.5+0.25);
+                        else{
+                            second = ((i-1)*0.5+0.25);
+                            temp = check_wail_change(i - 1, (j + count / 2), graph[i-1][j]);
+                        }
                         if(types[graph[i-1][j]].entrance.count(graph[i][j])==0){
-                            types[graph[i-1][j]].entrance.insert({graph[i][j],pair<double,double>(first,second)});
+                            types[graph[i-1][j]].entrance.insert({graph[i][j],temp});
                         }
                     }
                     else{
@@ -3930,13 +4021,13 @@ void divide_space(){
         }
         // cerr<<i<<endl;
     }
-    // for(i=0;i<types.size();i++){
-    //     cerr<<"type : "<<types[i].type<<' '<<types[i].entrance.size()<<endl;
-    //     for (auto iter = types[i].entrance.begin(); iter != types[i].entrance.end(); ++iter) {
-    //         cerr << iter->first << ' '<<iter->second.first<<' '<<iter->second.second<<' ';
-    //     }
-    //     cerr<<endl;
-    // }
+    for(i=0;i<types.size();i++){
+        cerr<<"type : "<<types[i].type<<' '<<types[i].entrance.size()<<endl;
+        for (auto iter = types[i].entrance.begin(); iter != types[i].entrance.end(); ++iter) {
+            cerr << iter->first << ' '<<iter->second.first<<' '<<iter->second.second<<' ';
+        }
+        cerr<<endl;
+    }
     floyd_area();
     // for(int i=0;i<types.size();i++){
     //     for(int j=0;j<types.size();j++){
@@ -3969,8 +4060,8 @@ void print_target(int i, int j) {
         // cerr<<"dist "<<start<<"->"<<k<<" = "<<dist<<endl;
         i = k;
     }
-    cerr<<endl;
-    cerr<<dist<<"*"<<dis_area[start][j]<<endl;
+    // cerr<<endl;
+    // cerr<<dist<<"*"<<dis_area[start][j]<<endl;
 }
 void init_area(){
     for(int i=0;i<types.size();i++){
@@ -4029,29 +4120,39 @@ void studio_distance(){
         col = (studios[i].pos.first-0.25)/0.5;
         row = (studios[i].pos.second-0.25)/0.5;
         studios[i].studio_area_type = graph[row][col];
+        cerr <<"kkk"<<studios[i].pos.first << ' ' << studios[i].pos.second << ' ' << col<<' '<<row<<' '<<studios[i].studio_area_type << endl;
     }
     for(int i=0;i<robots.size();i++){
         col = (robots[i].pos.first-0.25)/0.5;
         row = (robots[i].pos.second-0.25)/0.5;
-        cerr<<col<<' '<<row<<endl;
+        // cerr<<col<<' '<<row<<endl;
         robots[i].robot_area_type = graph[row][col];
     }
     for(int i=0;i<studios.size();i++){
         x = studios[i].studio_area_type;
-        for(int j=i+1;j<studios.size();j++){
+        cerr << studios.size()<<endl;
+        for (int j = i + 1; j < studios.size(); j++)
+        {
             y = studios[j].studio_area_type;
+            // cerr<<"a"<<endl;
             if(lt(dis_area[studios[i].studio_area_type][studios[j].studio_area_type],1000)){
+                // cerr << i << ' ' << j << endl;
+                // cerr<<x<<' '<<y<<endl;
                 if(studios[i].studio_area_type!=studios[j].studio_area_type){
                     studio_dis[i][j] = calcuDis(studios[i].pos, types[x].entrance[target_sequence[x][y]]) + dis_area[x][y] + calcuDis(studios[j].pos, types[y].entrance[target_sequence[y][x]]);
                 }
                 else{
                     studio_dis[i][j]=calcuDis(studios[i].pos,studios[j].pos);
                 }
+                // cerr << "b" << endl;
             }
             else{
+                // cerr<<i<<' '<<j<<endl;
                 studio_dis[i][j] = 1000;
+                // cerr << "c" << endl;
             }
             studio_dis[j][i] = studio_dis[i][j];
+            cerr << j << endl;
         }
     }
     for(int i=0;i<robots.size();i++){
@@ -4071,11 +4172,12 @@ void studio_distance(){
             }
         }
     }
-    for(int i=0;i<robots.size();i++){
-        for(int j=0;j<studios.size();j++){
-            cerr<<i<<' '<<j<<' '<< "robot_distance = "<<init_robot_dis[i][j]<<endl;
-        }
-    }
+    // for (int i = 0; i < studios.size(); i++)
+    // {
+    //     for(int j=0;j<studios.size();j++){
+    //         cerr<<i<<' '<<j<<' '<< "studio_distance = "<<studio_dis[i][j]<<endl;
+    //     }
+    // }
 
     // cerr<<"type"<<robots[0].robot_area_type<<endl;
 
