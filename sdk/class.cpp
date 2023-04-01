@@ -231,6 +231,7 @@ bool readMapUntilOK() {
                 pair<double,double>xy_pos_robot(0,0);
                 // cout<<x<<" "<<y<<endl;
                 Robot  robot(count_robot,0,0,0,1,1,xy_pos_robot,0,pos_robot,-1, (99-row)*100+i);
+                rob_transID[(99-row)*100+i] = count_robot;
                 robot.pane_id = train.id;
                 robots.push_back(robot);
                 count_robot++;
@@ -241,6 +242,7 @@ bool readMapUntilOK() {
                 pair<double,double>pos_studio(x,y);
                 // cout<<x<<" "<<y<<endl;
                 Studio studio(count_studio,0,-1,pos_studio,0,0,0, (99-row)*100+i);
+                stu_transID[(99-row)*100+i] = count_studio;
                 studio.type = (int)line[i]-48;
                 studio.pane_id = train.id;
                 studios.push_back(studio);
