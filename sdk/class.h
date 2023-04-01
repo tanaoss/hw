@@ -94,6 +94,7 @@ struct Robot
     int pre_rote;
     int pre_cnt;
     int wait;
+    int node_id;
     int last_get_type;
     bool need_rote_wall;
     double radius;
@@ -107,7 +108,7 @@ struct Robot
         return false;
     }
     Robot(int _id, int _loc_id, int _get_type, double _time_val, double _collision_val, double _angular_velocity, pair<double, double> &_xy_pos,
-          double _direction, pair<double, double> &_pos, int _target_id = -1,int _wait = -1,int _lastSign = 0, int _isTurn = 0, double _radius = 0.45) : xy_pos(_xy_pos), pos(_pos)
+          double _direction, pair<double, double> &_pos, int _target_id = -1, int _node_id = 0,int _wait = -1,int _lastSign = 0, int _isTurn = 0, double _radius = 0.45) : xy_pos(_xy_pos), pos(_pos)
     {
         id = _id;
         loc_id = _loc_id;
@@ -124,6 +125,7 @@ struct Robot
         wait=_wait;
         need_rote_wall=false;
         radius = _radius;
+        node_id = _node_id;
     }
     void set(int _id, int _loc_id, int _get_type, double _time_val, double _collision_val, double _angular_velocity, pair<double, double> &&_xy_pos,
              double _direction, pair<double, double> &&_pos)
@@ -177,7 +179,8 @@ struct Studio
     int area;
     int studio_area_type;
     int pane_id;
-    Studio(int _id, int _type, int _r_id, pair<double, double> &_pos, int _r_time, int _bitSatus, int _pStatus) : id(_id), type(_type), r_id(_r_id), pos(_pos), r_time(_r_time), bitSatus(_bitSatus), pStatus(_pStatus)
+    int node_id;
+    Studio(int _id, int _type, int _r_id, pair<double, double> &_pos, int _r_time, int _bitSatus, int _pStatus, int _node_id) : id(_id), type(_type), r_id(_r_id), pos(_pos), r_time(_r_time), bitSatus(_bitSatus), pStatus(_pStatus), node_id(_node_id)
     {
     }
     void set(int _id, int _type, pair<double, double> &&_pos, int _r_time, int _bitSatus, int _pStatus)
@@ -217,6 +220,9 @@ struct Graph_node{
         id=_id;
         dis=_dis;
         pre_id=_pre_id;
+    }
+    bool operator < (const Graph_node & a) {
+        return dis - a.dis > 1e-7;
     }
 };//转换图节点
 

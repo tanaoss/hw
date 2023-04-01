@@ -6,6 +6,7 @@
 #include <cstring>
 #include <algorithm>
 #include <cstring>
+#include <queue>
 #include<unordered_map>
 #include"vec.h"
 #include "class.h"
@@ -62,9 +63,10 @@ vector<pair<double,double>>arri_Set;
 double Compute_redundancy=0;
 Ins ins_set[8];
 unordered_map<int,vector<Graph_node>> graph_edge[2];//点id的边集
-unordered_map<string,vector<Graph_node>>road[2];//路径
+unordered_map<int,vector<Graph_node>>road[2];//路径
 unordered_map<int,pair<double,double>> exist_id[2];//确定存在的id，便于建立边关系
 int graph_trans[100][100];
+int vis_node[10000];
 
 
 void initrobotInfo() {
@@ -222,7 +224,7 @@ bool readMapUntilOK() {
                 pair<double,double>pos_robot(x,y);
                 pair<double,double>xy_pos_robot(0,0);
                 // cout<<x<<" "<<y<<endl;
-                Robot  robot(count_robot,0,0,0,1,1,xy_pos_robot,0,pos_robot,-1);
+                Robot  robot(count_robot,0,0,0,1,1,xy_pos_robot,0,pos_robot,-1, (99-row)*100+i);
                 robot.pane_id = train.id;
                 robots.push_back(robot);
                 count_robot++;
@@ -232,7 +234,7 @@ bool readMapUntilOK() {
                 y = (100-count)*0.5-0.25;
                 pair<double,double>pos_studio(x,y);
                 // cout<<x<<" "<<y<<endl;
-                Studio studio(count_studio,0,-1,pos_studio,0,0,0);
+                Studio studio(count_studio,0,-1,pos_studio,0,0,0, (99-row)*100+i);
                 studio.type = (int)line[i]-48;
                 studio.pane_id = train.id;
                 studios.push_back(studio);
@@ -4216,6 +4218,21 @@ void Translation_graph_no(){
     
 }
 
-void Dijkstra(int s) {
-
+void Dijkstra(int s, int flag) {
+    priority_queue<Graph_node> q;
+    int id, pre_id;
+    double dis;
+    memset(vis_node, 0, sizeof(vis_node));
+    q.push(Graph_node(s, 0, -1));
+    while(!q.empty()) {
+        Graph_node now_node = q.top();
+        q.pop();
+        if(vis_node[now_node.id]) continue;
+        id = now_node.id;
+        dis = now_node.dis;
+        
+    }
+// unordered_map<int,vector<Graph_node>> graph_edge[2];//点id的边集
+// unordered_map<string,vector<Graph_node>>road[2];//路径
+// unordered_map<int,pair<double,double>> exist_id[2];//确定存在的id，便于建立边关系
 }
