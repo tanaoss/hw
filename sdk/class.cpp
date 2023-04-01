@@ -65,7 +65,7 @@ Ins ins_set[8];
 unordered_map<int,vector<Graph_node>> graph_edge[2];//点id的边集
 unordered_map<int,vector<Graph_node>>road[2];//路径
 unordered_map<int,pair<double,double>> exist_id[2];//确定存在的id，便于建立边关系
-unordered_map<int,int> stu_transID[2];//建立工作台id与转换后id的关系
+unordered_map<int,int> stu_transID;//建立工作台id与转换后id的关系
 int graph_trans[100][100];
 int vis_node[10000];
 double dis_node[10000];
@@ -4280,7 +4280,7 @@ void getEdgeRalative(){
     }
 }
 
-void Dijkstra(int s, int is_take) {
+void Dijkstra(int s, int is_take, int is_robot) {
     priority_queue<Graph_node> q;
     int from, pre_id, num, i, to, next_id;
     int studio_id;
@@ -4301,14 +4301,14 @@ void Dijkstra(int s, int is_take) {
         vis_node[now_node.id] = 1;
 
 
-        if(stu_transID.count(from)) {
-            count--;
-            studio_id = stu_transID[from];
-            pre_id = now_node.pre_id;
-            // while(pre_id != s) {
-            //     road[is_take][]
-            // }
-        }
+        // if(stu_transID.count(from)) {
+        //     count--;
+        //     studio_id = stu_transID[from];
+        //     pre_id = now_node.pre_id;
+        //     while(pre_id != s) {
+        //         road[is_take][]
+        //     }
+        // }
 
         if(count == 0) break;
 
