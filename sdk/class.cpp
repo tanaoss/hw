@@ -6,6 +6,7 @@
 #include <cstring>
 #include <algorithm>
 #include <cstring>
+#include<unordered_map>
 #include"vec.h"
 #include "class.h"
 
@@ -60,6 +61,11 @@ vector<type_area>types;
 vector<pair<double,double>>arri_Set;
 double Compute_redundancy=0;
 Ins ins_set[8];
+unordered_map<int,vector<Graph_node>> graph_edge;//点id的边集
+unordered_map<string,vector<Graph_node>>road;//路径
+int graph_trans[100][100];
+
+
 void initrobotInfo() {
     double weightMin = 0.45 * 0.45 * Pi * 20;
     double weightMax = 0.53 * 0.53 * Pi * 20;
@@ -4088,6 +4094,14 @@ void studio_distance(){
 double Angle_conversion(double angle){
     return fabs(angle)/Pi;
 }//将角度转换为距离
+bool check_4(int i,int j){
+    if(i-1<0||j-1<0)return false;
+    return graph_trans[i][j]!=-2&&graph_trans[i][j]==graph_trans[i][j-1]&&graph_trans[i][j-1]==graph_trans[i-1][j-1]&&graph_trans[i-1][j]==graph_trans[i-1][j-1];
+}//检查坐标i,j是否是一个四个格子的合法点
+bool check_6(int i,int j){
+    if(i-2<0||j-2<0)return false;
+    return graph_trans[i][j-2]!=-2&&graph_trans[i][j-2]==graph_trans[i-1][j-2]&& graph_trans[i-2][j]==graph_trans[i-2][j-1]&&graph_trans[i-2][j-1]!=-2&&check_4(i,j);
+}//检查坐标i,j是否是一个四个格子的合法点
 void Translation_graph_no(){
-    
+
 }

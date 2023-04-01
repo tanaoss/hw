@@ -4,7 +4,6 @@
 #include <string>
 #include <cmath>
 #include <map>
-#include<unordered_map>
 using namespace std;
 
 #define Pi 3.141592653589793
@@ -224,8 +223,6 @@ struct Graph_node{
 };//转换图节点
 
 
-unordered_map<int,vector<Graph_node>> graph_trans;//点id的边集
-vector<vector<int,vector<int>>> road;//点i-j的路径
 struct Line { pair<double, double>  P; pair<double, double> v; };      // 直线（点向式）
 bool eq(double a, double b);// ==
 bool gt(double a, double b);// >
@@ -351,6 +348,7 @@ void floyd_area();
 void studio_distance();
 
 void print_target(int i, int j);
+void init_trans();//将原来的地图中不是-2的部分全部更改为0
 void Translation_graph_no();//转换机器人不带物品的原始图
 void Translation_graph_has();//转换机器人带物品的原始图
 double Angle_conversion(double angle);//将角度转换为距离
