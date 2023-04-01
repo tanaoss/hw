@@ -71,6 +71,8 @@ int graph_trans[100][100];
 int vis_node[10000];
 double dis_node[10000];
 int pre_node[10000];
+double dis_stuios[50][50][2];
+double dis_robot_to_studios[4][50];
 
 
 void initrobotInfo() {
@@ -4326,11 +4328,18 @@ void Dijkstra(int s, int is_take, int is_robot) {
             studio_id = stu_transID[from];
             pre_id = now_node.pre_id;
             next_id = from;
+            dis = now_node.dis;
             road_id = transID(from_id, is_robot, studio_id);
             road[is_take][road_id].emplace_back(Graph_node{s, 0, pre_id});
+            if(is_robot) {
+                dis_robot_to_studios[from_id][studio_id] = dis;
+            }
+            else {
+                dis_stuios[from][studio_id][is_take] = dis;
+                // dis_stuios[studio_id][from] = dis;
+            }
             while(pre_id != s) {
                 id = pre_id;
-                dis = dis_node[id];
                 pre_id = pre_node[pre_id];
                 // id转向
                 if(!eq(calAngleToDis(pre_id, id, next_id), 0)){
