@@ -65,7 +65,7 @@ Ins ins_set[8];
 unordered_map<int,vector<Graph_node>> graph_edge[2];//点id的边集
 unordered_map<int,vector<Graph_node>>road[2];//路径
 unordered_map<int,pair<double,double>> exist_id[2];//确定存在的id，便于建立边关系
-unordered_map<int,int> stu_transID;//建立工作台id与转换后id的关系
+unordered_map<int,int> stu_transID[2];//建立工作台id与转换后id的关系
 int graph_trans[100][100];
 int vis_node[10000];
 double dis_node[10000];
@@ -4213,19 +4213,19 @@ bool check_4(int i,int j){
     if(i+1>=100||j-1<0)return false;
     return graph_trans[i][j]!=-2&&graph_trans[i][j]==graph_trans[i][j-1]&&graph_trans[i][j-1]==graph_trans[i+1][j-1]&&graph_trans[i+1][j]==graph_trans[i+1][j-1];
 }//检查坐标i,j是否是一个四个格子的合法点
-pair<bool,pair<double,double>> check_8(int i,int j){
+pair<int,pair<double,double>> check_8(int i,int j){
     if(check_4(i,j)&&check_4(i,j+1)&&check_4(i-1,j)&&check_4(i-1,j+1)){
-        return {true,make_pair<double,double>(0.5*j+0.25,0.5*i+0.25)};
+        return {1,make_pair<double,double>(0.5*j+0.25,0.5*i+0.25)};
     }else if((!check_4(i,j))&&check_4(i,j+1)&&check_4(i-1,j)&&check_4(i-1,j+1)){
-        return {true,make_pair<double,double>(0.5*j+0.47,0.5*i+0.03)};
+        return {2,make_pair<double,double>(0.5*j+0.47,0.5*i+0.03)};
     }else if(check_4(i,j)&&check_4(i,j+1)&&(!check_4(i-1,j))&&check_4(i-1,j+1)){
-        return {true,make_pair<double,double>(0.5*j+0.47,0.5*i+0.47)};
+        return {3,make_pair<double,double>(0.5*j+0.47,0.5*i+0.47)};
     }else if(check_4(i,j)&&(!check_4(i,j+1))&&check_4(i-1,j)&&check_4(i-1,j+1)){
-        return {true,make_pair<double,double>(0.5*j+0.03,0.5*i+0.03)};
+        return {4,make_pair<double,double>(0.5*j+0.03,0.5*i+0.03)};
     }else if(check_4(i,j)&&check_4(i,j+1)&&check_4(i-1,j)&&(!check_4(i-1,j+1))){
-        return {true,make_pair<double,double>(0.5*j+0.03,0.5*i+0.47)};
+        return {5,make_pair<double,double>(0.5*j+0.03,0.5*i+0.47)};
     }else{
-        return {false,make_pair<double,double>(0,0)};
+        return {0,make_pair<double,double>(0,0)};
     }
     
 }//检查坐标i,j是否是一个八个格子的合法点
@@ -4235,6 +4235,7 @@ void Translation_graph_no(){
             if(check_4(i,j)){
                 int id=100*i+j;
                 exist_id[0][id]=make_pair<double,double>(0.5*j,0.5*i+0.5);
+
             }
         }
     }
@@ -4244,7 +4245,7 @@ void Translation_graph_has(){
         for(int j=0;j<100;j++){
             auto tmp=check_8(i,j);
             int id=100*i+j;
-            if(tmp.first){
+            if(tmp.first!=0){
                 exist_id[1][id]=tmp.second;
             }
         }
