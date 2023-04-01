@@ -57,6 +57,7 @@ pair<double ,double> Root;
 pair<double ,double> Collision_point;
 vector<PayLoad> pl_g;
 vector<type_area>types;
+vector<pair<double,double>>arri_Set;
 double Compute_redundancy=0;
 Ins ins_set[8];
 void initrobotInfo() {
@@ -3124,7 +3125,7 @@ Ins contr_one_rob(Robot& robot , const PayLoad& payload){
     ins_t.forward=get_v_now(robot,payload);
     if(lt(payload.distance,1)&&!p1.second)
         ins_t.forward=0;
-    if(gt(fabs(ins_t.rotate),Pi/2))
+    if(!p1.second)
         ins_t.forward=0;
     return ins_t;
 }
@@ -3166,13 +3167,17 @@ pair<double,bool> get_w_now(const Robot& robot, const PayLoad& payload){
         can_stop_flag=1;
         StopA=0;        
     }
+    if(state.FrameID>=161&&state.FrameID<=1452){
+        cerr<<"ID: "<<state.FrameID<<" "<<robot.id<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<" "<<payload.distance<<endl;
+        cerr<<can_st<<endl;
+    }
     double tmpAngle =can_stop_flag?StopA:rateAngle_fabs*payload.sign;
     return {tmpAngle,can_st} ;
 }
 double get_v_now(const Robot& robot, const PayLoad& payload){
     double res_v=6;
     if(lt(payload.distance,1)){
-        res_v=3;
+        res_v=1;
     }else if(lt(payload.distance,0.5)){
         res_v=0.5;
     }
@@ -4181,4 +4186,10 @@ void studio_distance(){
 
     // cerr<<"type"<<robots[0].robot_area_type<<endl;
 
+}
+double Angle_conversion(double angle){
+    return fabs(angle)/Pi;
+}//将角度转换为距离
+void Translation_graph_no(){
+    
 }
