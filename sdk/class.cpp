@@ -66,9 +66,11 @@ unordered_map<int,vector<Graph_node>> graph_edge[2];//点id的边集
 unordered_map<int,vector<Graph_node>>road[2];//路径
 unordered_map<int,pair<double,double>> exist_id[2];//确定存在的id，便于建立边关系
 unordered_map<int,int> stu_transID;//建立工作台id与转换后id的关系
+unordered_map<int,int> rob_transID;//建立机器人id与转换后id的关系
 int graph_trans[100][100];
 int vis_node[10000];
 double dis_node[10000];
+int pre_node[10000];
 
 
 void initrobotInfo() {
@@ -4239,15 +4241,15 @@ void Translation_graph_no(){
                 for(int t=0;t<studios.size();t++){
                     double tmpDis=calcuDis(studios[t].pos,pos);
                     if(lt(tmpDis,0.4)){
-                        graph_edge[0][id].push_back(Graph_node(studios[t].node_id,1,id,-2));
-                        graph_edge[0][studios[t].node_id].push_back(Graph_node(id,1,studios[t].node_id,-2));
+                        graph_edge[0][id].push_back(Graph_node(studios[t].node_id,1,id));
+                        graph_edge[0][studios[t].node_id].push_back(Graph_node(id,1,studios[t].node_id));
                     }
                 }
                 for(int t=0;t<4;t++){
                     double tmpDis=calcuDis(robots[t].pos,pos);
                     if(lt(tmpDis,0.4)){
-                        graph_edge[0][id].push_back(Graph_node(robots[t].node_id,1,id,-2));
-                        graph_edge[0][robots[t].node_id].push_back(Graph_node(id,1,robots[t].node_id,-2));
+                        graph_edge[0][id].push_back(Graph_node(robots[t].node_id,1,id));
+                        graph_edge[0][robots[t].node_id].push_back(Graph_node(id,1,robots[t].node_id));
                     }
                 }
             }
@@ -4265,15 +4267,15 @@ void Translation_graph_has(){
                 for(int t=0;t<studios.size();t++){
                     double tmpDis=calcuDis(studios[t].pos,pos);
                     if(lt(tmpDis,0.4)){
-                        graph_edge[1][id].push_back(Graph_node(studios[t].node_id,1,id,-2));
-                        graph_edge[1][studios[t].node_id].push_back(Graph_node(id,1,studios[t].node_id,-2));
+                        graph_edge[1][id].push_back(Graph_node(studios[t].node_id,1,id));
+                        graph_edge[1][studios[t].node_id].push_back(Graph_node(id,1,studios[t].node_id));
                     }
                 }
                 for(int t=0;t<4;t++){
                     double tmpDis=calcuDis(robots[t].pos,pos);
                     if(lt(tmpDis,0.4)){
-                        graph_edge[1][id].push_back(Graph_node(robots[t].node_id,1,id,-2));
-                        graph_edge[1][robots[t].node_id].push_back(Graph_node(id,1,robots[t].node_id,-2));
+                        graph_edge[1][id].push_back(Graph_node(robots[t].node_id,1,id));
+                        graph_edge[1][robots[t].node_id].push_back(Graph_node(id,1,robots[t].node_id));
                     }
                 }
                 if(tmp.first==1){
@@ -4282,20 +4284,20 @@ void Translation_graph_has(){
                     int id_tmp3=(i-1)*100+(j-1);
                     int id_tmp4=(i-1)*100+(j+1);
                     if(stu_transID.count(id_tmp1)){
-                        graph_edge[1][id].push_back(Graph_node(id_tmp1,1,id,-2));
-                        graph_edge[1][id_tmp1].push_back(Graph_node(id,1,id_tmp1,-2));
+                        graph_edge[1][id].push_back(Graph_node(id_tmp1,1,id));
+                        graph_edge[1][id_tmp1].push_back(Graph_node(id,1,id_tmp1));
                     }
                     if(stu_transID.count(id_tmp2)){
-                        graph_edge[1][id].push_back(Graph_node(id_tmp2,1,id,-2));
-                        graph_edge[1][id_tmp2].push_back(Graph_node(id,1,id_tmp2,-2));
+                        graph_edge[1][id].push_back(Graph_node(id_tmp2,1,id));
+                        graph_edge[1][id_tmp2].push_back(Graph_node(id,1,id_tmp2));
                     }
                     if(stu_transID.count(id_tmp3)){
-                        graph_edge[1][id].push_back(Graph_node(id_tmp3,1,id,-2));
-                        graph_edge[1][id_tmp3].push_back(Graph_node(id,1,id_tmp3,-2));
+                        graph_edge[1][id].push_back(Graph_node(id_tmp3,1,id));
+                        graph_edge[1][id_tmp3].push_back(Graph_node(id,1,id_tmp3));
                     }
                     if(stu_transID.count(id_tmp4)){
-                        graph_edge[1][id].push_back(Graph_node(id_tmp4,1,id,-2));
-                        graph_edge[1][id_tmp4].push_back(Graph_node(id,1,id_tmp4,-2));
+                        graph_edge[1][id].push_back(Graph_node(id_tmp4,1,id));
+                        graph_edge[1][id_tmp4].push_back(Graph_node(id,1,id_tmp4));
                     }                    
                 }
             }
@@ -4311,7 +4313,7 @@ void getEdgeRalative(){
                 if(i==idi&&j==idj)continue;
                 int tmpId=idi*100+idj;
                 if(exist_id[0].count(tmpId)){
-                    graph_edge[0][it.first].push_back(Graph_node(tmpId,1,it.first,tmpId));
+                    graph_edge[0][it.first].push_back(Graph_node(tmpId,1,it.first));
                 }
             }
         }
@@ -4324,60 +4326,87 @@ void getEdgeRalative(){
                 if(i==idi&&j==idj)continue;
                 int tmpId=idi*100+idj;
                 if(exist_id[1].count(tmpId)){
-                    graph_edge[1][it.first].push_back(Graph_node(tmpId,1,it.first,tmpId));
+                    graph_edge[1][it.first].push_back(Graph_node(tmpId,1,it.first));
                 }
             }
         }
     }
 }
 
+
+
+double calAngleToDis(int x, int y, int z) {
+    if(x == y) return 0;
+    if(y == z) return 0;
+
+    Vec vec1 = Vec((x / 100) - (y / 100), (x % 100) - (y % 100));
+    Vec vec2 = Vec((z / 100) - (y / 100), (z % 100) - (y % 100));
+    double angle = acos(cos_t(vec1, vec2));
+    return Angle_conversion(angle);
+}
+
+int transID(int from_id, int is_robot, int to_id) {
+    return (from_id + is_robot * 50) * 54 + to_id;
+}
+
 void Dijkstra(int s, int is_take, int is_robot) {
-    priority_queue<Graph_node> q;
+    priority_queue<Graph_node, vector<Graph_node>, cmp_Graph_node> q;
     int from, pre_id, num, i, to, next_id;
-    int studio_id;
+    int from_id;
+    int studio_id, id, road_id;
     int count = studios.size();
     double dis, new_dis;
+    from_id = is_robot? rob_transID[s]: stu_transID[s];
     for(i = 0; i < 1000; ++i) {
         vis_node[i] = 0;
         dis_node[i] = 1000;
     }
-    q.push(Graph_node(s, 0, -1, -1));
+    q.push(Graph_node(s, 0, s));
     while(!q.empty()) {
         Graph_node now_node = q.top();
         q.pop();
         if(vis_node[now_node.id]) continue;
         from = now_node.id;
         dis = now_node.dis;
-        next_id = now_node.next_id;
+        pre_id = now_node.pre_id;
         vis_node[now_node.id] = 1;
 
 
-        // if(stu_transID.count(from)) {
-        //     count--;
-        //     studio_id = stu_transID[from];
-        //     pre_id = now_node.pre_id;
-        //     while(pre_id != s) {
-        //         road[is_take][]
-        //     }
-        // }
+        if(stu_transID.count(from)) {
+            count--;
+            studio_id = stu_transID[from];
+            pre_id = now_node.pre_id;
+            next_id = from;
+            road_id = transID(from_id, is_robot, studio_id);
+            road[is_take][road_id].emplace_back(Graph_node{s, 0, pre_id});
+            while(pre_id != s) {
+                id = pre_id;
+                dis = dis_node[id];
+                pre_id = pre_node[pre_id];
+                // id转向
+                if(!eq(calAngleToDis(pre_id, id, next_id), 0)){
+                    road[is_take][studio_id].emplace_back(Graph_node{id, dis - dis_node[id], pre_id});
+                    next_id = id;
+                    dis = dis_node[id];
+                }
+            }
+            road[is_take][studio_id].reserve(sizeof(road[is_take][studio_id]));
+        }
 
         if(count == 0) break;
 
         num = graph_edge[is_take][from].size();
         for(i = 0; i < num; ++i) {
             to = graph_edge[is_take][from][i].id;
-            new_dis = dis + graph_edge[is_take][from][i].dis;
+            new_dis = dis + graph_edge[is_take][from][i].dis + calAngleToDis(pre_id, from, to);
             pre_id = graph_edge[is_take][from][i].pre_id;
             if(lt(new_dis, dis_node[to])) {
-                q.push(Graph_node{to, new_dis, pre_id, next_id});
+                q.push(Graph_node{to, new_dis, pre_id});
                 dis_node[to] = new_dis;
+                pre_node[to] = pre_id;
             }
         }
     }
-// unordered_map<int,vector<Graph_node>> graph_edge[2];//点id的边集
-// unordered_map<string,vector<Graph_node>>road[2];//路径
-// unordered_map<int,pair<double,double>> exist_id[2];//确定存在的id，便于建立边关系
-// unordered_map<int,int> stu_transID;//建立工作台id与转换后id的关系
 }
 void trans_studio_rob_toID(){
     int cnt=1;
