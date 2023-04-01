@@ -4,6 +4,7 @@
 #include <string>
 #include <cmath>
 #include <map>
+#include<unordered_map>
 using namespace std;
 
 #define Pi 3.141592653589793
@@ -209,7 +210,20 @@ struct type_area
     int height;
     map<int,pair<double,double>> entrance;
 };
+struct Graph_node{
+    int id;//i*100+j
+    int pre_id;//最短路中的前置pre_id;
+    double dis;
+    Graph_node(int _id,double _dis,int _pre_id=0){
+        id=_id;
+        dis=_dis;
+        pre_id=_pre_id;
+    }
+};//转换图节点
 
+
+unordered_map<int,vector<Graph_node>> graph_trans;//点id的边集
+vector<vector<int,vector<int>>> road;//点i-j的路径
 struct Line { pair<double, double>  P; pair<double, double> v; };      // 直线（点向式）
 bool eq(double a, double b);// ==
 bool gt(double a, double b);// >
@@ -335,3 +349,7 @@ void floyd_area();
 void studio_distance();
 
 void print_target(int i, int j);
+void Translation_graph_no();//转换机器人不带物品的原始图
+void Translation_graph_has();//转换机器人带物品的原始图
+double Angle_conversion(double angle);//将角度转换为距离
+void Dijkstra(int s);//对源点s做最短路
