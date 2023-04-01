@@ -217,7 +217,7 @@ struct Graph_node{
     int pre_id;//最短路中的前置pre_id;
     int next_id;
     double dis;
-    Graph_node(int _id,double _dis,int _pre_id=0, int _next_id){
+    Graph_node(int _id,double _dis,int _pre_id, int _next_id){
         id=_id;
         dis=_dis;
         pre_id=_pre_id;
