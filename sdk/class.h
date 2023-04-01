@@ -180,8 +180,10 @@ struct Studio
     int studio_area_type;
     int pane_id;
     int node_id;
+    bool corner;
     Studio(int _id, int _type, int _r_id, pair<double, double> &_pos, int _r_time, int _bitSatus, int _pStatus, int _node_id) : id(_id), type(_type), r_id(_r_id), pos(_pos), r_time(_r_time), bitSatus(_bitSatus), pStatus(_pStatus), node_id(_node_id)
     {
+        corner=false;
     }
     void set(int _id, int _type, pair<double, double> &&_pos, int _r_time, int _bitSatus, int _pStatus)
     {
@@ -191,6 +193,7 @@ struct Studio
         r_time = _r_time;
         bitSatus = _bitSatus;
         pStatus = _pStatus;
+        
     }
     bool operator!=(Studio s1){
         if(pos!=s1.pos||s1.id!=id||type!=s1.type||s1.r_id!=r_id||r_time!=s1.r_time||bitSatus!=s1.bitSatus||s1.pStatus!=pStatus){
@@ -366,6 +369,8 @@ void Dijkstra(int s, int is_take, int is_robot);//对源点s做最短路，s为n
 bool check_4(int i,int j);//检查坐标i,j是否是一个四个格子的合法点
 pair<int,pair<double,double>> check_8(int i,int j);//检查坐标i,j是否是一个四个格子的合法点
 void getEdgeRalative();//得到边关系
+void trans_studio_rob_toID();//建立工作台和机器人id与编号的关系；
+bool is_corner(int id);//判断工作台是不是在墙角
 
 double calAngleToDis(int x, int y, int z);//nodeID转角度转距离
 int transID(int from_id, int is_robot, int to_id);//from_id -> to_id 转化为 road_id
