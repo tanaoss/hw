@@ -61,8 +61,12 @@ vector<type_area>types;
 vector<pair<double,double>>arri_Set;
 double Compute_redundancy=0;
 Ins ins_set[8];
-unordered_map<int,vector<Graph_node>> graph_edge;//点id的边集
-unordered_map<string,vector<Graph_node>>road;//路径
+unordered_map<int,vector<Graph_node>> graph_edge_no;//点id的边集
+unordered_map<int,vector<Graph_node>> graph_edge_has;//点id的边集
+unordered_map<string,vector<Graph_node>>road_no;//路径
+unordered_map<string,vector<Graph_node>>road_has;//路径
+unordered_map<int,pair<double,double>> exist_id_no;//确定存在的id，便于建立边关系
+unordered_map<int,pair<double,double>> exist_id_has;//确定存在的id，便于建立边关系
 int graph_trans[100][100];
 
 
@@ -4207,10 +4211,10 @@ bool check_4(int i,int j){
     if(i-1<0||j-1<0)return false;
     return graph_trans[i][j]!=-2&&graph_trans[i][j]==graph_trans[i][j-1]&&graph_trans[i][j-1]==graph_trans[i-1][j-1]&&graph_trans[i-1][j]==graph_trans[i-1][j-1];
 }//检查坐标i,j是否是一个四个格子的合法点
-bool check_8(int i,int j){
-    if(i-2<0||j-2<0)return false;
-    return graph_trans[i][j-2]!=-2&&graph_trans[i][j-2]==graph_trans[i-1][j-2]&& graph_trans[i-2][j]==graph_trans[i-2][j-1]&&graph_trans[i-2][j-1]!=-2&&check_4(i,j);
-}//检查坐标i,j是否是一个四个格子的合法点
+pair<bool,pair<double,double>> check_8(int i,int j){
+    if(i-2<0||j-2<0)return {};
+    
+}//检查坐标i,j是否是一个八个格子的合法点
 void Translation_graph_no(){
     
 }

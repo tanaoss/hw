@@ -213,8 +213,7 @@ struct Graph_node{
     int id;//i*100+j
     int pre_id;//最短路中的前置pre_id;
     double dis;
-    pair<double,double>pos;
-    Graph_node(int _id,double _dis ,int _pre_id=0){
+    Graph_node(int _id,double _dis,int _pre_id=0){
         id=_id;
         dis=_dis;
         pre_id=_pre_id;
@@ -353,4 +352,4 @@ void Translation_graph_has();//转换机器人带物品的原始图
 double Angle_conversion(double angle);//将角度转换为距离
 void Dijkstra(int s);//对源点s做最短路
 bool check_4(int i,int j);//检查坐标i,j是否是一个四个格子的合法点
-bool check_8(int i,int j);//检查坐标i,j是否是一个四个格子的合法点
+pair<bool,pair<double,double>> check_8(int i,int j);//检查坐标i,j是否是一个四个格子的合法点
