@@ -61,12 +61,9 @@ vector<type_area>types;
 vector<pair<double,double>>arri_Set;
 double Compute_redundancy=0;
 Ins ins_set[8];
-unordered_map<int,vector<Graph_node>> graph_edge_no;//点id的边集
-unordered_map<int,vector<Graph_node>> graph_edge_has;//点id的边集
-unordered_map<string,vector<Graph_node>>road_no;//路径
-unordered_map<string,vector<Graph_node>>road_has;//路径
-unordered_map<int,pair<double,double>> exist_id_no;//确定存在的id，便于建立边关系
-unordered_map<int,pair<double,double>> exist_id_has;//确定存在的id，便于建立边关系
+unordered_map<int,vector<Graph_node>> graph_edge[2];//点id的边集
+unordered_map<string,vector<Graph_node>>road[2];//路径
+unordered_map<int,pair<double,double>> exist_id[2];//确定存在的id，便于建立边关系
 int graph_trans[100][100];
 
 
@@ -4226,4 +4223,8 @@ pair<bool,pair<double,double>> check_8(int i,int j){
 }//检查坐标i,j是否是一个八个格子的合法点
 void Translation_graph_no(){
     
+}
+
+void Dijkstra(int s) {
+
 }
