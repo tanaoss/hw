@@ -64,6 +64,7 @@ Ins ins_set[8];
 unordered_map<int,vector<Graph_node>> graph_edge[2];//点id的边集
 unordered_map<string,vector<Graph_node>>road[2];//路径
 unordered_map<int,pair<double,double>> exist_id[2];//确定存在的id，便于建立边关系
+unordered_map<int,int> stu_transID;//建立工作台id与转换后id的关系
 int graph_trans[100][100];
 
 
@@ -4217,14 +4218,63 @@ pair<bool,pair<double,double>> check_8(int i,int j){
     }else if(check_4(i,j)&&check_4(i,j+1)&&(!check_4(i-1,j))&&check_4(i-1,j+1)){
         return {true,make_pair<double,double>(0.5*j+0.47,0.5*i+0.47)};
     }else if(check_4(i,j)&&(!check_4(i,j+1))&&check_4(i-1,j)&&check_4(i-1,j+1)){
-        return {true,make_pair<double,double>(0.5*j+0.47,0.5*i+0.47)};
+        return {true,make_pair<double,double>(0.5*j+0.03,0.5*i+0.03)};
+    }else if(check_4(i,j)&&check_4(i,j+1)&&check_4(i-1,j)&&(!check_4(i-1,j+1))){
+        return {true,make_pair<double,double>(0.5*j+0.03,0.5*i+0.47)};
+    }else{
+        return {false,make_pair<double,double>(0,0)};
     }
     
 }//检查坐标i,j是否是一个八个格子的合法点
 void Translation_graph_no(){
-    
+    for(int i=0;i<100;i++){
+        for(int j=0;j<100;j++){
+            if(check_4(i,j)){
+                int id=100*i+j;
+                exist_id[0][id]=make_pair<double,double>(0.5*j,0.5*i+0.5);
+            }
+        }
+    }
 }
-
+void Translation_graph_has(){
+    for(int i=0;i<100;i++){
+        for(int j=0;j<100;j++){
+            auto tmp=check_8(i,j);
+            int id=100*i+j;
+            if(tmp.first){
+                exist_id[1][id]=tmp.second;
+            }
+        }
+    }    
+}//转换机器人带物品的原始图
+void getEdgeRalative(){
+    for(auto& it:exist_id[0]){
+        int idi=it.first/100;
+        int idj=it.first-it.first/100;
+        for(int i=idi-1;i<=idi+1;i++){
+            for(int j=idj-1;j<=idj+1;j++){
+                if(i==idi&&j==idj)continue;
+                int tmpId=idi*100+idj;
+                if(exist_id[0].count(tmpId)){
+                    graph_edge[0][it.first].push_back(Graph_node(tmpId,1,it.first));
+                }
+            }
+        }
+    }
+    for(auto& it:exist_id[1]){
+        int idi=it.first/100;
+        int idj=it.first-it.first/100;
+        for(int i=idi-1;i<=idi+1;i++){
+            for(int j=idj-1;j<=idj+1;j++){
+                if(i==idi&&j==idj)continue;
+                int tmpId=idi*100+idj;
+                if(exist_id[1].count(tmpId)){
+                    graph_edge[1][it.first].push_back(Graph_node(tmpId,1,it.first));
+                }
+            }
+        }
+    }
+}
 void Dijkstra(int s) {
 
 }
