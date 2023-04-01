@@ -4085,4 +4085,9 @@ void studio_distance(){
     // cerr<<"type"<<robots[0].robot_area_type<<endl;
 
 }
-
+double Angle_conversion(double angle){
+    return fabs(angle)/Pi;
+}//将角度转换为距离
+void Translation_graph_no(){
+    
+}
