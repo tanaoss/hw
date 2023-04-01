@@ -4278,19 +4278,25 @@ void getEdgeRalative(){
     }
 }
 
-void Dijkstra(int s, int flag) {
+void Dijkstra(int s, int is_take) {
     priority_queue<Graph_node> q;
-    int id, pre_id;
-    double dis;
+    int from, pre_id, num, i, to;
+    double dis, new_dis;
     memset(vis_node, 0, sizeof(vis_node));
     q.push(Graph_node(s, 0, -1));
     while(!q.empty()) {
         Graph_node now_node = q.top();
         q.pop();
         if(vis_node[now_node.id]) continue;
-        id = now_node.id;
+        from = now_node.id;
         dis = now_node.dis;
-        
+        num = graph_edge[is_take][from].size();
+        for(i = 0; i < num; ++i) {
+            to = graph_edge[is_take][from][i].id;
+            new_dis = dis + graph_edge[is_take][from][i].dis;
+            pre_id = graph_edge[is_take][from][i].pre_id;
+            
+        }
     }
 // unordered_map<int,vector<Graph_node>> graph_edge[2];//点id的边集
 // unordered_map<string,vector<Graph_node>>road[2];//路径

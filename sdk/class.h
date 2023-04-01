@@ -215,11 +215,13 @@ struct type_area
 struct Graph_node{
     int id;//i*100+j
     int pre_id;//最短路中的前置pre_id;
+    int next_id;
     double dis;
-    Graph_node(int _id,double _dis,int _pre_id=0){
+    Graph_node(int _id,double _dis,int _pre_id=0, int _next_id){
         id=_id;
         dis=_dis;
         pre_id=_pre_id;
+        next_id = _next_id;
     }
     bool operator < (const Graph_node & a) {
         return dis - a.dis > 1e-7;
@@ -356,7 +358,7 @@ void init_trans();//将原来的地图中不是-2的部分全部更改为0
 void Translation_graph_no();//转换机器人不带物品的原始图
 void Translation_graph_has();//转换机器人带物品的原始图
 double Angle_conversion(double angle);//将角度转换为距离
-void Dijkstra(int s, int flag);//对源点s做最短路
+void Dijkstra(int s, int is_take);//对源点s做最短路
 bool check_4(int i,int j);//检查坐标i,j是否是一个四个格子的合法点
 pair<bool,pair<double,double>> check_8(int i,int j);//检查坐标i,j是否是一个四个格子的合法点
 void getEdgeRalative();//得到边关系
