@@ -4391,5 +4391,5 @@ void trans_studio_rob_toID(){
 bool is_corner(int id){
     int i=id/100;
     int j=id-i*100;
-    bool leg1
+    bool leg1;
 }//判断工作台是不是在墙角
