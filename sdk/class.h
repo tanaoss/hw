@@ -221,10 +221,16 @@ struct Graph_node{
         dis=_dis;
         pre_id=_pre_id;
     }
-    bool operator < (const Graph_node & a) {
-        return dis - a.dis > 1e-7;
-    }
+    
 };//转换图节点
+
+struct cmp_Graph_node
+{
+    bool operator()(const Graph_node &a,const Graph_node &b)
+    {
+        return a.dis - b.dis < -1e-7;
+    }
+};
 
 
 struct Line { pair<double, double>  P; pair<double, double> v; };      // 直线（点向式）
@@ -356,7 +362,10 @@ void init_trans();//将原来的地图中不是-2的部分全部更改为0
 void Translation_graph_no();//转换机器人不带物品的原始图
 void Translation_graph_has();//转换机器人带物品的原始图
 double Angle_conversion(double angle);//将角度转换为距离
-void Dijkstra(int s, int is_take, int is_robot);//对源点s做最短路
+void Dijkstra(int s, int is_take, int is_robot);//对源点s做最短路，s为node_id
 bool check_4(int i,int j);//检查坐标i,j是否是一个四个格子的合法点
 pair<int,pair<double,double>> check_8(int i,int j);//检查坐标i,j是否是一个四个格子的合法点
 void getEdgeRalative();//得到边关系
+
+double calAngleToDis(int x, int y, int z);//nodeID转角度转距离
+int transID(int from_id, int is_robot, int to_id);//from_id -> to_id 转化为 road_id

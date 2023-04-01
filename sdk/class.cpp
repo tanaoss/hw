@@ -66,6 +66,7 @@ unordered_map<int,vector<Graph_node>> graph_edge[2];//点id的边集
 unordered_map<int,vector<Graph_node>>road[2];//路径
 unordered_map<int,pair<double,double>> exist_id[2];//确定存在的id，便于建立边关系
 unordered_map<int,int> stu_transID;//建立工作台id与转换后id的关系
+unordered_map<int,int> rob_transID;//建立机器人id与转换后id的关系
 int graph_trans[100][100];
 int vis_node[10000];
 double dis_node[10000];
@@ -4282,6 +4283,7 @@ void getEdgeRalative(){
 }
 
 
+
 double calAngleToDis(int x, int y, int z) {
     if(x == y) return 0;
     if(y == z) return 0;
@@ -4292,12 +4294,18 @@ double calAngleToDis(int x, int y, int z) {
     return Angle_conversion(angle);
 }
 
+int transID(int from_id, int is_robot, int to_id) {
+    return (from_id + is_robot * 50) * 54 + to_id;
+}
+
 void Dijkstra(int s, int is_take, int is_robot) {
-    priority_queue<Graph_node> q;
+    priority_queue<Graph_node, vector<Graph_node>, cmp_Graph_node> q;
     int from, pre_id, num, i, to, next_id;
-    int studio_id, id;
+    int from_id;
+    int studio_id, id, road_id;
     int count = studios.size();
     double dis, new_dis;
+    from_id = is_robot? rob_transID[s]: stu_transID[s];
     for(i = 0; i < 1000; ++i) {
         vis_node[i] = 0;
         dis_node[i] = 1000;
@@ -4317,11 +4325,19 @@ void Dijkstra(int s, int is_take, int is_robot) {
             count--;
             studio_id = stu_transID[from];
             pre_id = now_node.pre_id;
+            next_id = from;
+            road_id = transID(from_id, is_robot, studio_id);
+            road[is_take][road_id].emplace_back(Graph_node{s, 0, pre_id});
             while(pre_id != s) {
                 id = pre_id;
-                dis = dis_node[pre_id];
-                road[is_take][studio_id].emplace_back(Graph_node{id, dis, pre_id});
+                dis = dis_node[id];
                 pre_id = pre_node[pre_id];
+                // id转向
+                if(!eq(calAngleToDis(pre_id, id, next_id), 0)){
+                    road[is_take][studio_id].emplace_back(Graph_node{id, dis - dis_node[id], pre_id});
+                    next_id = id;
+                    dis = dis_node[id];
+                }
             }
             road[is_take][studio_id].reserve(sizeof(road[is_take][studio_id]));
         }
