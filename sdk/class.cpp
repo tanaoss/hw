@@ -68,6 +68,7 @@ unordered_map<int,pair<double,double>> exist_id[2];//确定存在的id，便于�
 unordered_map<int,int> stu_transID;//建立工作台id与转换后id的关系
 int graph_trans[100][100];
 int vis_node[10000];
+double dis_node[10000];
 
 
 void initrobotInfo() {
@@ -4258,7 +4259,7 @@ void getEdgeRalative(){
                 if(i==idi&&j==idj)continue;
                 int tmpId=idi*100+idj;
                 if(exist_id[0].count(tmpId)){
-                    graph_edge[0][it.first].push_back(Graph_node(tmpId,1,it.first));
+                    graph_edge[0][it.first].push_back(Graph_node(tmpId,1,it.first,tmpId));
                 }
             }
         }
@@ -4271,7 +4272,7 @@ void getEdgeRalative(){
                 if(i==idi&&j==idj)continue;
                 int tmpId=idi*100+idj;
                 if(exist_id[1].count(tmpId)){
-                    graph_edge[1][it.first].push_back(Graph_node(tmpId,1,it.first));
+                    graph_edge[1][it.first].push_back(Graph_node(tmpId,1,it.first,tmpId));
                 }
             }
         }
@@ -4281,21 +4282,29 @@ void getEdgeRalative(){
 void Dijkstra(int s, int is_take) {
     priority_queue<Graph_node> q;
     int from, pre_id, num, i, to;
+    int next_id;
     double dis, new_dis;
-    memset(vis_node, 0, sizeof(vis_node));
-    q.push(Graph_node(s, 0, -1));
+    for(i = 0; i < 1000; ++i) {
+        vis_node[i] = 0;
+        dis_node[i] = 1000;
+    }
+    q.push(Graph_node(s, 0, -1, -1));
     while(!q.empty()) {
         Graph_node now_node = q.top();
         q.pop();
         if(vis_node[now_node.id]) continue;
         from = now_node.id;
         dis = now_node.dis;
+        next_id = now_node.next_id;
         num = graph_edge[is_take][from].size();
         for(i = 0; i < num; ++i) {
             to = graph_edge[is_take][from][i].id;
             new_dis = dis + graph_edge[is_take][from][i].dis;
             pre_id = graph_edge[is_take][from][i].pre_id;
-            
+            if(lt(new_dis, dis_node[to])) {
+                q.push(Graph_node{to, new_dis, pre_id, next_id});
+                dis_node[to] = new_dis;
+            }
         }
     }
 // unordered_map<int,vector<Graph_node>> graph_edge[2];//点id的边集
