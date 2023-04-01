@@ -4193,6 +4193,13 @@ void studio_distance(){
     // cerr<<"type"<<robots[0].robot_area_type<<endl;
 
 }
+void init_trans(){
+    for(int i=0;i<100;i++){
+        for(int j=0;j<100;j++){
+            graph_trans[i][j]==-2?-2:0;
+        }
+    }
+}//将原来的地图中不是-2的部分全部更改为0
 double Angle_conversion(double angle){
     return fabs(angle)/Pi;
 }//将角度转换为距离
@@ -4200,10 +4207,10 @@ bool check_4(int i,int j){
     if(i-1<0||j-1<0)return false;
     return graph_trans[i][j]!=-2&&graph_trans[i][j]==graph_trans[i][j-1]&&graph_trans[i][j-1]==graph_trans[i-1][j-1]&&graph_trans[i-1][j]==graph_trans[i-1][j-1];
 }//检查坐标i,j是否是一个四个格子的合法点
-bool check_6(int i,int j){
+bool check_8(int i,int j){
     if(i-2<0||j-2<0)return false;
     return graph_trans[i][j-2]!=-2&&graph_trans[i][j-2]==graph_trans[i-1][j-2]&& graph_trans[i-2][j]==graph_trans[i-2][j-1]&&graph_trans[i-2][j-1]!=-2&&check_4(i,j);
 }//检查坐标i,j是否是一个四个格子的合法点
 void Translation_graph_no(){
-
+    
 }
