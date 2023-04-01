@@ -214,10 +214,9 @@ struct Graph_node{
     int pre_id;//最短路中的前置pre_id;
     double dis;
     pair<double,double>pos;
-    Graph_node(int _id,double _dis,pair<double,double> _pos,int _pre_id=0){
+    Graph_node(int _id,double _dis ,int _pre_id=0){
         id=_id;
         dis=_dis;
-        pos=_pos;
         pre_id=_pre_id;
     }
 };//转换图节点
