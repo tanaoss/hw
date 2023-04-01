@@ -4283,19 +4283,19 @@ void Translation_graph_has(){
                     int id_tmp2=(i+1)*100+(j+1);
                     int id_tmp3=(i-1)*100+(j-1);
                     int id_tmp4=(i-1)*100+(j+1);
-                    if(stu_transID.count(id_tmp1)){
+                    if(stu_transID.count(id_tmp1)&&(!is_corner(id_tmp1))){
                         graph_edge[1][id].push_back(Graph_node(id_tmp1,1,id));
                         graph_edge[1][id_tmp1].push_back(Graph_node(id,1,id_tmp1));
                     }
-                    if(stu_transID.count(id_tmp2)){
+                    if(stu_transID.count(id_tmp2)&&(!is_corner(id_tmp2))){
                         graph_edge[1][id].push_back(Graph_node(id_tmp2,1,id));
                         graph_edge[1][id_tmp2].push_back(Graph_node(id,1,id_tmp2));
                     }
-                    if(stu_transID.count(id_tmp3)){
+                    if(stu_transID.count(id_tmp3)&&(!is_corner(id_tmp3))){
                         graph_edge[1][id].push_back(Graph_node(id_tmp3,1,id));
                         graph_edge[1][id_tmp3].push_back(Graph_node(id,1,id_tmp3));
                     }
-                    if(stu_transID.count(id_tmp4)){
+                    if(stu_transID.count(id_tmp4)&&(!is_corner(id_tmp4))){
                         graph_edge[1][id].push_back(Graph_node(id_tmp4,1,id));
                         graph_edge[1][id_tmp4].push_back(Graph_node(id,1,id_tmp4));
                     }                    
@@ -4414,11 +4414,23 @@ void trans_studio_rob_toID(){
         stu_transID[studios[i].node_id]=cnt++;
     }
     for(int i=0;i<4;i++){
-        stu_transID[robots[i].node_id]=cnt++;
+        stu_transID[robots[i].node_id]=cnt;
+        rob_transID[robots[i].node_id]=cnt++;
     }
 }
 bool is_corner(int id){
     int i=id/100;
     int j=id-i*100;
-    bool leg1;
+    bool leg1= (j==0||graph_trans[i][j-1]==-2)?true:false;
+    bool leg2= (i==99||graph_trans[i+1][j]==-2)?true:false;
+    bool leg3= (j==99||graph_trans[i][j+1]==-2)?true:false;
+    bool leg4= (i==0||graph_trans[i-1][j]==-2)?true:false;
+    return (leg1&&leg2) || (leg2&&leg3) || (leg3&&leg4) || (leg4&&leg1);
 }//判断工作台是不是在墙角
+void init_data(){
+    init_trans();
+    Translation_graph_no();
+    Translation_graph_has();
+    getEdgeRalative();
+    trans_studio_rob_toID();
+}
