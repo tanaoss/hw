@@ -4211,7 +4211,7 @@ double Angle_conversion(double angle){
 bool check_4(int i,int j){
     if(i<0||j<0||i>=100||j>=100)return false;
     if(i+1>=100||j-1<0)return false;
-    return graph_trans[i][j]!=-2&&graph_trans[i][j]==graph_trans[i][j-1]&&graph_trans[i][j-1]==graph_trans[i+1][j-1]&&graph_trans[i+1][j]==graph_trans[i+1][j-1];
+    return graph_trans[i][j]!=-2&&graph_trans[i][j-1]!=-2&&graph_trans[i+1][j-1]!=-1&&graph_trans[i+1][j]!=-2;
 }//检查坐标i,j是否是一个四个格子的合法点
 pair<int,pair<double,double>> check_8(int i,int j){
     if(check_4(i,j)&&check_4(i,j+1)&&check_4(i-1,j)&&check_4(i-1,j+1)){
@@ -4234,8 +4234,22 @@ void Translation_graph_no(){
         for(int j=0;j<100;j++){
             if(check_4(i,j)){
                 int id=100*i+j;
-                exist_id[0][id]=make_pair<double,double>(0.5*j,0.5*i+0.5);
-
+                auto pos=make_pair<double,double>(0.5*j,0.5*i+0.5);
+                exist_id[0][id]=pos;
+                for(int t=0;t<studios.size();t++){
+                    double tmpDis=calcuDis(studios[t].pos,pos);
+                    if(lt(tmpDis,0.4)){
+                        graph_edge[0][id].push_back(Graph_node(studios[t].node_id,1,id,-2));
+                        graph_edge[0][studios[t].node_id].push_back(Graph_node(id,1,studios[t].node_id,-2));
+                    }
+                }
+                for(int t=0;t<4;t++){
+                    double tmpDis=calcuDis(robots[t].pos,pos);
+                    if(lt(tmpDis,0.4)){
+                        graph_edge[0][id].push_back(Graph_node(robots[t].node_id,1,id,-2));
+                        graph_edge[0][robots[t].node_id].push_back(Graph_node(id,1,robots[t].node_id,-2));
+                    }
+                }
             }
         }
     }
@@ -4244,9 +4258,46 @@ void Translation_graph_has(){
     for(int i=0;i<100;i++){
         for(int j=0;j<100;j++){
             auto tmp=check_8(i,j);
+            auto pos=tmp.second;
             int id=100*i+j;
             if(tmp.first!=0){
                 exist_id[1][id]=tmp.second;
+                for(int t=0;t<studios.size();t++){
+                    double tmpDis=calcuDis(studios[t].pos,pos);
+                    if(lt(tmpDis,0.4)){
+                        graph_edge[1][id].push_back(Graph_node(studios[t].node_id,1,id,-2));
+                        graph_edge[1][studios[t].node_id].push_back(Graph_node(id,1,studios[t].node_id,-2));
+                    }
+                }
+                for(int t=0;t<4;t++){
+                    double tmpDis=calcuDis(robots[t].pos,pos);
+                    if(lt(tmpDis,0.4)){
+                        graph_edge[1][id].push_back(Graph_node(robots[t].node_id,1,id,-2));
+                        graph_edge[1][robots[t].node_id].push_back(Graph_node(id,1,robots[t].node_id,-2));
+                    }
+                }
+                if(tmp.first==1){
+                    int id_tmp1=(i+1)*100+(j-1);
+                    int id_tmp2=(i+1)*100+(j+1);
+                    int id_tmp3=(i-1)*100+(j-1);
+                    int id_tmp4=(i-1)*100+(j+1);
+                    if(stu_transID.count(id_tmp1)){
+                        graph_edge[1][id].push_back(Graph_node(id_tmp1,1,id,-2));
+                        graph_edge[1][id_tmp1].push_back(Graph_node(id,1,id_tmp1,-2));
+                    }
+                    if(stu_transID.count(id_tmp2)){
+                        graph_edge[1][id].push_back(Graph_node(id_tmp2,1,id,-2));
+                        graph_edge[1][id_tmp2].push_back(Graph_node(id,1,id_tmp2,-2));
+                    }
+                    if(stu_transID.count(id_tmp3)){
+                        graph_edge[1][id].push_back(Graph_node(id_tmp3,1,id,-2));
+                        graph_edge[1][id_tmp3].push_back(Graph_node(id,1,id_tmp3,-2));
+                    }
+                    if(stu_transID.count(id_tmp4)){
+                        graph_edge[1][id].push_back(Graph_node(id_tmp4,1,id,-2));
+                        graph_edge[1][id_tmp4].push_back(Graph_node(id,1,id_tmp4,-2));
+                    }                    
+                }
             }
         }
     }    
@@ -4328,3 +4379,17 @@ void Dijkstra(int s, int is_take, int is_robot) {
 // unordered_map<int,pair<double,double>> exist_id[2];//确定存在的id，便于建立边关系
 // unordered_map<int,int> stu_transID;//建立工作台id与转换后id的关系
 }
+void trans_studio_rob_toID(){
+    int cnt=1;
+    for(int i=0;i<studios.size();i++){
+        stu_transID[studios[i].node_id]=cnt++;
+    }
+    for(int i=0;i<4;i++){
+        stu_transID[robots[i].node_id]=cnt++;
+    }
+}
+bool is_corner(int id){
+    int i=id/100;
+    int j=id-i*100;
+    bool leg1
+}//判断工作台是不是在墙角
