@@ -69,6 +69,7 @@ unordered_map<int,int> stu_transID;//建立工作台id与转换后id的关系
 int graph_trans[100][100];
 int vis_node[10000];
 double dis_node[10000];
+int pre_node[10000];
 
 
 void initrobotInfo() {
@@ -4260,7 +4261,7 @@ void getEdgeRalative(){
                 if(i==idi&&j==idj)continue;
                 int tmpId=idi*100+idj;
                 if(exist_id[0].count(tmpId)){
-                    graph_edge[0][it.first].push_back(Graph_node(tmpId,1,it.first,tmpId));
+                    graph_edge[0][it.first].push_back(Graph_node(tmpId,1,it.first));
                 }
             }
         }
@@ -4273,53 +4274,69 @@ void getEdgeRalative(){
                 if(i==idi&&j==idj)continue;
                 int tmpId=idi*100+idj;
                 if(exist_id[1].count(tmpId)){
-                    graph_edge[1][it.first].push_back(Graph_node(tmpId,1,it.first,tmpId));
+                    graph_edge[1][it.first].push_back(Graph_node(tmpId,1,it.first));
                 }
             }
         }
     }
 }
 
+
+double calAngleToDis(int x, int y, int z) {
+    if(x == y) return 0;
+    if(y == z) return 0;
+    
+    Vec vec1 = Vec((x / 100) - (y / 100), (x % 100) - (y % 100));
+    Vec vec2 = Vec((z / 100) - (y / 100), (z % 100) - (y % 100));
+    double angle = acos(cos_t(vec1, vec2));
+    return Angle_conversion(angle);
+}
+
 void Dijkstra(int s, int is_take, int is_robot) {
     priority_queue<Graph_node> q;
     int from, pre_id, num, i, to, next_id;
-    int studio_id;
+    int studio_id, id;
     int count = studios.size();
     double dis, new_dis;
     for(i = 0; i < 1000; ++i) {
         vis_node[i] = 0;
         dis_node[i] = 1000;
     }
-    q.push(Graph_node(s, 0, -1, -1));
+    q.push(Graph_node(s, 0, s));
     while(!q.empty()) {
         Graph_node now_node = q.top();
         q.pop();
         if(vis_node[now_node.id]) continue;
         from = now_node.id;
         dis = now_node.dis;
-        next_id = now_node.next_id;
+        pre_id = now_node.pre_id;
         vis_node[now_node.id] = 1;
 
 
-        // if(stu_transID.count(from)) {
-        //     count--;
-        //     studio_id = stu_transID[from];
-        //     pre_id = now_node.pre_id;
-        //     while(pre_id != s) {
-        //         road[is_take][]
-        //     }
-        // }
+        if(stu_transID.count(from)) {
+            count--;
+            studio_id = stu_transID[from];
+            pre_id = now_node.pre_id;
+            while(pre_id != s) {
+                id = pre_id;
+                dis = dis_node[pre_id];
+                road[is_take][studio_id].emplace_back(Graph_node{id, dis, pre_id});
+                pre_id = pre_node[pre_id];
+            }
+            road[is_take][studio_id].reserve(sizeof(road[is_take][studio_id]));
+        }
 
         if(count == 0) break;
 
         num = graph_edge[is_take][from].size();
         for(i = 0; i < num; ++i) {
             to = graph_edge[is_take][from][i].id;
-            new_dis = dis + graph_edge[is_take][from][i].dis;
+            new_dis = dis + graph_edge[is_take][from][i].dis + calAngleToDis(pre_id, from, to);
             pre_id = graph_edge[is_take][from][i].pre_id;
             if(lt(new_dis, dis_node[to])) {
-                q.push(Graph_node{to, new_dis, pre_id, next_id});
+                q.push(Graph_node{to, new_dis, pre_id});
                 dis_node[to] = new_dis;
+                pre_node[to] = pre_id;
             }
         }
     }
