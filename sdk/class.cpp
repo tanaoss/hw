@@ -4208,11 +4208,20 @@ double Angle_conversion(double angle){
     return fabs(angle)/Pi;
 }//将角度转换为距离
 bool check_4(int i,int j){
-    if(i-1<0||j-1<0)return false;
-    return graph_trans[i][j]!=-2&&graph_trans[i][j]==graph_trans[i][j-1]&&graph_trans[i][j-1]==graph_trans[i-1][j-1]&&graph_trans[i-1][j]==graph_trans[i-1][j-1];
+    if(i<0||j<0||i>=100||j>=100)return false;
+    if(i+1>=100||j-1<0)return false;
+    return graph_trans[i][j]!=-2&&graph_trans[i][j]==graph_trans[i][j-1]&&graph_trans[i][j-1]==graph_trans[i+1][j-1]&&graph_trans[i+1][j]==graph_trans[i+1][j-1];
 }//检查坐标i,j是否是一个四个格子的合法点
 pair<bool,pair<double,double>> check_8(int i,int j){
-    if(i-2<0||j-2<0)return {};
+    if(check_4(i,j)&&check_4(i,j+1)&&check_4(i-1,j)&&check_4(i-1,j+1)){
+        return {true,make_pair<double,double>(0.5*j+0.25,0.5*i+0.25)};
+    }else if((!check_4(i,j))&&check_4(i,j+1)&&check_4(i-1,j)&&check_4(i-1,j+1)){
+        return {true,make_pair<double,double>(0.5*j+0.47,0.5*i+0.03)};
+    }else if(check_4(i,j)&&check_4(i,j+1)&&(!check_4(i-1,j))&&check_4(i-1,j+1)){
+        return {true,make_pair<double,double>(0.5*j+0.47,0.5*i+0.47)};
+    }else if(check_4(i,j)&&(!check_4(i,j+1))&&check_4(i-1,j)&&check_4(i-1,j+1)){
+        return {true,make_pair<double,double>(0.5*j+0.47,0.5*i+0.47)};
+    }
     
 }//检查坐标i,j是否是一个八个格子的合法点
 void Translation_graph_no(){
