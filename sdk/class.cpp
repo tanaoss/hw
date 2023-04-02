@@ -4585,11 +4585,15 @@ void Dijkstra(int s, int is_take, int is_robot) {
     int count = studios.size();
     double dis, new_dis;
     from_id = is_robot? rob_transID[s]: stu_transID[s];
+
+    cerr<<"start-studio:"<<from_id<<endl;
+
     for(i = 0; i < 1000; ++i) {
         vis_node[i] = 0;
         dis_node[i] = 1000;
     }
     q.push(Graph_node(s, 0, s));
+    
     while(!q.empty()) {
         Graph_node now_node = q.top();
         q.pop();
@@ -4598,7 +4602,7 @@ void Dijkstra(int s, int is_take, int is_robot) {
         dis = now_node.dis;
         pre_id = now_node.pre_id;
         vis_node[now_node.id] = 1;
-
+        cerr<<"node_id:"<<from<<" dis:"<<dis<<" pre_id:"<<pre_id<<endl;
 
         if(stu_transID.count(from)) {
             count--;
@@ -4606,8 +4610,7 @@ void Dijkstra(int s, int is_take, int is_robot) {
             pre_id = now_node.pre_id;
             next_id = from;
             dis = now_node.dis;
-            road_id = transID(from_id, is_robot, studio_id);
-            road[is_take][road_id].emplace_back(Graph_node{s, 0, pre_id});
+            vector<Graph_node> ro = {Graph_node{s, 0, pre_id}};
             if(is_robot) {
                 dis_robot_to_studios[from_id][studio_id] = dis;
             }
@@ -4615,20 +4618,25 @@ void Dijkstra(int s, int is_take, int is_robot) {
                 dis_stuios[from][studio_id][is_take] = dis;
                 // dis_stuios[studio_id][from] = dis;
             }
+            cerr<<"lllnode_id:"<<from<<" dis:"<<dis<<" pre_id:"<<pre_id<<endl;
             while(pre_id != s) {
                 id = pre_id;
                 pre_id = pre_node[pre_id];
                 // id转向
                 if(!eq(calAngleToDis(pre_id, id, next_id), 0)){
-                    road[is_take][studio_id].emplace_back(Graph_node{id, dis - dis_node[id], pre_id});
+                    ro.emplace_back(Graph_node{id, dis - dis_node[id], pre_id});
                     next_id = id;
                     dis = dis_node[id];
                 }
             }
-            road[is_take][studio_id].reserve(sizeof(road[is_take][studio_id]));
+            ro.reserve(sizeof(ro));
+            road_id = transID(from_id, is_robot, studio_id);
+            cerr<<"kkk"<<endl;
+            road[is_take][road_id] = ro;
         }
 
         if(count == 0) break;
+
 
         num = graph_edge[is_take][from].size();
         for(i = 0; i < num; ++i) {
@@ -4637,6 +4645,7 @@ void Dijkstra(int s, int is_take, int is_robot) {
             pre_id = graph_edge[is_take][from][i].pre_id;
             if(lt(new_dis, dis_node[to])) {
                 q.push(Graph_node{to, new_dis, pre_id});
+                cerr<<"ro_id:"<<from<<" new-dis:"<<dis<<" pre_id:"<<pre_id<<endl;
                 dis_node[to] = new_dis;
                 pre_node[to] = pre_id;
             }

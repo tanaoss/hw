@@ -18,7 +18,6 @@ int main()
     readMapUntilOK();
     // cerr << "sss" << endl;
     // divide_space();
-    // cerr << "sss" << endl;
     init_data();
     for(int i = 0; i < studios.size(); ++i) {
         Dijkstra(studios[i].node_id, 0, 0);
@@ -27,7 +26,6 @@ int main()
     for(int i = 0; i < 4; ++i) {
         Dijkstra(robots[i].node_id, 0, 1);
     }
-    cerr << "sss" << endl;
     // floyd();
     // print_queue();
     // cerr<<robots.size();
