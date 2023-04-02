@@ -3419,7 +3419,7 @@ Ins contr_one_rob(Robot& robot , const PayLoad& payload){
     Ins ins_t;
     int flag_type=robot.get_type==0?0:1;
     robot.virtual_pos=exist_id[flag_type][robot.virtual_id];
-    if(state.FrameID>=1700&&state.FrameID<=1945&&robot.id==0){
+    if(state.FrameID>=2930&&state.FrameID<=3050&&robot.id==0){
         cerr<<" FrameID "<<state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
         cerr<<robot.virtual_id<<endl;
     }
@@ -4781,11 +4781,11 @@ void Dijkstra(int s, int is_take, int is_robot) {
                 pre_id = pre_node[pre_id];
                 // cerr<<id<<"-"<<pre_id<<endl;
                 // id转向
-                if(!eq(calAngleToDis(pre_id, id, next_id), 0)){
+                // if(!eq(calAngleToDis(pre_id, id, next_id), 0)){
                     ro.emplace_back(Graph_node{id, dis - dis_node[id], pre_id});
                     next_id = id;
                     dis = dis_node[id];
-                }
+                // }
             }
             reverse(ro.begin(), ro.end());
             road_id = transID(from_id, is_robot, studio_id);
@@ -4847,20 +4847,20 @@ void init_data(){
     // trans_studio_rob_toID();
 }
 void printMap(int f){
-    for(int i=0;i<100;i++){
-        cerr<<i<<" ";
-    }
+    // for(int i=0;i<100;i++){
+    //     cerr<<i<<" ";
+    // }
     cerr<<endl;
         for(int i=100;i>=0;i--){
         for(int j=0;j<100;j++){
             int id=i*100+j;
             if(exist_id[f].count(id)){
                 if(f==1)
-                cerr<<" "<<check_8(i,j).first<<" ";
+                cerr<<check_8(i,j).first<<" ";
                 else
                 cerr<<1<<" ";
             }else{
-                cerr<<"- "<<" ";
+                cerr<<"-"<<" ";
             }
         }
         cerr<<endl;
@@ -4898,10 +4898,10 @@ void printEdge(int id){
         
     }
     cerr<<"edge-print "<<endl;
-    for(int i=0;i<100;i++){
-        cerr<<i<<" ";
-    }
-    cerr<<endl;
+    // for(int i=0;i<100;i++){
+    //     cerr<<i<<" ";
+    // }
+    // cerr<<endl;
     for(int i=99;i>=0;i--){
     for(int j=0;j<100;j++){
             int id=i*100+j;
