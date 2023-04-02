@@ -385,3 +385,4 @@ void printMap(int f);
 void printEdge(int id);
 bool check_slope(int id1, int id2);
 void printPath(int from_id, int is_robot, int to_id, int is_take);
+vector<int> get_future_node(int robot_id);
