@@ -3418,6 +3418,25 @@ Ins contr_one_rob(Robot& robot , const PayLoad& payload){
     Flag_sumulate=0;
     Ins ins_t;
     int flag_type=robot.get_type==0?0:1;
+    auto tmpVec=get_future_node(robot.id);
+    if(tmpVec.size()>0){
+        auto tmpPos1=exist_id[flag_type][robot.virtual_id];
+        // cerr<<"---"<<get_future_node(robot.id)[0]<<endl;
+        auto tmpPos2=exist_id[flag_type][tmpVec[0]];
+        int signX=le(tmpPos1.first,tmpPos2.first)?-1:1;
+        int signY=le(tmpPos1.second,tmpPos2.second)?-1:1;
+        int subx=tmpPos1.first-tmpPos2.first;
+        int suby=tmpPos1.second-tmpPos2.second;
+        if(!eq(subx,0)&&!eq(suby,0)){
+            exist_id[flag_type][robot.virtual_id]={tmpPos2.first+signX*0.5,tmpPos2.second+signY*0.5};
+            if(state.FrameID>=200&&state.FrameID<=5000){
+                cerr<<"-------------"<<endl;
+                cerr<<state.FrameID<<" "<<robot.id<<endl;
+                cerr<<exist_id[flag_type][robot.virtual_id].first<<"-"<<exist_id[flag_type][robot.virtual_id].second<<endl;
+                cerr<<tmpPos2.first<<"-"<<tmpPos2.second<<endl;
+            }
+        }
+    }
     robot.virtual_pos=exist_id[flag_type][robot.virtual_id];
     if(state.FrameID>=2000&&state.FrameID<=2500&&robot.id==0){
         cerr<<" FrameID "<<state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
@@ -4945,5 +4964,6 @@ vector<int> get_future_node(int robot_id) {
     for(int i = now_index + 1; i < len; ++i) {
         v.emplace_back(road[(robots[robot_id].get_type != 0)][robots[robot_id].road_id][i].id);
     }
+    // cerr<<"kkk"<<v.size()<<endl;
     return v;
 }
