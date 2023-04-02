@@ -8,6 +8,7 @@
 #include <cstring>
 #include <queue>
 #include<unordered_map>
+#include<iomanip>
 #include"vec.h"
 #include "class.h"
 
@@ -4495,39 +4496,17 @@ void Translation_graph_has(){
                 exist_id[1][id]=tmp.second;
                 for(int t=0;t<studios.size();t++){
                     double tmpDis=calcuDis(studios[t].pos,pos);
-                    if(le(tmpDis,0.4)&&id!=studios[t].node_id){
+                    if(((le(tmpDis,0.71)&&tmp.first==1)||le(tmpDis,0.4))&&id!=studios[t].node_id){
                         graph_edge[1][id].push_back(Graph_node(studios[t].node_id,1,id));
                         graph_edge[1][studios[t].node_id].push_back(Graph_node(id,1,studios[t].node_id));
                     }
                 }
                 for(int t=0;t<4;t++){
                     double tmpDis=calcuDis(robots[t].pos,pos);
-                    if(le(tmpDis,0.4)&&id!=robots[t].node_id){
+                    if(((le(tmpDis,0.71)&&tmp.first==1)||le(tmpDis,0.4))&&id!=robots[t].node_id){
                         graph_edge[1][id].push_back(Graph_node(robots[t].node_id,1,id));
                         graph_edge[1][robots[t].node_id].push_back(Graph_node(id,1,robots[t].node_id));
                     }
-                }
-                if(tmp.first==1){
-                    int id_tmp1=(i+1)*100+(j-1);
-                    int id_tmp2=(i+1)*100+(j+1);
-                    int id_tmp3=(i-1)*100+(j-1);
-                    int id_tmp4=(i-1)*100+(j+1);
-                    if(stu_transID.count(id_tmp1)&&(!is_corner(id_tmp1))&&(id!=id_tmp1)){
-                        graph_edge[1][id].push_back(Graph_node(id_tmp1,1,id));
-                        graph_edge[1][id_tmp1].push_back(Graph_node(id,1,id_tmp1));
-                    }
-                    if(stu_transID.count(id_tmp2)&&(!is_corner(id_tmp2))&&(id!=id_tmp2)){
-                        graph_edge[1][id].push_back(Graph_node(id_tmp2,1,id));
-                        graph_edge[1][id_tmp2].push_back(Graph_node(id,1,id_tmp2));
-                    }
-                    if(stu_transID.count(id_tmp3)&&(!is_corner(id_tmp3))&&(id!=id_tmp3)){
-                        graph_edge[1][id].push_back(Graph_node(id_tmp3,1,id));
-                        graph_edge[1][id_tmp3].push_back(Graph_node(id,1,id_tmp3));
-                    }
-                    if(stu_transID.count(id_tmp4)&&(!is_corner(id_tmp4))&&(id!=id_tmp4)){
-                        graph_edge[1][id].push_back(Graph_node(id_tmp4,1,id));
-                        graph_edge[1][id_tmp4].push_back(Graph_node(id,1,id_tmp4));
-                    }                    
                 }
             }
         }
@@ -4546,7 +4525,14 @@ void getEdgeRalative(){
                 //     cerr<<graph_edge[0][it.first].size()<<" "<<exist_id[0].count(tmpId)<<" "<<exist_id[0].count(ckeck_id)<<endl;
                 //     cerr<<idi<<"-"<<idj<<" "<<i<<"-"<<j<<endl;
                 // }
-                if(exist_id[0].count(tmpId)&&exist_id[0].count(ckeck_id)&&it.first!=tmpId){
+                if((it.first==4656&&tmpId==4557) ||(it.first==4557&&tmpId==4656) ){
+                    cerr<<"****"<<endl;
+                    cerr<<check_slope(tmpId,it.first)<<endl;
+                    cerr<<idi<<" "<<j<<endl;
+                    cerr<<graph_trans[idi][j+1]<<endl;
+                    cerr<<"****"<<endl;
+                }
+                if(exist_id[0].count(tmpId)&&check_slope(tmpId,it.first) &&it.first!=tmpId){
                     graph_edge[0][it.first].push_back(Graph_node(tmpId,1,it.first));
                 }
             }
@@ -4560,7 +4546,7 @@ void getEdgeRalative(){
                 if(i==idi&&j==idj)continue;
                 int tmpId=i*100+j;
                 int ckeck_id=idi*100+j;
-                if(exist_id[1].count(tmpId)&&it.first!=tmpId&&exist_id[0].count(ckeck_id)){
+                if(exist_id[1].count(tmpId)&&it.first!=tmpId&&check_slope(tmpId,it.first)){
                     graph_edge[1][it.first].push_back(Graph_node(tmpId,1,it.first));
                 }
             }
@@ -4575,7 +4561,7 @@ double calAngleToDis(int x, int y, int z) {
     if(y == z) return 0;
 
     Vec vec1 = Vec((x / 100) - (y / 100), (x % 100) - (y % 100));
-    Vec vec2 = Vec((z / 100) - (y / 100), (z % 100) - (y % 100));
+    Vec vec2 = Vec((y / 100) - (z / 100), (y % 100) - (z % 100));
     double angle = acos(cos_t(vec1, vec2));
     return Angle_conversion(angle);
 }
@@ -4714,4 +4700,44 @@ void printMap(int f){
         }
         cerr<<endl;
     }
+}
+void printEdge(int id){
+    vector<int> vis_rob_edge(100*100,0);
+    // cerr<<studios[4].node_id/100<<"-"<<(studios[4].node_id-studios[4].node_id/100*100)<<endl;
+    cerr<<studios[5].node_id<<endl;
+    //unordered_map<int,vector<Graph_node>> graph_edge[2];
+    queue<int>Q;
+    Q.push(robots[id].node_id);
+    int cnt=0;
+    vis_rob_edge[robots[id].node_id]=1;
+    while(!Q.empty()){
+        int tmpId=Q.front();
+        Q.pop();
+        for(auto it:graph_edge[1][tmpId]){
+            if(vis_rob_edge[it.id]==0){
+                 Q.push(it.id);
+                 vis_rob_edge[it.id]=(((vis_rob_edge[tmpId]+1)%10)==0?1:(vis_rob_edge[tmpId]+1)%10);
+            }
+            
+        }
+    }
+    for(int i=100;i>=0;i--){
+    for(int j=0;j<100;j++){
+            int id=i*100+j;
+            if(vis_rob_edge[id]){
+            cerr<<vis_rob_edge[id]<<" ";
+        
+            }else{
+                cerr<<"-"<<" ";
+            }
+        }
+        cerr<<endl;
+    }
+}
+bool check_slope(int id1,int id2){
+    int y1=id1/100,y2=id2/100;
+    int x1=id1-y1*100,x2=id2-y2*100;
+    id1=y2*100+x1;
+    id2=y1*100+x2;
+    return exist_id[0].count(id1)&&exist_id[0].count(id2);
 }

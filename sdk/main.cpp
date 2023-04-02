@@ -21,7 +21,7 @@ int main()
     // cerr << "sss" << endl;
     
     init_data();
-    printMap(1);
+    printEdge(0);
     for(int i = 0; i < studios.size(); ++i) {
         Dijkstra(studios[i].node_id, 0, 0);
         Dijkstra(studios[i].node_id, 1, 0);
