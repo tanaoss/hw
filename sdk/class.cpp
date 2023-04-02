@@ -4834,7 +4834,7 @@ void printEdge(int id){
         }
     }
     cerr<<"edge-print "<<endl;
-    for(int i=100;i>=0;i--){
+    for(int i=99;i>=0;i--){
     for(int j=0;j<100;j++){
             int id=i*100+j;
             if(vis_rob_edge[id]!=-1){
