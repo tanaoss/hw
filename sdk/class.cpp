@@ -1639,6 +1639,7 @@ void first_action()
             robots[i].virtual_id = -1;
             robots[i].virtual_pos = pair<double,double>(0,0);
         }
+        robots[i].last_target_id = -1;
     }
 }
 
@@ -1733,7 +1734,19 @@ bool check_material_full(int studio_id)
     }
     return false;
 }
-
+int find_closest_studio(int robot_id){
+    double dist;
+    double min = 10000;
+    double min_subscript = -1;
+    for(int i = 0;i<studios.size();i++){
+        dist = calcuDis(robots[robot_id].pos,studios[i].pos);
+        if(lt(dist,min)){
+            min=dist;
+            min_subscript = i;
+        }
+    }
+    return min_subscript;
+}
 void robot_judge_sol(int threshold_lack,int full){
     int i,k,m,is_take;
     int target,min_subscript=-1;
@@ -1746,7 +1759,7 @@ void robot_judge_sol(int threshold_lack,int full){
         if(robots[i].get_type==0)is_take=0;
         else is_take=1;
         // cerr<<"robot :"<<i<<"distance : "<<calcuDis(robots[i].pos,robots[i].virtual_pos)<<endl;
-        if(lt(calcuDis(robots[i].pos,robots[i].virtual_pos),0.4)){
+        if(lt(calcuDis(robots[i].pos,robots[i].virtual_pos),0.2)){
             // if(robots[i].robot_area_type[is_take] != studios[robots[i].target_id].studio_area_type[is_take]){
             //     x= robots[i].robot_area_type[is_take];
             //     y= target_sequence[is_take][robots[i].robot_area_type[is_take]][studios[robots[i].target_id].studio_area_type[is_take]];
@@ -1782,6 +1795,8 @@ void robot_judge_sol(int threshold_lack,int full){
                     robots[i].get_type = studios[robots[i].loc_id].type;
                     studios[robots[i].loc_id].r_id = -1;
                     studios[robots[i].loc_id].pStatus = 0;
+                    if(robots[i].target_id != -1)
+                        robots[i].last_target_id = robots[i].target_id;
                     robots[i].target_id = pick_point(i, 5).first;
                     // cerr<<"target_id "<<robots[i].target_id<<endl;
                     if (robots[i].target_id != -1)
@@ -1900,6 +1915,8 @@ void robot_judge_sol(int threshold_lack,int full){
                                 }
                             // }
                         // }
+                        if(robots[i].target_id != -1)
+                            robots[i].last_target_id = robots[i].target_id;
                         robots[i].target_id = min_subscript;
                             // cerr<<"aaa"<<endl;
                         if(min_subscript != -1){
@@ -1951,6 +1968,8 @@ void robot_judge_sol(int threshold_lack,int full){
                     }
                 }
                 // cerr<<min_subscript<<endl;
+                if(robots[i].target_id != -1)
+                    robots[i].last_target_id = robots[i].target_id;
                 robots[i].target_id = min_subscript;
                 // cerr<<"ccc"<<endl;
                 if(robots[i].target_id!= -1){
@@ -1967,10 +1986,13 @@ void robot_judge_sol(int threshold_lack,int full){
                     // else{
                     //     robots[i].virtual_pos = studios[robots[i].target_id].pos;
                     // // }
-                    robots[i].road_id = transID(robots[i].loc_id, 0, robots[i].target_id);
+                    if(robots[i].last_target_id != -1)
+                        robots[i].road_id = transID(robots[i].last_target_id, 0, robots[i].target_id);
+                    else
+                        robots[i].road_id = transID(i, 1, robots[i].target_id);
                     robots[i].now_index = 0;
-                    // robots[i].virtual_id = road[(robots[i].get_type != 0)][robots[i].road_id][robots[i].now_index].id;
-                    road[(robots[i].get_type != 0)][robots[i].road_id][robots[i].now_index].id;
+                    robots[i].virtual_id = road[(robots[i].get_type != 0)][robots[i].road_id][robots[i].now_index].id;
+                    // cerr<<"aaa"<<robots[i].road_id <<"aaa"<<road[(robots[i].get_type != 0)][robots[i].road_id][robots[i].now_index].id<<endl;
                         //cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" target_type= "<<studios[robots[i].target_id].type<<endl;
                     robot_get_type[studios[robots[i].target_id].type]++;
                     studios[robots[i].target_id].r_id = i;
@@ -1979,6 +2001,8 @@ void robot_judge_sol(int threshold_lack,int full){
             }
             else{
                 // cerr<<endl;
+                if(robots[i].target_id != -1)
+                    robots[i].last_target_id = robots[i].target_id;
                 robots[i].target_id = pick_point(i,5).first;
                 // cerr<<"eee"<<endl;
                 if(robots[i].target_id != -1){
@@ -1998,7 +2022,10 @@ void robot_judge_sol(int threshold_lack,int full){
                     // else{
                     //     robots[i].virtual_pos = studios[robots[i].target_id].pos;
                     // // }
-                    robots[i].road_id = transID(robots[i].loc_id, 0, robots[i].target_id);
+                    if(robots[i].last_target_id != -1)
+                        robots[i].road_id = transID(robots[i].last_target_id, 0, robots[i].target_id);
+                    else
+                        robots[i].road_id = transID(i, 1, robots[i].target_id);
                     robots[i].now_index = 0;
                     robots[i].virtual_id = road[(robots[i].get_type != 0)][robots[i].road_id][robots[i].now_index].id;
                     if(studios[robots[i].target_id].type != 8 && studios[robots[i].target_id].type != 9)studios_rid[robots[i].target_id][robots[i].get_type] = i;
