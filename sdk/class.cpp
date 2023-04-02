@@ -78,8 +78,11 @@ double dis_robot_to_studios[4][50];
 
 
 void initrobotInfo() {
+    // cerr<<studios[13].node_id<<endl;
+    // cerr<<"kk"<<graph_edge[1][studios[13].node_id].size()<<endl;
+    // cerr<<graph_edge[1][studios[13].node_id][0].id<<endl;
     for(int i =0;i<studios.size(); ++i) {
-        cerr<<"dis:"<<dis_robot_to_studios[0][i]<<endl;
+        cerr<<i<<"dis:"<<dis_stuios[11][i][1]<<endl;
     }
     
     double weightMin = 0.45 * 0.45 * Pi * 20;
@@ -1997,8 +2000,9 @@ void robot_judge_sol(int threshold_lack,int full){
             //     }
             // }
         // }
-        // if(robots[i].get_type==0)cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<studios[robots[i].target_id].type<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
-        // else cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
+        if(robots[i].get_type==0)cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<studios[robots[i].target_id].type<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
+        else cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
+        cerr<<robots[i].now_index<<endl;
     }
 
 }
@@ -4698,9 +4702,14 @@ void Dijkstra(int s, int is_take, int is_robot) {
     int count = studios.size();
     double dis, new_dis;
     from_id = is_robot? rob_transID[s]: stu_transID[s];
-    // if(is_robot)
-    //     cerr<<"start-robot:"<<from_id<<endl;
-    // else cerr<<"start-studio:"<<from_id<<endl;
+
+    bool cerr_flag = false;
+    // if(s==studios[11].node_id) cerr_flag = true;
+    if(cerr_flag) {
+        if(is_robot)
+            cerr<<"start-robot:"<<from_id<<endl;
+        else cerr<<"start-studio:"<<from_id<<endl;
+    }
 
     for(i = 0; i < 10000; ++i) {
         vis_node[i] = 0;
@@ -4717,7 +4726,8 @@ void Dijkstra(int s, int is_take, int is_robot) {
         pre_id = now_node.pre_id;
         vis_node[now_node.id] = 1;
 
-        // cerr<<"node_id:"<<from<<" dis:"<<dis<<" pre_id:"<<pre_id<<endl;
+        if(cerr_flag) 
+            cerr<<"node_id:"<<from<<" dis:"<<dis<<" pre_id:"<<pre_id<<endl;
 
         if(stu_transID.count(from) && stu_transID[from] != -1) {
             count--;
@@ -4726,7 +4736,8 @@ void Dijkstra(int s, int is_take, int is_robot) {
             next_id = from;
             dis = now_node.dis;
 
-            // cerr<<"to-studio:"<<studio_id<<" dis:"<<dis<<" pre_id:"<<pre_id<<endl;
+            if(cerr_flag) 
+                cerr<<"to-studio:"<<studio_id<<" dis:"<<dis<<" pre_id:"<<pre_id<<endl;
             
             vector<Graph_node> ro = {Graph_node{from, 0, pre_id}};
             if(is_robot) {
@@ -4756,7 +4767,8 @@ void Dijkstra(int s, int is_take, int is_robot) {
 
 
         num = graph_edge[is_take][from].size();
-        // cerr<<"edge-num:"<<num<<endl;
+        dis = now_node.dis;
+        if(cerr_flag) cerr<<"edge-num:"<<num<<endl;
         for(i = 0; i < num; ++i) {
             to = graph_edge[is_take][from][i].id;
             if(vis_node[to]) continue;
@@ -4769,7 +4781,7 @@ void Dijkstra(int s, int is_take, int is_robot) {
                 //     cerr<<"kkkk-"<<from<<endl;
                 //     cerr<<"update-to_id:"<<to<<" new-dis:"<<new_dis<<" old-dis:"<<dis_node[to]<<endl;
                 // }
-                // cerr<<"update-to_id:"<<to<<" new-dis:"<<new_dis<<" old-dis:"<<dis_node[to]<<endl;
+                if(cerr_flag) cerr<<"update-to_id:"<<to<<" new-dis:"<<new_dis<<" old-dis:"<<dis_node[to]<<endl;
                 dis_node[to] = new_dis;
                 pre_node[to] = from;
             }
