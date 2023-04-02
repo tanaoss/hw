@@ -4217,19 +4217,19 @@ double Angle_conversion(double angle){
 bool check_4(int i,int j){
     if(i<0||j<0||i>=100||j>=100)return false;
     if(i+1>=100||j-1<0)return false;
-    return graph_trans[i][j]!=-2&&graph_trans[i][j-1]!=-2&&graph_trans[i+1][j-1]!=-1&&graph_trans[i+1][j]!=-2;
+    return graph_trans[i][j]!=-2&&graph_trans[i][j-1]!=-2&&graph_trans[i+1][j-1]!=-2&&graph_trans[i+1][j]!=-2;
 }//检查坐标i,j是否是一个四个格子的合法点
 pair<int,pair<double,double>> check_8(int i,int j){
     if(check_4(i,j)&&check_4(i,j+1)&&check_4(i-1,j)&&check_4(i-1,j+1)){
         return {1,make_pair<double,double>(0.5*j+0.25,0.5*i+0.25)};
     }else if((!check_4(i,j))&&check_4(i,j+1)&&check_4(i-1,j)&&check_4(i-1,j+1)){
-        return {2,make_pair<double,double>(0.5*j+0.47,0.5*i+0.03)};
+        return {2,make_pair<double,double>(0.5*j+0.25,0.5*i+0.03)};
     }else if(check_4(i,j)&&check_4(i,j+1)&&(!check_4(i-1,j))&&check_4(i-1,j+1)){
-        return {3,make_pair<double,double>(0.5*j+0.47,0.5*i+0.47)};
+        return {3,make_pair<double,double>(0.5*j+0.25,0.5*i+0.47)};
     }else if(check_4(i,j)&&(!check_4(i,j+1))&&check_4(i-1,j)&&check_4(i-1,j+1)){
-        return {4,make_pair<double,double>(0.5*j+0.03,0.5*i+0.03)};
+        return {4,make_pair<double,double>(0.5*j+0.25,0.5*i+0.03)};
     }else if(check_4(i,j)&&check_4(i,j+1)&&check_4(i-1,j)&&(!check_4(i-1,j+1))){
-        return {5,make_pair<double,double>(0.5*j+0.03,0.5*i+0.47)};
+        return {5,make_pair<double,double>(0.5*j+0.25,0.5*i+0.47)};
     }else{
         return {0,make_pair<double,double>(0,0)};
     }
@@ -4315,8 +4315,9 @@ void getEdgeRalative(){
         for(int i=idi-1;i<=idi+1;i++){
             for(int j=idj-1;j<=idj+1;j++){
                 if(i==idi&&j==idj)continue;
-                int tmpId=idi*100+idj;
-                if(exist_id[0].count(tmpId)){
+                int tmpId=i*100+j;
+                int ckeck_id=idi*100+j;
+                if(exist_id[0].count(tmpId)&&exist_id[0].count(ckeck_id)){
                     graph_edge[0][it.first].push_back(Graph_node(tmpId,1,it.first));
                 }
             }
@@ -4328,7 +4329,7 @@ void getEdgeRalative(){
         for(int i=idi-1;i<=idi+1;i++){
             for(int j=idj-1;j<=idj+1;j++){
                 if(i==idi&&j==idj)continue;
-                int tmpId=idi*100+idj;
+                int tmpId=i*100+j;
                 if(exist_id[1].count(tmpId)){
                     graph_edge[1][it.first].push_back(Graph_node(tmpId,1,it.first));
                 }
