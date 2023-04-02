@@ -4295,11 +4295,11 @@ void print_target(int i, int j) {
     int k;
     int start = i;
     double dist=0;
-    cerr<<i;
+    // cerr<<i;
     if(eq(dis_area[i][j], 1000)) return;
     while(i != j) {
         k = target_sequence[i][j];
-        cerr<<"->"<<k;
+        // cerr<<"->"<<k;
         if(k==j) dist += dis_area[i][k];
         else
             dist += dis_area[i][k] + calcuDis(types[k].entrance[i], types[k].entrance[target_sequence[k][j]]);
@@ -4366,7 +4366,7 @@ void studio_distance(){
         col = (studios[i].pos.first-0.25)/0.5;
         row = (studios[i].pos.second-0.25)/0.5;
         studios[i].studio_area_type = graph[row][col];
-        cerr <<"kkk"<<studios[i].pos.first << ' ' << studios[i].pos.second << ' ' << col<<' '<<row<<' '<<studios[i].studio_area_type << endl;
+        // cerr <<"kkk"<<studios[i].pos.first << ' ' << studios[i].pos.second << ' ' << col<<' '<<row<<' '<<studios[i].studio_area_type << endl;
     }
     for(int i=0;i<robots.size();i++){
         col = (robots[i].pos.first-0.25)/0.5;
@@ -4376,7 +4376,7 @@ void studio_distance(){
     }
     for(int i=0;i<studios.size();i++){
         x = studios[i].studio_area_type;
-        cerr << studios.size()<<endl;
+        // cerr << studios.size()<<endl;
         for (int j = i + 1; j < studios.size(); j++)
         {
             y = studios[j].studio_area_type;
@@ -4398,7 +4398,7 @@ void studio_distance(){
                 // cerr << "c" << endl;
             }
             studio_dis[j][i] = studio_dis[i][j];
-            cerr << j << endl;
+            // cerr << j << endl;
         }
     }
     for(int i=0;i<robots.size();i++){
@@ -4633,7 +4633,7 @@ void Dijkstra(int s, int is_take, int is_robot) {
             while(pre_id != s) {
                 id = pre_id;
                 pre_id = pre_node[pre_id];
-                cerr<<id<<"-"<<pre_id<<endl;
+                // cerr<<id<<"-"<<pre_id<<endl;
                 // id转向
                 if(!eq(calAngleToDis(pre_id, id, next_id), 0)){
                     ro.emplace_back(Graph_node{id, dis - dis_node[id], pre_id});
