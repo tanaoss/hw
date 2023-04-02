@@ -1724,7 +1724,7 @@ void robot_judge_sol(int threshold_lack,int full){
         if(robots[i].get_type==0)is_take=0;
         else is_take=1;
         // cerr<<"robot :"<<i<<"distance : "<<calcuDis(robots[i].pos,robots[i].virtual_pos)<<endl;
-        if(lt(calcuDis(robots[i].pos,robots[i].virtual_pos),0.2)){
+        if(lt(calcuDis(robots[i].pos,robots[i].virtual_pos),0.1)){
             // if(robots[i].robot_area_type[is_take] != studios[robots[i].target_id].studio_area_type[is_take]){
             //     x= robots[i].robot_area_type[is_take];
             //     y= target_sequence[is_take][robots[i].robot_area_type[is_take]][studios[robots[i].target_id].studio_area_type[is_take]];
@@ -2025,9 +2025,9 @@ void robot_judge_sol(int threshold_lack,int full){
                 else robots[i].virtual_id = -1;
             }
         }
-        if(robots[i].get_type==0)cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<studios[robots[i].target_id].type<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
-        else cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
-        cerr<<robots[i].now_index<<endl;
+        // if(robots[i].get_type==0)cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<studios[robots[i].target_id].type<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
+        // else cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
+        // cerr<<robots[i].now_index<<endl;
     }
 
 }
@@ -3418,7 +3418,7 @@ Ins contr_one_rob(Robot& robot , const PayLoad& payload){
     Ins ins_t;
     int flag_type=robot.get_type==0?0:1;
     robot.virtual_pos=exist_id[flag_type][robot.virtual_id];
-    if(state.FrameID>=2930&&state.FrameID<=3050&&robot.id==0){
+    if(state.FrameID>=2000&&state.FrameID<=2500&&robot.id==0){
         cerr<<" FrameID "<<state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
         cerr<<robot.virtual_id<<endl;
     }
