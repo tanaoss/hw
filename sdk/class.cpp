@@ -1894,8 +1894,12 @@ void robot_judge_sol(int threshold_lack,int full){
                                     min_subscript=temp1.first;
                                     k=j;
                                 }
+                            }
                             // }
                         // }
+                        if(state.FrameID>4700 &&state.FrameID<4800&&i==2){
+                            cerr<<"wwww"<<k<<' '<<temp1.first<<' '<<temp1.second<<endl;
+                        }
                         if(robots[i].target_id != -1)
                             robots[i].last_target_id = robots[i].target_id;
                         robots[i].target_id = min_subscript;
@@ -1925,7 +1929,7 @@ void robot_judge_sol(int threshold_lack,int full){
                         }
                         else robots[i].virtual_id = -1;
                     }
-                }
+                
 
             }
         }       
