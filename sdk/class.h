@@ -381,4 +381,6 @@ double calAngleToDis(int x, int y, int z);//nodeID转角度转距离
 int transID(int from_id, int is_robot, int to_id);//from_id -> to_id 转化为 road_id
 void init_data();
 void printMap(int f);
+void printEdge(int id);
+bool check_slope(int id1, int id2);
 void printPath(int from_id, int is_robot, int to_id, int is_take);
