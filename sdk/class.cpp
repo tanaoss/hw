@@ -4614,7 +4614,7 @@ void Dijkstra(int s, int is_take, int is_robot) {
             next_id = from;
             dis = now_node.dis;
 
-            // cerr<<"to-studio:"<<studio_id<<" dis:"<<dis<<" pre_id:"<<pre_id<<endl;
+            cerr<<"to-studio:"<<studio_id<<" dis:"<<dis<<" pre_id:"<<pre_id<<endl;
             
             vector<Graph_node> ro = {Graph_node{s, 0, pre_id}};
             if(is_robot) {
@@ -4643,15 +4643,15 @@ void Dijkstra(int s, int is_take, int is_robot) {
 
 
         num = graph_edge[is_take][from].size();
-        // cerr<<"edge-num:"<<num<<endl;
+        cerr<<"edge-num:"<<num<<endl;
         for(i = 0; i < num; ++i) {
             to = graph_edge[is_take][from][i].id;
             new_dis = dis + graph_edge[is_take][from][i].dis + calAngleToDis(pre_id, from, to);
             pre_id = graph_edge[is_take][from][i].pre_id;
-            // cerr<<"ro_id:"<<to<<" new-dis:"<<dis<<" old-dis:"<<dis_node[to]<<endl;
+            cerr<<"to_id:"<<to<<" new-dis:"<<dis<<" old-dis:"<<dis_node[to]<<endl;
             if(lt(new_dis, dis_node[to])) {
                 q.push(Graph_node{to, new_dis, pre_id});
-                // cerr<<"update-ro_id:"<<to<<" new-dis:"<<new_dis<<" old-dis:"<<dis_node[to]<<endl;
+                cerr<<"update-to_id:"<<to<<" new-dis:"<<new_dis<<" old-dis:"<<dis_node[to]<<endl;
                 dis_node[to] = new_dis;
                 pre_node[to] = pre_id;
             }
