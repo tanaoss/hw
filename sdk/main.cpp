@@ -18,6 +18,7 @@ int main()
     readMapUntilOK();
     // cerr << "sss" << endl;
     // divide_space();
+    // deal_graph();
     // cerr << "sss" << endl;
     init_data();
     for(int i = 0; i < studios.size(); ++i) {
@@ -27,7 +28,7 @@ int main()
     for(int i = 0; i < 4; ++i) {
         Dijkstra(robots[i].node_id, 0, 1);
     }
-    cerr << "sss" << endl;
+    // cerr << "sss" << endl;
     // floyd();
     // print_queue();
     // cerr<<robots.size();
@@ -38,7 +39,7 @@ int main()
     init_studio_parameter();
      while (cin >> state.FrameID)
     {
-        cerr<<" time "<<state.FrameID<<endl;
+        // cerr<<" time "<<state.FrameID<<endl;
         readStatusUntilOK() ;
         cout<<state.FrameID<<endl;
         if(count == 0)first_action();

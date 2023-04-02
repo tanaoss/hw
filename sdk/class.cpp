@@ -18,7 +18,7 @@ vector<Studio> studios;
 vector<Robot> robots;
 State state;//当前帧数，全局可见
 vector<Ins> ins(4);
-vector<int> material[8];
+vector<int> material[4][8];
 vector<int> product[8];
 vector<int> full_product;
 vector<PayLoad> payloads;
@@ -49,16 +49,17 @@ int max_wait_time[4];
 int robot_area[4];
 int contr_print_flag=0;
 int graph[100][100];
-int target_sequence[500][500];
+int graphs[2][100][100];
+int target_sequence[2][500][500];
 int wail[101][101];
-double dis_area[500][500];
-double studio_dis[50][50];
+double dis_area[2][500][500];
+double studio_dis[2][50][50];
 double init_robot_dis[4][50];
 double new_cllo_time = 0;
 pair<double ,double> Root;
 pair<double ,double> Collision_point;
 vector<PayLoad> pl_g;
-vector<type_area>types;
+vector<type_area>types[2];
 vector<pair<double,double>>arri_Set;
 double Compute_redundancy=0;
 Ins ins_set[8];
@@ -276,8 +277,12 @@ bool readStatusUntilOK() {
     int rob_id=0;
     cin>>K;
     cin.ignore();
+    for(int i=0;i<4;i++){
+        for(int j=0;j<8;j++){
+            material[i][j].clear();
+        }
+    }
     for(int i=0;i<8;++i) {
-        material[i].clear();
         product[i].clear();
         produce_product[i]=0;
         lack_material[i]=0;
@@ -321,7 +326,10 @@ bool readStatusUntilOK() {
                             for(int j = 0;j<studio_material[i][0];j++){
                                 if((studios[studio_id].bitSatus & (int)pow(2,studio_material[i][j+1])) == 0){
                                     // if(studios_rid[studio_id][studio_material[i][j+1]] == -1)material[studio_material[i][j+1]].push_back(studio_id);
-                                    material[studio_material[i][j+1]].push_back(studio_id);
+                                    for(int k = 0;k<4;k++){
+                                        if(!eq(dis_robot_to_studios[k][studio_id],10000))
+                                            material[k][studio_material[i][j+1]].push_back(studio_id);
+                                    }
                                 }
                             }
                         }
@@ -329,11 +337,20 @@ bool readStatusUntilOK() {
                 }
             }
             if(studios[studio_id].type == 8){
-                material[7].push_back(studio_id);
+                for(int k = 0;k<4;k++){
+                    if(!eq(dis_robot_to_studios[k][studio_id],10000))
+                        material[k][7].push_back(studio_id);
+                }
+                                    
+                // material[7].push_back(studio_id);
             }
             if(studios[studio_id].type == 9){
                 for(int h = 1;h <=7;h++){
-                    material[h].push_back(studio_id);
+                    for(int k = 0;k<4;k++){
+                        if(!eq(dis_robot_to_studios[k][studio_id],10000))
+                            material[k][h].push_back(studio_id);
+                    }
+                    // material[h].push_back(studio_id);
                 }
             }
         }
@@ -1017,20 +1034,20 @@ double Calc_collisions_dis(int robot_id,int studio_id){
 
     return dis;
 }
-double back_dis(int studio_id){
-    int i;
-    double min = 100;
-    double dist;
-    int min_subscript = -1;
-    for(i=0;i<material[studios[studio_id].type].size();i++){
-        dist=calcuDis(studios[studio_id].pos,studios[material[studios[studio_id].type][i]].pos);
-        if(dist<min){
-            min=dist;
-            min_subscript = material[studios[studio_id].type][i];
-        }
-    }
-    return min*0.2/6;
-}
+// double back_dis(int studio_id){
+//     int i;
+//     double min = 100;
+//     double dist;
+//     int min_subscript = -1;
+//     for(i=0;i<material[studios[studio_id].type].size();i++){
+//         dist=calcuDis(studios[studio_id].pos,studios[material[studios[studio_id].type][i]].pos);
+//         if(dist<min){
+//             min=dist;
+//             min_subscript = material[studios[studio_id].type][i];
+//         }
+//     }
+//     return min*0.2/6;
+// }
 double studio_wait_time(int robot_id,int studio_id){
     double wait=1;
     if(class_map == 1){
@@ -1234,134 +1251,6 @@ double change_area(int robot_id,int studio_id){
     return 1;
 }
 
-// pair<int, double>pick_point(int robot_id, int state_type)
-// {
-//     pair<double,double> pos = robots[robot_id].pos;
-//     double min = 1000;
-//     int min_subscript = -1;
-//     int i,j;
-//     int studio_id;
-//     double dist;
-//     int item_type = robots[robot_id].get_type;
-//     if(state_type == 1){
-//         //qu 123
-//         for(i=0;i<studios.size();i++){
-//             if(studios[i].type >= 1 && studios[i].type <= 3 && (studios[i].r_id==-1 ) ){  
-//                 if(studios[i].pStatus == 1||(studios[i].r_time>0)){
-//                     if(robot_get_type[studios[i].type]< material[studios[i].type].size()){
-//                         dist = init_robot_dis[robot_id][i];
-//                         if(eq(dist,1000))continue;
-//                         if (lt(dist,min))
-//                         {
-//                             min = dist;
-//                             min_subscript = i;
-//                         }
-                            
-//                     }
-//                 }
-//             }
-//         }
-//     }
-//     else if(state_type == 2){
-//         //qu 123
-//         for(i=0;i<studios.size();i++){
-//             if(studios[i].type >= 1 && studios[i].type <= 3 && (studios[i].r_id==-1 ) ){  
-//                 if(studios[i].pStatus == 1){
-//                     if(robot_get_type[studios[i].type]< material[studios[i].type].size()){
-//                         dist = studio_dis[robots[robot_id].loc_id][i];
-//                         if(eq(dist,1000))continue;
-//                         if (lt(dist,min))
-//                         {
-//                             min = dist;
-//                             min_subscript = i;
-//                         }
-                            
-//                     }
-//                 }
-//             }
-//         }
-//     }
-//     else if(state_type == 3){
-//         //qu 456
-//         for(i=0;i<studios.size();i++){
-//             if(studios[i].type >= 4 && studios[i].type <= 6 && (studios[i].r_id==-1 )){  //456 and no robot choose ,get
-//                 // if(studios[i].pStatus == 1 ||(studios[i].r_time>0&&(checkEnough(robot_id,i,studios[i].r_time)))){
-//                     // cerr<<"ccc1"<<endl;
-//                 if(studios[i].pStatus == 1){
-//                     if(robot_get_type[studios[i].type]< material[studios[i].type].size()){
-//                         dist = studio_dis[robots[robot_id].loc_id][i];
-//                         if(eq(dist,1000))continue;
-//                         if (lt(dist,min))
-//                         {
-//                             min = dist;
-//                             min_subscript = i;
-//                         }       
-//                     }
-//                 }
-//             }
-//         }
-//     }
-//     else if(state_type == 4){
-//         //qu 7
-//         for(i=0;i<studios.size();i++){
-//             if(studios[i].type ==7 && (studios[i].r_id==-1)){  
-//                 if(studios[i].pStatus == 1){
-//                     if(robot_get_type[studios[i].type]< material[studios[i].type].size()){
-//                         dist = studio_dis[robots[robot_id].loc_id][i];
-//                         if(eq(dist,1000))continue;
-//                         if (lt(dist,min))
-//                         {
-//                             min = dist;
-//                             min_subscript = i;
-//                         }
-//                     }
-//                 }
-//             }
-//         }
-//     }
-//     else if(state_type == 5){             
-//             //send
-//         for(i=0;i<studios.size();i++){
-//             for(j=1;j<=material_send[item_type][0];j++){
-//                 if(item_type != 7){
-//                     if(studios[i].type == material_send[item_type][j] && (studios_rid[i][item_type] == -1) ){
-//                         if(((studios[i].bitSatus & ((int)pow(2,item_type)))==0)||((check_material_full(i)&&(studios[i].pStatus != 1)&&(studios[i].r_time>0&&(checkEnough(robot_id,i,studios[i].r_time)))))){
-//                             dist = studio_dis[robots[robot_id].loc_id][i];
-//                             if(eq(dist,1000))continue;
-//                             if (lt(dist,min))
-//                             {
-//                                 min = dist;
-//                                 min_subscript = i;
-//                             }
-//                         }
-//                     }
-//                 }
-//                 else{
-//                     if(studios[i].type == material_send[item_type][j]){
-//                        dist = studio_dis[robots[robot_id].loc_id][i];
-//                        if(eq(dist,1000))continue;
-//                         if (lt(dist,min))
-//                         {
-//                             min = dist;
-//                             min_subscript = i;
-//                         }
-//                     }
-//                 }
-//             }
-//             if(studios[i].type == 9){
-//                 dist = studio_dis[robots[robot_id].loc_id][i];
-//                 if(eq(dist,1000))continue;
-//                 if (lt(dist,min))
-//                 {
-//                     min = dist;
-//                     min_subscript = i;
-//                 }
-//             }
-//         }
-//     }
-//     return pair<int, double>(min_subscript, min);
-// }
-
 pair<int, double>pick_point(int robot_id, int state_type)
 {
     pair<double,double> pos = robots[robot_id].pos;
@@ -1376,9 +1265,9 @@ pair<int, double>pick_point(int robot_id, int state_type)
         for(i=0;i<studios.size();i++){
             if(studios[i].type >= 1 && studios[i].type <= 3 && (studios[i].r_id==-1 ) ){  
                 if(studios[i].pStatus == 1||(studios[i].r_time>0)){
-                    if(robot_get_type[studios[i].type]< material[studios[i].type].size()){
-                        dist = dis_robot_to_studios[robot_id][i];
-                        if(eq(dist,10000))continue;
+                    if(robot_get_type[studios[i].type]< material[robot_id][studios[i].type].size()){
+                        dist = init_robot_dis[robot_id][i];
+                        if(eq(dist,1000))continue;
                         if (lt(dist,min))
                         {
                             min = dist;
@@ -1395,9 +1284,9 @@ pair<int, double>pick_point(int robot_id, int state_type)
         for(i=0;i<studios.size();i++){
             if(studios[i].type >= 1 && studios[i].type <= 3 && (studios[i].r_id==-1 ) ){  
                 if(studios[i].pStatus == 1){
-                    if(robot_get_type[studios[i].type]< material[studios[i].type].size()){
-                        dist = dis_stuios[robots[robot_id].loc_id][i][0];
-                        if(eq(dist,10000))continue;
+                    if(robot_get_type[studios[i].type]< material[robot_id][studios[i].type].size()){
+                        dist = studio_dis[0][robots[robot_id].loc_id][i];
+                        if(eq(dist,1000))continue;
                         if (lt(dist,min))
                         {
                             min = dist;
@@ -1416,9 +1305,9 @@ pair<int, double>pick_point(int robot_id, int state_type)
                 // if(studios[i].pStatus == 1 ||(studios[i].r_time>0&&(checkEnough(robot_id,i,studios[i].r_time)))){
                     // cerr<<"ccc1"<<endl;
                 if(studios[i].pStatus == 1){
-                    if(robot_get_type[studios[i].type]< material[studios[i].type].size()){
-                        dist = dis_stuios[robots[robot_id].loc_id][i][0];
-                        if(eq(dist,10000))continue;
+                    if(robot_get_type[studios[i].type]< material[robot_id][studios[i].type].size()){
+                        dist = studio_dis[0][robots[robot_id].loc_id][i];
+                        if(eq(dist,1000))continue;
                         if (lt(dist,min))
                         {
                             min = dist;
@@ -1434,9 +1323,9 @@ pair<int, double>pick_point(int robot_id, int state_type)
         for(i=0;i<studios.size();i++){
             if(studios[i].type ==7 && (studios[i].r_id==-1)){  
                 if(studios[i].pStatus == 1){
-                    if(robot_get_type[studios[i].type]< material[studios[i].type].size()){
-                        dist = dis_stuios[robots[robot_id].loc_id][i][0];
-                        if(eq(dist,10000))continue;
+                    if(robot_get_type[studios[i].type]< material[robot_id][studios[i].type].size()){
+                        dist = studio_dis[0][robots[robot_id].loc_id][i];
+                        if(eq(dist,1000))continue;
                         if (lt(dist,min))
                         {
                             min = dist;
@@ -1454,8 +1343,8 @@ pair<int, double>pick_point(int robot_id, int state_type)
                 if(item_type != 7){
                     if(studios[i].type == material_send[item_type][j] && (studios_rid[i][item_type] == -1) ){
                         if(((studios[i].bitSatus & ((int)pow(2,item_type)))==0)||((check_material_full(i)&&(studios[i].pStatus != 1)&&(studios[i].r_time>0&&(checkEnough(robot_id,i,studios[i].r_time)))))){
-                            dist = dis_stuios[robots[robot_id].loc_id][i][1];
-                            if(eq(dist,10000))continue;
+                            dist = studio_dis[1][robots[robot_id].loc_id][i];
+                            if(eq(dist,1000))continue;
                             if (lt(dist,min))
                             {
                                 min = dist;
@@ -1466,8 +1355,8 @@ pair<int, double>pick_point(int robot_id, int state_type)
                 }
                 else{
                     if(studios[i].type == material_send[item_type][j]){
-                       dist = dis_stuios[robots[robot_id].loc_id][i][1];
-                       if(eq(dist,10000))continue;
+                       dist = studio_dis[1][robots[robot_id].loc_id][i];
+                       if(eq(dist,1000))continue;
                         if (lt(dist,min))
                         {
                             min = dist;
@@ -1477,8 +1366,8 @@ pair<int, double>pick_point(int robot_id, int state_type)
                 }
             }
             if(studios[i].type == 9){
-                dist = dis_stuios[robots[robot_id].loc_id][i][1];
-                if(eq(dist,10000))continue;
+                dist = studio_dis[1][robots[robot_id].loc_id][i];
+                if(eq(dist,1000))continue;
                 if (lt(dist,min))
                 {
                     min = dist;
@@ -1489,6 +1378,150 @@ pair<int, double>pick_point(int robot_id, int state_type)
     }
     return pair<int, double>(min_subscript, min);
 }
+bool check_get_send(int robot_id,int studio_id){
+    int j;
+    for(int i=0;i<material[robot_id][studios[studio_id].type].size();i++){
+        j=material[robot_id][studios[studio_id].type][i];
+        if(studios_rid[j][studios[studio_id].type]== -1){
+            if(lt(dis_stuios[studio_id][j][1],10000))
+                return true;
+        }
+    }
+    return false;
+}
+// pair<int, double>pick_point(int robot_id, int state_type)
+// {
+//     pair<double,double> pos = robots[robot_id].pos;
+//     double min = 1000;
+//     int min_subscript = -1;
+//     int i,j;
+//     int studio_id;
+//     double dist;
+//     int item_type = robots[robot_id].get_type;
+//     if(state_type == 1){
+//         //qu 123
+//         for(i=0;i<studios.size();i++){
+//             if(studios[i].type >= 1 && studios[i].type <= 3 && (studios[i].r_id==-1 ) ){  
+//                 if(studios[i].pStatus == 1||(studios[i].r_time>0)){
+//                     if(robot_get_type[studios[i].type]< material[robot_id][studios[i].type].size()){
+//                         dist = dis_robot_to_studios[robot_id][i];
+//                         if(eq(dist,10000))continue;
+//                         if(check_get_send(robot_id,i)){
+//                             if (lt(dist,min))
+//                             {
+//                                 min = dist;
+//                                 min_subscript = i;
+//                             }
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+//     }
+//     else if(state_type == 2){
+//         //qu 123
+//         for(i=0;i<studios.size();i++){
+//             if(studios[i].type >= 1 && studios[i].type <= 3 && (studios[i].r_id==-1 ) ){  
+//                 if(studios[i].pStatus == 1){
+//                     if(robot_get_type[studios[i].type]< material[robot_id][studios[i].type].size()){
+//                         dist = dis_stuios[robots[robot_id].loc_id][i][0];
+//                         if(eq(dist,10000))continue;
+//                         if(check_get_send(robot_id,i)){
+//                             if (lt(dist,min))
+//                             {
+//                                 min = dist;
+//                                 min_subscript = i;
+//                             }
+//                         } 
+//                     }
+//                 }
+//             }
+//         }
+//     }
+//     else if(state_type == 3){
+//         //qu 456
+//         for(i=0;i<studios.size();i++){
+//             if(studios[i].type >= 4 && studios[i].type <= 6 && (studios[i].r_id==-1 )){  //456 and no robot choose ,get
+//                 // if(studios[i].pStatus == 1 ||(studios[i].r_time>0&&(checkEnough(robot_id,i,studios[i].r_time)))){
+//                     // cerr<<"ccc1"<<endl;
+//                 if(studios[i].pStatus == 1){
+//                     if(robot_get_type[studios[i].type]< material[robot_id][studios[i].type].size()){
+//                         dist = dis_stuios[robots[robot_id].loc_id][i][0];
+//                         if(eq(dist,10000))continue;
+//                         if(check_get_send(robot_id,i)){
+//                             if (lt(dist,min))
+//                             {
+//                                 min = dist;
+//                                 min_subscript = i;
+//                             }
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+//     }
+//     else if(state_type == 4){
+//         //qu 7
+//         for(i=0;i<studios.size();i++){
+//             if(studios[i].type ==7 && (studios[i].r_id==-1)){  
+//                 if(studios[i].pStatus == 1){
+//                     if(robot_get_type[studios[i].type]< material[robot_id][studios[i].type].size()){
+//                         dist = dis_stuios[robots[robot_id].loc_id][i][0];
+//                         if(eq(dist,10000))continue;
+//                         if(check_get_send(robot_id,i)){
+//                             if (lt(dist,min))
+//                             {
+//                                 min = dist;
+//                                 min_subscript = i;
+//                             }
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+//     }
+//     else if(state_type == 5){             
+//             //send
+//         for(i=0;i<studios.size();i++){
+//             for(j=1;j<=material_send[item_type][0];j++){
+//                 if(item_type != 7){
+//                     if(studios[i].type == material_send[item_type][j] && (studios_rid[i][item_type] == -1) ){
+//                         if(((studios[i].bitSatus & ((int)pow(2,item_type)))==0)||((check_material_full(i)&&(studios[i].pStatus != 1)&&(studios[i].r_time>0&&(checkEnough(robot_id,i,studios[i].r_time)))))){
+//                             dist = dis_stuios[robots[robot_id].loc_id][i][1];
+//                             if(eq(dist,10000))continue;
+//                             if (lt(dist,min))
+//                             {
+//                                 min = dist;
+//                                 min_subscript = i;
+//                             }
+//                         }
+//                     }
+//                 }
+//                 else{
+//                     if(studios[i].type == material_send[item_type][j]){
+//                        dist = dis_stuios[robots[robot_id].loc_id][i][1];
+//                        if(eq(dist,10000))continue;
+//                         if (lt(dist,min))
+//                         {
+//                             min = dist;
+//                             min_subscript = i;
+//                         }
+//                     }
+//                 }
+//             }
+//             if(studios[i].type == 9){
+//                 dist = dis_stuios[robots[robot_id].loc_id][i][1];
+//                 if(eq(dist,10000))continue;
+//                 if (lt(dist,min))
+//                 {
+//                     min = dist;
+//                     min_subscript = i;
+//                 }
+//             }
+//         }
+//     }
+//     return pair<int, double>(min_subscript, min);
+// }
 
 
 // pair<int, double> choose_lack(int studio_id, int threshold)
@@ -1572,7 +1605,7 @@ void first_action()
     {
         if(robots[i].target_id != -1){
             // if(robots[i].robot_area_type != studios[robots[i].target_id].studio_area_type){
-            //     robots[i].virtual_pos = types[robots[i].robot_area_type].entrance[target_sequence[robots[i].robot_area_type][studios[robots[i].target_id].studio_area_type]];
+            //     robots[i].virtual_pos = types[0][robots[i].robot_area_type[0]].entrance[target_sequence[0][robots[i].robot_area_type[0]][studios[robots[i].target_id].studio_area_type[0]]];
             // }
             // else{
             //     robots[i].virtual_pos = studios[robots[i].target_id].pos;
@@ -1586,6 +1619,7 @@ void first_action()
         }
         else {
             robots[i].virtual_id = -1;
+            robots[i].virtual_pos = pair<double,double>(0,0);
         }
     }
 }
@@ -1691,11 +1725,13 @@ void robot_judge_sol(int threshold_lack,int full){
     pair<int,double> temp2;
     //cerr<<robots.size()<<endl;
     for(i = 0; i < robots.size(); i++){
+        if(robots[i].get_type==0)is_take=0;
+        else is_take=1;
         // cerr<<"robot :"<<i<<"distance : "<<calcuDis(robots[i].pos,robots[i].virtual_pos)<<endl;
         if(lt(calcuDis(robots[i].pos,robots[i].virtual_pos),0.4)){
-            // if(robots[i].robot_area_type != studios[robots[i].target_id].studio_area_type){
-            //     x= robots[i].robot_area_type;
-            //     y= target_sequence[robots[i].robot_area_type][studios[robots[i].target_id].studio_area_type];
+            // if(robots[i].robot_area_type[is_take] != studios[robots[i].target_id].studio_area_type[is_take]){
+            //     x= robots[i].robot_area_type[is_take];
+            //     y= target_sequence[is_take][robots[i].robot_area_type[is_take]][studios[robots[i].target_id].studio_area_type[is_take]];
             //     // if((eq(robots[i].virtual_pos.first,types[x].entrance[y].first)&&eq(robots[i].virtual_pos.second,types[x].entrance[y].second))){
             //     //     robots[i].virtual_pos = types[y].entrance[x];
             //     // }
@@ -1705,20 +1741,18 @@ void robot_judge_sol(int threshold_lack,int full){
             //     //     robots[i].virtual_pos = types[x].entrance[y];
             //     // }
             //     if(x != y){
-            //         if(!(eq(robots[i].virtual_pos.first,types[x].entrance[y].first)&&eq(robots[i].virtual_pos.second,types[x].entrance[y].second))&&!(eq(robots[i].virtual_pos.first,types[y].entrance[x].first)&&eq(robots[i].virtual_pos.second,types[y].entrance[x].second))){
-            //             robots[i].virtual_pos = types[x].entrance[y];
+            //         if(!(eq(robots[i].virtual_pos.first,types[is_take][x].entrance[y].first)&&eq(robots[i].virtual_pos.second,types[is_take][x].entrance[y].second))&&!(eq(robots[i].virtual_pos.first,types[is_take][y].entrance[x].first)&&eq(robots[i].virtual_pos.second,types[is_take][y].entrance[x].second))){
+            //             robots[i].virtual_pos = types[is_take][x].entrance[y];
             //         }
-            //         else robots[i].virtual_pos = types[y].entrance[x];
+            //         else robots[i].virtual_pos = types[is_take][y].entrance[x];
             //     }
             //     else{
-            //         robots[i].virtual_pos = types[x].entrance[y];
+            //         robots[i].virtual_pos = types[is_take][x].entrance[y];
             //     }
             // }
             // else{
             //     robots[i].virtual_pos = studios[robots[i].target_id].pos;
             // }
-            if(robots[i].get_type==0)is_take=0;
-            else is_take = 1;
             robots[i].now_index++;
             robots[i].virtual_id = road[(robots[i].get_type != 0)][robots[i].road_id][robots[i].now_index].id;
         }
@@ -1734,16 +1768,16 @@ void robot_judge_sol(int threshold_lack,int full){
                     // cerr<<"target_id "<<robots[i].target_id<<endl;
                     if (robots[i].target_id != -1)
                      {
-                        //studios[robots[i].target_id].r_id = i;
-                        // x= robots[i].robot_area_type;
-                        // y= studios[robots[i].target_id].studio_area_type;
+                        // studios[robots[i].target_id].r_id = i;
+                        // x= robots[i].robot_area_type[is_take];
+                        // y= studios[robots[i].target_id].studio_area_type[is_take];
                         // if(x != y){
-                        //     y= target_sequence[robots[i].robot_area_type][studios[robots[i].target_id].studio_area_type];
-                        //     if(lt(calcuDis(robots[i].pos,types[x].entrance[y]),0.6)){
-                        //         robots[i].virtual_pos = types[y].entrance[x];
+                        //     y= target_sequence[is_take][robots[i].robot_area_type[is_take]][studios[robots[i].target_id].studio_area_type[is_take]];
+                        //     if(lt(calcuDis(robots[i].pos,types[is_take][x].entrance[y]),0.6)){
+                        //         robots[i].virtual_pos = types[is_take][y].entrance[x];
                         //     }
                         //     else{
-                        //         robots[i].virtual_pos = types[x].entrance[y];
+                        //         robots[i].virtual_pos = types[is_take][x].entrance[y];
                         //     }
                         //     // cerr<<"sss"<<i<<' '<<x<<' '<<y<<endl;
                         //     // printPair(robots[i].virtual_pos);
@@ -1850,14 +1884,14 @@ void robot_judge_sol(int threshold_lack,int full){
                         robots[i].target_id = min_subscript;
                             // cerr<<"aaa"<<endl;
                         if(min_subscript != -1){
-                            // if(robots[i].robot_area_type != studios[robots[i].target_id].studio_area_type){
-                            //     x= robots[i].robot_area_type;
-                            //     y= target_sequence[robots[i].robot_area_type][studios[robots[i].target_id].studio_area_type];
-                            //     if(lt(calcuDis(robots[i].pos,types[x].entrance[y]),0.6)){
-                            //         robots[i].virtual_pos = types[y].entrance[x];
+                            // if(robots[i].robot_area_type[is_take] != studios[robots[i].target_id].studio_area_type[is_take]){
+                            //     x= robots[i].robot_area_type[is_take];
+                            //     y= target_sequence[is_take][robots[i].robot_area_type[is_take]][studios[robots[i].target_id].studio_area_type[is_take]];
+                            //     if(lt(calcuDis(robots[i].pos,types[is_take][x].entrance[y]),0.6)){
+                            //         robots[i].virtual_pos = types[is_take][y].entrance[x];
                             //     }
                             //     else{
-                            //         robots[i].virtual_pos = types[x].entrance[y];
+                            //         robots[i].virtual_pos = types[is_take][x].entrance[y];
                             //     }
                             // }
                             // else{
@@ -1948,18 +1982,20 @@ void robot_judge_sol(int threshold_lack,int full){
             //     }
             // }
         // }
-        if(robots[i].get_type==0)cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<studios[robots[i].target_id].type<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
-        else cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
+        // if(robots[i].get_type==0)cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<studios[robots[i].target_id].type<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
+        // else cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
     }
 
 }
 
 void robot_action(){
-    int col,row;
+    int col,row,is_take;
     for(int i=0;i<robots.size();i++){
+        if(robots[i].get_type==0)is_take=0;
+        else is_take=1;
         col = (robots[i].pos.first-0.25)/0.5;
         row = (robots[i].pos.second-0.25)/0.5;
-        robots[i].robot_area_type = graph[row][col];
+        robots[i].robot_area_type[is_take] = graphs[is_take][row][col];
         // printPair(robots[i].virtual_pos);
     }
     for(int i =0;i<=7;i++)robot_get_type[i]=0;
@@ -4033,7 +4069,7 @@ void floyd(){
 //         cerr<<endl;
 //     }
 // }
- bool check_side(int i,int j,int flag){
+ bool check_side(int i,int j,int flag,int is_take){
     int count1,count2,k;
     j = j + flag;
     count1=99-j+1;
@@ -4050,8 +4086,8 @@ void floyd(){
     }
     // if(graph[i-1][j]==21)
         // cerr<<" abs(count1-count2) "<<i<<' '<<j<<' '<<abs(count1-count2)<<' '<<count1<<' '<<count2<<endl;
-    if(count1>4&&count2>4){
-        if(abs(count1-count2)>3){
+    if(count1>(is_take+3)&&count2>(is_take+3)){
+        if(abs(count1-count2)>(is_take+2)){
             // if(graph[i-1][j]==21)
                 // cerr<<"kkk"<<' '<<i<<' '<<j<<endl;
             return false;
@@ -4077,8 +4113,8 @@ void floyd(){
         }
         // if(graph[i-1][j]==21)
             // cerr<<" count1 "<<i<<' '<<count1<<endl;
-        if(count2>4){
-            if(count1>3)return false;
+        if(count2>(is_take+3)){
+            if(count1>(is_take+2))return false;
         }
         else{
             if(count1>0)return false;
@@ -4127,7 +4163,70 @@ void floyd(){
     return pair<double, double>(x, y);
  }
 
-void divide_space(){
+void deal_graph(){
+    int count1,count2;
+    for(int i = 0;i<2;i++){
+        for(int j=0;j<100;j++){
+            for(int k =0 ;k<100;k++){
+                graphs[i][j][k]=graph[j][k];
+            }
+        }
+    }
+    for(int i=0;i<100;i++){
+        count1 = 0;
+        count2 = 0;
+        for(int j=0;j<100;j++){
+            if(graphs[0][i][j]!=-2){
+                count1++;
+            }
+            if(count1>0 && graphs[0][i][j] == -2){
+                if(count1 < 2 )
+                    graphs[0][i][j-1]=-2;
+                    else count1 = 0;
+            }
+            if(graphs[1][i][j]!=-2){
+                count2++;
+            }
+            if(count2>0 && graphs[1][i][j] == -2){
+                if(count2 < 3 ){
+                    graphs[1][i][j-1]=-2;
+                    graphs[1][i][j-2]=-2;
+                }
+                else count2 = 0;
+            }
+        }
+    }
+    for(int j=0;j<100;j++){
+        count1 = 0;
+        count2 = 0;
+        for(int i=0;i<100;i++){
+            if(graphs[0][i][j]!=-2){
+                count1++;
+            }
+            if(count1>0 && graphs[0][i][j] == -2){
+                if(count1 < 2 )
+                    graphs[0][i-1][j]=-2;
+                    else count1 = 0;
+            }
+            if(graphs[1][i][j]!=-2){
+                count2++;
+            }
+            if(count2>0 && graphs[1][i][j] == -2){
+                if(count2 < 3 ){
+                    graphs[1][i-1][j]=-2;
+                    graphs[1][i-2][j]=-2;
+                }
+                else count2 = 0;
+            }
+        }
+    }
+    divide_space(0);
+    divide_space(1);
+    analyze_space(0);
+    analyze_space(1);
+}
+
+void divide_space(int is_take){
     int i,j,k,type = 0,count1,count2,count;
     int flag =0;
     double first,second;
@@ -4135,65 +4234,65 @@ void divide_space(){
     for(i=0;i<100;i++){
         for(j=0;j<100;j++){
             // cerr << "ffff" << endl;
-            if(graph[i][j]==-2)continue;
+            if(graphs[is_take][i][j]==-2)continue;
             flag = 0;
             // cerr<<"aaaa"<<endl;
-            if(i==0||graph[i-1][j]==-2){
+            if(i==0||graphs[is_take][i-1][j]==-2){
                 // cerr<<"bbbb"<<endl;
-                if(j==0||graph[i][j-1]==-2){
-                    if (graph[i][j - 1] == -2 &&j<98){
-                        if (graph[i - 1][j + 1] != -2 ){ 
+                if(j==0||graphs[is_take][i][j-1]==-2){
+                    if (graphs[is_take][i][j - 1] == -2 &&j<98){
+                        if (graphs[is_take][i - 1][j + 1] != -2 ){ 
                             flag = 1;
-                            if(check_side(i,j,1)){
-                                graph[i][j] = graph[i - 1][j + 1];
+                            if(check_side(i,j,1,is_take)){
+                                graphs[is_take][i][j] = graphs[is_take][i - 1][j + 1];
                                 continue;
                             }
                         }
-                        else if (graph[i-1][j +2] != -2 ){
+                        else if (graphs[is_take][i-1][j +2] != -2 ){
                             flag = 2;
-                            if (check_side(i, j, 2))
+                            if (check_side(i, j, 2,is_take))
                             {
-                                graph[i][j] = graph[i - 1][j + 2];
+                                graphs[is_take][i][j] = graphs[is_take][i - 1][j + 2];
                                 continue;
                             }
                         }
                     }
                     // cerr<<"111"<<endl;
-                    graph[i][j] = type;
+                    graphs[is_take][i][j] = type;
                     // cerr<<type<<endl;
                     type_area temp;
                     temp.type = type;
                     temp.height=1;
-                    types.push_back(temp);
+                    types[is_take].push_back(temp);
                     type ++;
                 }
                 else{
-                    graph[i][j]=graph[i][j-1];
+                    graphs[is_take][i][j]=graphs[is_take][i][j-1];
                 }
             }
             else{
-                if(j==0||graph[i][j-1]==-2){
-                    if(graph[i-1][j] != -2){
-                        if(check_side(i,j,0)){
-                            graph[i][j] = graph[i - 1][j];
-                            types[graph[i][j]].height++;
+                if(j==0||graphs[is_take][i][j-1]==-2){
+                    if(graphs[is_take][i-1][j] != -2){
+                        if(check_side(i,j,0,is_take)){
+                            graphs[is_take][i][j] = graphs[is_take][i - 1][j];
+                            types[is_take][graphs[is_take][i][j]].height++;
                         }
                         else{
-                            graph[i][j]=type;
+                            graphs[is_take][i][j]=type;
                             type_area temp;
                             temp.type = type;
                             temp.height=1;
-                            types.push_back(temp);
+                            types[is_take].push_back(temp);
                                 // cerr<<type<<endl;
                             type ++;
                         }
                     }
                 }
                 else{
-                    if(graph[i][j-1]!=graph[i-1][j] && graph[i][j-1] != -2){
-                        graph[i][j]=graph[i][j-1];
+                    if(graphs[is_take][i][j-1]!=graphs[is_take][i-1][j] && graphs[is_take][i][j-1] != -2){
+                        graphs[is_take][i][j]=graphs[is_take][i][j-1];
                     }
-                    else graph[i][j]=graph[i-1][j];
+                    else graphs[is_take][i][j]=graphs[is_take][i-1][j];
                 }
             }
         }
@@ -4204,55 +4303,63 @@ void divide_space(){
     }
     for(i=99;i>=0;i--){
         for(j=0;j<100;j++){
-            fprintf(stderr,"%4d",graph[i][j]);
+            fprintf(stderr,"%4d",graphs[is_take][i][j]);
             // cerr<<graph[i][j]<<' ';
         }
         cerr<<endl;
     }
+    cerr<<endl;
+}
+
+void analyze_space(int is_take){
+    int i,j,k,type = 0,count1,count2,count;
+    int flag =0;
+    double first,second;
+    pair<double,double>temp;
     for(i=0;i<100;i++){
         for(j=0;j<100;j++){
-            if(graph[i][j]==-2)continue;
-            if(i>0&& graph[i][j]!=graph[i-1][j]&& graph[i-1][j]!=-2){
-                if(j==0 || graph[i][j] !=graph[i][j-1]|| graph[i-1][j] !=graph[i-1][j-1]){
+            if(graphs[is_take][i][j]==-2)continue;
+            if(i>0&& graphs[is_take][i][j]!=graphs[is_take][i-1][j]&& graphs[is_take][i-1][j]!=-2){
+                if(j==0 || graphs[is_take][i][j] !=graphs[is_take][i][j-1]|| graphs[is_take][i-1][j] !=graphs[is_take][i-1][j-1]){
                     count = 1;
                     for(k=j+1;k<100;k++){
                         // cerr<<graph[i][k]<<' '<<graph[i][k-1]<<' '<<graph[i-1][k]<<' '<<graph[i-1][k-1]<<endl;
-                        if(graph[i][k] !=graph[i][k-1]|| graph[i-1][k] !=graph[i-1][k-1]) break;
+                        if(graphs[is_take][i][k] !=graphs[is_take][i][k-1]|| graphs[is_take][i-1][k] != graphs[is_take][i-1][k-1]) break;
                         count ++;
                     }
                     // cerr<<"count = "<<count<<endl;
-                    if(count>2){
+                    if(count>(is_take+2)){
                         first = (j+count/2)*0.5+0.25;
                         // cerr<<"type = "<<graph[i][j]<<endl;
                         // cerr<<"type = "<<graph[i-1][j]<<endl;
-                        if(types[graph[i][j]].height>2){
+                        if(types[is_take][graphs[is_take][i][j]].height>2){
                             second = ((i+1)*0.5+0.25);
-                            temp = check_wail_change(i+1,(j + count / 2), graph[i][j]);
+                            temp = check_wail_change(i+1,(j + count / 2), graphs[is_take][i][j]);
                         }
                         else {
                             second = ((i)*0.5+0.25);
-                            temp = check_wail_change(i, (j + count / 2), graph[i][j]);
+                            temp = check_wail_change(i, (j + count / 2), graphs[is_take][i][j]);
                         }
-                        if (types[graph[i][j]].entrance.count(graph[i-1][j]) == 0)
+                        if (types[is_take][graphs[is_take][i][j]].entrance.count(graphs[is_take][i-1][j]) == 0)
                         {
-                            types[graph[i][j]].entrance.insert({graph[i-1][j],temp});
+                            types[is_take][graphs[is_take][i][j]].entrance.insert({graphs[is_take][i-1][j],temp});
                         }
-                        if(types[graph[i-1][j]].height>2){
+                        if(types[is_take][graphs[is_take][i-1][j]].height>2){
                             second = ((i-2)*0.5+0.25);
-                            temp = check_wail_change(i - 2, (j + count / 2), graph[i-1][j]);
+                            temp = check_wail_change(i - 2, (j + count / 2), graphs[is_take][i-1][j]);
                         }
                         else{
                             second = ((i-1)*0.5+0.25);
-                            temp = check_wail_change(i - 1, (j + count / 2), graph[i-1][j]);
+                            temp = check_wail_change(i - 1, (j + count / 2), graphs[is_take][i-1][j]);
                         }
-                        if(types[graph[i-1][j]].entrance.count(graph[i][j])==0){
-                            types[graph[i-1][j]].entrance.insert({graph[i][j],temp});
+                        if(types[is_take][graphs[is_take][i-1][j]].entrance.count(graphs[is_take][i][j])==0){
+                            types[is_take][graphs[is_take][i-1][j]].entrance.insert({graphs[is_take][i][j],temp});
                         }
                     }
                     else{
                         // cerr<<"graph[i][j] type = "<<graph[i][j]<<"graph[i-1][j] = " <<graph[i-1][j]<<endl;
-                        types[graph[i-1][j]].entrance.erase(graph[i][j]);
-                        types[graph[i][j]].entrance.erase(graph[i-1][j]);
+                        types[is_take][graphs[is_take][i-1][j]].entrance.erase(graphs[is_take][i][j]);
+                        types[is_take][graphs[is_take][i][j]].entrance.erase(graphs[is_take][i-1][j]);
                     }
                     // cerr<<"count = "<<count<<endl;
                 }
@@ -4273,77 +4380,70 @@ void divide_space(){
     //     }
     //     cerr<<endl;
     // }
-    floyd_area();
+    floyd_area(is_take);
     // for(int i=0;i<types.size();i++){
     //     for(int j=0;j<types.size();j++){
     //         cerr<<i<<' '<<j<<' '<< "dis = "<<dis_area[i][j]<<endl;
     //     }
     // }
     // print_target(0, 93);
-    studio_distance();
-    
-    // for(int i=0;i<studios.size();i++){
-    //     for(int j=0;j<studios.size();j++){
-    //         cerr<<i<<' '<<j<<' '<< "studios_distance = "<<studio_dis[i][j]<<endl;
-    //     }
-    // }
+    studio_distance(is_take);
 }
 
-
-void print_target(int i, int j) {
+void print_target(int i, int j,int is_take) {
     int k;
     int start = i;
     double dist=0;
     cerr<<i;
-    if(eq(dis_area[i][j], 1000)) return;
+    if(eq(dis_area[is_take][i][j], 1000)) return;
     while(i != j) {
-        k = target_sequence[i][j];
+        k = target_sequence[is_take][i][j];
         cerr<<"->"<<k;
-        if(k==j) dist += dis_area[i][k];
+        if(k==j) dist += dis_area[is_take][i][k];
         else
-            dist += dis_area[i][k] + calcuDis(types[k].entrance[i], types[k].entrance[target_sequence[k][j]]);
+            dist += dis_area[is_take][i][k] + calcuDis(types[is_take][k].entrance[i], types[is_take][k].entrance[target_sequence[is_take][k][j]]);
         // cerr<<"dist "<<start<<"->"<<k<<" = "<<dist<<endl;
         i = k;
     }
     // cerr<<endl;
     // cerr<<dist<<"*"<<dis_area[start][j]<<endl;
 }
-void init_area(){
-    for(int i=0;i<types.size();i++){
-        for(int j=i+1;j<types.size();j++){
-            if(types[i].entrance.count(types[j].type)!=0){
-                dis_area[i][j]=calcuDis(types[i].entrance[types[j].type],types[types[j].type].entrance[i]);
-                dis_area[j][i]=dis_area[i][j];
-                target_sequence[i][j]=j;
-                target_sequence[j][i]=i;
+void init_area(int is_take){
+    for(int i=0;i<types[is_take].size();i++){
+        for(int j=i+1;j<types[is_take].size();j++){
+            if(types[is_take][i].entrance.count(types[is_take][j].type)!=0){
+                dis_area[is_take][i][j]=calcuDis(types[is_take][i].entrance[types[is_take][j].type],types[is_take][types[is_take][j].type].entrance[i]);
+                dis_area[is_take][j][i]=dis_area[is_take][i][j];
+                target_sequence[is_take][i][j]=j;
+                target_sequence[is_take][j][i]=i;
             }
             else{
-                dis_area[i][j]=1000;
-                dis_area[j][i]=dis_area[i][j];
-                target_sequence[i][j]=-1;
-                target_sequence[j][i]=-1;
+                dis_area[is_take][i][j]=1000;
+                dis_area[is_take][j][i]=dis_area[is_take][i][j];
+                target_sequence[is_take][i][j]=-1;
+                target_sequence[is_take][j][i]=-1;
             }
         }
     }
 }
-void floyd_area(){
+void floyd_area(int is_take){
     double dist;
-    init_area();
-    for(int k=0;k<types.size();k++){
-        for(int j= 0;j<types.size();j++){
-            for(int i=0;i<types.size();i++){
+    init_area(is_take);
+    for(int k=0;k<types[is_take].size();k++){
+        for(int j= 0;j<types[is_take].size();j++){
+            for(int i=0;i<types[is_take].size();i++){
                 if(j==k || i==k || i==j)continue;
-                if(lt(dis_area[i][k], 1000) && lt(dis_area[k][j], 1000)){
+                if(lt(dis_area[is_take][i][k], 1000) && lt(dis_area[is_take][k][j], 1000)){
                     // cerr<<j<<endl;
                     // printPair(types[i].entrance[j]);
                     // cerr<<k<<endl;
                     // printPair(types[i].entrance[k]);
                     
-                    dist = dis_area[i][k] + dis_area[k][j] + calcuDis(types[k].entrance[target_sequence[k][i]], types[k].entrance[target_sequence[k][j]]);
-                    if(gt(dis_area[i][j], dist)) {
-                        dis_area[i][j] = dis_area[j][i] = dist;
-                        target_sequence[i][j] = target_sequence[i][k];
-                        target_sequence[j][i] = target_sequence[j][k];
+                    dist = dis_area[is_take][i][k] + dis_area[is_take][k][j] + calcuDis(types[is_take][k].entrance[target_sequence[is_take][k][i]], types[is_take][k].entrance[target_sequence[is_take][k][j]]);
+                    if(gt(dis_area[is_take][i][j], dist)) {
+                        dis_area[is_take][i][j] = dis_area[is_take][j][i] = dist;
+                        target_sequence[is_take][i][j] = target_sequence[is_take][i][k];
+                        target_sequence[is_take][j][i] = target_sequence[is_take][j][k];
                     }
 
 
@@ -4358,55 +4458,55 @@ void floyd_area(){
         }
     }
 }
-void studio_distance(){
+void studio_distance(int is_take){
     int row,col;
     int x, y;
     for(int i=0;i<studios.size();i++){
         col = (studios[i].pos.first-0.25)/0.5;
         row = (studios[i].pos.second-0.25)/0.5;
-        studios[i].studio_area_type = graph[row][col];
-        cerr <<"kkk"<<studios[i].pos.first << ' ' << studios[i].pos.second << ' ' << col<<' '<<row<<' '<<studios[i].studio_area_type << endl;
+        studios[i].studio_area_type[is_take] = graphs[is_take][row][col];
+        // cerr <<"kkk"<<studios[i].pos.first << ' ' << studios[i].pos.second << ' ' << col<<' '<<row<<' '<<studios[i].studio_area_type << endl;
     }
     for(int i=0;i<robots.size();i++){
         col = (robots[i].pos.first-0.25)/0.5;
         row = (robots[i].pos.second-0.25)/0.5;
         // cerr<<col<<' '<<row<<endl;
-        robots[i].robot_area_type = graph[row][col];
+        robots[i].robot_area_type[0] = graphs[0][row][col];
     }
     for(int i=0;i<studios.size();i++){
-        x = studios[i].studio_area_type;
+        x = studios[i].studio_area_type[is_take];
         cerr << studios.size()<<endl;
         for (int j = i + 1; j < studios.size(); j++)
         {
-            y = studios[j].studio_area_type;
+            y = studios[j].studio_area_type[is_take];
             // cerr<<"a"<<endl;
-            if(lt(dis_area[studios[i].studio_area_type][studios[j].studio_area_type],1000)){
+            if(lt(dis_area[is_take][studios[i].studio_area_type[is_take]][studios[j].studio_area_type[is_take]],1000)){
                 // cerr << i << ' ' << j << endl;
                 // cerr<<x<<' '<<y<<endl;
-                if(studios[i].studio_area_type!=studios[j].studio_area_type){
-                    studio_dis[i][j] = calcuDis(studios[i].pos, types[x].entrance[target_sequence[x][y]]) + dis_area[x][y] + calcuDis(studios[j].pos, types[y].entrance[target_sequence[y][x]]);
+                if(studios[i].studio_area_type[is_take]!=studios[j].studio_area_type[is_take]){
+                    studio_dis[is_take][i][j] = calcuDis(studios[i].pos, types[is_take][x].entrance[target_sequence[is_take][x][y]]) + dis_area[is_take][x][y] + calcuDis(studios[j].pos, types[is_take][y].entrance[target_sequence[is_take][y][x]]);
                 }
                 else{
-                    studio_dis[i][j]=calcuDis(studios[i].pos,studios[j].pos);
+                    studio_dis[is_take][i][j]=calcuDis(studios[i].pos,studios[j].pos);
                 }
                 // cerr << "b" << endl;
             }
             else{
                 // cerr<<i<<' '<<j<<endl;
-                studio_dis[i][j] = 1000;
+                studio_dis[is_take][i][j] = 1000;
                 // cerr << "c" << endl;
             }
-            studio_dis[j][i] = studio_dis[i][j];
-            cerr << j << endl;
+            studio_dis[is_take][j][i] = studio_dis[is_take][i][j];
+            // cerr << j << endl;
         }
     }
     for(int i=0;i<robots.size();i++){
-        x = robots[i].robot_area_type;
+        x = robots[i].robot_area_type[0];
         for(int j=0;j<studios.size();j++){
-            y = studios[j].studio_area_type;
-            if(lt(dis_area[x][y],1000)){
+            y = studios[j].studio_area_type[is_take];
+            if(lt(dis_area[is_take][x][y],1000)){
                 if(x != y){
-                    init_robot_dis[i][j] = calcuDis(robots[i].pos, types[x].entrance[target_sequence[x][y]]) + dis_area[x][y] + calcuDis(studios[j].pos, types[y].entrance[target_sequence[y][x]]);
+                    init_robot_dis[i][j] = calcuDis(robots[i].pos, types[is_take][x].entrance[target_sequence[is_take][x][y]]) + dis_area[is_take][x][y] + calcuDis(studios[j].pos, types[is_take][y].entrance[target_sequence[is_take][y][x]]);
                 }
                 else{
                     init_robot_dis[i][j]=calcuDis(robots[i].pos,studios[j].pos);

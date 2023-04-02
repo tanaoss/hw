@@ -103,7 +103,7 @@ struct Robot
     int now_index;
     int road_id;
     pair<double,double> virtual_pos;
-    int robot_area_type;
+    int robot_area_type[2];
     bool operator!=(Robot s1){
     if(s1.id!=id||target_id!=s1.target_id||s1.loc_id!=loc_id||xy_pos!=s1.xy_pos||pos!=s1.pos){
             return true;
@@ -180,7 +180,7 @@ struct Studio
     int pStatus;  // 产品格状态
     int wait_time; //等待时间
     int area;
-    int studio_area_type;
+    int studio_area_type[2];
     int pane_id;
     int node_id;
     bool corner;
@@ -359,9 +359,11 @@ double get_v_now(const Robot& robot, const PayLoad& payload);
 bool checkNearBar(const pair<double,double> &a, double radius);
 void floyd();
 void print_queue();
-void divide_space();
-void floyd_area();
-void studio_distance();
+void divide_space(int is_take);
+void deal_graph();
+void floyd_area(int is_take);
+void studio_distance(int is_take);
+void analyze_space(int is_take);
 
 void print_target(int i, int j);
 void init_trans();//将原来的地图中不是-2的部分全部更改为0
@@ -378,3 +380,4 @@ bool is_corner(int id);//判断工作台是不是在墙角
 double calAngleToDis(int x, int y, int z);//nodeID转角度转距离
 int transID(int from_id, int is_robot, int to_id);//from_id -> to_id 转化为 road_id
 void init_data();
+
