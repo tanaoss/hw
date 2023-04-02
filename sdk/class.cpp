@@ -233,6 +233,7 @@ bool readMapUntilOK() {
                 // cout<<x<<" "<<y<<endl;
                 Robot  robot(count_robot,0,0,0,1,1,xy_pos_robot,0,pos_robot,-1, (99-row)*100+i);
                 rob_transID[(99-row)*100+i] = count_robot;
+                stu_transID[(99-row)*100+i] = -1;
                 robot.pane_id = train.id;
                 robots.push_back(robot);
                 count_robot++;
@@ -4530,7 +4531,7 @@ void studio_distance(int is_take){
 void init_trans(){
     for(int i=0;i<100;i++){
         for(int j=0;j<100;j++){
-            graph_trans[i][j]==-2?-2:0;
+           graph_trans[i][j]=( graph[i][j]==-2?-2:0);
         }
     }
 }//将原来的地图中不是-2的部分全部更改为0
@@ -4567,14 +4568,15 @@ void Translation_graph_no(){
                 exist_id[0][id]=pos;
                 for(int t=0;t<studios.size();t++){
                     double tmpDis=calcuDis(studios[t].pos,pos);
-                    if(lt(tmpDis,0.4)){
+                    if(le(tmpDis,0.4)&&id!=studios[t].node_id){
                         graph_edge[0][id].push_back(Graph_node(studios[t].node_id,1,id));
                         graph_edge[0][studios[t].node_id].push_back(Graph_node(id,1,studios[t].node_id));
+                        // if(t==0)cerr<<graph_edge[0][studios[t].node_id].size()<<endl;
                     }
                 }
                 for(int t=0;t<4;t++){
                     double tmpDis=calcuDis(robots[t].pos,pos);
-                    if(lt(tmpDis,0.4)){
+                    if(le(tmpDis,0.4)&&id!=robots[t].node_id){
                         graph_edge[0][id].push_back(Graph_node(robots[t].node_id,1,id));
                         graph_edge[0][robots[t].node_id].push_back(Graph_node(id,1,robots[t].node_id));
                     }
@@ -4593,14 +4595,14 @@ void Translation_graph_has(){
                 exist_id[1][id]=tmp.second;
                 for(int t=0;t<studios.size();t++){
                     double tmpDis=calcuDis(studios[t].pos,pos);
-                    if(lt(tmpDis,0.4)){
+                    if(le(tmpDis,0.4)&&id!=studios[t].node_id){
                         graph_edge[1][id].push_back(Graph_node(studios[t].node_id,1,id));
                         graph_edge[1][studios[t].node_id].push_back(Graph_node(id,1,studios[t].node_id));
                     }
                 }
                 for(int t=0;t<4;t++){
                     double tmpDis=calcuDis(robots[t].pos,pos);
-                    if(lt(tmpDis,0.4)){
+                    if(le(tmpDis,0.4)&&id!=robots[t].node_id){
                         graph_edge[1][id].push_back(Graph_node(robots[t].node_id,1,id));
                         graph_edge[1][robots[t].node_id].push_back(Graph_node(id,1,robots[t].node_id));
                     }
@@ -4610,19 +4612,19 @@ void Translation_graph_has(){
                     int id_tmp2=(i+1)*100+(j+1);
                     int id_tmp3=(i-1)*100+(j-1);
                     int id_tmp4=(i-1)*100+(j+1);
-                    if(stu_transID.count(id_tmp1)&&(!is_corner(id_tmp1))){
+                    if(stu_transID.count(id_tmp1)&&(!is_corner(id_tmp1))&&(id!=id_tmp1)){
                         graph_edge[1][id].push_back(Graph_node(id_tmp1,1,id));
                         graph_edge[1][id_tmp1].push_back(Graph_node(id,1,id_tmp1));
                     }
-                    if(stu_transID.count(id_tmp2)&&(!is_corner(id_tmp2))){
+                    if(stu_transID.count(id_tmp2)&&(!is_corner(id_tmp2))&&(id!=id_tmp2)){
                         graph_edge[1][id].push_back(Graph_node(id_tmp2,1,id));
                         graph_edge[1][id_tmp2].push_back(Graph_node(id,1,id_tmp2));
                     }
-                    if(stu_transID.count(id_tmp3)&&(!is_corner(id_tmp3))){
+                    if(stu_transID.count(id_tmp3)&&(!is_corner(id_tmp3))&&(id!=id_tmp3)){
                         graph_edge[1][id].push_back(Graph_node(id_tmp3,1,id));
                         graph_edge[1][id_tmp3].push_back(Graph_node(id,1,id_tmp3));
                     }
-                    if(stu_transID.count(id_tmp4)&&(!is_corner(id_tmp4))){
+                    if(stu_transID.count(id_tmp4)&&(!is_corner(id_tmp4))&&(id!=id_tmp4)){
                         graph_edge[1][id].push_back(Graph_node(id_tmp4,1,id));
                         graph_edge[1][id_tmp4].push_back(Graph_node(id,1,id_tmp4));
                     }                    
@@ -4634,13 +4636,17 @@ void Translation_graph_has(){
 void getEdgeRalative(){
     for(auto& it:exist_id[0]){
         int idi=it.first/100;
-        int idj=it.first-it.first/100;
+        int idj=it.first-idi*100;
         for(int i=idi-1;i<=idi+1;i++){
             for(int j=idj-1;j<=idj+1;j++){
                 if(i==idi&&j==idj)continue;
                 int tmpId=i*100+j;
                 int ckeck_id=idi*100+j;
-                if(exist_id[0].count(tmpId)&&exist_id[0].count(ckeck_id)){
+                // if(it.first==studios[0].node_id){
+                //     cerr<<graph_edge[0][it.first].size()<<" "<<exist_id[0].count(tmpId)<<" "<<exist_id[0].count(ckeck_id)<<endl;
+                //     cerr<<idi<<"-"<<idj<<" "<<i<<"-"<<j<<endl;
+                // }
+                if(exist_id[0].count(tmpId)&&exist_id[0].count(ckeck_id)&&it.first!=tmpId){
                     graph_edge[0][it.first].push_back(Graph_node(tmpId,1,it.first));
                 }
             }
@@ -4648,12 +4654,13 @@ void getEdgeRalative(){
     }
     for(auto& it:exist_id[1]){
         int idi=it.first/100;
-        int idj=it.first-it.first/100;
+        int idj=it.first-idi*100;
         for(int i=idi-1;i<=idi+1;i++){
             for(int j=idj-1;j<=idj+1;j++){
                 if(i==idi&&j==idj)continue;
                 int tmpId=i*100+j;
-                if(exist_id[1].count(tmpId)){
+                int ckeck_id=idi*100+j;
+                if(exist_id[1].count(tmpId)&&it.first!=tmpId&&exist_id[0].count(ckeck_id)){
                     graph_edge[1][it.first].push_back(Graph_node(tmpId,1,it.first));
                 }
             }
@@ -4685,11 +4692,16 @@ void Dijkstra(int s, int is_take, int is_robot) {
     int count = studios.size();
     double dis, new_dis;
     from_id = is_robot? rob_transID[s]: stu_transID[s];
-    for(i = 0; i < 1000; ++i) {
+    // if(is_robot)
+    //     cerr<<"start-robot:"<<from_id<<endl;
+    // else cerr<<"start-studio:"<<from_id<<endl;
+
+    for(i = 0; i < 10000; ++i) {
         vis_node[i] = 0;
-        dis_node[i] = 1000;
+        dis_node[i] = 10000;
     }
     q.push(Graph_node(s, 0, s));
+    
     while(!q.empty()) {
         Graph_node now_node = q.top();
         q.pop();
@@ -4699,60 +4711,66 @@ void Dijkstra(int s, int is_take, int is_robot) {
         pre_id = now_node.pre_id;
         vis_node[now_node.id] = 1;
 
+        // cerr<<"node_id:"<<from<<" dis:"<<dis<<" pre_id:"<<pre_id<<endl;
 
-        if(stu_transID.count(from)) {
+        if(stu_transID.count(from) && stu_transID[from] != -1) {
             count--;
             studio_id = stu_transID[from];
             pre_id = now_node.pre_id;
             next_id = from;
             dis = now_node.dis;
-            road_id = transID(from_id, is_robot, studio_id);
-            road[is_take][road_id].emplace_back(Graph_node{s, 0, pre_id});
+
+            // cerr<<"to-studio:"<<studio_id<<" dis:"<<dis<<" pre_id:"<<pre_id<<endl;
+            
+            vector<Graph_node> ro = {Graph_node{s, 0, pre_id}};
             if(is_robot) {
                 dis_robot_to_studios[from_id][studio_id] = dis;
             }
             else {
-                dis_stuios[from][studio_id][is_take] = dis;
+                dis_stuios[from_id][studio_id][is_take] = dis;
                 // dis_stuios[studio_id][from] = dis;
             }
             while(pre_id != s) {
                 id = pre_id;
                 pre_id = pre_node[pre_id];
+                // cerr<<id<<"-"<<pre_id<<endl;
                 // id转向
                 if(!eq(calAngleToDis(pre_id, id, next_id), 0)){
-                    road[is_take][studio_id].emplace_back(Graph_node{id, dis - dis_node[id], pre_id});
+                    ro.emplace_back(Graph_node{id, dis - dis_node[id], pre_id});
                     next_id = id;
                     dis = dis_node[id];
                 }
             }
-            road[is_take][studio_id].reserve(sizeof(road[is_take][studio_id]));
+            ro.reserve(sizeof(ro));
+            road_id = transID(from_id, is_robot, studio_id);
+            road[is_take][road_id] = ro;
         }
 
         if(count == 0) break;
 
+
         num = graph_edge[is_take][from].size();
+        // cerr<<"edge-num:"<<num<<endl;
         for(i = 0; i < num; ++i) {
             to = graph_edge[is_take][from][i].id;
+            if(vis_node[to]) continue;
             new_dis = dis + graph_edge[is_take][from][i].dis + calAngleToDis(pre_id, from, to);
             pre_id = graph_edge[is_take][from][i].pre_id;
+            // cerr<<"to_id:"<<to<<" new-dis:"<<dis<<" old-dis:"<<dis_node[to]<<endl;
             if(lt(new_dis, dis_node[to])) {
                 q.push(Graph_node{to, new_dis, pre_id});
+                // if(to==2763){
+                //     cerr<<"kkkk-"<<from<<endl;
+                //     cerr<<"update-to_id:"<<to<<" new-dis:"<<new_dis<<" old-dis:"<<dis_node[to]<<endl;
+                // }
+                // cerr<<"update-to_id:"<<to<<" new-dis:"<<new_dis<<" old-dis:"<<dis_node[to]<<endl;
                 dis_node[to] = new_dis;
-                pre_node[to] = pre_id;
+                pre_node[to] = from;
             }
         }
     }
 }
-void trans_studio_rob_toID(){
-    int cnt=1;
-    for(int i=0;i<studios.size();i++){
-        stu_transID[studios[i].node_id]=cnt++;
-    }
-    for(int i=0;i<4;i++){
-        stu_transID[robots[i].node_id]=cnt;
-        rob_transID[robots[i].node_id]=cnt++;
-    }
-}
+
 bool is_corner(int id){
     int i=id/100;
     int j=id-i*100;
@@ -4779,5 +4797,21 @@ void init_data(){
     Translation_graph_no();
     Translation_graph_has();
     getEdgeRalative();
-    trans_studio_rob_toID();
+    // trans_studio_rob_toID();
+}
+void printMap(int f){
+        for(int i=100;i>=0;i--){
+        for(int j=0;j<100;j++){
+            int id=i*100+j;
+            if(exist_id[f].count(id)){
+                if(f==1)
+                cerr<<check_8(i,j).first<<" ";
+                else
+                cerr<<1<<" ";
+            }else{
+                cerr<<"-"<<" ";
+            }
+        }
+        cerr<<endl;
+    }
 }

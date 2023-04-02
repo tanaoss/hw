@@ -20,7 +20,9 @@ int main()
     // divide_space();
     // deal_graph();
     // cerr << "sss" << endl;
+    
     init_data();
+    printMap(1);
     for(int i = 0; i < studios.size(); ++i) {
         Dijkstra(studios[i].node_id, 0, 0);
         Dijkstra(studios[i].node_id, 1, 0);
@@ -28,7 +30,6 @@ int main()
     for(int i = 0; i < 4; ++i) {
         Dijkstra(robots[i].node_id, 0, 1);
     }
-    // cerr << "sss" << endl;
     // floyd();
     // print_queue();
     // cerr<<robots.size();
