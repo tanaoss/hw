@@ -102,7 +102,6 @@ struct Robot
     int pane_id;
     pair<double,double> virtual_pos;
     int robot_area_type;
-    int virtual_id;
     bool operator!=(Robot s1){
     if(s1.id!=id||target_id!=s1.target_id||s1.loc_id!=loc_id||xy_pos!=s1.xy_pos||pos!=s1.pos){
             return true;
