@@ -4613,14 +4613,14 @@ void Translation_graph_has(){
                 exist_id[1][id]=tmp.second;
                 for(int t=0;t<studios.size();t++){
                     double tmpDis=calcuDis(studios[t].pos,pos);
-                    if(((le(tmpDis,0.71)&&tmp.first==1)||le(tmpDis,0.4))&&id!=studios[t].node_id){
+                    if(!is_corner(studios[t].node_id)&&((le(tmpDis,0.71)&&tmp.first==1)||le(tmpDis,0.4))&&id!=studios[t].node_id){
                         graph_edge[1][id].push_back(Graph_node(studios[t].node_id,1,id));
                         graph_edge[1][studios[t].node_id].push_back(Graph_node(id,1,studios[t].node_id));
                     }
                 }
                 for(int t=0;t<4;t++){
                     double tmpDis=calcuDis(robots[t].pos,pos);
-                    if(((le(tmpDis,0.71)&&tmp.first==1)||le(tmpDis,0.4))&&id!=robots[t].node_id){
+                    if(!is_corner(studios[t].node_id)&&((le(tmpDis,0.71)&&tmp.first==1)||le(tmpDis,0.4))&&id!=robots[t].node_id){
                         graph_edge[1][id].push_back(Graph_node(robots[t].node_id,1,id));
                         graph_edge[1][robots[t].node_id].push_back(Graph_node(id,1,robots[t].node_id));
                     }
@@ -4662,6 +4662,9 @@ void getEdgeRalative(){
             for(int j=idj-1;j<=idj+1;j++){
                 if(i==idi&&j==idj)continue;
                 int tmpId=i*100+j;
+                if(is_corner(it.first)||is_corner(tmpId)){
+                    continue;
+                }
                 int ckeck_id=idi*100+j;
                 if(exist_id[1].count(tmpId)&&it.first!=tmpId&&check_slope(tmpId,it.first)){
                     graph_edge[1][it.first].push_back(Graph_node(tmpId,1,it.first));
@@ -4839,7 +4842,7 @@ void printEdge(int id){
     while(!Q.empty()){
         int tmpId=Q.front();
         Q.pop();
-        for(auto it:graph_edge[1][tmpId]){
+        for(auto it:graph_edge[0][tmpId]){
             if(vis_rob_edge[it.id]==-1){
                  Q.push(it.id);
                  vis_rob_edge[it.id]=(vis_rob_edge[tmpId]+1)%10;
@@ -4847,14 +4850,25 @@ void printEdge(int id){
             
         }
     }
+    vector<Graph_node> path = road[0][transID(1, 1, 3)];
+    for(auto it:path){
+        int tmpId=it.id;
+        vis_rob_edge[tmpId]=-7;
+       
+        
+    }
     cerr<<"edge-print "<<endl;
     for(int i=99;i>=0;i--){
     for(int j=0;j<100;j++){
             int id=i*100+j;
-            if(vis_rob_edge[id]!=-1){
+            if(vis_rob_edge[id]!=-1&&vis_rob_edge[id]!=-7&&stu_transID.count(id)==0){
             cerr<<vis_rob_edge[id]<<" ";
         
-            }else{
+            }else if(vis_rob_edge[id]==-7&&stu_transID.count(id)==0){
+                cerr<<"+"<<" ";
+            }else if(stu_transID.count(id)==1){
+                cerr<<"^"<<" ";
+            }else {
                 cerr<<"-"<<" ";
             }
         }
