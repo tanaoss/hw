@@ -4643,16 +4643,7 @@ void Dijkstra(int s, int is_take, int is_robot) {
         }
     }
 }
-void trans_studio_rob_toID(){
-    int cnt=1;
-    for(int i=0;i<studios.size();i++){
-        stu_transID[studios[i].node_id]=cnt++;
-    }
-    for(int i=0;i<4;i++){
-        stu_transID[robots[i].node_id]=cnt;
-        rob_transID[robots[i].node_id]=cnt++;
-    }
-}
+
 bool is_corner(int id){
     int i=id/100;
     int j=id-i*100;
@@ -4679,7 +4670,6 @@ void init_data(){
     Translation_graph_no();
     Translation_graph_has();
     getEdgeRalative();
-    trans_studio_rob_toID();
 }
 void printMap(int f){
         for(int i=100;i>=0;i--){
