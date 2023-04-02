@@ -78,8 +78,10 @@ double dis_robot_to_studios[4][50];
 
 
 void initrobotInfo() {
-
-    cerr<<"dis:"<<dis_robot_to_studios[0][0]<<endl;
+    // for(int i =0;i<studios.size(); ++i) {
+    //     cerr<<"dis:"<<dis_robot_to_studios[0][i]<<endl;
+    // }
+    
     double weightMin = 0.45 * 0.45 * Pi * 20;
     double weightMax = 0.53 * 0.53 * Pi * 20;
     double inertiaMin = weightMin * 0.45 * 0.45 *0.5;
@@ -1622,7 +1624,7 @@ void first_action()
             cerr<<i<<"-"<<robots[i].target_id<<endl;
             cerr<<robots[i].node_id<<endl;
             cerr<<studios[robots[i].target_id].node_id<<endl;
-            // printPath(i, 1, robots[i].target_id, 0);
+            printPath(i, 1, robots[i].target_id, 0);
             robots[i].road_id = transID(i, 1, robots[i].target_id);
             robots[i].virtual_id = road[0][robots[i].road_id][0].id;
             robots[i].now_index = 0;
@@ -3434,10 +3436,10 @@ pair<double,bool> get_w_now(const Robot& robot, const PayLoad& payload){
         can_stop_flag=1;
         StopA=0;        
     }
-    if(state.FrameID>=161&&state.FrameID<=1452){
-        cerr<<"ID: "<<state.FrameID<<" "<<robot.id<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<" "<<payload.distance<<endl;
-        cerr<<can_st<<endl;
-    }
+    // if(state.FrameID>=161&&state.FrameID<=1452){
+    //     cerr<<"ID: "<<state.FrameID<<" "<<robot.id<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<" "<<payload.distance<<endl;
+    //     cerr<<can_st<<endl;
+    // }
     double tmpAngle =can_stop_flag?StopA:rateAngle_fabs*payload.sign;
     return {tmpAngle,can_st} ;
 }
