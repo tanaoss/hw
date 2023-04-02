@@ -1871,7 +1871,8 @@ void robot_judge_sol(int threshold_lack,int full){
             ins[i].destroy = -1;
         }
         if(robots[i].target_id == -1){
-            robots[i].virtual_pos = pair<double,double>(0,0);
+            robots[i].virtual_id = -1;
+            // robots[i].virtual_pos = pair<double,double>(0,0);
         }
             // min_dist=1000;
             // min_subscript = -1;
@@ -1956,11 +1957,11 @@ void robot_action(){
         if(robots[i].get_type != 0)robot_get_type[robots[i].get_type]++;
         else if(robots[i].target_id != -1)robot_get_type[studios[robots[i].target_id].type]++;
     }
-    if(state.FrameID == 9324){
-        for(int i = 0;i<studios.size();i++){
-            cerr<<studios[i].r_id<<endl;
-        }
-    }
+    // if(state.FrameID == 9324){
+    //     for(int i = 0;i<studios.size();i++){
+    //         cerr<<studios[i].r_id<<endl;
+    //     }
+    // }
     robot_judge_sol(5, 0);
 }
 // void robot_action(){
