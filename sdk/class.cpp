@@ -4731,7 +4731,7 @@ void Dijkstra(int s, int is_take, int is_robot) {
 
             // cerr<<"to-studio:"<<studio_id<<" dis:"<<dis<<" pre_id:"<<pre_id<<endl;
             
-            vector<Graph_node> ro = {Graph_node{s, 0, pre_id}};
+            vector<Graph_node> ro = {Graph_node{from, 0, pre_id}};
             if(is_robot) {
                 dis_robot_to_studios[from_id][studio_id] = dis;
             }
