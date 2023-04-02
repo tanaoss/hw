@@ -18,6 +18,7 @@ int main()
     readMapUntilOK();
     // cerr << "sss" << endl;
     // divide_space();
+    // deal_graph();
     // cerr << "sss" << endl;
     
     init_data();
@@ -39,7 +40,7 @@ int main()
     init_studio_parameter();
      while (cin >> state.FrameID)
     {
-        cerr<<" time "<<state.FrameID<<endl;
+        // cerr<<" time "<<state.FrameID<<endl;
         readStatusUntilOK() ;
         cout<<state.FrameID<<endl;
         if(count == 0)first_action();
