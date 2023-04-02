@@ -4819,16 +4819,20 @@ void init_data(){
     // trans_studio_rob_toID();
 }
 void printMap(int f){
+    for(int i=0;i<100;i++){
+        cerr<<i<<" ";
+    }
+    cerr<<endl;
         for(int i=100;i>=0;i--){
         for(int j=0;j<100;j++){
             int id=i*100+j;
             if(exist_id[f].count(id)){
                 if(f==1)
-                cerr<<check_8(i,j).first<<" ";
+                cerr<<" "<<check_8(i,j).first<<" ";
                 else
                 cerr<<1<<" ";
             }else{
-                cerr<<"-"<<" ";
+                cerr<<"- "<<" ";
             }
         }
         cerr<<endl;
