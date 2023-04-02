@@ -78,9 +78,9 @@ double dis_robot_to_studios[4][50];
 
 
 void initrobotInfo() {
-    // for(int i =0;i<studios.size(); ++i) {
-    //     cerr<<"dis:"<<dis_robot_to_studios[0][i]<<endl;
-    // }
+    for(int i =0;i<studios.size(); ++i) {
+        cerr<<"dis:"<<dis_robot_to_studios[0][i]<<endl;
+    }
     
     double weightMin = 0.45 * 0.45 * Pi * 20;
     double weightMax = 0.53 * 0.53 * Pi * 20;
