@@ -4812,29 +4812,30 @@ void printMap(int f){
     }
 }
 void printEdge(int id){
-    vector<int> vis_rob_edge(100*100,0);
+    vector<int> vis_rob_edge(100*100,-1);
     // cerr<<studios[4].node_id/100<<"-"<<(studios[4].node_id-studios[4].node_id/100*100)<<endl;
     cerr<<studios[5].node_id<<endl;
     //unordered_map<int,vector<Graph_node>> graph_edge[2];
     queue<int>Q;
     Q.push(robots[id].node_id);
     int cnt=0;
-    vis_rob_edge[robots[id].node_id]=1;
+    vis_rob_edge[robots[id].node_id]=0;
     while(!Q.empty()){
         int tmpId=Q.front();
         Q.pop();
         for(auto it:graph_edge[1][tmpId]){
-            if(vis_rob_edge[it.id]==0){
+            if(vis_rob_edge[it.id]==-1){
                  Q.push(it.id);
-                 vis_rob_edge[it.id]=(((vis_rob_edge[tmpId]+1)%10)==0?1:(vis_rob_edge[tmpId]+1)%10);
+                 vis_rob_edge[it.id]=(vis_rob_edge[tmpId]+1)%10;
             }
             
         }
     }
+    cerr<<"edge-print "<<endl;
     for(int i=100;i>=0;i--){
     for(int j=0;j<100;j++){
             int id=i*100+j;
-            if(vis_rob_edge[id]){
+            if(vis_rob_edge[id]!=-1){
             cerr<<vis_rob_edge[id]<<" ";
         
             }else{
