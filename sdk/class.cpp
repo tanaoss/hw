@@ -4633,7 +4633,7 @@ void Dijkstra(int s, int is_take, int is_robot) {
             while(pre_id != s) {
                 id = pre_id;
                 pre_id = pre_node[pre_id];
-                cerr<<id<<"-"<<pre_id<<endl;
+                // cerr<<id<<"-"<<pre_id<<endl;
                 // id转向
                 if(!eq(calAngleToDis(pre_id, id, next_id), 0)){
                     ro.emplace_back(Graph_node{id, dis - dis_node[id], pre_id});
