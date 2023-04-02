@@ -14,19 +14,20 @@ int main()
 {
     std::ios::sync_with_stdio(false);   
     std::cin.tie(0);    // IO
-    cerr<<"sss"<<endl;
+    // cerr<<"sss"<<endl;
     readMapUntilOK();
-    cerr << "sss" << endl;
-    divide_space();
-    cerr << "sss" << endl;
+    // cerr << "sss" << endl;
+    // divide_space();
+    // cerr << "sss" << endl;
     init_data();
-    // for(int i = 0; i < studios.size(); ++i) {
-    //     Dijkstra(studios[i].node_id, 0, 0);
-    //     Dijkstra(studios[i].node_id, 1, 0);
-    // }
-    // for(int i = 0; i < 4; ++i) {
-    //     Dijkstra(robots[i].node_id, 0, 1);
-    // }
+    for(int i = 0; i < studios.size(); ++i) {
+        Dijkstra(studios[i].node_id, 0, 0);
+        Dijkstra(studios[i].node_id, 1, 0);
+    }
+
+    for(int i = 0; i < 4; ++i) {
+        Dijkstra(robots[i].node_id, 0, 1);
+    }
     
     // floyd();
     // print_queue();
