@@ -4671,7 +4671,7 @@ double calAngleToDis(int x, int y, int z) {
 
     Vec vec1 = Vec((x / 100) - (y / 100), (x % 100) - (y % 100));
     Vec vec2 = Vec((y / 100) - (z / 100), (y % 100) - (z % 100));
-    Vec vec2 = Vec((y / 100) - (z / 100), (y % 100) - (z % 100));
+
     double angle = acos(cos_t(vec1, vec2));
     return Angle_conversion(angle);
 }
