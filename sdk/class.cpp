@@ -4696,9 +4696,14 @@ void Dijkstra(int s, int is_take, int is_robot) {
     int count = studios.size();
     double dis, new_dis;
     from_id = is_robot? rob_transID[s]: stu_transID[s];
-    // if(is_robot)
-    //     cerr<<"start-robot:"<<from_id<<endl;
-    // else cerr<<"start-studio:"<<from_id<<endl;
+
+    bool cerr_flag = false;
+    // if(s==studios[11].node_id) cerr_flag = true;
+    if(cerr_flag) {
+        if(is_robot)
+            cerr<<"start-robot:"<<from_id<<endl;
+        else cerr<<"start-studio:"<<from_id<<endl;
+    }
 
     for(i = 0; i < 10000; ++i) {
         vis_node[i] = 0;
@@ -4715,7 +4720,8 @@ void Dijkstra(int s, int is_take, int is_robot) {
         pre_id = now_node.pre_id;
         vis_node[now_node.id] = 1;
 
-        // cerr<<"node_id:"<<from<<" dis:"<<dis<<" pre_id:"<<pre_id<<endl;
+        if(cerr_flag) 
+            cerr<<"node_id:"<<from<<" dis:"<<dis<<" pre_id:"<<pre_id<<endl;
 
         if(stu_transID.count(from) && stu_transID[from] != -1) {
             count--;
@@ -4724,7 +4730,8 @@ void Dijkstra(int s, int is_take, int is_robot) {
             next_id = from;
             dis = now_node.dis;
 
-            // cerr<<"to-studio:"<<studio_id<<" dis:"<<dis<<" pre_id:"<<pre_id<<endl;
+            if(cerr_flag) 
+                cerr<<"to-studio:"<<studio_id<<" dis:"<<dis<<" pre_id:"<<pre_id<<endl;
             
             vector<Graph_node> ro = {Graph_node{from, 0, pre_id}};
             if(is_robot) {
@@ -4754,7 +4761,8 @@ void Dijkstra(int s, int is_take, int is_robot) {
 
 
         num = graph_edge[is_take][from].size();
-        // cerr<<"edge-num:"<<num<<endl;
+        dis = now_node.dis;
+        if(cerr_flag) cerr<<"edge-num:"<<num<<endl;
         for(i = 0; i < num; ++i) {
             to = graph_edge[is_take][from][i].id;
             if(vis_node[to]) continue;
@@ -4767,7 +4775,7 @@ void Dijkstra(int s, int is_take, int is_robot) {
                 //     cerr<<"kkkk-"<<from<<endl;
                 //     cerr<<"update-to_id:"<<to<<" new-dis:"<<new_dis<<" old-dis:"<<dis_node[to]<<endl;
                 // }
-                // cerr<<"update-to_id:"<<to<<" new-dis:"<<new_dis<<" old-dis:"<<dis_node[to]<<endl;
+                if(cerr_flag) cerr<<"update-to_id:"<<to<<" new-dis:"<<new_dis<<" old-dis:"<<dis_node[to]<<endl;
                 dis_node[to] = new_dis;
                 pre_node[to] = from;
             }
