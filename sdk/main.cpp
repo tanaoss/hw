@@ -23,7 +23,7 @@ int main()
     
     init_data();
     printEdge(0);
-    
+    // printMap(1);
     for(int i = 0; i < studios.size(); ++i) {
         Dijkstra(studios[i].node_id, 0, 0);
         Dijkstra(studios[i].node_id, 1, 0);
@@ -34,7 +34,7 @@ int main()
     // floyd();
     // print_queue();
     // cerr<<robots.size();
-    printEdge(1);
+    // printEdge(1);
     cout<<"OK\n";
     cout.flush();
     int count = 0;
@@ -42,7 +42,7 @@ int main()
     init_studio_parameter();
      while (cin >> state.FrameID)
     {
-        cerr<<" time "<<state.FrameID<<endl;
+        // cerr<<" time "<<state.FrameID<<endl;
         readStatusUntilOK() ;
         cout<<state.FrameID<<endl;
         if(count == 0)first_action();

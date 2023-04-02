@@ -3414,6 +3414,10 @@ Ins contr_one_rob(Robot& robot , const PayLoad& payload){
     Ins ins_t;
     int flag_type=robot.get_type==0?0:1;
     robot.virtual_pos=exist_id[flag_type][robot.virtual_id];
+    if(state.FrameID>=1700&&state.FrameID<=1945&&robot.id==0){
+        cerr<<" FrameID "<<state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
+        cerr<<robot.virtual_id<<endl;
+    }
     auto p1=get_w_now(robot,payload);
     ins_t.rotate=p1.first;
     ins_t.forward=get_v_now(robot,payload);
@@ -4586,13 +4590,13 @@ pair<int,pair<double,double>> check_8(int i,int j){
     if(check_4(i,j)&&check_4(i,j+1)&&check_4(i-1,j)&&check_4(i-1,j+1)){
         return {1,make_pair<double,double>(0.5*j+0.25,0.5*i+0.25)};
     }else if((!check_4(i,j))&&check_4(i,j+1)&&check_4(i-1,j)&&check_4(i-1,j+1)){
-        return {2,make_pair<double,double>(0.5*j+0.25,0.5*i+0.03)};
+        return {2,make_pair<double,double>(0.5*j+0.47,0.5*i+0.03)};
     }else if(check_4(i,j)&&check_4(i,j+1)&&(!check_4(i-1,j))&&check_4(i-1,j+1)){
-        return {3,make_pair<double,double>(0.5*j+0.25,0.5*i+0.47)};
+        return {3,make_pair<double,double>(0.5*j+0.47,0.5*i+0.47)};
     }else if(check_4(i,j)&&(!check_4(i,j+1))&&check_4(i-1,j)&&check_4(i-1,j+1)){
-        return {4,make_pair<double,double>(0.5*j+0.25,0.5*i+0.03)};
+        return {4,make_pair<double,double>(0.5*j+0.03,0.5*i+0.03)};
     }else if(check_4(i,j)&&check_4(i,j+1)&&check_4(i-1,j)&&(!check_4(i-1,j+1))){
-        return {5,make_pair<double,double>(0.5*j+0.25,0.5*i+0.47)};
+        return {5,make_pair<double,double>(0.5*j+0.03,0.5*i+0.47)};
     }else{
         return {0,make_pair<double,double>(0,0)};
     }
@@ -4720,9 +4724,14 @@ void Dijkstra(int s, int is_take, int is_robot) {
     int count = studios.size();
     double dis, new_dis;
     from_id = is_robot? rob_transID[s]: stu_transID[s];
-    // if(is_robot)
-    //     cerr<<"start-robot:"<<from_id<<endl;
-    // else cerr<<"start-studio:"<<from_id<<endl;
+
+    bool cerr_flag = false;
+    // if(s==studios[11].node_id) cerr_flag = true;
+    if(cerr_flag) {
+        if(is_robot)
+            cerr<<"start-robot:"<<from_id<<endl;
+        else cerr<<"start-studio:"<<from_id<<endl;
+    }
 
     for(i = 0; i < 10000; ++i) {
         vis_node[i] = 0;
@@ -4739,7 +4748,8 @@ void Dijkstra(int s, int is_take, int is_robot) {
         pre_id = now_node.pre_id;
         vis_node[now_node.id] = 1;
 
-        // cerr<<"node_id:"<<from<<" dis:"<<dis<<" pre_id:"<<pre_id<<endl;
+        if(cerr_flag) 
+            cerr<<"node_id:"<<from<<" dis:"<<dis<<" pre_id:"<<pre_id<<endl;
 
         if(stu_transID.count(from) && stu_transID[from] != -1) {
             count--;
@@ -4748,7 +4758,8 @@ void Dijkstra(int s, int is_take, int is_robot) {
             next_id = from;
             dis = now_node.dis;
 
-            // cerr<<"to-studio:"<<studio_id<<" dis:"<<dis<<" pre_id:"<<pre_id<<endl;
+            if(cerr_flag) 
+                cerr<<"to-studio:"<<studio_id<<" dis:"<<dis<<" pre_id:"<<pre_id<<endl;
             
             vector<Graph_node> ro = {Graph_node{from, 0, pre_id}};
             if(is_robot) {
@@ -4779,7 +4790,7 @@ void Dijkstra(int s, int is_take, int is_robot) {
 
         num = graph_edge[is_take][from].size();
         dis = now_node.dis;
-        // cerr<<"edge-num:"<<num<<endl;
+        if(cerr_flag) cerr<<"edge-num:"<<num<<endl;
         for(i = 0; i < num; ++i) {
             to = graph_edge[is_take][from][i].id;
             if(vis_node[to]) continue;
@@ -4792,7 +4803,7 @@ void Dijkstra(int s, int is_take, int is_robot) {
                 //     cerr<<"kkkk-"<<from<<endl;
                 //     cerr<<"update-to_id:"<<to<<" new-dis:"<<new_dis<<" old-dis:"<<dis_node[to]<<endl;
                 // }
-                // cerr<<"update-to_id:"<<to<<" new-dis:"<<new_dis<<" old-dis:"<<dis_node[to]<<endl;
+                if(cerr_flag) cerr<<"update-to_id:"<<to<<" new-dis:"<<new_dis<<" old-dis:"<<dis_node[to]<<endl;
                 dis_node[to] = new_dis;
                 pre_node[to] = from;
             }
@@ -4829,16 +4840,20 @@ void init_data(){
     // trans_studio_rob_toID();
 }
 void printMap(int f){
+    for(int i=0;i<100;i++){
+        cerr<<i<<" ";
+    }
+    cerr<<endl;
         for(int i=100;i>=0;i--){
         for(int j=0;j<100;j++){
             int id=i*100+j;
             if(exist_id[f].count(id)){
                 if(f==1)
-                cerr<<check_8(i,j).first<<" ";
+                cerr<<" "<<check_8(i,j).first<<" ";
                 else
                 cerr<<1<<" ";
             }else{
-                cerr<<"-"<<" ";
+                cerr<<"- "<<" ";
             }
         }
         cerr<<endl;
@@ -4864,23 +4879,30 @@ void printEdge(int id){
             
         }
     }
-    vector<Graph_node> path = road[0][transID(1, 1, 3)];
+    int tarStu=4;
+    vector<Graph_node> path = road[0][transID(3, 0, tarStu)];
     for(auto it:path){
         int tmpId=it.id;
+        if(vis_rob_edge[tmpId]==-1){
+            cerr<<" 错误 "<<endl;
+        }
         vis_rob_edge[tmpId]=-7;
        
         
     }
     cerr<<"edge-print "<<endl;
+    for(int i=0;i<100;i++){
+        cerr<<i<<" ";
+    }
+    cerr<<endl;
     for(int i=99;i>=0;i--){
     for(int j=0;j<100;j++){
             int id=i*100+j;
-            if(vis_rob_edge[id]!=-1&&vis_rob_edge[id]!=-7&&stu_transID.count(id)==0){
-            cerr<<vis_rob_edge[id]<<" ";
-        
-            }else if(vis_rob_edge[id]==-7&&stu_transID.count(id)==0){
+            if(vis_rob_edge[id]!=-1&&vis_rob_edge[id]!=-7&&id!=studios[tarStu].node_id){
+                cerr<<vis_rob_edge[id]<<" ";
+            }else if(vis_rob_edge[id]==-7&&id!=studios[tarStu].node_id){
                 cerr<<"+"<<" ";
-            }else if(stu_transID.count(id)==1){
+            }else if(id==studios[tarStu].node_id){
                 cerr<<"^"<<" ";
             }else {
                 cerr<<"-"<<" ";
@@ -4904,7 +4926,7 @@ void printPath(int from_id, int is_robot, int to_id, int is_take) {
         id = path[i].id;
         x = id / 100;
         y = id % 100;
-        cerr << "to:(" << x <<", "<<y<<")"<<endl;
+        // cerr << "to:(" << x <<", "<<y<<")"<<endl;
     }
     cerr<<endl;
 }

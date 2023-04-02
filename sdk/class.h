@@ -235,7 +235,7 @@ struct cmp_Graph_node
 {
     bool operator()(const Graph_node &a,const Graph_node &b)
     {
-        return a.dis - b.dis > 1e-7;
+        return a.dis > b.dis;
     }
 };
 
