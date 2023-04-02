@@ -4420,7 +4420,7 @@ void studio_distance(){
 void init_trans(){
     for(int i=0;i<100;i++){
         for(int j=0;j<100;j++){
-            graph_trans[i][j]==-2?-2:0;
+           graph_trans[i][j]=( graph[i][j]==-2?-2:0);
         }
     }
 }//将原来的地图中不是-2的部分全部更改为0
@@ -4670,4 +4670,20 @@ void init_data(){
     Translation_graph_has();
     getEdgeRalative();
     trans_studio_rob_toID();
+}
+void printMap(int f){
+        for(int i=100;i>=0;i--){
+        for(int j=0;j<100;j++){
+            int id=i*100+j;
+            if(exist_id[f].count(id)){
+                if(f==1)
+                cerr<<check_8(i,j).first<<" ";
+                else
+                cerr<<1<<" ";
+            }else{
+                cerr<<"-"<<" ";
+            }
+        }
+        cerr<<endl;
+    }
 }
