@@ -3389,6 +3389,9 @@ Ins contr_one_rob(Robot& robot , const PayLoad& payload){
     Ins ins_t;
     int flag_type=robot.get_type==0?0:1;
     robot.virtual_pos=exist_id[flag_type][robot.virtual_id];
+    if(state.FrameID>=200&&state.FrameID<=450&&robot.id==1){
+        cerr<<" FrameID "<<state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
+    }
     auto p1=get_w_now(robot,payload);
     ins_t.rotate=p1.first;
     ins_t.forward=get_v_now(robot,payload);
@@ -4561,13 +4564,13 @@ pair<int,pair<double,double>> check_8(int i,int j){
     if(check_4(i,j)&&check_4(i,j+1)&&check_4(i-1,j)&&check_4(i-1,j+1)){
         return {1,make_pair<double,double>(0.5*j+0.25,0.5*i+0.25)};
     }else if((!check_4(i,j))&&check_4(i,j+1)&&check_4(i-1,j)&&check_4(i-1,j+1)){
-        return {2,make_pair<double,double>(0.5*j+0.25,0.5*i+0.03)};
+        return {2,make_pair<double,double>(0.5*j+0.47,0.5*i+0.03)};
     }else if(check_4(i,j)&&check_4(i,j+1)&&(!check_4(i-1,j))&&check_4(i-1,j+1)){
-        return {3,make_pair<double,double>(0.5*j+0.25,0.5*i+0.47)};
+        return {3,make_pair<double,double>(0.5*j+0.47,0.5*i+0.47)};
     }else if(check_4(i,j)&&(!check_4(i,j+1))&&check_4(i-1,j)&&check_4(i-1,j+1)){
-        return {4,make_pair<double,double>(0.5*j+0.25,0.5*i+0.03)};
+        return {4,make_pair<double,double>(0.5*j+0.03,0.5*i+0.03)};
     }else if(check_4(i,j)&&check_4(i,j+1)&&check_4(i-1,j)&&(!check_4(i-1,j+1))){
-        return {5,make_pair<double,double>(0.5*j+0.25,0.5*i+0.47)};
+        return {5,make_pair<double,double>(0.5*j+0.03,0.5*i+0.47)};
     }else{
         return {0,make_pair<double,double>(0,0)};
     }
@@ -4838,9 +4841,13 @@ void printEdge(int id){
             
         }
     }
-    vector<Graph_node> path = road[0][transID(1, 1, 3)];
+    int tarStu=4;
+    vector<Graph_node> path = road[0][transID(3, 0, tarStu)];
     for(auto it:path){
         int tmpId=it.id;
+        if(vis_rob_edge[tmpId]==-1){
+            cerr<<" 错误 "<<endl;
+        }
         vis_rob_edge[tmpId]=-7;
        
         
@@ -4849,12 +4856,11 @@ void printEdge(int id){
     for(int i=99;i>=0;i--){
     for(int j=0;j<100;j++){
             int id=i*100+j;
-            if(vis_rob_edge[id]!=-1&&vis_rob_edge[id]!=-7&&stu_transID.count(id)==0){
-            cerr<<vis_rob_edge[id]<<" ";
-        
-            }else if(vis_rob_edge[id]==-7&&stu_transID.count(id)==0){
+            if(vis_rob_edge[id]!=-1&&vis_rob_edge[id]!=-7&&id!=studios[tarStu].node_id){
+                cerr<<vis_rob_edge[id]<<" ";
+            }else if(vis_rob_edge[id]==-7&&id!=studios[tarStu].node_id){
                 cerr<<"+"<<" ";
-            }else if(stu_transID.count(id)==1){
+            }else if(id==studios[tarStu].node_id){
                 cerr<<"^"<<" ";
             }else {
                 cerr<<"-"<<" ";
@@ -4878,7 +4884,7 @@ void printPath(int from_id, int is_robot, int to_id, int is_take) {
         id = path[i].id;
         x = id / 100;
         y = id % 100;
-        cerr << "to:(" << x <<", "<<y<<")"<<endl;
+        // cerr << "to:(" << x <<", "<<y<<")"<<endl;
     }
     cerr<<endl;
 }
