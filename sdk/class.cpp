@@ -4468,14 +4468,15 @@ void Translation_graph_no(){
                 exist_id[0][id]=pos;
                 for(int t=0;t<studios.size();t++){
                     double tmpDis=calcuDis(studios[t].pos,pos);
-                    if(lt(tmpDis,0.4)){
+                    if(le(tmpDis,0.4)&&id!=studios[t].node_id){
                         graph_edge[0][id].push_back(Graph_node(studios[t].node_id,1,id));
                         graph_edge[0][studios[t].node_id].push_back(Graph_node(id,1,studios[t].node_id));
+                        // if(t==0)cerr<<graph_edge[0][studios[t].node_id].size()<<endl;
                     }
                 }
                 for(int t=0;t<4;t++){
                     double tmpDis=calcuDis(robots[t].pos,pos);
-                    if(lt(tmpDis,0.4)){
+                    if(le(tmpDis,0.4)&&id!=robots[t].node_id){
                         graph_edge[0][id].push_back(Graph_node(robots[t].node_id,1,id));
                         graph_edge[0][robots[t].node_id].push_back(Graph_node(id,1,robots[t].node_id));
                     }
@@ -4494,14 +4495,14 @@ void Translation_graph_has(){
                 exist_id[1][id]=tmp.second;
                 for(int t=0;t<studios.size();t++){
                     double tmpDis=calcuDis(studios[t].pos,pos);
-                    if(lt(tmpDis,0.4)){
+                    if(le(tmpDis,0.4)&&id!=studios[t].node_id){
                         graph_edge[1][id].push_back(Graph_node(studios[t].node_id,1,id));
                         graph_edge[1][studios[t].node_id].push_back(Graph_node(id,1,studios[t].node_id));
                     }
                 }
                 for(int t=0;t<4;t++){
                     double tmpDis=calcuDis(robots[t].pos,pos);
-                    if(lt(tmpDis,0.4)){
+                    if(le(tmpDis,0.4)&&id!=robots[t].node_id){
                         graph_edge[1][id].push_back(Graph_node(robots[t].node_id,1,id));
                         graph_edge[1][robots[t].node_id].push_back(Graph_node(id,1,robots[t].node_id));
                     }
@@ -4511,19 +4512,19 @@ void Translation_graph_has(){
                     int id_tmp2=(i+1)*100+(j+1);
                     int id_tmp3=(i-1)*100+(j-1);
                     int id_tmp4=(i-1)*100+(j+1);
-                    if(stu_transID.count(id_tmp1)&&(!is_corner(id_tmp1))){
+                    if(stu_transID.count(id_tmp1)&&(!is_corner(id_tmp1))&&(id!=id_tmp1)){
                         graph_edge[1][id].push_back(Graph_node(id_tmp1,1,id));
                         graph_edge[1][id_tmp1].push_back(Graph_node(id,1,id_tmp1));
                     }
-                    if(stu_transID.count(id_tmp2)&&(!is_corner(id_tmp2))){
+                    if(stu_transID.count(id_tmp2)&&(!is_corner(id_tmp2))&&(id!=id_tmp2)){
                         graph_edge[1][id].push_back(Graph_node(id_tmp2,1,id));
                         graph_edge[1][id_tmp2].push_back(Graph_node(id,1,id_tmp2));
                     }
-                    if(stu_transID.count(id_tmp3)&&(!is_corner(id_tmp3))){
+                    if(stu_transID.count(id_tmp3)&&(!is_corner(id_tmp3))&&(id!=id_tmp3)){
                         graph_edge[1][id].push_back(Graph_node(id_tmp3,1,id));
                         graph_edge[1][id_tmp3].push_back(Graph_node(id,1,id_tmp3));
                     }
-                    if(stu_transID.count(id_tmp4)&&(!is_corner(id_tmp4))){
+                    if(stu_transID.count(id_tmp4)&&(!is_corner(id_tmp4))&&(id!=id_tmp4)){
                         graph_edge[1][id].push_back(Graph_node(id_tmp4,1,id));
                         graph_edge[1][id_tmp4].push_back(Graph_node(id,1,id_tmp4));
                     }                    
@@ -4535,13 +4536,17 @@ void Translation_graph_has(){
 void getEdgeRalative(){
     for(auto& it:exist_id[0]){
         int idi=it.first/100;
-        int idj=it.first-it.first/100;
+        int idj=it.first-idi*100;
         for(int i=idi-1;i<=idi+1;i++){
             for(int j=idj-1;j<=idj+1;j++){
                 if(i==idi&&j==idj)continue;
                 int tmpId=i*100+j;
                 int ckeck_id=idi*100+j;
-                if(exist_id[0].count(tmpId)&&exist_id[0].count(ckeck_id)){
+                // if(it.first==studios[0].node_id){
+                //     cerr<<graph_edge[0][it.first].size()<<" "<<exist_id[0].count(tmpId)<<" "<<exist_id[0].count(ckeck_id)<<endl;
+                //     cerr<<idi<<"-"<<idj<<" "<<i<<"-"<<j<<endl;
+                // }
+                if(exist_id[0].count(tmpId)&&exist_id[0].count(ckeck_id)&&it.first!=tmpId){
                     graph_edge[0][it.first].push_back(Graph_node(tmpId,1,it.first));
                 }
             }
@@ -4549,12 +4554,12 @@ void getEdgeRalative(){
     }
     for(auto& it:exist_id[1]){
         int idi=it.first/100;
-        int idj=it.first-it.first/100;
+        int idj=it.first-idi*100;
         for(int i=idi-1;i<=idi+1;i++){
             for(int j=idj-1;j<=idj+1;j++){
                 if(i==idi&&j==idj)continue;
                 int tmpId=i*100+j;
-                if(exist_id[1].count(tmpId)){
+                if(exist_id[1].count(tmpId)&&it.first!=tmpId){
                     graph_edge[1][it.first].push_back(Graph_node(tmpId,1,it.first));
                 }
             }
