@@ -4592,9 +4592,9 @@ void Dijkstra(int s, int is_take, int is_robot) {
     int count = studios.size();
     double dis, new_dis;
     from_id = is_robot? rob_transID[s]: stu_transID[s];
-    if(is_robot)
-        cerr<<"start-robot:"<<from_id<<endl;
-    else cerr<<"start-studio:"<<from_id<<endl;
+    // if(is_robot)
+    //     cerr<<"start-robot:"<<from_id<<endl;
+    // else cerr<<"start-studio:"<<from_id<<endl;
 
     for(i = 0; i < 10000; ++i) {
         vis_node[i] = 0;
@@ -4620,7 +4620,7 @@ void Dijkstra(int s, int is_take, int is_robot) {
             next_id = from;
             dis = now_node.dis;
 
-            cerr<<"to-studio:"<<studio_id<<" dis:"<<dis<<" pre_id:"<<pre_id<<endl;
+            // cerr<<"to-studio:"<<studio_id<<" dis:"<<dis<<" pre_id:"<<pre_id<<endl;
             
             vector<Graph_node> ro = {Graph_node{s, 0, pre_id}};
             if(is_robot) {
@@ -4633,6 +4633,7 @@ void Dijkstra(int s, int is_take, int is_robot) {
             while(pre_id != s) {
                 id = pre_id;
                 pre_id = pre_node[pre_id];
+                cerr<<id<<"-"<<pre_id<<endl;
                 // id转向
                 if(!eq(calAngleToDis(pre_id, id, next_id), 0)){
                     ro.emplace_back(Graph_node{id, dis - dis_node[id], pre_id});
@@ -4649,17 +4650,22 @@ void Dijkstra(int s, int is_take, int is_robot) {
 
 
         num = graph_edge[is_take][from].size();
-        cerr<<"edge-num:"<<num<<endl;
+        // cerr<<"edge-num:"<<num<<endl;
         for(i = 0; i < num; ++i) {
             to = graph_edge[is_take][from][i].id;
+            if(vis_node[to]) continue;
             new_dis = dis + graph_edge[is_take][from][i].dis + calAngleToDis(pre_id, from, to);
             pre_id = graph_edge[is_take][from][i].pre_id;
-            cerr<<"to_id:"<<to<<" new-dis:"<<dis<<" old-dis:"<<dis_node[to]<<endl;
+            // cerr<<"to_id:"<<to<<" new-dis:"<<dis<<" old-dis:"<<dis_node[to]<<endl;
             if(lt(new_dis, dis_node[to])) {
                 q.push(Graph_node{to, new_dis, pre_id});
-                cerr<<"update-to_id:"<<to<<" new-dis:"<<new_dis<<" old-dis:"<<dis_node[to]<<endl;
+                // if(to==2763){
+                //     cerr<<"kkkk-"<<from<<endl;
+                //     cerr<<"update-to_id:"<<to<<" new-dis:"<<new_dis<<" old-dis:"<<dis_node[to]<<endl;
+                // }
+                // cerr<<"update-to_id:"<<to<<" new-dis:"<<new_dis<<" old-dis:"<<dis_node[to]<<endl;
                 dis_node[to] = new_dis;
-                pre_node[to] = pre_id;
+                pre_node[to] = from;
             }
         }
     }
