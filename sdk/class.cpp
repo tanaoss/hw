@@ -4941,9 +4941,9 @@ void printPath(int from_id, int is_robot, int to_id, int is_take) {
 vector<int> get_future_node(int robot_id) {
     vector<int> v;
     int now_index = robots[robot_id].now_index;
-    int len = min(road[(robots[robot_id].get_type != 0)][robots[robot_id].road_id].size(), now_index + 2);
+    int len = min((int)(road[(robots[robot_id].get_type != 0)][robots[robot_id].road_id].size()), now_index + 2);
     for(int i = now_index + 1; i < len; ++i) {
-        v.emplace_back(road[(robots[robot_id].get_type != 0)][robots[robot_id].road_id][i]);
+        v.emplace_back(road[(robots[robot_id].get_type != 0)][robots[robot_id].road_id][i].id);
     }
     return v;
 }
