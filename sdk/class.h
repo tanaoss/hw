@@ -100,6 +100,8 @@ struct Robot
     bool need_rote_wall;
     double radius;
     int pane_id;
+    int now_index;
+    int road_id;
     pair<double,double> virtual_pos;
     int robot_area_type;
     bool operator!=(Robot s1){
