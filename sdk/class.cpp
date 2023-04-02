@@ -6,6 +6,7 @@
 #include <cstring>
 #include <algorithm>
 #include <cstring>
+#include <queue>
 #include<unordered_map>
 #include"vec.h"
 #include "class.h"
@@ -61,9 +62,17 @@ vector<type_area>types;
 vector<pair<double,double>>arri_Set;
 double Compute_redundancy=0;
 Ins ins_set[8];
-unordered_map<int,vector<Graph_node>> graph_edge;//点id的边集
-unordered_map<string,vector<Graph_node>>road;//路径
+unordered_map<int,vector<Graph_node>> graph_edge[2];//点id的边集
+unordered_map<int,vector<Graph_node>>road[2];//路径
+unordered_map<int,pair<double,double>> exist_id[2];//确定存在的id，便于建立边关系
+unordered_map<int,int> stu_transID;//建立工作台id与转换后id的关系
+unordered_map<int,int> rob_transID;//建立机器人id与转换后id的关系
 int graph_trans[100][100];
+int vis_node[10000];
+double dis_node[10000];
+int pre_node[10000];
+double dis_stuios[50][50][2];
+double dis_robot_to_studios[4][50];
 
 
 void initrobotInfo() {
@@ -221,7 +230,8 @@ bool readMapUntilOK() {
                 pair<double,double>pos_robot(x,y);
                 pair<double,double>xy_pos_robot(0,0);
                 // cout<<x<<" "<<y<<endl;
-                Robot  robot(count_robot,0,0,0,1,1,xy_pos_robot,0,pos_robot,-1);
+                Robot  robot(count_robot,0,0,0,1,1,xy_pos_robot,0,pos_robot,-1, (99-row)*100+i);
+                rob_transID[(99-row)*100+i] = count_robot;
                 robot.pane_id = train.id;
                 robots.push_back(robot);
                 count_robot++;
@@ -231,7 +241,8 @@ bool readMapUntilOK() {
                 y = (100-count)*0.5-0.25;
                 pair<double,double>pos_studio(x,y);
                 // cout<<x<<" "<<y<<endl;
-                Studio studio(count_studio,0,-1,pos_studio,0,0,0);
+                Studio studio(count_studio,0,-1,pos_studio,0,0,0, (99-row)*100+i);
+                stu_transID[(99-row)*100+i] = count_studio;
                 studio.type = (int)line[i]-48;
                 studio.pane_id = train.id;
                 studios.push_back(studio);
@@ -4268,17 +4279,245 @@ void studio_distance(){
     // cerr<<"type"<<robots[0].robot_area_type<<endl;
 
 }
+void init_trans(){
+    for(int i=0;i<100;i++){
+        for(int j=0;j<100;j++){
+            graph_trans[i][j]==-2?-2:0;
+        }
+    }
+}//将原来的地图中不是-2的部分全部更改为0
 double Angle_conversion(double angle){
     return fabs(angle)/Pi;
 }//将角度转换为距离
 bool check_4(int i,int j){
-    if(i-1<0||j-1<0)return false;
-    return graph_trans[i][j]!=-2&&graph_trans[i][j]==graph_trans[i][j-1]&&graph_trans[i][j-1]==graph_trans[i-1][j-1]&&graph_trans[i-1][j]==graph_trans[i-1][j-1];
+    if(i<0||j<0||i>=100||j>=100)return false;
+    if(i+1>=100||j-1<0)return false;
+    return graph_trans[i][j]!=-2&&graph_trans[i][j-1]!=-2&&graph_trans[i+1][j-1]!=-2&&graph_trans[i+1][j]!=-2;
 }//检查坐标i,j是否是一个四个格子的合法点
-bool check_6(int i,int j){
-    if(i-2<0||j-2<0)return false;
-    return graph_trans[i][j-2]!=-2&&graph_trans[i][j-2]==graph_trans[i-1][j-2]&& graph_trans[i-2][j]==graph_trans[i-2][j-1]&&graph_trans[i-2][j-1]!=-2&&check_4(i,j);
-}//检查坐标i,j是否是一个四个格子的合法点
+pair<int,pair<double,double>> check_8(int i,int j){
+    if(check_4(i,j)&&check_4(i,j+1)&&check_4(i-1,j)&&check_4(i-1,j+1)){
+        return {1,make_pair<double,double>(0.5*j+0.25,0.5*i+0.25)};
+    }else if((!check_4(i,j))&&check_4(i,j+1)&&check_4(i-1,j)&&check_4(i-1,j+1)){
+        return {2,make_pair<double,double>(0.5*j+0.25,0.5*i+0.03)};
+    }else if(check_4(i,j)&&check_4(i,j+1)&&(!check_4(i-1,j))&&check_4(i-1,j+1)){
+        return {3,make_pair<double,double>(0.5*j+0.25,0.5*i+0.47)};
+    }else if(check_4(i,j)&&(!check_4(i,j+1))&&check_4(i-1,j)&&check_4(i-1,j+1)){
+        return {4,make_pair<double,double>(0.5*j+0.25,0.5*i+0.03)};
+    }else if(check_4(i,j)&&check_4(i,j+1)&&check_4(i-1,j)&&(!check_4(i-1,j+1))){
+        return {5,make_pair<double,double>(0.5*j+0.25,0.5*i+0.47)};
+    }else{
+        return {0,make_pair<double,double>(0,0)};
+    }
+    
+}//检查坐标i,j是否是一个八个格子的合法点
 void Translation_graph_no(){
+    for(int i=0;i<100;i++){
+        for(int j=0;j<100;j++){
+            if(check_4(i,j)){
+                int id=100*i+j;
+                auto pos=make_pair<double,double>(0.5*j,0.5*i+0.5);
+                exist_id[0][id]=pos;
+                for(int t=0;t<studios.size();t++){
+                    double tmpDis=calcuDis(studios[t].pos,pos);
+                    if(lt(tmpDis,0.4)){
+                        graph_edge[0][id].push_back(Graph_node(studios[t].node_id,1,id));
+                        graph_edge[0][studios[t].node_id].push_back(Graph_node(id,1,studios[t].node_id));
+                    }
+                }
+                for(int t=0;t<4;t++){
+                    double tmpDis=calcuDis(robots[t].pos,pos);
+                    if(lt(tmpDis,0.4)){
+                        graph_edge[0][id].push_back(Graph_node(robots[t].node_id,1,id));
+                        graph_edge[0][robots[t].node_id].push_back(Graph_node(id,1,robots[t].node_id));
+                    }
+                }
+            }
+        }
+    }
+}
+void Translation_graph_has(){
+    for(int i=0;i<100;i++){
+        for(int j=0;j<100;j++){
+            auto tmp=check_8(i,j);
+            auto pos=tmp.second;
+            int id=100*i+j;
+            if(tmp.first!=0){
+                exist_id[1][id]=tmp.second;
+                for(int t=0;t<studios.size();t++){
+                    double tmpDis=calcuDis(studios[t].pos,pos);
+                    if(lt(tmpDis,0.4)){
+                        graph_edge[1][id].push_back(Graph_node(studios[t].node_id,1,id));
+                        graph_edge[1][studios[t].node_id].push_back(Graph_node(id,1,studios[t].node_id));
+                    }
+                }
+                for(int t=0;t<4;t++){
+                    double tmpDis=calcuDis(robots[t].pos,pos);
+                    if(lt(tmpDis,0.4)){
+                        graph_edge[1][id].push_back(Graph_node(robots[t].node_id,1,id));
+                        graph_edge[1][robots[t].node_id].push_back(Graph_node(id,1,robots[t].node_id));
+                    }
+                }
+                if(tmp.first==1){
+                    int id_tmp1=(i+1)*100+(j-1);
+                    int id_tmp2=(i+1)*100+(j+1);
+                    int id_tmp3=(i-1)*100+(j-1);
+                    int id_tmp4=(i-1)*100+(j+1);
+                    if(stu_transID.count(id_tmp1)&&(!is_corner(id_tmp1))){
+                        graph_edge[1][id].push_back(Graph_node(id_tmp1,1,id));
+                        graph_edge[1][id_tmp1].push_back(Graph_node(id,1,id_tmp1));
+                    }
+                    if(stu_transID.count(id_tmp2)&&(!is_corner(id_tmp2))){
+                        graph_edge[1][id].push_back(Graph_node(id_tmp2,1,id));
+                        graph_edge[1][id_tmp2].push_back(Graph_node(id,1,id_tmp2));
+                    }
+                    if(stu_transID.count(id_tmp3)&&(!is_corner(id_tmp3))){
+                        graph_edge[1][id].push_back(Graph_node(id_tmp3,1,id));
+                        graph_edge[1][id_tmp3].push_back(Graph_node(id,1,id_tmp3));
+                    }
+                    if(stu_transID.count(id_tmp4)&&(!is_corner(id_tmp4))){
+                        graph_edge[1][id].push_back(Graph_node(id_tmp4,1,id));
+                        graph_edge[1][id_tmp4].push_back(Graph_node(id,1,id_tmp4));
+                    }                    
+                }
+            }
+        }
+    }    
+}//转换机器人带物品的原始图
+void getEdgeRalative(){
+    for(auto& it:exist_id[0]){
+        int idi=it.first/100;
+        int idj=it.first-it.first/100;
+        for(int i=idi-1;i<=idi+1;i++){
+            for(int j=idj-1;j<=idj+1;j++){
+                if(i==idi&&j==idj)continue;
+                int tmpId=i*100+j;
+                int ckeck_id=idi*100+j;
+                if(exist_id[0].count(tmpId)&&exist_id[0].count(ckeck_id)){
+                    graph_edge[0][it.first].push_back(Graph_node(tmpId,1,it.first));
+                }
+            }
+        }
+    }
+    for(auto& it:exist_id[1]){
+        int idi=it.first/100;
+        int idj=it.first-it.first/100;
+        for(int i=idi-1;i<=idi+1;i++){
+            for(int j=idj-1;j<=idj+1;j++){
+                if(i==idi&&j==idj)continue;
+                int tmpId=i*100+j;
+                if(exist_id[1].count(tmpId)){
+                    graph_edge[1][it.first].push_back(Graph_node(tmpId,1,it.first));
+                }
+            }
+        }
+    }
+}
 
+
+
+double calAngleToDis(int x, int y, int z) {
+    if(x == y) return 0;
+    if(y == z) return 0;
+
+    Vec vec1 = Vec((x / 100) - (y / 100), (x % 100) - (y % 100));
+    Vec vec2 = Vec((z / 100) - (y / 100), (z % 100) - (y % 100));
+    double angle = acos(cos_t(vec1, vec2));
+    return Angle_conversion(angle);
+}
+
+int transID(int from_id, int is_robot, int to_id) {
+    return (from_id + is_robot * 50) * 54 + to_id;
+}
+
+void Dijkstra(int s, int is_take, int is_robot) {
+    priority_queue<Graph_node, vector<Graph_node>, cmp_Graph_node> q;
+    int from, pre_id, num, i, to, next_id;
+    int from_id;
+    int studio_id, id, road_id;
+    int count = studios.size();
+    double dis, new_dis;
+    from_id = is_robot? rob_transID[s]: stu_transID[s];
+    for(i = 0; i < 1000; ++i) {
+        vis_node[i] = 0;
+        dis_node[i] = 1000;
+    }
+    q.push(Graph_node(s, 0, s));
+    while(!q.empty()) {
+        Graph_node now_node = q.top();
+        q.pop();
+        if(vis_node[now_node.id]) continue;
+        from = now_node.id;
+        dis = now_node.dis;
+        pre_id = now_node.pre_id;
+        vis_node[now_node.id] = 1;
+
+
+        if(stu_transID.count(from)) {
+            count--;
+            studio_id = stu_transID[from];
+            pre_id = now_node.pre_id;
+            next_id = from;
+            dis = now_node.dis;
+            road_id = transID(from_id, is_robot, studio_id);
+            road[is_take][road_id].emplace_back(Graph_node{s, 0, pre_id});
+            if(is_robot) {
+                dis_robot_to_studios[from_id][studio_id] = dis;
+            }
+            else {
+                dis_stuios[from][studio_id][is_take] = dis;
+                // dis_stuios[studio_id][from] = dis;
+            }
+            while(pre_id != s) {
+                id = pre_id;
+                pre_id = pre_node[pre_id];
+                // id转向
+                if(!eq(calAngleToDis(pre_id, id, next_id), 0)){
+                    road[is_take][studio_id].emplace_back(Graph_node{id, dis - dis_node[id], pre_id});
+                    next_id = id;
+                    dis = dis_node[id];
+                }
+            }
+            road[is_take][studio_id].reserve(sizeof(road[is_take][studio_id]));
+        }
+
+        if(count == 0) break;
+
+        num = graph_edge[is_take][from].size();
+        for(i = 0; i < num; ++i) {
+            to = graph_edge[is_take][from][i].id;
+            new_dis = dis + graph_edge[is_take][from][i].dis + calAngleToDis(pre_id, from, to);
+            pre_id = graph_edge[is_take][from][i].pre_id;
+            if(lt(new_dis, dis_node[to])) {
+                q.push(Graph_node{to, new_dis, pre_id});
+                dis_node[to] = new_dis;
+                pre_node[to] = pre_id;
+            }
+        }
+    }
+}
+void trans_studio_rob_toID(){
+    int cnt=1;
+    for(int i=0;i<studios.size();i++){
+        stu_transID[studios[i].node_id]=cnt++;
+    }
+    for(int i=0;i<4;i++){
+        stu_transID[robots[i].node_id]=cnt;
+        rob_transID[robots[i].node_id]=cnt++;
+    }
+}
+bool is_corner(int id){
+    int i=id/100;
+    int j=id-i*100;
+    bool leg1= (j==0||graph_trans[i][j-1]==-2)?true:false;
+    bool leg2= (i==99||graph_trans[i+1][j]==-2)?true:false;
+    bool leg3= (j==99||graph_trans[i][j+1]==-2)?true:false;
+    bool leg4= (i==0||graph_trans[i-1][j]==-2)?true:false;
+    return (leg1&&leg2) || (leg2&&leg3) || (leg3&&leg4) || (leg4&&leg1);
+}//判断工作台是不是在墙角
+void init_data(){
+    init_trans();
+    Translation_graph_no();
+    Translation_graph_has();
+    getEdgeRalative();
+    trans_studio_rob_toID();
 }

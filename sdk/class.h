@@ -94,6 +94,7 @@ struct Robot
     int pre_rote;
     int pre_cnt;
     int wait;
+    int node_id;
     int last_get_type;
     bool need_rote_wall;
     double radius;
@@ -107,7 +108,7 @@ struct Robot
         return false;
     }
     Robot(int _id, int _loc_id, int _get_type, double _time_val, double _collision_val, double _angular_velocity, pair<double, double> &_xy_pos,
-          double _direction, pair<double, double> &_pos, int _target_id = -1,int _wait = -1,int _lastSign = 0, int _isTurn = 0, double _radius = 0.45) : xy_pos(_xy_pos), pos(_pos)
+          double _direction, pair<double, double> &_pos, int _target_id = -1, int _node_id = 0,int _wait = -1,int _lastSign = 0, int _isTurn = 0, double _radius = 0.45) : xy_pos(_xy_pos), pos(_pos)
     {
         id = _id;
         loc_id = _loc_id;
@@ -124,6 +125,7 @@ struct Robot
         wait=_wait;
         need_rote_wall=false;
         radius = _radius;
+        node_id = _node_id;
     }
     void set(int _id, int _loc_id, int _get_type, double _time_val, double _collision_val, double _angular_velocity, pair<double, double> &&_xy_pos,
              double _direction, pair<double, double> &&_pos)
@@ -177,8 +179,11 @@ struct Studio
     int area;
     int studio_area_type;
     int pane_id;
-    Studio(int _id, int _type, int _r_id, pair<double, double> &_pos, int _r_time, int _bitSatus, int _pStatus) : id(_id), type(_type), r_id(_r_id), pos(_pos), r_time(_r_time), bitSatus(_bitSatus), pStatus(_pStatus)
+    int node_id;
+    bool corner;
+    Studio(int _id, int _type, int _r_id, pair<double, double> &_pos, int _r_time, int _bitSatus, int _pStatus, int _node_id) : id(_id), type(_type), r_id(_r_id), pos(_pos), r_time(_r_time), bitSatus(_bitSatus), pStatus(_pStatus), node_id(_node_id)
     {
+        corner=false;
     }
     void set(int _id, int _type, pair<double, double> &&_pos, int _r_time, int _bitSatus, int _pStatus)
     {
@@ -188,6 +193,7 @@ struct Studio
         r_time = _r_time;
         bitSatus = _bitSatus;
         pStatus = _pStatus;
+        
     }
     bool operator!=(Studio s1){
         if(pos!=s1.pos||s1.id!=id||type!=s1.type||s1.r_id!=r_id||r_time!=s1.r_time||bitSatus!=s1.bitSatus||s1.pStatus!=pStatus){
@@ -213,14 +219,21 @@ struct Graph_node{
     int id;//i*100+j
     int pre_id;//最短路中的前置pre_id;
     double dis;
-    pair<double,double>pos;
-    Graph_node(int _id,double _dis,pair<double,double> _pos,int _pre_id=0){
+    Graph_node(int _id,double _dis,int _pre_id){
         id=_id;
         dis=_dis;
-        pos=_pos;
         pre_id=_pre_id;
     }
+    
 };//转换图节点
+
+struct cmp_Graph_node
+{
+    bool operator()(const Graph_node &a,const Graph_node &b)
+    {
+        return a.dis - b.dis < -1e-7;
+    }
+};
 
 
 struct Line { pair<double, double>  P; pair<double, double> v; };      // 直线（点向式）
@@ -352,6 +365,13 @@ void init_trans();//将原来的地图中不是-2的部分全部更改为0
 void Translation_graph_no();//转换机器人不带物品的原始图
 void Translation_graph_has();//转换机器人带物品的原始图
 double Angle_conversion(double angle);//将角度转换为距离
-void Dijkstra(int s);//对源点s做最短路
+void Dijkstra(int s, int is_take, int is_robot);//对源点s做最短路，s为node_id
 bool check_4(int i,int j);//检查坐标i,j是否是一个四个格子的合法点
-bool check_6(int i,int j);//检查坐标i,j是否是一个四个格子的合法点
+pair<int,pair<double,double>> check_8(int i,int j);//检查坐标i,j是否是一个四个格子的合法点
+void getEdgeRalative();//得到边关系
+void trans_studio_rob_toID();//建立工作台和机器人id与编号的关系；
+bool is_corner(int id);//判断工作台是不是在墙角
+
+double calAngleToDis(int x, int y, int z);//nodeID转角度转距离
+int transID(int from_id, int is_robot, int to_id);//from_id -> to_id 转化为 road_id
+void init_data();
