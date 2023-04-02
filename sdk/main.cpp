@@ -33,6 +33,7 @@ int main()
     // floyd();
     // print_queue();
     // cerr<<robots.size();
+    printEdge(1);
     cout<<"OK\n";
     cout.flush();
     int count = 0;

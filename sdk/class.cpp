@@ -4827,7 +4827,7 @@ void printEdge(int id){
     while(!Q.empty()){
         int tmpId=Q.front();
         Q.pop();
-        for(auto it:graph_edge[1][tmpId]){
+        for(auto it:graph_edge[0][tmpId]){
             if(vis_rob_edge[it.id]==-1){
                  Q.push(it.id);
                  vis_rob_edge[it.id]=(vis_rob_edge[tmpId]+1)%10;
@@ -4835,14 +4835,25 @@ void printEdge(int id){
             
         }
     }
+    vector<Graph_node> path = road[0][transID(1, 1, 3)];
+    for(auto it:path){
+        int tmpId=it.id;
+        vis_rob_edge[tmpId]=-7;
+       
+        
+    }
     cerr<<"edge-print "<<endl;
     for(int i=99;i>=0;i--){
     for(int j=0;j<100;j++){
             int id=i*100+j;
-            if(vis_rob_edge[id]!=-1){
+            if(vis_rob_edge[id]!=-1&&vis_rob_edge[id]!=-7&&stu_transID.count(id)==0){
             cerr<<vis_rob_edge[id]<<" ";
         
-            }else{
+            }else if(vis_rob_edge[id]==-7){
+                cerr<<"+"<<" ";
+            }else if(stu_transID.count(id)==1){
+                cerr<<"^"<<" ";
+            }else {
                 cerr<<"-"<<" ";
             }
         }
