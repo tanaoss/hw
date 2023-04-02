@@ -4609,14 +4609,14 @@ void Translation_graph_has(){
                 exist_id[1][id]=tmp.second;
                 for(int t=0;t<studios.size();t++){
                     double tmpDis=calcuDis(studios[t].pos,pos);
-                    if(((le(tmpDis,0.71)&&tmp.first==1)||le(tmpDis,0.4))&&id!=studios[t].node_id){
+                    if(!is_corner(studios[t].node_id)&&((le(tmpDis,0.71)&&tmp.first==1)||le(tmpDis,0.4))&&id!=studios[t].node_id){
                         graph_edge[1][id].push_back(Graph_node(studios[t].node_id,1,id));
                         graph_edge[1][studios[t].node_id].push_back(Graph_node(id,1,studios[t].node_id));
                     }
                 }
                 for(int t=0;t<4;t++){
                     double tmpDis=calcuDis(robots[t].pos,pos);
-                    if(((le(tmpDis,0.71)&&tmp.first==1)||le(tmpDis,0.4))&&id!=robots[t].node_id){
+                    if(!is_corner(studios[t].node_id)&&((le(tmpDis,0.71)&&tmp.first==1)||le(tmpDis,0.4))&&id!=robots[t].node_id){
                         graph_edge[1][id].push_back(Graph_node(robots[t].node_id,1,id));
                         graph_edge[1][robots[t].node_id].push_back(Graph_node(id,1,robots[t].node_id));
                     }
@@ -4658,6 +4658,9 @@ void getEdgeRalative(){
             for(int j=idj-1;j<=idj+1;j++){
                 if(i==idi&&j==idj)continue;
                 int tmpId=i*100+j;
+                if(is_corner(it.first)||is_corner(tmpId)){
+                    continue;
+                }
                 int ckeck_id=idi*100+j;
                 if(exist_id[1].count(tmpId)&&it.first!=tmpId&&check_slope(tmpId,it.first)){
                     graph_edge[1][it.first].push_back(Graph_node(tmpId,1,it.first));
