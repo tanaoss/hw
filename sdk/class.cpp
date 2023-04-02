@@ -3137,6 +3137,8 @@ PayLoad calPayload_trajectory(Robot rob,int studioID){
 Ins contr_one_rob(Robot& robot , const PayLoad& payload){
     Flag_sumulate=0;
     Ins ins_t;
+    int flag_type=robot.get_type==0?0:1;
+    robot.virtual_pos=exist_id[flag_type][robot.virtual_id];
     auto p1=get_w_now(robot,payload);
     ins_t.rotate=p1.first;
     ins_t.forward=get_v_now(robot,payload);
