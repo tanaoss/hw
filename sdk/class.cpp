@@ -4559,7 +4559,8 @@ void getEdgeRalative(){
             for(int j=idj-1;j<=idj+1;j++){
                 if(i==idi&&j==idj)continue;
                 int tmpId=i*100+j;
-                if(exist_id[1].count(tmpId)&&it.first!=tmpId){
+                int ckeck_id=idi*100+j;
+                if(exist_id[1].count(tmpId)&&it.first!=tmpId&&exist_id[0].count(ckeck_id)){
                     graph_edge[1][it.first].push_back(Graph_node(tmpId,1,it.first));
                 }
             }
