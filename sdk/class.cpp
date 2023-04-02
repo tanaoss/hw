@@ -78,6 +78,8 @@ double dis_robot_to_studios[4][50];
 
 
 void initrobotInfo() {
+
+    cerr<<"dis:"<<dis_robot_to_studios[0][0]<<endl;
     double weightMin = 0.45 * 0.45 * Pi * 20;
     double weightMax = 0.53 * 0.53 * Pi * 20;
     double inertiaMin = weightMin * 0.45 * 0.45 *0.5;
@@ -1620,7 +1622,7 @@ void first_action()
             cerr<<i<<"-"<<robots[i].target_id<<endl;
             cerr<<robots[i].node_id<<endl;
             cerr<<studios[robots[i].target_id].node_id<<endl;
-            printPath(i, 1, robots[i].target_id, 0);
+            // printPath(i, 1, robots[i].target_id, 0);
             robots[i].road_id = transID(i, 1, robots[i].target_id);
             robots[i].virtual_id = road[0][robots[i].road_id][0].id;
             robots[i].now_index = 0;
@@ -4731,13 +4733,13 @@ void Dijkstra(int s, int is_take, int is_robot) {
                 pre_id = pre_node[pre_id];
                 // cerr<<id<<"-"<<pre_id<<endl;
                 // id转向
-                // if(!eq(calAngleToDis(pre_id, id, next_id), 0)){
+                if(!eq(calAngleToDis(pre_id, id, next_id), 0)){
                     ro.emplace_back(Graph_node{id, dis - dis_node[id], pre_id});
                     next_id = id;
                     dis = dis_node[id];
-                // }
+                }
             }
-            ro.reserve(sizeof(ro));
+            reverse(ro.begin(), ro.end());
             road_id = transID(from_id, is_robot, studio_id);
             road[is_take][road_id] = ro;
         }
