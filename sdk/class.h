@@ -87,6 +87,7 @@ struct Robot
     double direction;
     pair<double, double> pos;
     int target_id; // 正在赶往的工作台；
+    int virtual_id;
     int lastSign;  //
     double lastRate;
     double isTurn;
