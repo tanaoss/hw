@@ -23,6 +23,7 @@ int main()
     
     init_data();
     printEdge(0);
+    
     for(int i = 0; i < studios.size(); ++i) {
         Dijkstra(studios[i].node_id, 0, 0);
         Dijkstra(studios[i].node_id, 1, 0);
@@ -40,7 +41,7 @@ int main()
     init_studio_parameter();
      while (cin >> state.FrameID)
     {
-        // cerr<<" time "<<state.FrameID<<endl;
+        cerr<<" time "<<state.FrameID<<endl;
         readStatusUntilOK() ;
         cout<<state.FrameID<<endl;
         if(count == 0)first_action();

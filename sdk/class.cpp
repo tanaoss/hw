@@ -78,8 +78,11 @@ double dis_robot_to_studios[4][50];
 
 
 void initrobotInfo() {
+    // cerr<<studios[13].node_id<<endl;
+    // cerr<<"kk"<<graph_edge[1][studios[13].node_id].size()<<endl;
+    // cerr<<graph_edge[1][studios[13].node_id][0].id<<endl;
     for(int i =0;i<studios.size(); ++i) {
-        cerr<<"dis:"<<dis_robot_to_studios[0][i]<<endl;
+        cerr<<i<<"dis:"<<dis_stuios[11][i][1]<<endl;
     }
     
     double weightMin = 0.45 * 0.45 * Pi * 20;
@@ -1997,8 +2000,9 @@ void robot_judge_sol(int threshold_lack,int full){
             //     }
             // }
         // }
-        // if(robots[i].get_type==0)cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<studios[robots[i].target_id].type<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
-        // else cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
+        if(robots[i].get_type==0)cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<studios[robots[i].target_id].type<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
+        else cerr<< "robots "<< i<<" target_id = "<<robots[i].target_id <<" get_type = "<<robots[i].get_type<<" buy "<<ins[i].buy<<" sell "<<ins[i].sell<<endl;
+        cerr<<robots[i].now_index<<endl;
     }
 
 }
