@@ -4943,7 +4943,7 @@ vector<int> get_future_node(int robot_id) {
     int now_index = robots[robot_id].now_index;
     int len = road[(robots[robot_id].get_type != 0)][robots[robot_id].road_id].size();
     for(int i = now_index + 1; i < len; ++i) {
-        v.emplace_back(i);
+        v.emplace_back(road[(robots[robot_id].get_type != 0)][robots[robot_id].road_id][i]);
     }
     return v;
 }
