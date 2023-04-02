@@ -4849,7 +4849,7 @@ void printEdge(int id){
             if(vis_rob_edge[id]!=-1&&vis_rob_edge[id]!=-7&&stu_transID.count(id)==0){
             cerr<<vis_rob_edge[id]<<" ";
         
-            }else if(vis_rob_edge[id]==-7){
+            }else if(vis_rob_edge[id]==-7&&stu_transID.count(id)==0){
                 cerr<<"+"<<" ";
             }else if(stu_transID.count(id)==1){
                 cerr<<"^"<<" ";
