@@ -29,7 +29,6 @@ int main()
     for(int i = 0; i < 4; ++i) {
         Dijkstra(robots[i].node_id, 0, 1);
     }
-    cerr << "sss" << endl;
     // floyd();
     // print_queue();
     // cerr<<robots.size();
