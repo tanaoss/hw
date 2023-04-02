@@ -410,15 +410,15 @@ double calAngle(pair<double, double> a) {
 }
 
 
-PayLoad calPayload(int robotID) {
+PayLoad calPayload(Robot robot, pair<double, double> virtual_pos) {
     
     //int target = rand() % ((int)studios.size());
     //robots[robotID].target_id = target;
 
     //cerr << robotID << target<<endl;
 
-    Robot robot = robots[robotID];
-    pair<double, double> virtual_pos = robots[robotID].virtual_pos;
+    // Robot robot = robots[robotID];
+    // pair<double, double> virtual_pos = robots[robotID].virtual_pos;
 
 
     // cerr << robotID << "--"<< robot.target_id<<endl;

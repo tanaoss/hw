@@ -255,7 +255,7 @@ void control(vector<PayLoad> payLoad); // 控制球体运行
 void first_pick_point();
 void robot_action();
 void process();
-PayLoad calPayload(int robotID);                                                              // 计算机器人与目标之间的夹角、距离等信息
+PayLoad calPayload(Robot robot, pair<double, double> virtual_pos);                               // 计算机器人与目标之间的夹角、距离等信息
 vector<double> get_T_limits(pair<double, double> pos,const Robot& robot, int ctr = -1, double dis = 0.0); // 靠近墙体时，需要把方向转到那个范围才能加速
 pair<double, double> subVector(pair<double, double> a, pair<double, double> b);                // 向量减（a-b）
 double calVectorProduct(pair<double, double> a, pair<double, double> b);                       // 向量乘
