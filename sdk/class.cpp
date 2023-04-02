@@ -232,6 +232,7 @@ bool readMapUntilOK() {
                 // cout<<x<<" "<<y<<endl;
                 Robot  robot(count_robot,0,0,0,1,1,xy_pos_robot,0,pos_robot,-1, (99-row)*100+i);
                 rob_transID[(99-row)*100+i] = count_robot;
+                stu_transID[(99-row)*100+i] = -1;
                 robot.pane_id = train.id;
                 robots.push_back(robot);
                 count_robot++;
@@ -4430,7 +4431,7 @@ void studio_distance(){
 void init_trans(){
     for(int i=0;i<100;i++){
         for(int j=0;j<100;j++){
-            graph_trans[i][j]==-2?-2:0;
+           graph_trans[i][j]=( graph[i][j]==-2?-2:0);
         }
     }
 }//将原来的地图中不是-2的部分全部更改为0
@@ -4585,12 +4586,13 @@ void Dijkstra(int s, int is_take, int is_robot) {
     int count = studios.size();
     double dis, new_dis;
     from_id = is_robot? rob_transID[s]: stu_transID[s];
+    if(is_robot)
+        cerr<<"start-robot:"<<from_id<<endl;
+    else cerr<<"start-studio:"<<from_id<<endl;
 
-    cerr<<"start-studio:"<<from_id<<endl;
-
-    for(i = 0; i < 1000; ++i) {
+    for(i = 0; i < 10000; ++i) {
         vis_node[i] = 0;
-        dis_node[i] = 1000;
+        dis_node[i] = 10000;
     }
     q.push(Graph_node(s, 0, s));
     
@@ -4602,23 +4604,26 @@ void Dijkstra(int s, int is_take, int is_robot) {
         dis = now_node.dis;
         pre_id = now_node.pre_id;
         vis_node[now_node.id] = 1;
-        cerr<<"node_id:"<<from<<" dis:"<<dis<<" pre_id:"<<pre_id<<endl;
 
-        if(stu_transID.count(from)) {
+        // cerr<<"node_id:"<<from<<" dis:"<<dis<<" pre_id:"<<pre_id<<endl;
+
+        if(stu_transID.count(from) && stu_transID[from] != -1) {
             count--;
             studio_id = stu_transID[from];
             pre_id = now_node.pre_id;
             next_id = from;
             dis = now_node.dis;
+
+            // cerr<<"to-studio:"<<studio_id<<" dis:"<<dis<<" pre_id:"<<pre_id<<endl;
+            
             vector<Graph_node> ro = {Graph_node{s, 0, pre_id}};
             if(is_robot) {
                 dis_robot_to_studios[from_id][studio_id] = dis;
             }
             else {
-                dis_stuios[from][studio_id][is_take] = dis;
+                dis_stuios[from_id][studio_id][is_take] = dis;
                 // dis_stuios[studio_id][from] = dis;
             }
-            cerr<<"lllnode_id:"<<from<<" dis:"<<dis<<" pre_id:"<<pre_id<<endl;
             while(pre_id != s) {
                 id = pre_id;
                 pre_id = pre_node[pre_id];
@@ -4631,7 +4636,6 @@ void Dijkstra(int s, int is_take, int is_robot) {
             }
             ro.reserve(sizeof(ro));
             road_id = transID(from_id, is_robot, studio_id);
-            cerr<<"kkk"<<endl;
             road[is_take][road_id] = ro;
         }
 
@@ -4639,13 +4643,15 @@ void Dijkstra(int s, int is_take, int is_robot) {
 
 
         num = graph_edge[is_take][from].size();
+        // cerr<<"edge-num:"<<num<<endl;
         for(i = 0; i < num; ++i) {
             to = graph_edge[is_take][from][i].id;
             new_dis = dis + graph_edge[is_take][from][i].dis + calAngleToDis(pre_id, from, to);
             pre_id = graph_edge[is_take][from][i].pre_id;
+            // cerr<<"ro_id:"<<to<<" new-dis:"<<dis<<" old-dis:"<<dis_node[to]<<endl;
             if(lt(new_dis, dis_node[to])) {
                 q.push(Graph_node{to, new_dis, pre_id});
-                cerr<<"ro_id:"<<from<<" new-dis:"<<dis<<" pre_id:"<<pre_id<<endl;
+                // cerr<<"update-ro_id:"<<to<<" new-dis:"<<new_dis<<" old-dis:"<<dis_node[to]<<endl;
                 dis_node[to] = new_dis;
                 pre_node[to] = pre_id;
             }
@@ -4688,5 +4694,21 @@ void init_data(){
     Translation_graph_no();
     Translation_graph_has();
     getEdgeRalative();
-    trans_studio_rob_toID();
+    // trans_studio_rob_toID();
+}
+void printMap(int f){
+        for(int i=100;i>=0;i--){
+        for(int j=0;j<100;j++){
+            int id=i*100+j;
+            if(exist_id[f].count(id)){
+                if(f==1)
+                cerr<<check_8(i,j).first<<" ";
+                else
+                cerr<<1<<" ";
+            }else{
+                cerr<<"-"<<" ";
+            }
+        }
+        cerr<<endl;
+    }
 }
