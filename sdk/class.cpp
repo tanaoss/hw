@@ -411,15 +411,15 @@ double calAngle(pair<double, double> a) {
 }
 
 
-PayLoad calPayload(int robotID) {
+PayLoad calPayload(Robot robot, pair<double, double> virtual_pos) {
     
     //int target = rand() % ((int)studios.size());
     //robots[robotID].target_id = target;
 
     //cerr << robotID << target<<endl;
 
-    Robot robot = robots[robotID];
-    pair<double, double> virtual_pos = robots[robotID].virtual_pos;
+    // Robot robot = robots[robotID];
+    // pair<double, double> virtual_pos = robots[robotID].virtual_pos;
 
 
     // cerr << robotID << "--"<< robot.target_id<<endl;
@@ -831,7 +831,7 @@ double get_at_stop_test(double t,double a,double v,int sign_v1){
 
 double anger_to_length(int robot_id,int studio_id){
     double length;
-    double anger = calPayload(robot_id).angle;
+    double anger = calPayload(robots[robot_id], robots[robot_id].virtual_pos).angle;
     length = anger/Pi*6;
     // cerr<<"length = "<<length<<endl;
     return length;
@@ -1062,7 +1062,7 @@ double precise_distance(int robot_id,int studio_id){
         temp = -1;
     }
     double studio_point_tangency = acos(temp);
-    double robot_studio_angle = calPayload(robot_id).angle;
+    double robot_studio_angle = calPayload(robots[robot_id], robots[robot_id].virtual_pos).angle;
     double rounded_corner;
     if(robot_studio_angle<(Pi/2)){
         rounded_corner = angle_robot_center_studio - studio_point_tangency;

@@ -49,7 +49,7 @@ int main()
         else robot_action();
         payloads.clear();
         for(int i=0;i<4;++i){
-            payloads.push_back(calPayload(i));
+            payloads.push_back(calPayload(robots[i], robots[i].virtual_pos));
         }
         for(int i=0;i<4;++i) robots[i].radius = payloads[i].radius;
         pl_g=payloads;
