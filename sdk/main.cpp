@@ -48,8 +48,8 @@ int main()
         // cerr<<" time "<<state.FrameID<<endl;
         readStatusUntilOK() ;
         cout<<state.FrameID<<endl;
-        if(count == 0)first_action();
-        else robot_action();
+        if(count == 0)new_first_action();
+        else new_robot_action();
         adjust_virtual_pos_total();
         payloads.clear();
         for(int i=0;i<4;++i){
