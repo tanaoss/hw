@@ -4811,7 +4811,7 @@ void Dijkstra(int studio_id, int is_take) {
 }
 
 int trans_pos_to_nodeID(pair<double, double> pos) {
-    return (int)(pos.first / 0.5) * 100 + (int)(pos.second / 0.5);
+    return (int)(pos.second / 0.5) * 100 + (int)(pos.first / 0.5);
 }
 
 int trans_pos_to_nodeID(int robot_id) {
