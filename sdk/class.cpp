@@ -4855,13 +4855,13 @@ void Dijkstra(int s, int is_take, int is_robot) {
 }
 
 
-void print_dijkstra() {
-    for(int i = 0; i < 100; ++i) {
-        for(int j = 0; j< 100; ++j) {
-            
-        }
-    }
-}
+// void print_dijkstra() {
+//     for(int i = 0; i < 100; ++i) {
+//         for(int j = 0; j< 100; ++j) {
+
+//         }
+//     }
+// }
 
 bool is_corner(int id){
     int i=id/100;
