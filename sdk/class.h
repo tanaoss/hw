@@ -87,6 +87,9 @@ struct Robot
     double direction;
     pair<double, double> pos;
     int target_id; // 正在赶往的工作台；
+    int last_target_id;
+    int target_id_send;
+    int target_id_buy;
     int virtual_id;
     int lastSign;  //
     double lastRate;
@@ -181,6 +184,7 @@ struct Studio
     int studio_area_type[2];
     int pane_id;
     int node_id;
+    vector<int> material_studios[3];
     bool corner;
     Studio(int _id, int _type, int _r_id, pair<double, double> &_pos, int _r_time, int _bitSatus, int _pStatus, int _node_id) : id(_id), type(_type), r_id(_r_id), pos(_pos), r_time(_r_time), bitSatus(_bitSatus), pStatus(_pStatus), node_id(_node_id)
     {
