@@ -402,6 +402,7 @@ void printPath(int from_id, int is_robot, int to_id, int is_take);
 void print_dijkstra(int studio_id, int is_take);
 int trans_pos_to_nodeID(pair<double, double> pos);
 int trans_pos_to_nodeID(int robot_id);
+void init_vector();
 
 
 vector<int> get_future_node(int robot_id);
