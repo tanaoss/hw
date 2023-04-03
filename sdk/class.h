@@ -397,6 +397,7 @@ void printMap(int f);
 void printEdge(int id);
 bool check_slope(int id1, int id2);
 void printPath(int from_id, int is_robot, int to_id, int is_take);
+void print_dijkstra();
 vector<int> get_future_node(int robot_id);
 bool is_need_slow(Robot& robot,pair<double,double> pos,pair<double,double> pos1);
 void adjust_virtual_pos(Robot& robot);
