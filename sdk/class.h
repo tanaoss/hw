@@ -87,6 +87,9 @@ struct Robot
     double direction;
     pair<double, double> pos;
     int target_id; // 正在赶往的工作台；
+    int last_target_id;
+    int target_id_send;
+    int target_id_buy;
     int virtual_id;
     int lastSign;  //
     double lastRate;
@@ -100,8 +103,6 @@ struct Robot
     bool need_rote_wall;
     double radius;
     int pane_id;
-    int now_index;
-    int road_id;
     pair<double,double> virtual_pos;
     int robot_area_type[2];
     bool operator!=(Robot s1){
@@ -183,6 +184,7 @@ struct Studio
     int studio_area_type[2];
     int pane_id;
     int node_id;
+    vector<int> material_studios[3];
     bool corner;
     Studio(int _id, int _type, int _r_id, pair<double, double> &_pos, int _r_time, int _bitSatus, int _pStatus, int _node_id) : id(_id), type(_type), r_id(_r_id), pos(_pos), r_time(_r_time), bitSatus(_bitSatus), pStatus(_pStatus), node_id(_node_id)
     {
@@ -222,10 +224,19 @@ struct Graph_node{
     int id;//i*100+j
     int pre_id;//最短路中的前置pre_id;
     double dis;
+    double angle_sum;
     Graph_node(int _id,double _dis,int _pre_id){
         id=_id;
         dis=_dis;
         pre_id=_pre_id;
+        angle_sum = 0;
+    }
+
+    Graph_node(int _id,double _dis,int _pre_id, double _angle_sum){
+        id=_id;
+        dis=_dis;
+        pre_id=_pre_id;
+        angle_sum = _angle_sum;
     }
     
 };//转换图节点
@@ -234,7 +245,10 @@ struct cmp_Graph_node
 {
     bool operator()(const Graph_node &a,const Graph_node &b)
     {
-        return a.dis - b.dis < -1e-7;
+        if(fabs(a.dis - b.dis) < 1e-7) {
+            return a.angle_sum > b.angle_sum;
+        }
+        return a.dis > b.dis;
     }
 };
 
@@ -254,7 +268,7 @@ void control(vector<PayLoad> payLoad); // 控制球体运行
 void first_pick_point();
 void robot_action();
 void process();
-PayLoad calPayload(int robotID);                                                              // 计算机器人与目标之间的夹角、距离等信息
+PayLoad calPayload(Robot robot, pair<double, double> virtual_pos);                               // 计算机器人与目标之间的夹角、距离等信息
 vector<double> get_T_limits(pair<double, double> pos,const Robot& robot, int ctr = -1, double dis = 0.0); // 靠近墙体时，需要把方向转到那个范围才能加速
 pair<double, double> subVector(pair<double, double> a, pair<double, double> b);                // 向量减（a-b）
 double calVectorProduct(pair<double, double> a, pair<double, double> b);                       // 向量乘
@@ -370,14 +384,32 @@ void init_trans();//将原来的地图中不是-2的部分全部更改为0
 void Translation_graph_no();//转换机器人不带物品的原始图
 void Translation_graph_has();//转换机器人带物品的原始图
 double Angle_conversion(double angle);//将角度转换为距离
-void Dijkstra(int s, int is_take, int is_robot);//对源点s做最短路，s为node_id
+void Dijkstra(int s, int is_take);//对源点s做最短路，s为node_id
 bool check_4(int i,int j);//检查坐标i,j是否是一个四个格子的合法点
 pair<int,pair<double,double>> check_8(int i,int j);//检查坐标i,j是否是一个四个格子的合法点
 void getEdgeRalative();//得到边关系
 void trans_studio_rob_toID();//建立工作台和机器人id与编号的关系；
 bool is_corner(int id);//判断工作台是不是在墙角
 
+
 double calAngleToDis(int x, int y, int z);//nodeID转角度转距离
 int transID(int from_id, int is_robot, int to_id);//from_id -> to_id 转化为 road_id
 void init_data();
 void printMap(int f);
+void printEdge(int id);
+bool check_slope(int id1, int id2);
+void printPath(int from_id, int is_robot, int to_id, int is_take);
+void print_dijkstra(int studio_id, int is_take);
+int trans_pos_to_nodeID(pair<double, double> pos);
+int trans_pos_to_nodeID(int robot_id);
+void init_vector();
+
+
+vector<int> get_future_node(int robot_id);
+bool is_need_slow(Robot& robot,pair<double,double> pos,pair<double,double> pos1);
+void adjust_virtual_pos(Robot& robot);
+void adjust_virtual_pos_total();
+bool check_can_arrival(int istake,int id1,int id2);
+vector<int> getEqID(int istake,int id1,int tar);bool checkEnough(int robot_id, int target_id, int frame);
+void new_robot_action();
+void new_first_action();
