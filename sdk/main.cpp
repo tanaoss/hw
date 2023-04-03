@@ -61,7 +61,7 @@ int main()
         control(payloads);
         count++;
 
-        if(state.FrameID == 1) {
+        if(state.FrameID == 3053) {
             for(int i = 0; i < 4; ++i) {
                 cerr<<i<<"-target:"<<robots[i].target_id<<endl;
             }
