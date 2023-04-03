@@ -1752,6 +1752,15 @@ void robot_judge_sol(int threshold_lack,int full){
         if((robots[i].loc_id == robots[i].target_id && robots[i].target_id != -1)){
             if(robots[i].get_type == 0){
                 if(studios[robots[i].target_id].pStatus == 1){
+                    int now_i=robots[i].pos.second/0.5;
+                    int now_j=robots[i].pos.first/0.5;
+                    int tmpID=now_i*100+now_j;
+                    bool con1=(exist_id[1].count(tmpID)!=0)?true:false;
+                    if(!con1){
+                        ins[i].buy = -1;
+                        ins[i].sell = -1;
+                        continue;
+                    }
                     robots[i].lastSign=0;
                     robots[i].isTurn=0;
                     robots[i].get_type = studios[robots[i].loc_id].type;
