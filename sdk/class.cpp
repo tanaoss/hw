@@ -83,9 +83,9 @@ void initrobotInfo() {
     // cerr<<studios[13].node_id<<endl;
     // cerr<<"kk"<<graph_edge[1][studios[13].node_id].size()<<endl;
     // cerr<<graph_edge[1][studios[13].node_id][0].id<<endl;
-    for(int i =0;i<studios.size(); ++i) {
-        cerr<<i<<"dis:"<<dis_stuios[11][i][1]<<endl;
-    }
+    // for(int i =0;i<studios.size(); ++i) {
+    //     cerr<<i<<"dis:"<<dis_stuios[11][i][1]<<endl;
+    // }
     
     double weightMin = 0.45 * 0.45 * Pi * 20;
     double weightMax = 0.53 * 0.53 * Pi * 20;
@@ -1590,10 +1590,10 @@ void first_action()
             // else{
             //     robots[i].virtual_pos = studios[robots[i].target_id].pos;
             // }
-            cerr<<i<<"-"<<robots[i].target_id<<endl;
-            cerr<<robots[i].node_id<<endl;
-            cerr<<studios[robots[i].target_id].node_id<<endl;
-            printPath(i, 1, robots[i].target_id, 0);
+            // cerr<<i<<"-"<<robots[i].target_id<<endl;
+            // cerr<<robots[i].node_id<<endl;
+            // cerr<<studios[robots[i].target_id].node_id<<endl;
+            // printPath(i, 1, robots[i].target_id, 0);
             robots[i].road_id = transID(i, 1, robots[i].target_id);
             robots[i].virtual_id = road[0][robots[i].road_id][0].id;
             robots[i].now_index = 0;
@@ -3445,12 +3445,12 @@ Ins contr_one_rob(Robot& robot , const PayLoad& payload){
         // }
     }
     robot.virtual_pos=exist_id[flag_type][robot.virtual_id];
-    if(contr_print_flag&&state.FrameID>=1354&&state.FrameID<=1450&&robot.id==0){
-        cerr<<" FrameID "<<state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
-        cerr<<exist_id_type[1][robot.virtual_id]<<endl;
-        cerr<<robot.virtual_id<<endl;
-        cerr<<needSlow<<endl;
-    }
+    // if(contr_print_flag&&state.FrameID>=1354&&state.FrameID<=1450&&robot.id==0){
+    //     cerr<<" FrameID "<<state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
+    //     cerr<<exist_id_type[1][robot.virtual_id]<<endl;
+    //     cerr<<robot.virtual_id<<endl;
+    //     cerr<<needSlow<<endl;
+    // }
     auto p1=get_w_now(robot,payload);
     ins_t.rotate=p1.first;
     // ins_t.forward=get_v_now(robot,payload);
@@ -4793,6 +4793,7 @@ void Dijkstra(int s, int is_take, int is_robot) {
         dis_node[i] = 10000;
     }
     q.push(Graph_node(s, 0, s));
+    dis_node[s] = 0;
     
     while(!q.empty()) {
         Graph_node now_node = q.top();
@@ -4856,7 +4857,7 @@ void Dijkstra(int s, int is_take, int is_robot) {
             new_dis = dis + graph_edge[is_take][from][i].dis;
             pre_id = graph_edge[is_take][from][i].pre_id;
             // cerr<<"to_id:"<<to<<" new-dis:"<<dis<<" old-dis:"<<dis_node[to]<<endl;
-            if(lt(new_dis, dis_node[to]) || (eq(new_dis, dis_node[to] && lt(angle_sum, angle_node[to])))) {
+            if(lt(new_dis, dis_node[to]) || (eq(new_dis, dis_node[to]) && lt(angle_sum, angle_node[to]))) {
                 q.push(Graph_node{to, new_dis, pre_id, angle_sum});
                 if(cerr_flag) cerr<<"update-to_id:"<<to<<" new-dis:"<<new_dis<<" old-dis:"<<dis_node[to]<<endl;
                 dis_node[to] = new_dis;
@@ -4868,13 +4869,14 @@ void Dijkstra(int s, int is_take, int is_robot) {
 }
 
 
-// void print_dijkstra() {
-//     for(int i = 0; i < 100; ++i) {
-//         for(int j = 0; j< 100; ++j) {
-
-//         }
-//     }
-// }
+void print_dijkstra() {
+    for(int i = 0; i < 100; ++i) {
+        for(int j = 0; j< 100; ++j) {
+            cerr<<setw(10)<<dis_node[(99-i) * 100 +j]<<" ";
+        }
+        cerr<<endl;
+    }
+}
 
 bool is_corner(int id){
     int i=id/100;
@@ -4991,7 +4993,7 @@ void printPath(int from_id, int is_robot, int to_id, int is_take) {
         id = path[i].id;
         x = id / 100;
         y = id % 100;
-        // cerr << "to:(" << x <<", "<<y<<")"<<endl;
+        cerr << "to:(" << x <<", "<<y<<")"<<endl;
     }
     cerr<<endl;
 }
@@ -5017,9 +5019,9 @@ bool is_need_slow(Robot& robot,pair<double,double> pos,pair<double,double> pos1)
     Vec v_p3(p3);
     Vec v_v(v);
     double cmpNums1= cos_t(v_v,v_p1),cmpNums2= cos_t(v_v,v_p2),cmpNums3= cos_t(v_v,v_p3);
-    if(contr_print_flag&&state.FrameID>=1354&&state.FrameID<=1450&&robot.id==0){
-        cerr<<"cmpAngle "<<cmpNums1<<" "<<cmpNums2<<endl;
-    }
+    // if(contr_print_flag&&state.FrameID>=1354&&state.FrameID<=1450&&robot.id==0){
+    //     cerr<<"cmpAngle "<<cmpNums1<<" "<<cmpNums2<<endl;
+    // }
     if(ge(cmpNums1,0.9)&&ge(cmpNums2,0.8)&&ge(cmpNums3,0.8))return false;
     return true;
 }

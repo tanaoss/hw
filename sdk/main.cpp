@@ -27,10 +27,13 @@ int main()
     for(int i = 0; i < studios.size(); ++i) {
         Dijkstra(studios[i].node_id, 0, 0);
         Dijkstra(studios[i].node_id, 1, 0);
+        // if(i==1) print_dijkstra();
     }
     for(int i = 0; i < 4; ++i) {
         Dijkstra(robots[i].node_id, 0, 1);
     }
+    // cerr<<studios[12].node_id<<endl;
+    // printPath(1, 0, 12, 1);
     // floyd();
     // print_queue();
     // cerr<<robots.size();
