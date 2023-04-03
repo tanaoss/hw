@@ -73,6 +73,7 @@ unordered_map<int,bool> is_edge[2];//两个id之间是否有边
 unordered_map<int,unordered_map<int,pair<int,int>>> tar_bound[2];//路径上点的最小扩展点和最大扩展点
 int graph_trans[100][100];
 int vis_node[10000];
+double angle_node[10000];
 int next_node[10000][50][2];//next_node[node_id][studio_id][2]:node_id去往studio_id工作台的下一个点
 double dis_to_studios[10000][50][2];//dis_studios[node_id][studio_id][2]:node_id去往studio_id工作台的距离
 
@@ -4734,8 +4735,8 @@ double calAngleToDis(int x, int y, int z) {
     if(x == y) return 0;
     if(y == z) return 0;
 
-    Vec vec1 = Vec((x / 100) - (y / 100), (x % 100) - (y % 100));
-    Vec vec2 = Vec((y / 100) - (z / 100), (y % 100) - (z % 100));
+    Vec vec1 = Vec((y / 100) - (x / 100), (y % 100) - (x % 100));
+    Vec vec2 = Vec((z / 100) - (y / 100), (z % 100) - (y % 100));
 
     double angle = acos(cos_t(vec1, vec2));
     return Angle_conversion(angle);
