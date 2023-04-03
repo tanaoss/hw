@@ -4771,7 +4771,8 @@ void Dijkstra(int s, int is_take, int is_robot) {
     from_id = is_robot? rob_transID[s]: stu_transID[s];
 
     bool cerr_flag = false;
-    if(s==studios[1].node_id && is_take == 1) cerr_flag = true;
+    // if(s==studios[1].node_id && is_take == 1) cerr_flag = true;
+
     if(cerr_flag) {
         if(is_robot)
             cerr<<"start-robot:"<<from_id<<endl;
@@ -4819,11 +4820,11 @@ void Dijkstra(int s, int is_take, int is_robot) {
                 pre_id = pre_node[pre_id];
                 // cerr<<id<<"-"<<pre_id<<endl;
                 // id转向
-                // if(!eq(calAngleToDis(pre_id, id, next_id), 0)){
+                if(!eq(calAngleToDis(pre_id, id, next_id), 0)){
                     ro.emplace_back(Graph_node{id, dis - dis_node[id], pre_id});
                     next_id = id;
                     dis = dis_node[id];
-                // }
+                }
             }
             reverse(ro.begin(), ro.end());
             road_id = transID(from_id, is_robot, studio_id);
