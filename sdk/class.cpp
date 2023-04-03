@@ -50,6 +50,7 @@ int max_wait_time[4];
 int robot_area[4];
 int contr_print_flag=0;
 int graph[100][100];
+int sum_matrix[2][100][100];
 // int graphs[2][100][100];
 // int target_sequence[2][500][500];
 // int wail[101][101];
@@ -69,8 +70,7 @@ unordered_map<int,pair<double,double>> exist_id[2];//确定存在的id，便于�
 unordered_map<int,int> exist_id_type[2];//确定存在的点的关系
 unordered_map<int,int> stu_transID;//建立工作台id与转换后id的关系
 unordered_map<int,int> rob_transID;//建立机器人id与转换后id的关系
-unordered_map<int,bool> is_edge[2];//两个id之间是否有边
-unordered_map<int,unordered_map<int,pair<int,int>>> tar_bound[2];//路径上点的最小扩展点和最大扩展点
+unordered_map<int,bool> can_arrival[2];//判断任意两个小格之间是否可以直达;
 int graph_trans[100][100];
 int vis_node[10000];
 double angle_node[10000];
@@ -4855,6 +4855,13 @@ void init_data(){
     Translation_graph_has();
     getEdgeRalative();
     // trans_studio_rob_toID();
+    for(int j=0;j<100;j++){
+        for(int i=1;i<100;i++){
+            int id=i*100+j;
+            sum_matrix[0][i][j]=sum_matrix[0][i-1][j]+ (exist_id[0].count(id));
+            sum_matrix[1][i][j]=sum_matrix[1][i-1][j]+ (exist_id[1].count(id));
+        }
+    }
 }
 void printMap(int f){
     // for(int i=0;i<100;i++){
@@ -5002,5 +5009,31 @@ void adjust_virtual_pos(Robot& robot){
 void adjust_virtual_pos_total(){
     for(int i=0;i<4;i++){
         adjust_virtual_pos(robots[i]);
+    }
+}
+bool check_can_arrival(int istake,int id1,int id2){
+    int i1=min(id1/100,id2/100),i2=max(id1/100,id2/100);
+    int j1=min(id1-id1/100*100,id2-id2/100*100),j2=max(id1-id1/100*100,id2-id2/100*100);
+    if(!eq(i1-i2,0)&&!eq(j1-j2,0)){
+        i1=max(i1-1,0);
+        i2=min(i2+1,99);
+        j1=max(j1-1,0);
+        j2=min(j2+1,99);
+    }
+    for(int j=j1;j<=j2;j++){
+        int tmp=sum_matrix[istake][i2][j]-(i1>0?sum_matrix[istake][i1-1][j]:0);
+        if(tmp<(j2-j1+1))return false;
+    }
+    return true;
+
+}
+vector<int> getEqID(int istake,int id1,int tar) {
+    int i1=id1/100;
+    int j1=id1-i1*100;
+    vector<int> ans;
+    for(int i=i1-2;i<=i1+2;i++){
+        for(int j=j1-2;j<=j1+2;j++){
+
+        }
     }
 }

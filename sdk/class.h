@@ -404,3 +404,5 @@ vector<int> get_future_node(int robot_id);
 bool is_need_slow(Robot& robot,pair<double,double> pos,pair<double,double> pos1);
 void adjust_virtual_pos(Robot& robot);
 void adjust_virtual_pos_total();
+bool check_can_arrival(int istake,int id1,int id2);
+vector<int> getEqID(int istake,int id1,int tar);
