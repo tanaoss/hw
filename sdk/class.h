@@ -223,10 +223,19 @@ struct Graph_node{
     int id;//i*100+j
     int pre_id;//最短路中的前置pre_id;
     double dis;
+    double angle_sum;
     Graph_node(int _id,double _dis,int _pre_id){
         id=_id;
         dis=_dis;
         pre_id=_pre_id;
+        angle_sum = 0;
+    }
+
+    Graph_node(int _id,double _dis,int _pre_id, double _angle_sum){
+        id=_id;
+        dis=_dis;
+        pre_id=_pre_id;
+        angle_sum = _angle_sum;
     }
     
 };//转换图节点
@@ -235,6 +244,9 @@ struct cmp_Graph_node
 {
     bool operator()(const Graph_node &a,const Graph_node &b)
     {
+        if(fabs(a.dis - b.dis) < 1e-7) {
+            return a.angle_sum > b.angle_sum;
+        }
         return a.dis > b.dis;
     }
 };
