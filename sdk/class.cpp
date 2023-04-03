@@ -22,6 +22,7 @@ vector<Ins> ins(4);
 vector<int> material[4][8];
 vector<int> product[8];
 vector<int> full_product;
+vector<int> studios_type[10];
 vector<PayLoad> payloads;
 vector<pane> panes;
 int class_map;
@@ -110,10 +111,15 @@ void initrobotInfo() {
     ins_set[7].forward = -2;
 }
 void init_studio_parameter(){
+    int studio_id;
     for(int i=0;i<50;i++){
         last_count[i]=0;
         for(int j=0;j<8;j++)studios_rid[i][j]=-1;
     }
+    for(int i=0;i<studios.size();i++){
+        studios_type[studios[i].type].push_back(i);
+    }
+
     studio_material[0][0]=2;
     studio_material[0][1]=1;
     studio_material[0][2]=2;
@@ -164,7 +170,154 @@ void init_studio_parameter(){
     price[6][1]=27500;
     price[7][0]=76000;
     price[7][1]=105000;
+    for(int i=0;i<studios.size();i++){
+        if(studios[i].type>3){
+            for(int j = 1;j<studio_material[studios[i].type-4][0];j++){
+                for(int k = 0;k<studios_type[studio_material[studios[i].type-4][j]].size();k++){
+                    studio_id = studios_type[studio_material[studios[i].type-4][j]][k];
+                    if(!(eq(dis_stuios[i][studio_id][1],10000))){
+                        studios[i].material_studios[j-1].push_back(studio_id);
+                    }
+                }
+            }
+        }
+    }
 
+}
+pair<int,int> new_pick_point(int robot_id,int state_type){
+    double min = 10000;
+    int studio_buy = -1,studio_send = -1;
+    double dist;
+    double income;
+    double income_ratio;      //收益比
+    int material_studio_id;
+    if(state_type == 1){
+
+    }
+    else if(state_type ==2){
+        for(int i =0;i<studios.size();i++){
+            if(studios[i].type>3){
+                for(int j = 1;j<studio_material[studios[i].type-4][0];j++){
+                    if(((studios[i].bitSatus & (int)pow(2,studio_material[studios[i].type-4][j])) == 0) &&(studios_rid[i][studio_material[studios[i].type-4][j]]==-1)){
+                        for(int k=0;k<studios[i].material_studios[j-1].size();k++){
+                            material_studio_id = studios[i].material_studios[j-1][k];
+                            if(studios[material_studio_id].pStatus == 1 && studios[material_studio_id].r_id < 50 ){         //
+                                income = price[studios[material_studio_id].type][1]-price[studios[material_studio_id].type][0];
+                                if(studios[material_studio_id].r_id != -1)
+                                    dist = 20;    //等待补全
+                                else 
+                                    dist = 20;
+                                income_ratio = (income/dist);
+                                if(lt(income_ratio,min)){
+                                    min = income_ratio;
+                                    studio_buy = material_studio_id;
+                                    studio_send = j;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    else if(state_type == 3){
+        int item_type =robots[robot_id].get_type;
+        // 只有送
+        for(int i=0;i<studios.size();i++){
+            for(int j=1;j<=material_send[item_type][0];j++){
+                if(item_type != 7){
+                    if(studios[i].type == material_send[item_type][j] && (studios_rid[i][item_type] == -1) ){
+                        // if(((studios[i].bitSatus & ((int)pow(2,item_type)))==0)||((check_material_full(i)&&(studios[i].pStatus != 1)&&(studios[i].r_time>0&&(checkEnough(robot_id,i,studios[i].r_time)))))){
+                            dist = dis_stuios[robots[robot_id].loc_id][i][1];   //修改
+                            if(eq(dist,10000))continue;
+                            if (lt(dist,min))
+                            {
+                                min = dist;
+                                studio_send = i;
+                            }
+                        // }
+                    }
+                }
+                else{
+                    if(studios[i].type == material_send[item_type][j]){
+                       dist = dis_stuios[robots[robot_id].loc_id][i][1];
+                       if(eq(dist,10000))continue;
+                        if (lt(dist,min))
+                        {
+                            min = dist;
+                            studio_send = i;
+                        }
+                    }
+                }
+            }
+            if(studios[i].type == 9){
+                dist = dis_stuios[robots[robot_id].loc_id][i][1];
+                if(eq(dist,10000))continue;
+                if (lt(dist,min))
+                {
+                    min = dist;
+                    studio_send = i;
+                }
+            }
+        }
+    }
+    return pair<int,int>(studio_buy,studio_send);
+}
+void complete_trans(int robot_id){
+    pair<int,int>temp;
+    temp=new_pick_point(robot_id,2);
+    robots[robot_id].target_id_buy = temp.first;
+    robots[robot_id].target_id_send = temp.second;
+    robots[robot_id].target_id = robots[robot_id].target_id_buy;
+    if(robots[robot_id].target_id != -1){
+        if (studios[robots[robot_id].target_id].r_id != -1 && studios[robots[robot_id].target_id].r_id != robot_id)
+            studios[robots[robot_id].target_id].r_id += 50;
+        else
+            studios[robots[robot_id].target_id].r_id = robot_id;
+        robot_get_type[studios[robots[robot_id].target_id].type]++;
+        if(studios[robots[robot_id].target_id_send].type!=8&&studios[robots[robot_id].target_id_send].type!=9)studios_rid[robots[robot_id].target_id_send][robots[robot_id].get_type] = robot_id;
+    }
+}
+
+void new_robot_judge(){
+    for(int i=0;i<4;i++){
+        if(robots[i].loc_id == robots[i].target_id && robots[i].target_id != -1){
+            if(robots[i].get_type != 0){
+                //sell;
+                ins[i].sell = 1;
+                ins[i].buy = -1;
+                robots[i].lastSign=0;
+                robots[i].isTurn=0;
+                studios[robots[i].loc_id].bitSatus += (int)pow(2,robots[i].get_type);
+                studios_rid[robots[i].loc_id][robots[i].get_type] = -1;
+                robots[i].get_type = 0;
+                complete_trans(i);
+            }
+            else{
+                //do something buy;
+                ins[i].buy = 1;
+                ins[i].sell = -1;
+                robots[i].lastSign=0;
+                robots[i].isTurn=0;
+                if (studios[robots[i].loc_id].r_id >= 50)
+                    studios[robots[i].loc_id].r_id -= 50;
+                else
+                    studios[robots[i].loc_id].r_id = -1;
+                studios[robots[i].loc_id].pStatus = 0;
+                robots[i].get_type = studios[robots[i].loc_id].type;
+                robots[i].target_id = robots[i].target_id_send;
+            }
+        }
+        else if(robots[i].target_id == -1){
+            if(robots[i].get_type == 0){
+                complete_trans(i);
+            }
+            else{
+                robots[i].target_id_send = new_pick_point(i,3).second;
+                robots[i].target_id = robots[i].target_id_send;
+            }
+        }
+    }
 }
 bool readMapUntilOK() {
     char line[1024];
@@ -1360,7 +1513,6 @@ pair<int, double>pick_point(int robot_id, int state_type)
                     if(robot_get_type[studios[i].type]< material[robot_id][studios[i].type].size()){
                         dist = dis_to_studios[robots[robot_id].node_id][i][0];
                         if(eq(dist,10000))continue;
-                        if(lt(dist/6/0.02,50))continue;
                         if(check_get_send(robot_id,i)){
                             if (lt(dist,min))
                             {
@@ -1377,6 +1529,7 @@ pair<int, double>pick_point(int robot_id, int state_type)
                     if(robot_get_type[studios[i].type]< material[robot_id][studios[i].type].size()){
                         dist = dis_to_studios[robots[robot_id].node_id][i][0];
                         if(eq(dist,10000))continue;
+                        if(lt(dist/6/0.02,50))continue;
                         if(check_get_send(robot_id,i)){
                             if (lt(dist,min))
                             {
@@ -1900,10 +2053,11 @@ void robot_judge_sol(int threshold_lack,int full){
                             }
                             // }
                         // }
-                        if(state.FrameID>4700 &&state.FrameID<4800&&i==2){
-                            cerr<<"wwww"<<k<<' '<<temp1.first<<' '<<temp1.second<<endl;
-                        }
-                        
+                        // if(state.FrameID>4700 &&state.FrameID<4800&&i==2){
+                        //     cerr<<"wwww"<<k<<' '<<temp1.first<<' '<<temp1.second<<endl;
+                        // }
+                        if(robots[i].target_id != -1)
+                            robots[i].last_target_id = robots[i].target_id;
                         robots[i].target_id = min_subscript;
                             // cerr<<"aaa"<<endl;
                         if(min_subscript != -1){
