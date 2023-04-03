@@ -29,6 +29,7 @@ int main()
         Dijkstra(i, 1);
         // if(i==1) print_dijkstra();
     }
+    // print_dijkstra(1, 0);
     // for(int i = 0; i < 4; ++i) {
     //     Dijkstra(i, 0, 1);
     // }
@@ -59,6 +60,12 @@ int main()
         pl_g=payloads;
         control(payloads);
         count++;
+
+        if(state.FrameID == 3053) {
+            for(int i = 0; i < 4; ++i) {
+                cerr<<i<<"-target:"<<robots[i].target_id<<endl;
+            }
+        }
     }
     return 0;
    
