@@ -70,11 +70,12 @@ unordered_map<int,pair<double,double>> exist_id[2];//确定存在的id，便于�
 unordered_map<int,int> exist_id_type[2];//确定存在的点的关系
 unordered_map<int,int> stu_transID;//建立工作台id与转换后id的关系
 unordered_map<int,int> rob_transID;//建立机器人id与转换后id的关系
+unordered_map<int,bool> is_edge[2];//两个id之间是否有边
+unordered_map<int,unordered_map<int,pair<int,int>>> tar_bound[2];//路径上点的最小扩展点和最大扩展点
 int graph_trans[100][100];
 int vis_node[10000];
 double dis_node[10000];
 int pre_node[10000];
-double angle_node[10000];
 double dis_stuios[50][50][2];
 double dis_robot_to_studios[4][50];
 
@@ -4749,8 +4750,8 @@ double calAngleToDis(int x, int y, int z) {
     if(x == y) return 0;
     if(y == z) return 0;
 
-    Vec vec1 = Vec((y / 100) - (x / 100), (y % 100) - (x % 100));
-    Vec vec2 = Vec((z / 100) - (y / 100), (z % 100) - (y % 100));
+    Vec vec1 = Vec((x / 100) - (y / 100), (x % 100) - (y % 100));
+    Vec vec2 = Vec((y / 100) - (z / 100), (y % 100) - (z % 100));
 
     double angle = acos(cos_t(vec1, vec2));
     return Angle_conversion(angle);
@@ -4766,13 +4767,11 @@ void Dijkstra(int s, int is_take, int is_robot) {
     int from_id;
     int studio_id, id, road_id;
     int count = studios.size();
-    double dis, new_dis, angle_sum;
-
+    double dis, new_dis;
     from_id = is_robot? rob_transID[s]: stu_transID[s];
 
     bool cerr_flag = false;
-    // if(s==studios[1].node_id && is_take == 1) cerr_flag = true;
-
+    // if(s==studios[11].node_id) cerr_flag = true;
     if(cerr_flag) {
         if(is_robot)
             cerr<<"start-robot:"<<from_id<<endl;
@@ -4820,11 +4819,11 @@ void Dijkstra(int s, int is_take, int is_robot) {
                 pre_id = pre_node[pre_id];
                 // cerr<<id<<"-"<<pre_id<<endl;
                 // id转向
-                if(!eq(calAngleToDis(pre_id, id, next_id), 0)){
+                // if(!eq(calAngleToDis(pre_id, id, next_id), 0)){
                     ro.emplace_back(Graph_node{id, dis - dis_node[id], pre_id});
                     next_id = id;
                     dis = dis_node[id];
-                }
+                // }
             }
             reverse(ro.begin(), ro.end());
             road_id = transID(from_id, is_robot, studio_id);
@@ -4836,36 +4835,26 @@ void Dijkstra(int s, int is_take, int is_robot) {
 
         num = graph_edge[is_take][from].size();
         dis = now_node.dis;
-        
         if(cerr_flag) cerr<<"edge-num:"<<num<<endl;
         for(i = 0; i < num; ++i) {
             to = graph_edge[is_take][from][i].id;
-            pre_id = now_node.pre_id;
-            angle_sum = now_node.angle_sum;
-            if(vis_node[to] || to == pre_id) continue;
-            angle_sum += calAngleToDis(pre_id, from, to);
-            new_dis = dis + graph_edge[is_take][from][i].dis;
+            if(vis_node[to]) continue;
+            new_dis = dis + graph_edge[is_take][from][i].dis + calAngleToDis(pre_id, from, to);
             pre_id = graph_edge[is_take][from][i].pre_id;
             // cerr<<"to_id:"<<to<<" new-dis:"<<dis<<" old-dis:"<<dis_node[to]<<endl;
-            if(lt(new_dis, dis_node[to]) || (eq(new_dis, dis_node[to] && lt(angle_sum, angle_node[to])))) {
-                q.push(Graph_node{to, new_dis, pre_id, angle_sum});
+            if(lt(new_dis, dis_node[to])) {
+                q.push(Graph_node{to, new_dis, pre_id});
+                // if(to==2763){
+                //     cerr<<"kkkk-"<<from<<endl;
+                //     cerr<<"update-to_id:"<<to<<" new-dis:"<<new_dis<<" old-dis:"<<dis_node[to]<<endl;
+                // }
                 if(cerr_flag) cerr<<"update-to_id:"<<to<<" new-dis:"<<new_dis<<" old-dis:"<<dis_node[to]<<endl;
                 dis_node[to] = new_dis;
                 pre_node[to] = from;
-                angle_node[to] = angle_sum;
             }
         }
     }
 }
-
-
-// void print_dijkstra() {
-//     for(int i = 0; i < 100; ++i) {
-//         for(int j = 0; j< 100; ++j) {
-
-//         }
-//     }
-// }
 
 bool is_corner(int id){
     int i=id/100;
