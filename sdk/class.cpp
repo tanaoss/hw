@@ -22,6 +22,7 @@ vector<Ins> ins(4);
 vector<int> material[4][8];
 vector<int> product[8];
 vector<int> full_product;
+vector<int> studios_type[10];
 vector<PayLoad> payloads;
 vector<pane> panes;
 int class_map;
@@ -111,10 +112,15 @@ void initrobotInfo() {
     ins_set[7].forward = -2;
 }
 void init_studio_parameter(){
+    int studio_id;
     for(int i=0;i<50;i++){
         last_count[i]=0;
         for(int j=0;j<8;j++)studios_rid[i][j]=-1;
     }
+    for(int i=0;i<studios.size();i++){
+        studios_type[studios[i].type].push_back(i);
+    }
+
     studio_material[0][0]=2;
     studio_material[0][1]=1;
     studio_material[0][2]=2;
@@ -165,8 +171,56 @@ void init_studio_parameter(){
     price[6][1]=27500;
     price[7][0]=76000;
     price[7][1]=105000;
+    for(int i=0;i<studios.size();i++){
+        if(studios[i].type>3){
+            for(int j = 1;j<studio_material[studios[i].type-4][0];j++){
+                for(int k = 0;k<studios_type[studio_material[studios[i].type-4][j]].size();k++){
+                    studio_id = studios_type[studio_material[studios[i].type-4][j]][k];
+                    if(!(eq(dis_stuios[i][studio_id][1],10000))){
+                        studios[i].material_studios[j-1].push_back(studio_id);
+                    }
+                }
+            }
+        }
+    }
 
 }
+pair<int,int> new_pick_point(int robot_id,int state_type){
+    double min = 10000;
+    int studio_buy = -1,studio_send = -1;
+    double dist;
+    double income;
+    double income_ratio;      //收益比
+    int material_studio_id;
+    if(state_type == 1){
+
+    }
+    else if(state_type ==2){
+        for(int i =0;i<studios.size();i++){
+            if(studios[i].type>3){
+                for(int j = 1;j<studio_material[studios[i].type-4][0];j++){
+                    if(((studios[i].bitSatus & (int)pow(2,studio_material[studios[i].type-4][j])) == 0) &&(studios_rid[i][studio_material[studios[i].type-4][j]]==-1)){
+                        for(int k=0;k<studios[i].material_studios[j-1].size();k++){
+                            material_studio_id = studios[i].material_studios[j-1][k];
+                            if(studios[material_studio_id].pStatus == 1 && studios[material_studio_id].r_id == -1){
+                                income = price[studios[material_studio_id].type][1]-price[studios[material_studio_id].type][0];
+                                dist = 20;    //等待补全
+                                income_ratio = (income/dist);
+                                if(lt(income_ratio,min)){
+                                    min = income_ratio;
+                                    studio_buy = material_studio_id;
+                                    studio_send = j;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return pair<int,int>(studio_buy,studio_send);
+}
+
 bool readMapUntilOK() {
     char line[1024];
     int count = 0;
