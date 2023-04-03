@@ -44,16 +44,17 @@ int main()
     cout.flush();
     int count = 0;
     initrobotInfo();
+    // cerr<<"aaa"<<endl;
     init_studio_parameter();
-    
+    // cerr<<"bbb"<<endl;
      while (cin >> state.FrameID)
     {
         // cerr<<" time "<<state.FrameID<<endl;
         readStatusUntilOK() ;
         
         cout<<state.FrameID<<endl;
-        if(count == 0)first_action();
-        else robot_action();
+        if(count == 0)new_first_action();
+        else new_robot_action();
         adjust_virtual_pos_total();
         payloads.clear();
         for(int i=0;i<4;++i){
@@ -62,10 +63,10 @@ int main()
         
         for(int i=0;i<4;++i) robots[i].radius = payloads[i].radius;
         pl_g=payloads;
-        cerr<<"222"<<endl;
+        // cerr<<"222"<<endl;
         control(payloads);
         count++;
-        cerr<<"333"<<endl;
+        // cerr<<"333"<<endl;
 
         if(state.FrameID == 3053) {
             for(int i = 0; i < 4; ++i) {
