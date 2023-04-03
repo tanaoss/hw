@@ -3420,33 +3420,36 @@ Ins contr_one_rob(Robot& robot , const PayLoad& payload){
     Ins ins_t;
     int flag_type=robot.get_type==0?0:1;
     auto tmpVec=get_future_node(robot.id);
-    // if(tmpVec.size()>0){
-    //     auto tmpPos1=exist_id[flag_type][robot.virtual_id];
-    //     // cerr<<"---"<<get_future_node(robot.id)[0]<<endl;
-    //     auto tmpPos2=exist_id[flag_type][tmpVec[0]];
-    //     int signX=le(tmpPos1.first,tmpPos2.first)?-1:1;
-    //     int signY=le(tmpPos1.second,tmpPos2.second)?-1:1;
-    //     int subx=tmpPos1.first-tmpPos2.first;
-    //     int suby=tmpPos1.second-tmpPos2.second;
-    //     if(!eq(subx,0)&&!eq(suby,0)){
-    //         exist_id[flag_type][robot.virtual_id]={tmpPos2.first+signX*0.5,tmpPos2.second+signY*0.5};
-    //         // if(state.FrameID>=2080&&state.FrameID<=3080){
-    //         //     cerr<<"-------------"<<endl;
-    //         //     cerr<<state.FrameID<<" "<<robot.id<<endl;
-    //         //     cerr<<exist_id[flag_type][robot.virtual_id].first<<"-"<<exist_id[flag_type][robot.virtual_id].second<<endl;
-    //         //     cerr<<tmpPos2.first<<"-"<<tmpPos2.second<<endl;
-    //         // }
-    //     }
-    // }
+    bool needSlow=true;
+    if(tmpVec.size()>0){
+        auto tmpPos1=exist_id[flag_type][robot.virtual_id];
+        auto tmpPos2=exist_id[flag_type][tmpVec[0]];
+        auto tmpPos3=tmpVec.size()>1?exist_id[flag_type][tmpVec[1]]:make_pair<double,double>(-7,-7);
+        needSlow=is_need_slow(robot,tmpPos2,tmpPos3);
+        // int signX=le(tmpPos1.first,tmpPos2.first)?-1:1;
+        // int signY=le(tmpPos1.second,tmpPos2.second)?-1:1;
+        // int subx=tmpPos1.first-tmpPos2.first;
+        // int suby=tmpPos1.second-tmpPos2.second;
+        // if(!eq(subx,0)&&!eq(suby,0)){
+        //     exist_id[flag_type][robot.virtual_id]={tmpPos2.first+signX*0.5,tmpPos2.second+signY*0.5};
+        // }
+    }
     robot.virtual_pos=exist_id[flag_type][robot.virtual_id];
-    if(contr_print_flag&&state.FrameID>=1981&&state.FrameID<=2050&&robot.id==0){
+    if(contr_print_flag&&state.FrameID>=1354&&state.FrameID<=1450&&robot.id==0){
         cerr<<" FrameID "<<state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
         cerr<<exist_id_type[1][robot.virtual_id]<<endl;
         cerr<<robot.virtual_id<<endl;
+        cerr<<needSlow<<endl;
     }
     auto p1=get_w_now(robot,payload);
     ins_t.rotate=p1.first;
-    ins_t.forward=get_v_now(robot,payload);
+    // ins_t.forward=get_v_now(robot,payload);
+    ins_t.forward=6;
+    if(lt(payload.distance,1.5)){
+            ins_t.forward=1;
+    }else if(lt(payload.distance,0.5)){
+            ins_t.forward=0.5;
+    }
     if(lt(payload.distance,1)&&!p1.second)
         ins_t.forward=0;
     if(!p1.second)
@@ -4980,4 +4983,49 @@ vector<int> get_future_node(int robot_id) {
     }
     // cerr<<"kkk"<<v.size()<<endl;
     return v;
+}
+bool is_need_slow(Robot& robot,pair<double,double> pos,pair<double,double> pos1){
+    if(lt(pos1.first,0))return false;
+    auto p1=subVector(robot.virtual_pos,robot.pos);
+    auto p2=subVector(pos,robot.pos);
+    auto p3=subVector(pos1,robot.pos);
+    auto v=robot.xy_pos;
+    Vec v_p1(p1);
+    Vec v_p2(p2);
+    Vec v_p3(p3);
+    Vec v_v(v);
+    double cmpNums1= cos_t(v_v,v_p1),cmpNums2= cos_t(v_v,v_p2),cmpNums3= cos_t(v_v,v_p3);
+    if(contr_print_flag&&state.FrameID>=1354&&state.FrameID<=1450&&robot.id==0){
+        cerr<<"cmpAngle "<<cmpNums1<<" "<<cmpNums2<<endl;
+    }
+    if(ge(cmpNums1,0.9)&&ge(cmpNums2,0.8)&&ge(cmpNums3,0.8))return false;
+    return true;
+}
+void adjust_virtual_pos(Robot& robot){
+    if(robot.get_type==0|| exist_id_type[1][robot.virtual_id]!=1){
+        return;
+    }
+    int now_j= robot.pos.first/0.5;
+    int now_i= robot.pos.second/0.5;
+    int tar_i=robot.virtual_id/100;
+    int tar_j=robot.virtual_id-100*tar_i;
+    int tmpID1=now_i*100+tar_j,tmpID2=tar_i*100+now_j;
+    double arr[][2]={{0,0},{0,0},{0,-0.2},{0.2,0},{0,-0.2},{-0.2,0}};
+    if(exist_id_type[1][tmpID1]!=1&&exist_id_type[1][tmpID2]!=1){
+        return;
+    }else if(exist_id_type[1][tmpID1]!=1){
+        int type=exist_id_type[1][tmpID1];
+        robot.virtual_pos.first=exist_id[1][robot.virtual_id].first+arr[type][0];
+        robot.virtual_pos.second=exist_id[1][robot.virtual_id].second+arr[type][1];
+    }else if(exist_id_type[1][tmpID2]!=1){
+        int type=exist_id_type[1][tmpID2];
+        robot.virtual_pos.first=exist_id[1][robot.virtual_id].first+arr[type][0];
+        robot.virtual_pos.second=exist_id[1][robot.virtual_id].second+arr[type][1];
+    }
+    return ;
+}
+void adjust_virtual_pos_total(){
+    for(int i=0;i<4;i++){
+        adjust_virtual_pos(robots[i]);
+    }
 }
