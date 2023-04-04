@@ -269,7 +269,7 @@ bool readMapUntilOK();                 // 读地图
 bool readStatusUntilOK();              // 读判题器输出
 void out_put();                        // 输出指令
 
-void control(vector<PayLoad> payLoad); // 控制球体运行
+void control(); // 控制球体运行
 void first_pick_point();
 void robot_action();
 void process();
@@ -345,7 +345,7 @@ vector<pair<double, double>> Calculate_the_trajectory(Robot& rob, int cnt, int t
 PayLoad calPayload_trajectory(Robot rob,int studioID);
 vector<pair<double,double>>Calculate_the_trajectory(Robot& rob,Ins ins, int forward_change, int rotate_change,const vector<pair<double,double>>& tra,int cnt,int tar,double rob_dis,double pre_dis=100);
 double get_at_stop(double t,double a,double v,int sign_v1);
-Ins contr_one_rob(Robot& robot ,PayLoad& payload);
+Ins contr_one_rob(Robot& robot);
 vector<double>  get_T_limits(Robot& rob);
 double get_at_stop_a(double t,double x,double v,int sign_v1);
 double return_time_root_v(double a,double b,double c,double v,double a1);
