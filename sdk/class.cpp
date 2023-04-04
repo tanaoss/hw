@@ -63,7 +63,7 @@ int product_time[8];
 double new_cllo_time = 0;
 pair<double ,double> Root;
 pair<double ,double> Collision_point;
-vector<PayLoad> pl_g;
+
 vector<type_area>types[2];
 vector<pair<double,double>>arri_Set;
 double Compute_redundancy=0;
@@ -358,6 +358,8 @@ bool readStatusUntilOK() {
         robots[rob_id].set(rob_id,tmp[0],tmp[1],tmp[2],tmp[3],tmp[4],pair<double,double>(tmp[5],tmp[6]),tmp[7],
         pair<double,double>(tmp[8],tmp[9]));
         robots[rob_id].node_id = trans_pos_to_nodeID(rob_id);
+        robots[rob_id].radius = (robots[rob_id].get_type == 0? 0.45: 0.53);
+
         // if(gt(robots[rob_id].collision_val_pre, robots[rob_id].collision_val) && robots[rob_id].get_type != 0)
         //     cerr<<"time-collision:"<< state.FrameID <<"collision" <<rob_id<< endl<<endl;
         rob_id++;
@@ -449,6 +451,9 @@ PayLoad calPayload(Robot robot, pair<double, double> virtual_pos) {
 
 
     // cerr << robotID << "--"<< robot.target_id<<endl;
+    if(robot.target_id == -1) {
+        return PayLoad((robot.get_type == 0? 0.45: 0.53), 0, 0, 0, 0, speed, 0);
+    }
 
     double distance = calcuDis(robot.pos, virtual_pos);
     double angular_acceleration = robot.get_type == 0? angular_acceleration_no :angular_acceleration_has;
@@ -698,13 +703,15 @@ double calc_priority(int studio_id){
      return priority_value;
 }
 
-void control(vector<PayLoad> payLoad){
+void control(){
     contr_print_flag=1;
-     for(int i=0;i<4;i++){
-        auto tins=contr_one_rob(robots[i],payLoad[i]);
+    payloads.clear();
+    for(int i=0;i<4;i++){
+        auto tins=contr_one_rob(robots[i]);
         ins[i].forward=tins.forward;
         ins[i].rotate=tins.rotate;
         ins[i].robID=i;
+        payloads.emplace_back(calPayload(robots[i], robots[i].virtual_pos));
     }
     
     // if(state.FrameID>=1003&&state.FrameID<=1023){
@@ -745,7 +752,7 @@ void control(vector<PayLoad> payLoad){
     //     cerr<<state.FrameID<<" ins befoer "<<ins[0].forward<<endl;
     //     cerr<<check_will_colloWithWall(robots[0])<<endl;
     // }
-    // collision_solve(25);
+    collision_solve(25);
 
     // if(state.FrameID >= 5600 && state.FrameID < 5610) {
     //     cerr<<"~ins:"<<ins[2].forward<<"  "<<ins[2].rotate<<endl;
@@ -3341,9 +3348,10 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot& rob,Ins ins_in, int f
     //         cerr<<state.FrameID+cnt<<endl;
     // }
     double t=0.02;
-    PayLoad  pay=calPayload_trajectory(rob,rob.target_id);
-    if(rob.target_id==-1)rob.target_id=0;
-    Ins ins=contr_one_rob(rob,pay);
+    Ins ins=contr_one_rob(rob);
+    cerr<<"kkk";
+    PayLoad pay=calPayload(rob,rob.virtual_pos);
+
     Flag_sumulate=0;
     double w_next=ins.rotate;
     double v_next=ins.forward;
@@ -3481,7 +3489,7 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot& rob,int cnt,int tar,i
     // cerr<<"aaaa"<<state.FrameID<<endl;
     double t=0.02;
     PayLoad  pay=calPayload_trajectory(rob,rob.target_id);
-    Ins ins=contr_one_rob(rob,pay);
+    Ins ins=contr_one_rob(rob);
     double w_next=ins.rotate;
     double v_next=ins.forward;
     if(cnt>tar){
@@ -3605,17 +3613,17 @@ PayLoad calPayload_trajectory(Robot rob,int studioID){
 
     return PayLoad((robot.get_type == 0? 0.45: 0.53), angle, angular_acceleration, acceleration, distance, speed, sign);    
 }
-Ins contr_one_rob(Robot& robot , PayLoad& payload){
+Ins contr_one_rob(Robot& robot){
     Flag_sumulate=0;
     Ins ins_t;
     if(robot.target_id==-1){
         ins_t.forward=0;
-        ins_t.rotate=0;
+        ins_t.rotate=Pi;
         return ins_t;
     }
     adjust_virtual_pos_total(robot);
     
-    payload=calPayload(robot,robot.virtual_pos);
+    PayLoad payload=calPayload(robot,robot.virtual_pos);
     if(robot.id==0&&state.FrameID>=10&&state.FrameID<=100&&contr_print_flag){
         cerr<<" FrameID "<< state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
     }
@@ -3771,14 +3779,15 @@ void collision_solve(int frame){
 
 
     // if(state.FrameID >= 5600 && state.FrameID <= 5630 && 999==999)
-    //     cerr_falg = true;
+        cerr_falg = true;
 
 
     for(i = 0; i < 4; ++i)
         ro.emplace_back(robots[i]);
     sort(ro.begin(), ro.end(), cmp_robot);
-
+    cerr<<"111"<<endl;
     for(i = 0; i < 4; ++i) trajectory[i] = Calculate_the_trajectory(ro[i], 0, frame, 0);
+    cerr<<"222"<<endl;
 
     // if(state.FrameID == 2) {
     //     cerr<<"predict"<<endl;
@@ -3797,8 +3806,10 @@ void collision_solve(int frame){
     {
         for (j = i + 1; j < 4; j++)
         {
-            mindis = payloads[ro[i].id].radius + payloads[ro[j].id].radius;
+            mindis = ro[i].radius + ro[j].radius;
+            cerr<<"333"<<endl;
             tmp = checkNoCollision(trajectory[i], trajectory[j], mindis + 0.2);
+            cerr<<"444"<<endl;
             // if(state.FrameID == 1588 && ((ro[i].id == 3 && ro[j].id == 0) || (ro[i].id == 0 && ro[j].id == 3)))
             //     cerr<<"mindis:"<<mindis<<endl;
             coll_time[i][j] = tmp;
@@ -3809,23 +3820,24 @@ void collision_solve(int frame){
             }
                 
             if(tmp == 9000 || gt(calcuDis(ro[i].pos, ro[j].pos), 8)) {
-                if(ro[i].target_id == ro[j].target_id && ro[i].target_id != -1) {
-                    reachTime[ro[i].id] = getTimeToStudio(ro[i].id, trajectory[i]);
-                    reachTime[ro[j].id] = getTimeToStudio(ro[j].id, trajectory[j]);
+                //同个目标
+                // if(ro[i].target_id == ro[j].target_id && ro[i].target_id != -1) {
+                //     reachTime[ro[i].id] = getTimeToStudio(ro[i].id, trajectory[i]);
+                //     reachTime[ro[j].id] = getTimeToStudio(ro[j].id, trajectory[j]);
                     
-                    if(reachTime[ro[i].id] == reachTime[ro[j].id] && reachTime[ro[i].id]==1000) continue;
-                    stopID = (reachTime[ro[i].id]<reachTime[ro[j].id])? ro[j].id: ro[i].id;
-                    goID = (stopID == ro[i].id)? ro[j].id: ro[i].id;
-                    ins[stopID].forward = min(payloads[stopID].distance / (reachTime[goID]*0.02 + 0.5), ins[stopID].forward);
+                //     if(reachTime[ro[i].id] == reachTime[ro[j].id] && reachTime[ro[i].id]==1000) continue;
+                //     stopID = (reachTime[ro[i].id]<reachTime[ro[j].id])? ro[j].id: ro[i].id;
+                //     goID = (stopID == ro[i].id)? ro[j].id: ro[i].id;
+                //     ins[stopID].forward = min(payloads[stopID].distance / (reachTime[goID]*0.02 + 0.5), ins[stopID].forward);
 
-                    // if(cerr_falg) {
-                    //     cerr<<"time:"<<state.FrameID<<endl;
-                    //     // cerr<<ro[i].id<<"reach time:"<<reachTime[ro[i].id]<<endl;
-                    //     // cerr<<ro[j].id<<"reach time:"<<reachTime[ro[j].id]<<endl;
-                    //     cerr<<stopID<<"stop:"<<ins[stopID].forward<<endl;
-                    // }
+                //     // if(cerr_falg) {
+                //     //     cerr<<"time:"<<state.FrameID<<endl;
+                //     //     // cerr<<ro[i].id<<"reach time:"<<reachTime[ro[i].id]<<endl;
+                //     //     // cerr<<ro[j].id<<"reach time:"<<reachTime[ro[j].id]<<endl;
+                //     //     cerr<<stopID<<"stop:"<<ins[stopID].forward<<endl;
+                //     // }
 
-                }
+                // }
                 last_solution[ro[i].id][ro[j].id] = -1;
                 last_solution[ro[j].id][ro[i].id] = -1;
                 continue;
@@ -3841,211 +3853,211 @@ void collision_solve(int frame){
         }
     }
 
-    x = -1;
-    for(i = 0; i < 2; ++i) {
-        choose_id = -1;
-        //选择碰撞最多的小球改变状态
-        for(j = 0; j < 4; ++j){
-            if(vis[j] || coll[j].size() == 0)
-                continue;
-            if(choose_id == -1 || coll[j].size() - ((x == j)) > coll[choose_id].size()) {
-                choose_id = j;
-            }
-        }
+    // x = -1;
+    // for(i = 0; i < 2; ++i) {
+    //     choose_id = -1;
+    //     //选择碰撞最多的小球改变状态
+    //     for(j = 0; j < 4; ++j){
+    //         if(vis[j] || coll[j].size() == 0)
+    //             continue;
+    //         if(choose_id == -1 || coll[j].size() - ((x == j)) > coll[choose_id].size()) {
+    //             choose_id = j;
+    //         }
+    //     }
 
               
         
-        //No collision
-        if(choose_id == -1 || coll[choose_id].size() - (x == choose_id) == 0)
-            break;
+    //     //No collision
+    //     if(choose_id == -1 || coll[choose_id].size() - (x == choose_id) == 0)
+    //         break;
 
 
-        // if(cerr_falg) {
-        //     cerr<<state.FrameID<<endl;
-        //     cerr<<check_wall_r(1)<<endl;
-        //     for(j=0;j<4;++j){
-        //         cerr<<ro[j].id<<":"<<payloads[ro[j].id].speed<<" target:"<<ro[j].target_id<<endl;
-        //     }
-        // }
+    //     // if(cerr_falg) {
+    //     //     cerr<<state.FrameID<<endl;
+    //     //     cerr<<check_wall_r(1)<<endl;
+    //     //     for(j=0;j<4;++j){
+    //     //         cerr<<ro[j].id<<":"<<payloads[ro[j].id].speed<<" target:"<<ro[j].target_id<<endl;
+    //     //     }
+    //     // }
 
 
 
-        tmp = 9000;
-        //避让最zao发生的碰撞
-        for(j = 0; j < coll[choose_id].size(); ++j) {
-            if(coll_time[choose_id][coll[choose_id][j]] < tmp) {
-                x = coll[choose_id][j];
-                tmp = coll_time[choose_id][coll[choose_id][j]];
-            }
-        }
+    //     tmp = 9000;
+    //     //避让最zao发生的碰撞
+    //     for(j = 0; j < coll[choose_id].size(); ++j) {
+    //         if(coll_time[choose_id][coll[choose_id][j]] < tmp) {
+    //             x = coll[choose_id][j];
+    //             tmp = coll_time[choose_id][coll[choose_id][j]];
+    //         }
+    //     }
 
-        if(cmp_robot(ro[x], ro[choose_id]) && vis[x] != 1) {
-            tmp = x;
-            x = choose_id;
-            choose_id = tmp;
-        }
+    //     if(cmp_robot(ro[x], ro[choose_id]) && vis[x] != 1) {
+    //         tmp = x;
+    //         x = choose_id;
+    //         choose_id = tmp;
+    //     }
 
-        vis[choose_id] = 1;
+    //     vis[choose_id] = 1;
 
         
-        if(x == -1) {
-            // if(cerr_falg)
-            // {cerr<<choose_id<<"*"<<coll[choose_id].size();
-            // cerr<<"xx"<<x<<endl;}
-            break;
-        }
+    //     if(x == -1) {
+    //         // if(cerr_falg)
+    //         // {cerr<<choose_id<<"*"<<coll[choose_id].size();
+    //         // cerr<<"xx"<<x<<endl;}
+    //         break;
+    //     }
 
-        if(cerr_falg) {
-            cerr<<ro[choose_id].id<<"target:"<<ro[choose_id].target_id<<" angle:"<<payloads[ro[choose_id].id].speed<<endl;
-            cerr<<ro[x].id<<"target:"<<ro[x].target_id<<" angle:"<<payloads[ro[x].id].speed<<endl;
-            cerr<<ro[choose_id].id<<"avoid"<< ro[x].id<<endl;
-        }
+    //     if(cerr_falg) {
+    //         cerr<<ro[choose_id].id<<"target:"<<ro[choose_id].target_id<<" angle:"<<payloads[ro[choose_id].id].speed<<endl;
+    //         cerr<<ro[x].id<<"target:"<<ro[x].target_id<<" angle:"<<payloads[ro[x].id].speed<<endl;
+    //         cerr<<ro[choose_id].id<<"avoid"<< ro[x].id<<endl;
+    //     }
 
 
-        ans = -1;
-        dis = 1000;
-        min_size = 27;
-        mindis = payloads[ro[choose_id].id].radius + payloads[ro[x].id].radius + 0.1;
-        ins_num = ((le(payloads[ro[choose_id].id].speed, 1) && le(payloads[ro[choose_id].id].distance, 2)) || eq(payloads[ro[choose_id].id].speed, 0) && !isNearWall(ro[choose_id].id))? 8: 7; 
-        for(k = 0; k < ins_num; ++k) {
-            if(k < 3) {
-                tmp_tra = Calculate_the_trajectory(ro[choose_id], ins_set[k], 1, 1, trajectory[x], 0, 25, mindis + 0.2, 100);
-            }
-            else if(k < 6) {
-                tmp_tra = Calculate_the_trajectory(ro[choose_id], ins_set[k], 0, 1, trajectory[x], 0, 25, mindis + 0.2, 100);
-            }
-            else {
-                tmp_tra = Calculate_the_trajectory(ro[choose_id], ins_set[k], 1, 0, trajectory[x], 0, 25, mindis, 100);
-            }
+    //     ans = -1;
+    //     dis = 1000;
+    //     min_size = 27;
+    //     mindis = ro[choose_id].radius + ro[x].radius + 0.1;
+    //     ins_num = ((le(payloads[ro[choose_id].id].speed, 1) && le(payloads[ro[choose_id].id].distance, 2)) || eq(payloads[ro[choose_id].id].speed, 0) && !isNearWall(ro[choose_id].id))? 8: 7; 
+    //     for(k = 0; k < ins_num; ++k) {
+    //         if(k < 3) {
+    //             tmp_tra = Calculate_the_trajectory(ro[choose_id], ins_set[k], 1, 1, trajectory[x], 0, 25, mindis + 0.2, 100);
+    //         }
+    //         else if(k < 6) {
+    //             tmp_tra = Calculate_the_trajectory(ro[choose_id], ins_set[k], 0, 1, trajectory[x], 0, 25, mindis + 0.2, 100);
+    //         }
+    //         else {
+    //             tmp_tra = Calculate_the_trajectory(ro[choose_id], ins_set[k], 1, 0, trajectory[x], 0, 25, mindis, 100);
+    //         }
 
-            if(cerr_falg) cerr<<k<<"-"<<tmp_tra.size()<<endl;
-            if(tmp_tra.size() == 0) continue;
-            flag = false;
+    //         if(cerr_falg) cerr<<k<<"-"<<tmp_tra.size()<<endl;
+    //         if(tmp_tra.size() == 0) continue;
+    //         flag = false;
 
-            //检测是否会和其他小球发生碰撞
-            // for(j = 0; j < 4; ++j){
-            //     if(j == choose_id) continue;
-            //     if(checkNoCollision(tmp_tra, trajectory[j], payloads[ro[choose_id].id].radius + payloads[ro[j].id].radius) == 9000) {
-            //         flag =true;
-            //         break;
-            //     }
-            // }
-            //若和其他小球碰撞则更换策略
-            // if(flag) continue;
-            dis_tmp = calcuDis(tmp_tra[tmp_tra.size() - 1], studios[ro[choose_id].target_id].pos);
-            if(cerr_falg) cerr<<"dis:"<<dis_tmp<<endl;
+    //         //检测是否会和其他小球发生碰撞
+    //         // for(j = 0; j < 4; ++j){
+    //         //     if(j == choose_id) continue;
+    //         //     if(checkNoCollision(tmp_tra, trajectory[j], ro[choose_id].radius + ro[j].radius) == 9000) {
+    //         //         flag =true;
+    //         //         break;
+    //         //     }
+    //         // }
+    //         //若和其他小球碰撞则更换策略
+    //         // if(flag) continue;
+    //         dis_tmp = calcuDis(tmp_tra[tmp_tra.size() - 1], studios[ro[choose_id].target_id].pos);
+    //         if(cerr_falg) cerr<<"dis:"<<dis_tmp<<endl;
 
-            if((le(dis_tmp, dis) && min_size >= tmp_tra.size()) || min_size > tmp_tra.size() ) {
-                min_size = tmp_tra.size();
-                dis = dis_tmp;
-                ans = k;
-                tra = tmp_tra;
-            }
-        }
+    //         if((le(dis_tmp, dis) && min_size >= tmp_tra.size()) || min_size > tmp_tra.size() ) {
+    //             min_size = tmp_tra.size();
+    //             dis = dis_tmp;
+    //             ans = k;
+    //             tra = tmp_tra;
+    //         }
+    //     }
 
-        if(ans != -1) {
-            if(cerr_falg) {
-                cerr<<payloads[ro[choose_id].id].angle<<"-"<<payloads[ro[choose_id].id].sign<<endl;
-                cerr<<"old solution:"<<ins[ro[choose_id].id].forward<<"**"<<ins[ro[choose_id].id].rotate<<endl;
-            }
-            trajectory[choose_id] = tra;
-            // if(cerr_falg) cerr<<"ans"<<ans<<endl;
-            updateIns(ro[choose_id].id, ans);
-            coll_time[x][choose_id] = 0;
-            last_solution[ro[choose_id].id][ro[x].id] = ans;
-            last_solution[ro[x].id][ro[choose_id].id] = -1;
+    //     if(ans != -1) {
+    //         if(cerr_falg) {
+    //             cerr<<payloads[ro[choose_id].id].angle<<"-"<<payloads[ro[choose_id].id].sign<<endl;
+    //             cerr<<"old solution:"<<ins[ro[choose_id].id].forward<<"**"<<ins[ro[choose_id].id].rotate<<endl;
+    //         }
+    //         trajectory[choose_id] = tra;
+    //         // if(cerr_falg) cerr<<"ans"<<ans<<endl;
+    //         updateIns(ro[choose_id].id, ans);
+    //         coll_time[x][choose_id] = 0;
+    //         last_solution[ro[choose_id].id][ro[x].id] = ans;
+    //         last_solution[ro[x].id][ro[choose_id].id] = -1;
 
-            if(ro[choose_id].target_id == ro[x].target_id && ro[choose_id].target_id != -1) {
+    //         if(ro[choose_id].target_id == ro[x].target_id && ro[choose_id].target_id != -1) {
 
-                reachTime[ro[x].id] = getTimeToStudio(ro[x].id, trajectory[x]);
+    //             reachTime[ro[x].id] = getTimeToStudio(ro[x].id, trajectory[x]);
                     
-                stopID = ro[choose_id].id;
-                goID = ro[x].id;
-                ins[stopID].forward = min(payloads[stopID].distance / (reachTime[goID]*0.02 + 0.5), ins[stopID].forward);
+    //             stopID = ro[choose_id].id;
+    //             goID = ro[x].id;
+    //             ins[stopID].forward = min(payloads[stopID].distance / (reachTime[goID]*0.02 + 0.5), ins[stopID].forward);
 
 
-                    if(cerr_falg) {
-                        // cerr<<"time:"<<state.FrameID<<endl;
-                        // cerr<<ro[i].id<<"reach time:"<<reachTime[ro[i].id]<<endl;
-                        // cerr<<ro[j].id<<"reach time:"<<reachTime[ro[j].id]<<endl;
-                        cerr<<stopID<<"stop:"<<ins[stopID].forward<<endl;
-                    }
-            }
+    //                 if(cerr_falg) {
+    //                     // cerr<<"time:"<<state.FrameID<<endl;
+    //                     // cerr<<ro[i].id<<"reach time:"<<reachTime[ro[i].id]<<endl;
+    //                     // cerr<<ro[j].id<<"reach time:"<<reachTime[ro[j].id]<<endl;
+    //                     cerr<<stopID<<"stop:"<<ins[stopID].forward<<endl;
+    //                 }
+    //         }
 
-            if(cerr_falg) {
-                cerr<<ans<<endl;
-                cerr<<ro[x].id<<"-"<<ro[choose_id].id<<":"<<last_solution[ro[x].id][ro[choose_id].id]<<endl;
-                if(ans<3) {
-                    cerr<<"chose solution11:"<<ins[ro[choose_id].id].forward<<"**"<<ins[ro[choose_id].id].rotate<<endl;
-                }
-                else if(ans<6) {
-                    cerr<<"chose solution01:"<<ins[ro[choose_id].id].forward<<"**"<<ins[ro[choose_id].id].rotate<<endl;
-                }
-                else {
-                    cerr<<"chose solution10:"<<ins[ro[choose_id].id].forward<<"**"<<ins[ro[choose_id].id].rotate<<endl;
-                }
+    //         if(cerr_falg) {
+    //             cerr<<ans<<endl;
+    //             cerr<<ro[x].id<<"-"<<ro[choose_id].id<<":"<<last_solution[ro[x].id][ro[choose_id].id]<<endl;
+    //             if(ans<3) {
+    //                 cerr<<"chose solution11:"<<ins[ro[choose_id].id].forward<<"**"<<ins[ro[choose_id].id].rotate<<endl;
+    //             }
+    //             else if(ans<6) {
+    //                 cerr<<"chose solution01:"<<ins[ro[choose_id].id].forward<<"**"<<ins[ro[choose_id].id].rotate<<endl;
+    //             }
+    //             else {
+    //                 cerr<<"chose solution10:"<<ins[ro[choose_id].id].forward<<"**"<<ins[ro[choose_id].id].rotate<<endl;
+    //             }
                                 
-                // if(state.FrameID == 3487){
-                //     cerr<<"-----------"<<endl;
-                //     for(int t = 0; t<tra.size(); ++t){
-                //         if(state.FrameID+t>3600) break;
-                //         cerr<<state.FrameID+t;
-                //         cerr<<"pos:("<<tra[t].first<<", "<<tra[t].second<<")--("<<trajectory[x][t].first<<", "<<trajectory[x][t].second<<") dis:"<<calcuDis(trajectory[x][t], tra[t])<<endl;
-                //     }
-                //     cerr<<"-----------"<<endl;
-                // }
+    //             // if(state.FrameID == 3487){
+    //             //     cerr<<"-----------"<<endl;
+    //             //     for(int t = 0; t<tra.size(); ++t){
+    //             //         if(state.FrameID+t>3600) break;
+    //             //         cerr<<state.FrameID+t;
+    //             //         cerr<<"pos:("<<tra[t].first<<", "<<tra[t].second<<")--("<<trajectory[x][t].first<<", "<<trajectory[x][t].second<<") dis:"<<calcuDis(trajectory[x][t], tra[t])<<endl;
+    //             //     }
+    //             //     cerr<<"-----------"<<endl;
+    //             // }
                 
-                // updateIns(ro[choose_id].id, 7);
-                // int t = 1;
-                // cerr<<"pos:("<<tra[t].first<<", "<<tra[t].second<<")--("<<trajectory[x][t].first<<", "<<trajectory[x][t].second<<") dis:"<<calcuDis(trajectory[x][t], tra[t])<<endl;
-                // cerr<<state.FrameID;
-                // cerr<<"pos:("<<ro[choose_id].pos.first<<", "<<ro[choose_id].pos.second<<")--("<<ro[x].pos.first<<", "<<ro[x].pos.second<<") dis:"<<calcuDis(ro[choose_id].pos, ro[x].pos)<<endl;
-            }
-        }
-        else{
-            // if(cerr_falg) updateIns(ro[choose_id].id, 4);
-            // else
-            // adjust_collo_new(ro[choose_id].id, ro[x].id, payloads[ro[choose_id].id].sign);
-            // solveNoSolution(ro[choose_id].id, ro[x].id);
-            // if(cerr_falg)
-            if(cerr_falg) {
-                cerr<<"~old solution:"<<ins[ro[choose_id].id].forward<<"**"<<ins[ro[choose_id].id].rotate<<endl;
-                // cerr<<ro[choose_id].id<<"-"<<ro[x].id<<":"<<"last_solution[choose_id][x]"<<last_solution[ro[choose_id].id][ro[x].id]<<endl;
-            }
-            // cerr<<state.FrameID<<"no solution to avoid collision"<<ro[choose_id].id<<"-"<<ro[x].id<<"*"<<coll_time[choose_id][x]<<endl;
+    //             // updateIns(ro[choose_id].id, 7);
+    //             // int t = 1;
+    //             // cerr<<"pos:("<<tra[t].first<<", "<<tra[t].second<<")--("<<trajectory[x][t].first<<", "<<trajectory[x][t].second<<") dis:"<<calcuDis(trajectory[x][t], tra[t])<<endl;
+    //             // cerr<<state.FrameID;
+    //             // cerr<<"pos:("<<ro[choose_id].pos.first<<", "<<ro[choose_id].pos.second<<")--("<<ro[x].pos.first<<", "<<ro[x].pos.second<<") dis:"<<calcuDis(ro[choose_id].pos, ro[x].pos)<<endl;
+    //         }
+    //     }
+    //     else{
+    //         // if(cerr_falg) updateIns(ro[choose_id].id, 4);
+    //         // else
+    //         // adjust_collo_new(ro[choose_id].id, ro[x].id, payloads[ro[choose_id].id].sign);
+    //         // solveNoSolution(ro[choose_id].id, ro[x].id);
+    //         // if(cerr_falg)
+    //         if(cerr_falg) {
+    //             cerr<<"~old solution:"<<ins[ro[choose_id].id].forward<<"**"<<ins[ro[choose_id].id].rotate<<endl;
+    //             // cerr<<ro[choose_id].id<<"-"<<ro[x].id<<":"<<"last_solution[choose_id][x]"<<last_solution[ro[choose_id].id][ro[x].id]<<endl;
+    //         }
+    //         // cerr<<state.FrameID<<"no solution to avoid collision"<<ro[choose_id].id<<"-"<<ro[x].id<<"*"<<coll_time[choose_id][x]<<endl;
 
-            if(last_solution[ro[choose_id].id][ro[x].id] != -1) {
-                if(le(payloads[ro[choose_id].id].speed, 0) && le(ro[choose_id].angular_velocity, 0))
-                    updateIns(ro[choose_id].id, 7);
-                else updateIns(ro[choose_id].id, last_solution[ro[choose_id].id][ro[x].id]);
+    //         if(last_solution[ro[choose_id].id][ro[x].id] != -1) {
+    //             if(le(payloads[ro[choose_id].id].speed, 0) && le(ro[choose_id].angular_velocity, 0))
+    //                 updateIns(ro[choose_id].id, 7);
+    //             else updateIns(ro[choose_id].id, last_solution[ro[choose_id].id][ro[x].id]);
                 
-                if(cerr_falg)
-                {
-                    if(last_solution[ro[choose_id].id][ro[x].id]<3) {
-                        cerr<<"~chose solution11:"<<ins[ro[choose_id].id].forward<<"**"<<ins[ro[choose_id].id].rotate<<endl;
-                    }
-                    else if(last_solution[ro[choose_id].id][ro[x].id]<6) {
-                        cerr<<"~chose solution01:"<<ins[ro[choose_id].id].forward<<"**"<<ins[ro[choose_id].id].rotate<<endl;
-                    }
-                    else {
-                        cerr<<"~chose solution10:"<<ins[ro[choose_id].id].forward<<"**"<<ins[ro[choose_id].id].rotate<<endl;
-                    }
-                }
-            }
-            else {
-                if(vis[x] && vis[choose_id]) {
-                    // ins[ro[choose_id].id].forward = -2;
-                    if(cerr_falg) cerr<<"no way"<<endl;
-                    adjust_collo_new(ro[choose_id].id, ro[x].id, payloads[ro[choose_id].id].sign);
-                    continue;
-                }
-                choose_id = x;
-                x = -1;
-                i--;
-            }            
-        }
+    //             if(cerr_falg)
+    //             {
+    //                 if(last_solution[ro[choose_id].id][ro[x].id]<3) {
+    //                     cerr<<"~chose solution11:"<<ins[ro[choose_id].id].forward<<"**"<<ins[ro[choose_id].id].rotate<<endl;
+    //                 }
+    //                 else if(last_solution[ro[choose_id].id][ro[x].id]<6) {
+    //                     cerr<<"~chose solution01:"<<ins[ro[choose_id].id].forward<<"**"<<ins[ro[choose_id].id].rotate<<endl;
+    //                 }
+    //                 else {
+    //                     cerr<<"~chose solution10:"<<ins[ro[choose_id].id].forward<<"**"<<ins[ro[choose_id].id].rotate<<endl;
+    //                 }
+    //             }
+    //         }
+    //         else {
+    //             if(vis[x] && vis[choose_id]) {
+    //                 // ins[ro[choose_id].id].forward = -2;
+    //                 if(cerr_falg) cerr<<"no way"<<endl;
+    //                 adjust_collo_new(ro[choose_id].id, ro[x].id, payloads[ro[choose_id].id].sign);
+    //                 continue;
+    //             }
+    //             choose_id = x;
+    //             x = -1;
+    //             i--;
+    //         }            
+    //     }
           
-    }
+    // }
 
     // if(state.FrameID == 182 || state.FrameID == 187) {
     //     int a,b;
