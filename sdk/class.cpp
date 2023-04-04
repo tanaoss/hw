@@ -5136,15 +5136,16 @@ int get_bar_num(int node_id_a, int node_id_b, int is_take) {
 void init_bar_sum() {
     for(int stu_id = 0; stu_id < studios.size(); ++stu_id) {
         for(int i = 0; i < 100; ++i) {
-            // if(stu_id != 0 && )
-            for(int j = 0; j < 100; ++j) {
+            if(stu_id != 0 && get_bar_num(studios[stu_id].node_id, max((studios[stu_id].node_id / 100) - 1, 0) * 100 + max((studios[stu_id].node_id % 100) - 1, 0), 0)  == 0)
+                continue;
+            for(int j = 0; j < 100; ++j) { 
                 if(stu_id == 0) {
                     bar_sum[i][j][0] = (next_node[stu_id][0][i * 100 + j] == -1);
                     bar_sum[i][j][1] = (next_node[stu_id][1][i * 100 + j] == -1);
                 }
                 else {
                     bar_sum[i][j][0] = min(bar_sum[i][j][0], (int)(next_node[stu_id][0][i * 100 + j] == -1));
-                    bar_sum[i][j][0] = min(bar_sum[i][j][0], (int)(next_node[stu_id][0][i * 100 + j] == -1));
+                    bar_sum[i][j][1] = min(bar_sum[i][j][0], (int)(next_node[stu_id][1][i * 100 + j] == -1));
                 }
                 if(i > 0) {
                     bar_sum[i][j][0] += bar_sum[i - 1][j][0];
@@ -5152,6 +5153,7 @@ void init_bar_sum() {
                 }
                 if(j > 0) {
                     bar_sum[i][j][0] += bar_sum[i][j - 1][0] - bar_sum[i - 1][j - 1][0];
+                    bar_sum[i][j][1] += bar_sum[i][j - 1][1] - bar_sum[i - 1][j - 1][1];
                 }
             }
         }
