@@ -423,4 +423,6 @@ void setVirPos(Robot& robot);
 pair<double,double>select_visPos(Robot& robot,vector<int> range,int tar3);
 int ret_next(Robot& robot,int tar_cnt);
 bool at_least_three(Robot& robot,int tar_cnt);
-double calMinAngle(Robot& robot,pair<double,double>pos);
+bool calMinAngle(Robot& robot,pair<double,double>pos);
+double vir_v(Robot rob);
+bool can_trajectory_virpos(Robot rob,double v,int cnt);
