@@ -48,6 +48,7 @@ int main()
     // cerr<<"kkk"<<endl;
     init_studio_parameter();
     // cerr<<"eee"<<endl;
+    // print_dijkstra(0,1,1);
      while (cin >> state.FrameID)
     {
         // cerr<<" time "<<state.FrameID<<endl;
