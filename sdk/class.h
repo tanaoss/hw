@@ -429,3 +429,4 @@ bool at_least_three(Robot& robot,int tar_cnt);
 bool calMinAngle(Robot& robot,pair<double,double>pos);
 double vir_v(Robot rob);
 bool can_trajectory_virpos(Robot rob,double v,int cnt);
+int getPosID(pair<double,double>pos);

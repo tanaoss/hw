@@ -57,18 +57,18 @@ int main()
         if(count == 0)new_first_action();
         else new_robot_action();
 
-        if(state.FrameID == 4064) {
-            cerr<<robots[1].target_id<<endl;
-        }
+        // if(state.FrameID == 4064) {
+        //     cerr<<robots[1].target_id<<endl;
+        // }
         
         control();
         count++;
 
-        if(state.FrameID == 3053) {
-            for(int i = 0; i < 4; ++i) {
-                cerr<<i<<"-target:"<<robots[i].target_id<<endl;
-            }
-        }
+        // if(state.FrameID == 3053) {
+        //     for(int i = 0; i < 4; ++i) {
+        //         cerr<<i<<"-target:"<<robots[i].target_id<<endl;
+        //     }
+        // }
     }
     return 0;
    
