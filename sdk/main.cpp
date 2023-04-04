@@ -45,9 +45,9 @@ int main()
     cout.flush();
     int count = 0;
     initrobotInfo();
-    cerr<<"kkk"<<endl;
+    // cerr<<"kkk"<<endl;
     init_studio_parameter();
-    cerr<<"eee"<<endl;
+    // cerr<<"eee"<<endl;
      while (cin >> state.FrameID)
     {
         // cerr<<" time "<<state.FrameID<<endl;
