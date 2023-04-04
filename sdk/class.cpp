@@ -37,7 +37,7 @@ vector<bool> need_stop(4,false);
 int robot_get_type[8];
 int last_solution[4][4];
 int studios_rid[50][8];
-int studio_material[4][4];
+int studio_material[6][8];
 int studio_level[5][2];
 int material_send[8][3];
 int RootFlag=-2;
@@ -129,6 +129,16 @@ void init_studio_parameter(){
     studio_material[3][1]=4;
     studio_material[3][2]=5;
     studio_material[3][3]=6;
+    studio_material[4][0]=1;
+    studio_material[4][1]=7;
+    studio_material[5][0]=7;
+    studio_material[5][1]=1;
+    studio_material[5][1]=2;
+    studio_material[5][2]=3;
+    studio_material[5][4]=4;
+    studio_material[5][5]=5;
+    studio_material[5][6]=6;
+    studio_material[5][7]=7;
     studio_level[2][0] = 1;
     studio_level[2][1] = 3;
     studio_level[3][0] = 4;
@@ -175,13 +185,17 @@ void init_studio_parameter(){
     product_time[7] = 1000;
     for(int i=0;i<studios.size();i++){
         if(studios[i].type>3){
-            for(int j = 1;j<studio_material[studios[i].type-4][0];j++){
+            // cerr<<"studio : "<<i<<"type = "<<studios[i].type<<endl;
+            for(int j = 1;j<=studio_material[studios[i].type-4][0];j++){
+                // cerr<<" material type = "<<studio_material[studios[i].type-4][j]<<endl;
                 for(int k = 0;k<studios_type[studio_material[studios[i].type-4][j]].size();k++){
                     studio_id = studios_type[studio_material[studios[i].type-4][j]][k];
                     if(!(eq(dis_to_studios[studio_id][1][studios[i].node_id],10000))){
                         studios[i].material_studios[j-1].push_back(studio_id);
+                        // cerr<<' '<<studio_id<<' ';
                     }
                 }
+                // cerr<<endl;
             }
         }
     }
@@ -2085,7 +2099,7 @@ pair<pair<int,int>,double> new_pick_point(int robot_id,int state_type){
     if(state_type ==2){
         for(int i =0;i<studios.size();i++){
             if(studios[i].type>3){
-                for(int j = 1;j<studio_material[studios[i].type-4][0];j++){
+                for(int j = 1;j<=studio_material[studios[i].type-4][0];j++){
                     if(((studios[i].bitSatus & (int)pow(2,studio_material[studios[i].type-4][j])) == 0) &&(studios_rid[i][studio_material[studios[i].type-4][j]]==-1)){
                         for(int k=0;k<studios[i].material_studios[j-1].size();k++){
                             material_studio_id = studios[i].material_studios[j-1][k];
@@ -2109,7 +2123,7 @@ pair<pair<int,int>,double> new_pick_point(int robot_id,int state_type){
                                 if(lt(income_ratio,min)){
                                     min = income_ratio;
                                     studio_buy = material_studio_id;
-                                    studio_send = j;
+                                    studio_send = i;
                                 }
                             }
                         }
@@ -2182,9 +2196,10 @@ void complete_trans(int robot_id){
         else
             studios[robots[robot_id].target_id].r_id = robot_id;
         robot_get_type[studios[robots[robot_id].target_id].type]++;
-        if(studios[robots[robot_id].target_id_send].type!=8&&studios[robots[robot_id].target_id_send].type!=9)studios_rid[robots[robot_id].target_id_send][robots[robot_id].get_type] = robot_id;
+        // cerr<<" studio_rid : "<<robots[robot_id].target_id_send<<" - "<<studios[robots[robot_id].target_id_buy].type<<endl;
+        if(studios[robots[robot_id].target_id_send].type!=8&&studios[robots[robot_id].target_id_send].type!=9)studios_rid[robots[robot_id].target_id_send][studios[robots[robot_id].target_id_buy].type] = robot_id;
     }
-    // cerr<<"robot_id"<<robot_id<<endl;
+    // cerr<<"robot_id : "<<robot_id<<endl;
 }
 
 void new_robot_judge(){
@@ -2192,8 +2207,10 @@ void new_robot_judge(){
         if(robots[i].loc_id == robots[i].target_id && robots[i].target_id != -1){
             if(robots[i].get_type != 0){
                 //sell;
+                // cerr<<"aaa"<<endl;
                 ins[i].sell = 1;
                 ins[i].buy = -1;
+                // if(i == 1)cerr<<" ins[i].buy = "<<ins[i].buy<<" ins[i].sell = "<<ins[i].sell<<endl;
                 robots[i].lastSign=0;
                 robots[i].isTurn=0;
                 studios[robots[i].loc_id].bitSatus += (int)pow(2,robots[i].get_type);
@@ -2204,6 +2221,7 @@ void new_robot_judge(){
             }
             else{
                 //do something buy;
+                // cerr<<"bbb"<<endl;
                 ins[i].buy = 1;
                 ins[i].sell = -1;
                 robots[i].lastSign=0;
@@ -2218,17 +2236,26 @@ void new_robot_judge(){
                 robots[i].cnt_tar=robots[i].node_id;
             }
         }
-        else if(robots[i].target_id == -1){
+        else{
+            // cerr<<"ccc"<<endl;
+            ins[i].buy = -1;
+            ins[i].sell = -1;
+        }
+        if(robots[i].target_id == -1){
+            // cerr<<"ddd"<<endl;
             if(robots[i].get_type == 0){
                 complete_trans(i);
                 robots[i].cnt_tar=robots[i].node_id;
             }
             else{
                 robots[i].target_id_send = new_pick_point(i,3).first.second;
+                
                 robots[i].target_id = robots[i].target_id_send;
                 robots[i].cnt_tar=robots[i].node_id;
+                if(studios[robots[i].target_id_send].type!=8&&studios[robots[i].target_id_send].type!=9)studios_rid[robots[i].target_id_send][studios[robots[i].get_type].type] = i;
             }
         }
+        // cerr<<"robot : "<<i<<" target id = "<<robots[i].target_id<<" virtual target id = "<<robots[i].virtual_id<<" ins[i].buy = "<<ins[i].buy<<" ins[i].sell = "<<ins[i].sell<<endl;
     }
 }
 void new_first_action(){
@@ -2236,7 +2263,7 @@ void new_first_action(){
         cerr<<"aaa"<<endl;
         complete_trans(i);
         robots[i].cnt_tar=robots[i].node_id;
-        cerr<<"robot : "<<i<<" target id = "<<robots[i].target_id<<endl;
+        // cerr<<"robot : "<<i<<" target id = "<<robots[i].target_id<<endl;
     }
 }
 void new_robot_action(){
