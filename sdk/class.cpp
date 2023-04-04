@@ -2321,7 +2321,7 @@ void new_robot_judge(){
                 if(studios[robots[i].target_id_send].type!=8&&studios[robots[i].target_id_send].type!=9)studios_rid[robots[i].target_id_send][studios[robots[i].get_type].type] = i;
             }
         }
-        // cerr<<"robot : "<<i<<" target id = "<<robots[i].target_id<<" virtual target id = "<<robots[i].virtual_id<<" ins[i].buy = "<<ins[i].buy<<" ins[i].sell = "<<ins[i].sell<<endl;
+        // cerr<<"robot : "<<i<<" target id = "<<robots[i].target_id<<" virtual target id = "<<robots[i].virtual_id<<" virtual target pos = "<<robots[i].virtual_pos.first<<' '<<robots[i].virtual_pos.second<<" ins[i].buy = "<<ins[i].buy<<" ins[i].sell = "<<ins[i].sell<<endl;
     }
 }
 void new_first_action(){
@@ -3714,12 +3714,12 @@ Ins contr_one_rob(Robot& robot){
     adjust_virtual_pos_total(robot);
     double tmpDis=calcuDis(robot.pos,exist_id[0][robot.node_id]);
     PayLoad payload=calPayload(robot,robot.virtual_pos);
-    if(robot.id==0&&state.FrameID>=10&&state.FrameID<=100&&contr_print_flag){
-        cerr<<" FrameID "<< state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
-        cerr<<check_can_arrival(robot.get_type==0?0:1,robot.node_id,robot.virtual_id)<<endl;
-        cerr<<calcuDis(robot.pos,exist_id[0][robot.node_id])<<endl;
-        cerr<<robot.node_id<<" "<<robot.virtual_id<<endl;
-    }
+    // if(robot.id==0&&state.FrameID>=10&&state.FrameID<=100&&contr_print_flag){
+    //     cerr<<" FrameID "<< state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
+    //     cerr<<check_can_arrival(robot.get_type==0?0:1,robot.node_id,robot.virtual_id)<<endl;
+    //     cerr<<calcuDis(robot.pos,exist_id[0][robot.node_id])<<endl;
+    //     cerr<<robot.node_id<<" "<<robot.virtual_id<<endl;
+    // }
     
     auto p1=get_w_now(robot,payload);
     ins_t.rotate=p1.first;
@@ -3739,12 +3739,12 @@ Ins contr_one_rob(Robot& robot){
     {
         ins_t.forward=vir_v(robot);
     }
-   if(robot.id==0&&state.FrameID>=10&&state.FrameID<=100&&contr_print_flag){
-    cerr<<"forward: "<<ins_t.forward<<endl;
-    cerr<<"angle "<<payload.angle<<endl;
-    cerr<<"dis "<<payload.distance<<endl;
-    cerr<<robot.isVir<<endl;
-   }
+//    if(robot.id==0&&state.FrameID>=10&&state.FrameID<=100&&contr_print_flag){
+//     cerr<<"forward: "<<ins_t.forward<<endl;
+//     cerr<<"angle "<<payload.angle<<endl;
+//     cerr<<"dis "<<payload.distance<<endl;
+//     cerr<<robot.isVir<<endl;
+//    }
     return ins_t;
 }
 
@@ -5293,6 +5293,8 @@ void printEdge(int id){
 bool check_slope(int id1,int id2){
     int y1=id1/100,y2=id2/100;
     int x1=id1-y1*100,x2=id2-y2*100;
+    bool isSlope= (fabs(x1-x2)+fabs(y1-y2)==2)?true:false;
+    if(!isSlope)return true;
     id1=y2*100+x1;
     id2=y1*100+x2;
     return exist_id[0].count(id1)&&exist_id[0].count(id2);
@@ -5395,8 +5397,8 @@ set<int> getEqID(int istake,int id1) {
     int i1=id1/100;
     int j1=id1-i1*100;
     set<int> ans;
-    for(int i=i1-2;i<=i1+2;i++){
-        for(int j=j1-2;j<=j1+2;j++){
+    for(int i=i1-4;i<=i1+4;i++){
+        for(int j=j1-4;j<=j1+4;j++){
             int tmpID=i*100+j;
             if(check_can_arrival(istake,id1,tmpID)){
                 ans.insert(tmpID);
@@ -5415,36 +5417,68 @@ void setVirPos(Robot& robot){
     for(int i=ret_next(robot,cnt);i!=ret_next(robot,i) && i!=-1;i=ret_next(robot,i)){
         int tmpId=i;
  
-        if(i<0)cerr<<"i<0错误"<<endl;
+        // if(i<0)cerr<<"i<0错误"<<endl;
         if(check_can_arrival(1,now_id,tmpId)){
-            if(robot.id==0){
-                cerr<<" 合并的tar "<<robot.cnt_tar<<" ";
-                printPair(exist_id[istake][robot.cnt_tar]);
-            }
+            // if(robot.id==0){
+            //     cerr<<" 合并的tar "<<robot.cnt_tar<<" ";
+            //     printPair(exist_id[istake][robot.cnt_tar]);
+            // }
             robot.cnt_tar=tmpId;
 
         }else{
-            if(robot.id==0){
-                cerr<<endl<<state.FrameID<<" 更新后的tar "<<robot.cnt_tar<<endl;
-                printPair(exist_id[istake][robot.cnt_tar]);
-            }
-            
+            // if(robot.id==0){
+            //     cerr<<endl<<state.FrameID<<" 更新后的tar "<<robot.cnt_tar<<endl;
+            //     printPair(exist_id[istake][robot.cnt_tar]);
+            // }
             break;
         }
         
     }
-  
+    if(robot.cnt_tar==-1){
+        robot.cnt_tar=robot.node_id;
+    }
    
     int tar1=robot.cnt_tar;
-
-    auto virPos=exist_id[istake][tar1];
-    auto virID=getPosID(virPos);
+    pair<double,double>virPos=make_pair(-1,-1);
+    int virID=-1;
+    // if(state.FrameID==1990||)
+    if(exist_id[istake].count(tar1)!=0){
+        auto tmpPos=exist_id[istake][tar1];
+        virPos.first=tmpPos.first;
+        virPos.second=tmpPos.second;
+        virID=getPosID(virPos);
+    }else{
+        cerr<<state.FrameID<<" --dasd-- "<<robot.id<<" "<<endl;
+        int tmp_is_take=istake==0?1:0;
+        auto tmpSet=getEqID(tmp_is_take,robot.node_id);
+        int tmpID=-1;
+        int now_j= robot.pos.first/0.5;
+        int now_i= robot.pos.second/0.5;
+        for(int i=now_i-1;i<=now_i+1;i++){
+            for(int j=now_j-1;j<=now_j+1;j++){
+                if(exist_id[istake].count(i*100+j)!=0){
+                    tmpID=i*100+j;
+                }
+            }
+        }
+        if(tmpID==-1){
+            cerr<<"球体长大后错误且无法解决"<<" "<<tmpSet.size() <<endl;
+        }
+        virID=tmpID;
+        robot.cnt_tar=virID;
+        auto tmpPos=exist_id[tmp_is_take][virID];
+        virPos.first=tmpPos.first;
+        virPos.second=tmpPos.second;
+        // cerr<<virID<<endl;
+        // cerr<<robot.cnt_tar<<endl;
+    }
     robot.isVir=false;
     bool con1=false;
     if(at_least_three(robot,tar1)){
         con1=true;
         int tar2=next_node[tarID][istake][robot.cnt_tar];
         int tar3=next_node[tarID][istake][tar2];
+
         auto set1=getEqID(istake,tar1);
         auto set2=getEqID(istake,tar2);
         auto set3=getEqID(istake,tar3);
@@ -5465,6 +5499,7 @@ pair<double,double>select_visPos(Robot& robot,vector<int> range,int tar3){
     int istake=robot.get_type==0?0:1;
     int tar1=robot.cnt_tar;
     if(exist_id[istake].count(tar1)==0){
+        cerr<<tar1<<endl;
         cerr<<"路径选点错误 "<<endl;
     }
     auto virPos=exist_id[istake][tar1];
@@ -5488,7 +5523,7 @@ bool at_least_three(Robot& robot,int tar_cnt){
     int cnt1=3;
     int cnt=robot.cnt_tar;
     
-    for(int i=ret_next(robot,cnt);i!=ret_next(robot,i);i=ret_next(robot,i)){
+    for(int i=ret_next(robot,cnt);i!=ret_next(robot,i)&&i!=-1;i=ret_next(robot,i)){
         cnt1--;
         if(cnt1==0)return true;
     }
@@ -5527,13 +5562,13 @@ bool can_trajectory_virpos(Robot rob,double v,int cnt){
             int now_id=getPosID(rob.pos);
             int istake=rob.get_type==0?0:1;
             if(check_can_arrival(istake,now_id,tarID)){
-                if(rob.id==0){
-                    cerr<<now_id<<" "<<tarID<<endl;
-                    cerr<<"检查到的对齐点: \n";
-                    printPair(rob.pos);
-                    printPair(rob.virtual_pos);
-                    cerr<<state.FrameID+ i<<endl;
-                }
+                // if(rob.id==0){
+                //     cerr<<now_id<<" "<<tarID<<endl;
+                //     cerr<<"检查到的对齐点: \n";
+                //     printPair(rob.pos);
+                //     printPair(rob.virtual_pos);
+                //     cerr<<state.FrameID+ i<<endl;
+                // }
 
                 return true;
             }
@@ -5583,9 +5618,9 @@ bool can_trajectory_virpos(Robot rob,double v,int cnt){
     int now_id=getPosID(rob.pos);
     int istake=rob.get_type==0?0:1;
     if(check_can_arrival(istake,now_id,tarID)){
-        if(rob.id==0){
-        cerr<<"未检查到对齐"<<endl;
-        }
+        // if(rob.id==0){
+        // cerr<<"未检查到对齐"<<endl;
+        // }
         return true;
     }    
     else{
