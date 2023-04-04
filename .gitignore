@@ -6,6 +6,9 @@
 *.sh
 *.txt
 Robot*
+*.txt
+.DS_Store
+*.command
 
 # But not these files...
 !.gitignore
