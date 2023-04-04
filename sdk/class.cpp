@@ -81,12 +81,7 @@ vector<double> dis_to_studios[50][2];//dis_studios[node_id][studio_id][2]:node_i
 
 
 void initrobotInfo() {
-    // cerr<<studios[13].node_id<<endl;
-    // cerr<<"kk"<<graph_edge[1][studios[13].node_id].size()<<endl;
-    // cerr<<graph_edge[1][studios[13].node_id][0].id<<endl;
-    // for(int i =0;i<studios.size(); ++i) {
-    //     cerr<<i<<"dis:"<<dis_ro_stuios[11][i][1]<<endl;
-    // }
+
     
     double weightMin = 0.45 * 0.45 * Pi * 20;
     double weightMax = 0.53 * 0.53 * Pi * 20;
@@ -4999,7 +4994,8 @@ void Dijkstra(int studio_id, int is_take) {
     s = studios[studio_id].node_id;
 
     bool cerr_flag = false;
-    // if(s==studios[11].node_id) cerr_flag = true;
+    // if(studio_id == 1 && is_take == 0) cerr_flag = true;
+
     if(cerr_flag) {
         cerr<<"start-studio:"<<studio_id<<endl;
     }
@@ -5038,7 +5034,7 @@ void Dijkstra(int studio_id, int is_take) {
             // cerr<<"to_id:"<<to<<" new-dis:"<<dis<<" old-dis:"<<dis_node[to]<<endl;
             if(lt(new_dis, dis_to_studios[studio_id][is_take][to]) || (eq(new_dis, dis_to_studios[studio_id][is_take][to]) && lt(angle_sum, angle_node[to]))) {
                 q.push(Graph_node{to, new_dis, from, angle_sum});
-                if(cerr_flag) cerr<<"update-to_id:"<<to<<" new-dis:"<<new_dis<<" old-dis:"<<dis_to_studios[to][studio_id][is_take]<<endl;
+                if(cerr_flag) cerr<<"update-to_id:"<<to<<" new-dis:"<<new_dis<<" old-dis:"<<dis_to_studios[studio_id][is_take][to]<<endl;
                 dis_to_studios[studio_id][is_take][to] = new_dis;
                 next_node[studio_id][is_take][to] = from;
                 angle_node[to] = angle_sum;
