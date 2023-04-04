@@ -746,7 +746,7 @@ void control(vector<PayLoad> payLoad){
     //     cerr<<state.FrameID<<" ins befoer "<<ins[0].forward<<endl;
     //     cerr<<check_will_colloWithWall(robots[0])<<endl;
     // }
-    collision_solve(25);
+    // collision_solve(25);
 
     // if(state.FrameID >= 5600 && state.FrameID < 5610) {
     //     cerr<<"~ins:"<<ins[2].forward<<"  "<<ins[2].rotate<<endl;
@@ -3610,8 +3610,8 @@ Ins contr_one_rob(Robot& robot , PayLoad& payload){
     Flag_sumulate=0;
     adjust_virtual_pos_total(robot);
     payload=calPayload(robot,robot.virtual_pos);
-    if(robot.id==0&&state.FrameID>=10&&robot.id==0&&state.FrameID<=100&&contr_one_rob){
-        cerr<<" FrameID "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
+    if(robot.id==0&&state.FrameID>=10&&state.FrameID<=100&&contr_print_flag){
+        cerr<<" FrameID "<< state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
     }
     Ins ins_t;
     if(robot.target_id==-1){
@@ -4908,6 +4908,7 @@ void getEdgeRalative(){
                 if(i==idi&&j==idj)continue;
                 int tmpId=i*100+j;
                 int ckeck_id=idi*100+j;
+                if(exist_id[0].count(tmpId)==0)continue;
                 // if(it.first==studios[0].node_id){
                 //     cerr<<graph_edge[0][it.first].size()<<" "<<exist_id[0].count(tmpId)<<" "<<exist_id[0].count(ckeck_id)<<endl;
                 //     cerr<<idi<<"-"<<idj<<" "<<i<<"-"<<j<<endl;
@@ -4937,6 +4938,7 @@ void getEdgeRalative(){
             for(int j=idj-1;j<=idj+1;j++){
                 if(i==idi&&j==idj)continue;
                 int tmpId=i*100+j;
+                if(exist_id[1].count(tmpId)==0)continue;
                 if(is_corner(it.first)||is_corner(tmpId)){
                     continue;
                 }
@@ -5284,19 +5286,18 @@ set<int> getEqID(int istake,int id1) {
 void setVirPos(Robot& robot){
     int tarID=robot.target_id;
     int istake=robot.get_type==0?0:1;
-    int now_j= robot.pos.first/0.5;
-    int now_i= robot.pos.second/0.5;
-    int now_id=now_i*100+now_j;
+
+    int now_id=robot.node_id;
     int cnt=robot.cnt_tar;
     
-    // for(int i=ret_next(robot,cnt);i!=ret_next(robot,i);i=ret_next(robot,i)){
-    //     int tmpId=i;
-    //     if(check_can_arrival(istake,now_id,tmpId)){
-    //         robot.cnt_tar=ret_next(robot,robot.cnt_tar);
-    //     }else{
-    //         break;
-    //     }
-    // }
+    for(int i=ret_next(robot,cnt);i!=ret_next(robot,i);i=ret_next(robot,i)){
+        int tmpId=i;
+        if(check_can_arrival(istake,now_id,tmpId)){
+            robot.cnt_tar=tmpId;
+        }else{
+            break;
+        }
+    }
     int tar1=robot.cnt_tar;
     if(exist_id[istake].count(tar1)==0){
         cerr<<"路径选点错误 "<<endl;
@@ -5326,7 +5327,7 @@ void setVirPos(Robot& robot){
 pair<double,double>select_visPos(Robot& robot,vector<int> range,int tar3){
     int now_j= robot.pos.first/0.5;
     int now_i= robot.pos.second/0.5;
-    int now_id=now_i*100+now_j;
+    int now_id=robot.node_id;
     int tarID=robot.target_id;
     int istake=robot.get_type==0?0:1;
     int tar1=next_node[tarID][istake][robot.cnt_tar];
