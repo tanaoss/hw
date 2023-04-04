@@ -14,7 +14,7 @@ int main()
     std::cin.tie(0);    // IO
     // cerr<<"sss"<<endl;
     readMapUntilOK();
-    cerr << "sss" << endl;
+    // cerr << "sss" << endl;
     // divide_space();
     // deal_graph();
     // cerr << "sss" << endl;
