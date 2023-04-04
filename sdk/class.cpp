@@ -451,13 +451,16 @@ PayLoad calPayload(Robot robot, pair<double, double> virtual_pos) {
 
 
     // cerr << robotID << "--"<< robot.target_id<<endl;
-    if(robot.target_id == -1) {
-        return PayLoad((robot.get_type == 0? 0.45: 0.53), 0, 0, 0, 0, speed, 0);
-    }
+    
 
     double distance = calcuDis(robot.pos, virtual_pos);
     double angular_acceleration = robot.get_type == 0? angular_acceleration_no :angular_acceleration_has;
     double acceleration = robot.get_type == 0? acceleration_no: acceleration_has;
+    double speed = calVectorSize(robot.xy_pos) * (ge(calVectorProduct(robot.xy_pos, transformVector(robot.direction)), 0.0)? 1: -1);
+
+    if(robot.target_id == -1) {
+        return PayLoad((robot.get_type == 0? 0.45: 0.53), 0, 0, 0, 0, speed, 0);
+    }
 
     // 计算机器人与目标点构成的向量与x轴正方向夹角
     pair<double, double> robotToStudio = subVector(virtual_pos, robot.pos);
@@ -468,7 +471,7 @@ PayLoad calPayload(Robot robot, pair<double, double> virtual_pos) {
 
     double angle = angle2 - angle1;
 
-    double speed = calVectorSize(robot.xy_pos) * (ge(calVectorProduct(robot.xy_pos, transformVector(robot.direction)), 0.0)? 1: -1);
+    
     // if(state.FrameID==7010&& robotID==2) {
     //     printPair(robot.xy_pos);
     //     cerr<<"payload-speed:"<<speed<<endl;
@@ -2813,10 +2816,10 @@ bool return_collision(int i1,int i2){
     lt(robots[i2].collision_val_pre,robots[i2].collision_val);
 }
 pair<int,int> far_away(int i1,int i2,int base1,int base2){
-    int sign1=pl_g[i1].sign,sign2=pl_g[i2].sign;
+    int sign1=payloads[i1].sign,sign2=payloads[i2].sign;
     if(sign1*sign2<0) return pair<int,int> (sign1,sign2);
     else{
-        if(gt(fabs(pl_g[i1].angle)-fabs(pl_g[i2].angle) ,2)||robots[i1].get_type>(robots[i2].get_type)){
+        if(gt(fabs(payloads[i1].angle)-fabs(payloads[i2].angle) ,2)||robots[i1].get_type>(robots[i2].get_type)){
             return pair<int,int> (sign1,-1*sign2);
         }
         return pair<int,int> (-1*sign1,sign2);
@@ -2867,8 +2870,8 @@ int return_line_dire(int i1,int i2,int signBase){
     int try_aginF=0;
     int tarId1=robots[i1].target_id==-1?0:robots[i1].target_id;
     int tarId2=robots[i2].target_id==-1?0:robots[i2].target_id;
-    bool l1=can_stop(robots[i1].pos,studios[robots[i1].target_id].pos,pl_g [i1].angle,isWall(tarId1));
-    bool l2=can_stop(robots[i2].pos,studios[robots[i2].target_id].pos,pl_g [i2].angle,isWall(tarId2));
+    bool l1=can_stop(robots[i1].pos,studios[robots[i1].target_id].pos,payloads [i1].angle,isWall(tarId1));
+    bool l2=can_stop(robots[i2].pos,studios[robots[i2].target_id].pos,payloads [i2].angle,isWall(tarId2));
     double tmpDis=calcuDis(robots[i1].pos,robots[i2].pos);
     // if(l1&&l2)
     // will_collision(i1,i2,0);
@@ -2877,7 +2880,7 @@ int return_line_dire(int i1,int i2,int signBase){
     try_agin:
     int flagSign=getSign(i1,i2);
     // double canAngle=min(fabs(Root.first),fabs(Root.second))*40*0.3;
-    // double stop_time= (fabs(robots[i2].angular_velocity))/(pl_g[i2].angular_acceleration);
+    // double stop_time= (fabs(robots[i2].angular_velocity))/(payloads[i2].angular_acceleration);
     // double subVal=stop_time*40*0.36;
     double real_time=-8;
     // if(gt(tmpDis,2))
@@ -2887,9 +2890,9 @@ int return_line_dire(int i1,int i2,int signBase){
     // if(lt(real_time,0)){
     //     return 0;
     // }
-    double canAngle_neg=get_at_v(real_time,pl_g[i2].angular_acceleration
+    double canAngle_neg=get_at_v(real_time,payloads[i2].angular_acceleration
     ,robots[i2].angular_velocity,-1);
-    double canAngle_pos=get_at_v(real_time,pl_g[i2].angular_acceleration
+    double canAngle_pos=get_at_v(real_time,payloads[i2].angular_acceleration
     ,robots[i2].angular_velocity,1);
     auto tmp= subVector(robots[i1].pos, robots[i2].pos);
     Vec v2(robots[i2].xy_pos); 
@@ -2898,13 +2901,13 @@ int return_line_dire(int i1,int i2,int signBase){
     auto angle= return_seta(i1,i2); 
     double seta=angle.first;
     double arf=angle.second;
-    double canAngle_pos_z=get_at_v_z(real_time,pl_g[i2].angular_acceleration
+    double canAngle_pos_z=get_at_v_z(real_time,payloads[i2].angular_acceleration
     ,robots[i2].angular_velocity,sign)*-1;
-    double canAngle_neg_z=get_at_v_z(real_time,pl_g[i2].angular_acceleration
+    double canAngle_neg_z=get_at_v_z(real_time,payloads[i2].angular_acceleration
     ,robots[i2].angular_velocity,sign*-1)*-1;
     // if(lt(canAngle_neg,0.0)){
     //     cerr<<"----------+ "<<canAngle_neg<<" "<<canAngle_pos<<" "<<
-    //      pl_g[i2].angular_acceleration<<" "<<sign<<endl; 
+    //      payloads[i2].angular_acceleration<<" "<<sign<<endl; 
     //      cerr<<robots[i2].angular_velocity<<" "<<real_time<< endl;
     // }
     // if(state.FrameID>=2048&&state.FrameID<=2500&&i1==2&&i2==1){
@@ -3624,9 +3627,9 @@ Ins contr_one_rob(Robot& robot){
     adjust_virtual_pos_total(robot);
     
     PayLoad payload=calPayload(robot,robot.virtual_pos);
-    if(robot.id==0&&state.FrameID>=10&&state.FrameID<=100&&contr_print_flag){
-        cerr<<" FrameID "<< state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
-    }
+    // if(robot.id==0&&state.FrameID>=10&&state.FrameID<=100&&contr_print_flag){
+    //     cerr<<" FrameID "<< state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
+    // }
     
     // if(contr_print_flag&&state.FrameID>=1354&&state.FrameID<=1450&&robot.id==0){
     //     cerr<<" FrameID "<<state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
@@ -3785,9 +3788,7 @@ void collision_solve(int frame){
     for(i = 0; i < 4; ++i)
         ro.emplace_back(robots[i]);
     sort(ro.begin(), ro.end(), cmp_robot);
-    cerr<<"111"<<endl;
     for(i = 0; i < 4; ++i) trajectory[i] = Calculate_the_trajectory(ro[i], 0, frame, 0);
-    cerr<<"222"<<endl;
 
     // if(state.FrameID == 2) {
     //     cerr<<"predict"<<endl;
@@ -3807,9 +3808,7 @@ void collision_solve(int frame){
         for (j = i + 1; j < 4; j++)
         {
             mindis = ro[i].radius + ro[j].radius;
-            cerr<<"333"<<endl;
             tmp = checkNoCollision(trajectory[i], trajectory[j], mindis + 0.2);
-            cerr<<"444"<<endl;
             // if(state.FrameID == 1588 && ((ro[i].id == 3 && ro[j].id == 0) || (ro[i].id == 0 && ro[j].id == 3)))
             //     cerr<<"mindis:"<<mindis<<endl;
             coll_time[i][j] = tmp;
