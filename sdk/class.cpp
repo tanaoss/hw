@@ -5422,27 +5422,11 @@ double vir_v(Robot rob){
 bool can_trajectory_virpos(Robot rob,double v,int cnt){
     double t=0.02;
     double v_next=v;
-    if(rob.id==0){
-        cerr<<state.FrameID<<" "<<"初始"<<endl;
-        cerr<<v<<"-"<<endl;
-        cerr<<calPayload(rob,rob.virtual_pos).angle<<endl;
-        printPair(rob.virtual_pos);
-        printPair(rob.pos);
-        }
     for(int i=0;i<cnt;i++){
         auto pay=calPayload(rob,rob.virtual_pos);
-        if(checkNearBar(rob.pos,pay.radius)){
-            if(rob.id==0){
-                // cerr<<state.FrameID<<" "<<"撞墙"<<endl;
-                // cerr<<v<<" "<<endl;
-                // printPair(rob.pos);
-            }
-            
-            return false;
-        }
+        if(checkNearBar(rob.pos,pay.radius))return false;
         auto tmpPair=get_w_now(rob,pay);
         double w_next=tmpPair.first;
-        // if(state.FrameID==1)cerr<<"w :"<<w_next<<endl;
         if(tmpPair.second|| lt(pay.angle,0.3)){
             int now_j= rob.pos.first/0.5;
             int now_i= rob.pos.second/0.5;
@@ -5451,19 +5435,9 @@ bool can_trajectory_virpos(Robot rob,double v,int cnt){
             int istake=rob.get_type==0?0:1;
             if(check_can_arrival(istake,now_id,tarID))
                 return true;
-            else{
-                // if(rob.id==0){
-                // cerr<<state.FrameID<<" "<<"最后撞墙1"<<endl;
-                // cerr<<v<<"-"<<endl;
-                // cerr<<calPayload(rob,rob.virtual_pos).angle<<endl;
-                // cerr<<"is_vis: "<<rob.isVir<<endl;
-                // cerr<<"now_id "<<now_id<<" vis_id "<<tarID<<endl;
-                // printPair(rob.virtual_pos);
-                // printPair(rob.pos);
-                }
+            else
                 return false;
-            }
-        
+        }
         double seta=rob.direction;
         double w=rob.angular_velocity==0?0.00001:rob.angular_velocity;
         double a=return_ac(pay.angular_acceleration,rob.angular_velocity,w_next);
@@ -5510,19 +5484,6 @@ bool can_trajectory_virpos(Robot rob,double v,int cnt){
     int istake=rob.get_type==0?0:1;
     if(check_can_arrival(istake,now_id,tarID))
             return true;
-    else{
-        if(rob.id==0){
-        // cerr<<state.FrameID<<" "<<"最后撞墙"<<endl;
-        // cerr<<v<<"-"<<endl;
-        // cerr<<calPayload(rob,rob.virtual_pos).angle<<endl;
-        // cerr<<"is_vis: "<<rob.isVir<<endl;
-        // cerr<<"now_id "<<now_id<<" vis_id "<<tarID<<endl;
-        // printPair(rob.virtual_pos);
-        // printPair(rob.pos);
-        }
-     
+    else
         return false;
-    }
-    
-        
 }
