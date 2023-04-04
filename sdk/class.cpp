@@ -90,6 +90,7 @@ void initrobotInfo() {
     double inertiaMin = weightMin * 0.45 * 0.45 *0.5;
     double inertiaMax = weightMax * 0.53 * 0.53 *0.5;
 
+
     acceleration_no = 250/ weightMin;
     acceleration_has = 250 / weightMax;
 
@@ -97,6 +98,7 @@ void initrobotInfo() {
     angular_acceleration_has = 50 /inertiaMax;
 
     memset(last_solution, -1, sizeof(last_solution));
+    init_bar_sum();
 
 
     for(int i = 0; i < 6; ++i) {
@@ -485,6 +487,44 @@ PayLoad calPayload(Robot robot, pair<double, double> virtual_pos) {
     double angle1 = calAngle(robotToStudio);
 
     double angle2 = ge(robot.direction, 0.0) ? robot.direction: 2 * Pi + robot.direction;
+    // double angle2 = calAngle(robot.xy_pos);
+
+    double angle = angle2 - angle1;
+
+    
+    // if(state.FrameID==7010&& robotID==2) {
+    //     printPair(robot.xy_pos);
+    //     cerr<<"payload-speed:"<<speed<<endl;
+    // }
+    int sign;
+
+    if(ge(angle, 0) && lt(angle, Pi) || lt(angle, -Pi))
+        sign = -1;
+    else
+        sign = 1;
+    angle = fabs(angle);
+    angle  = gt(angle, Pi)? 2 * Pi - angle: angle;
+
+
+    // cerr<<"**"<< angle1<<"**dir:"<<robot.direction<<"**"<<angle2<<endl;
+    // cerr<<"**"<< angle << "**"<<distance<<"**"<<sign<<endl;
+
+    return PayLoad((robot.get_type == 0? 0.45: 0.53), angle, angular_acceleration, acceleration, distance, speed, sign);
+}
+
+PayLoad calPayload_back(Robot robot, pair<double, double> virtual_pos) {
+    double distance = calcuDis(robot.pos, virtual_pos);
+    double angular_acceleration = robot.get_type == 0? angular_acceleration_no :angular_acceleration_has;
+    double acceleration = robot.get_type == 0? acceleration_no: acceleration_has;
+    double speed = calVectorSize(robot.xy_pos) * (ge(calVectorProduct(robot.xy_pos, transformVector(robot.direction)), 0.0)? 1: -1);
+
+    // 计算机器人与目标点构成的向量与x轴正方向夹角
+    pair<double, double> robotToStudio = subVector(virtual_pos, robot.pos);
+    double angle1 = calAngle(robotToStudio);
+
+    double angle2 = ge(robot.direction, 0.0)? robot.direction: 2 * Pi + robot.direction;
+    angle2 += Pi;
+    angle2 = gt(angle2, 2 * Pi)? angle2 - Pi * 2: angle2;
     // double angle2 = calAngle(robot.xy_pos);
 
     double angle = angle2 - angle1;
@@ -3578,8 +3618,8 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot& rob,Ins ins_in, int f
 vector<pair<double,double>>Calculate_the_trajectory(Robot& rob,int cnt,int tar,int ctrF){
     // cerr<<"aaaa"<<state.FrameID<<endl;
     double t=0.02;
-    PayLoad  pay=calPayload_trajectory(rob,rob.target_id);
     Ins ins=contr_one_rob(rob);
+    PayLoad pay=calPayload(rob,rob.virtual_pos);
     double w_next=ins.rotate;
     double v_next=ins.forward;
     if(cnt>tar){
