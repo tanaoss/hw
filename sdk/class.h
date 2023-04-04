@@ -404,7 +404,7 @@ void printMap(int f);
 void printEdge(int id);
 bool check_slope(int id1, int id2);
 void printPath(int from_id, int is_robot, int to_id, int is_take);
-void print_dijkstra(int studio_id, int is_take);
+void print_dijkstra(int studio_id, int is_take, int is_path);
 int trans_pos_to_nodeID(pair<double, double> pos);
 int trans_pos_to_nodeID(int robot_id);
 void init_vector();

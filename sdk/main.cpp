@@ -29,8 +29,9 @@ int main()
         Dijkstra(i, 1);
         // if(i==1) print_dijkstra();
     }
-    cerr << "bbb" << endl;
-    // print_dijkstra(1, 1);
+    // cerr << "bbb" << endl;
+    // cerr<<studios[10].node_id<<endl;
+    // print_dijkstra(10, 1, 1);
     // for(int i = 0; i < 4; ++i) {
     //     Dijkstra(i, 0, 1);
     // }
@@ -55,6 +56,10 @@ int main()
         cout<<state.FrameID<<endl;
         if(count == 0)new_first_action();
         else new_robot_action();
+
+        if(state.FrameID == 4064) {
+            cerr<<robots[1].target_id<<endl;
+        }
         
         control();
         count++;

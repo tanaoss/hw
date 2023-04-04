@@ -3366,11 +3366,11 @@ bool checkNearBar(const pair<double,double> &a, double radius){
 
         for(j = y_min; j < y_max; ++j) {
             if(graph[i][j] == -2)
-                return false;
+                return true;
         }
     }
 
-    return true;
+    return false;
 }
 
 vector<pair<double,double>>Calculate_the_trajectory(Robot& rob,Ins ins_in, int forward_change, int rotate_change,const vector<pair<double,double>>&  tra,int cnt,int tar,double rob_dis,double pre_dis){
@@ -4974,8 +4974,8 @@ void init_vector() {
     // vector<int> next_node[50][2];//next_node[node_id][studio_id][2]:node_id去往studio_id工作台的下一个点
     // vector<double> dis_to_studios[50][2];
     for(int i = 0; i < studios.size(); ++i) {
-        next_node[i][0].resize(10000, 0);
-        next_node[i][1].resize(10000, 0);
+        next_node[i][0].resize(10000, -1);
+        next_node[i][1].resize(10000, -1);
         dis_to_studios[i][0].resize(10000, 0);
         dis_to_studios[i][1].resize(10000, 0);
     }
@@ -5072,22 +5072,35 @@ int trans_pos_to_nodeID(int robot_id) {
 }
 
 
-void print_dijkstra(int studio_id, int is_take) {
+void print_dijkstra(int studio_id, int is_take, int is_path) {
     for(int i = 0; i < 100; ++i) {
         for(int j = 0; j< 100; ++j) {
-            // if(pre_node[(99-i) * 100 +j] == (99-i) * 100 +j + 1)
-            //     cerr<<"→"<<" ";
-            // else if(pre_node[(99-i) * 100 +j] == (99-i) * 100 +j -1)
-            //     cerr<<"←"<<" ";
-            // else if(pre_node[(99-i) * 100 +j] == (99-(i-1)) * 100 +j)
-            //     cerr<<"↓"<<" ";
-            // else if(pre_node[(99-i) * 100 +j] == (99-(i+1)) * 100 +j)
-            //     cerr<<"↑"<<" ";
-            // else if(pre_node[(99-i) * 100 +j] == (99-(i-1)) * 100 +j-1)
-            //     cerr<<"↓"<<" ";
-            // else if(pre_node[(99-i) * 100 +j] == (99-(i-1)) * 100 +j+1) 
-            //     cerr<<"↓"<<" ";
-            cerr<<setw(10)<<dis_to_studios[studio_id][is_take][(99-i) * 100 +j]<<" ";
+            if(is_path) {
+                if(next_node[studio_id][is_take][(99-i) * 100 +j] == -1)
+                    cerr<<"- ";
+                else if(next_node[studio_id][is_take][(99-i) * 100 +j] == (99-i) * 100 +j + 1)
+                    cerr<<"→ ";
+                else if(next_node[studio_id][is_take][(99-i) * 100 +j] == (99-i) * 100 +j -1)
+                    cerr<<"← ";
+                else if(next_node[studio_id][is_take][(99-i) * 100 +j] == (99-(i+1)) * 100 +j)
+                    cerr<<"↓ ";
+                else if(next_node[studio_id][is_take][(99-i) * 100 +j] == (99-(i-1)) * 100 +j)
+                    cerr<<"↑ ";
+                else if(next_node[studio_id][is_take][(99-i) * 100 +j] == (99-(i+1)) * 100 +j-1)
+                    cerr<<"↙️ ";
+                else if(next_node[studio_id][is_take][(99-i) * 100 +j] == (99-(i+1)) * 100 +j+1) 
+                    cerr<<"↘️ ";
+                else if(next_node[studio_id][is_take][(99-i) * 100 +j] == (99-(i-1)) * 100 +j+1) 
+                    cerr<<"↗️ ";
+                else if(next_node[studio_id][is_take][(99-i) * 100 +j] == (99-(i-1)) * 100 +j-1) 
+                    cerr<<"↖️ ";
+                else if(next_node[studio_id][is_take][(99-i) * 100 +j] == (99-i) * 100 +j)
+                    cerr<<"* ";
+                else cerr<<(99-i) * 100 +j<<"-"<<next_node[studio_id][is_take][(99-i) * 100 +j]<<" ";
+                    
+            }
+            else 
+                cerr<<setw(10)<<dis_to_studios[studio_id][is_take][(99-i) * 100 +j]<<" ";
         }
         cerr<<endl;
     }
@@ -5310,10 +5323,10 @@ void setVirPos(Robot& robot){
     int now_id=robot.node_id;
     int cnt=robot.cnt_tar;
    
-    for(int i=ret_next(robot,cnt);i!=ret_next(robot,i);i=ret_next(robot,i)){
+    for(int i=ret_next(robot,cnt);i!=ret_next(robot,i) && i!=-1;i=ret_next(robot,i)){
         int tmpId=i;
  
-        if(i<0)cerr<<"错误"<<endl;
+        if(i<0)cerr<<"i<0错误"<<endl;
         if(check_can_arrival(istake,now_id,tmpId)){
             robot.cnt_tar=tmpId;
         }else{
@@ -5368,8 +5381,8 @@ pair<double,double>select_visPos(Robot& robot,vector<int> range,int tar3){
 }
 int ret_next(Robot& robot,int tar_cnt){
     int tarID=robot.target_id;
-    if(tarID==-1)cerr<<"错误"<<endl;
-    if(robot.target_id==-1)cerr<<"错误"<<endl;
+    if(tarID==-1)cerr<<"tarID==-1错误"<<endl;
+    if(robot.target_id==-1)cerr<<"robot.target_id==-1错误"<<endl;
     int istake=robot.get_type==0?0:1;
     return next_node[tarID][istake][tar_cnt];
 }
