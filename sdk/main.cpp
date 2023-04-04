@@ -16,7 +16,7 @@ int main()
     std::cin.tie(0);    // IO
     // cerr<<"sss"<<endl;
     readMapUntilOK();
-    // cerr << "sss" << endl;
+    cerr << "sss" << endl;
     // divide_space();
     // deal_graph();
     // cerr << "sss" << endl;
@@ -31,6 +31,7 @@ int main()
         Dijkstra(i, 1);
         // if(i==1) print_dijkstra();
     }
+    cerr << "bbb" << endl;
     // print_dijkstra(1, 1);
     // for(int i = 0; i < 4; ++i) {
     //     Dijkstra(i, 0, 1);
@@ -45,12 +46,12 @@ int main()
     cout.flush();
     int count = 0;
     initrobotInfo();
-    // cerr<<"aaa"<<endl;
+    cerr<<"kkk"<<endl;
     init_studio_parameter();
-    // cerr<<"bbb"<<endl;
+    cerr<<"eee"<<endl;
      while (cin >> state.FrameID)
     {
-        // cerr<<" time "<<state.FrameID<<endl;
+        cerr<<" time "<<state.FrameID<<endl;
         readStatusUntilOK() ;
         
         cout<<state.FrameID<<endl;

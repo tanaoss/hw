@@ -133,8 +133,8 @@ void init_studio_parameter(){
     studio_material[4][1]=7;
     studio_material[5][0]=7;
     studio_material[5][1]=1;
-    studio_material[5][1]=2;
-    studio_material[5][2]=3;
+    studio_material[5][2]=2;
+    studio_material[5][3]=3;
     studio_material[5][4]=4;
     studio_material[5][5]=5;
     studio_material[5][6]=6;
@@ -190,7 +190,9 @@ void init_studio_parameter(){
                 // cerr<<" material type = "<<studio_material[studios[i].type-4][j]<<endl;
                 for(int k = 0;k<studios_type[studio_material[studios[i].type-4][j]].size();k++){
                     studio_id = studios_type[studio_material[studios[i].type-4][j]][k];
+                    // cerr<<" studio_id "<<studio_id<<" dist = "<<dis_to_studios[studio_id][1][studios[i].node_id]<<endl;
                     if(!(eq(dis_to_studios[studio_id][1][studios[i].node_id],10000))){
+                        // cerr<<"j = "<<j<<endl;
                         studios[i].material_studios[j-1].push_back(studio_id);
                         // cerr<<' '<<studio_id<<' ';
                     }
@@ -2083,7 +2085,7 @@ int find_closest_studio(int robot_id){
 //     robot_judge_sol(5, 0);
 // }
 pair<pair<int,int>,double> new_pick_point(int robot_id,int state_type){
-    double min = 10000;
+    double min = 0;
     int studio_buy = -1,studio_send = -1;
     double dist;
     double income;
@@ -2120,7 +2122,7 @@ pair<pair<int,int>,double> new_pick_point(int robot_id,int state_type){
                                     if(lt(dist/6/0.02,studios[material_studio_id].r_time))continue;
                                 }
                                 income_ratio = (income/dist);
-                                if(lt(income_ratio,min)){
+                                if(gt(income_ratio,min)){
                                     min = income_ratio;
                                     studio_buy = material_studio_id;
                                     studio_send = i;
@@ -2144,7 +2146,7 @@ pair<pair<int,int>,double> new_pick_point(int robot_id,int state_type){
                             if(eq(dist,10000))continue;
                             income = price[studios[i].type][1]-price[studios[i].type][0];
                             income_ratio = (income/dist);
-                            if(lt(income_ratio,min)){
+                            if(gt(income_ratio,min)){
                                 min = income_ratio;
                                 studio_send = i;
                             }
@@ -2157,7 +2159,7 @@ pair<pair<int,int>,double> new_pick_point(int robot_id,int state_type){
                         if(eq(dist,10000))continue;
                         income = price[studios[i].type][1]-price[studios[i].type][0];
                         income_ratio = (income/dist);
-                        if(lt(income_ratio,min)){
+                        if(gt(income_ratio,min)){
                             min = income_ratio;
                             studio_send = i;
                         }
@@ -2260,7 +2262,7 @@ void new_robot_judge(){
 }
 void new_first_action(){
     for(int i=0;i<robots.size();i++){
-        cerr<<"aaa"<<endl;
+        // cerr<<"aaa"<<endl;
         complete_trans(i);
         robots[i].cnt_tar=robots[i].node_id;
         // cerr<<"robot : "<<i<<" target id = "<<robots[i].target_id<<endl;
