@@ -68,3 +68,5 @@ int main()
     return 0;
    
 }
+
+// ./Robot -f -m maps/4.txt -c ./sdk "./main" 2>1.txt

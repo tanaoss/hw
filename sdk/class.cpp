@@ -5274,7 +5274,10 @@ bool check_can_arrival(int istake,int id1,int id2){
     //     j1=max(j1-1,0);
     //     j2=min(j2+1,99);
     // }
-    if(i1<0||j1<0||i2<0||j2<0)cerr<<" 错误"<<endl;
+    if(i1<0||j1<0||i2<0||j2<0){
+        // cerr<<" 错误"<<endl;
+        return false;
+    }
     for(int j=j1;j<=j2;j++){
         int tmp=sum_matrix[istake][i2][j]-(i1>0?sum_matrix[istake][i1-1][j]:0);
         if(tmp<(i2-i1+1)){
@@ -5321,9 +5324,7 @@ void setVirPos(Robot& robot){
   
    
     int tar1=robot.cnt_tar;
-    if(exist_id[istake].count(tar1)==0){
-        cerr<<"路径选点错误 "<<endl;
-    }
+
     auto virPos=exist_id[istake][tar1];
     robot.isVir=false;
     bool con1=false;
