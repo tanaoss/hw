@@ -76,8 +76,10 @@ unordered_map<int,int> rob_transID;//建立机器人id与转换后id的关系
 unordered_map<int,bool> can_arrival[2];//判断任意两个小格之间是否可以直达;
 int graph_trans[100][100];
 
-vector<int> next_node[50][2];//next_node[node_id][studio_id][2]:node_id去往studio_id工作台的下一个点
-vector<double> dis_to_studios[50][2];//dis_studios[node_id][studio_id][2]:node_id去往studio_id工作台的距离
+vector<int> next_node[50][2];//next_node[studio_id][2][node_id]:node_id去往studio_id工作台的下一个点
+vector<double> dis_to_studios[50][2];//dis_studios[studio_id][2][node_id]:node_id去往studio_id工作台的距离
+
+int bar_sum[100][100][2];
 
 
 void initrobotInfo() {
@@ -2290,7 +2292,7 @@ void new_robot_judge(){
                     robots[i].cnt_tar=robots[i].node_id;
                 }
                 else{
-                    cerr<<"robot: "<<i<<" wait "<<endl;
+                    // cerr<<"robot: "<<i<<" wait "<<endl;
                     ins[i].buy = -1;   //wait;
                     ins[i].sell = -1;
                 }
@@ -2337,7 +2339,7 @@ void new_robot_action(){
         else if(robots[i].target_id != -1)robot_get_type[studios[robots[i].target_id].type]++;
     }
     // if(state.FrameID >=2200 &&state.FrameID <= 2300){
-    //     cerr<<" r_id "<<studios[20].r_id<<endl;
+        // cerr<<" r_id "<<studios_rid[20][1]<<endl;
     // }
     new_robot_judge();
 }
@@ -3712,14 +3714,12 @@ Ins contr_one_rob(Robot& robot){
     adjust_virtual_pos_total(robot);
     double tmpDis=calcuDis(robot.pos,exist_id[0][robot.node_id]);
     PayLoad payload=calPayload(robot,robot.virtual_pos);
-    if(robot.id==3&&state.FrameID>=1982&&state.FrameID<=2082&&contr_print_flag){
-        cerr<<robot.target_id<<endl;
-        cerr<<" FrameID "<< state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
-        cerr<<check_can_arrival(robot.get_type==0?0:1,robot.node_id,robot.virtual_id)<<endl;
-        cerr<<calcuDis(robot.pos,exist_id[0][robot.node_id])<<endl;
-        cerr<<robot.node_id<<" "<<robot.virtual_id<<endl;
-        
-    }
+    // if(robot.id==0&&state.FrameID>=10&&state.FrameID<=100&&contr_print_flag){
+    //     cerr<<" FrameID "<< state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
+    //     cerr<<check_can_arrival(robot.get_type==0?0:1,robot.node_id,robot.virtual_id)<<endl;
+    //     cerr<<calcuDis(robot.pos,exist_id[0][robot.node_id])<<endl;
+    //     cerr<<robot.node_id<<" "<<robot.virtual_id<<endl;
+    // }
     
     auto p1=get_w_now(robot,payload);
     ins_t.rotate=p1.first;
@@ -4908,16 +4908,18 @@ void Translation_graph_no(){
                 for(int t=0;t<studios.size();t++){
                     double tmpDis=calcuDis(studios[t].pos,pos);
                     if(le(tmpDis,0.4)&&id!=studios[t].node_id){
-                        graph_edge[0][id].push_back(Graph_node(studios[t].node_id,1,id));
-                        graph_edge[0][studios[t].node_id].push_back(Graph_node(id,1,studios[t].node_id));
+                        double dis= (abs(i-(studios[t].node_id/100))+abs(j-(studios[t].node_id%100))==2)?pow(2,0.5):1;
+                        graph_edge[0][id].push_back(Graph_node(studios[t].node_id,dis,id));
+                        graph_edge[0][studios[t].node_id].push_back(Graph_node(id,dis,studios[t].node_id));
                         // if(t==0)cerr<<graph_edge[0][studios[t].node_id].size()<<endl;
                     }
                 }
                 for(int t=0;t<4;t++){
                     double tmpDis=calcuDis(robots[t].pos,pos);
                     if(le(tmpDis,0.4)&&id!=robots[t].node_id){
-                        graph_edge[0][id].push_back(Graph_node(robots[t].node_id,1,id));
-                        graph_edge[0][robots[t].node_id].push_back(Graph_node(id,1,robots[t].node_id));
+                        double dis= (abs(i-(robots[t].node_id/100))+abs(j-(robots[t].node_id%100))==2)?pow(2,0.5):1;
+                        graph_edge[0][id].push_back(Graph_node(robots[t].node_id,dis,id));
+                        graph_edge[0][robots[t].node_id].push_back(Graph_node(id,dis,robots[t].node_id));
                     }
                 }
             }
@@ -4936,15 +4938,17 @@ void Translation_graph_has(){
                 for(int t=0;t<studios.size();t++){
                     double tmpDis=calcuDis(studios[t].pos,pos);
                     if(!is_corner(studios[t].node_id)&&((le(tmpDis,0.71)&&tmp.first==1)||le(tmpDis,0.4))&&id!=studios[t].node_id){
-                        graph_edge[1][id].push_back(Graph_node(studios[t].node_id,1,id));
-                        graph_edge[1][studios[t].node_id].push_back(Graph_node(id,1,studios[t].node_id));
+                        double dis= (abs(i-(studios[t].node_id/100))+abs(j-(studios[t].node_id%100))==2)?pow(2,0.5):1;
+                        graph_edge[1][id].push_back(Graph_node(studios[t].node_id,dis,id));
+                        graph_edge[1][studios[t].node_id].push_back(Graph_node(id,dis,studios[t].node_id));
                     }
                 }
                 for(int t=0;t<4;t++){
                     double tmpDis=calcuDis(robots[t].pos,pos);
                     if(!is_corner(studios[t].node_id)&&((le(tmpDis,0.71)&&tmp.first==1)||le(tmpDis,0.4))&&id!=robots[t].node_id){
-                        graph_edge[1][id].push_back(Graph_node(robots[t].node_id,1,id));
-                        graph_edge[1][robots[t].node_id].push_back(Graph_node(id,1,robots[t].node_id));
+                        double dis= (abs(i-(robots[t].node_id/100))+abs(j-(robots[t].node_id%100))==2)?pow(2,0.5):1;
+                        graph_edge[1][id].push_back(Graph_node(robots[t].node_id,dis,id));
+                        graph_edge[1][robots[t].node_id].push_back(Graph_node(id,dis,robots[t].node_id));
                     }
                 }
             }
@@ -4976,7 +4980,7 @@ void getEdgeRalative(){
                 int SlopeCheckId2=i*100+idj;
                 //不带货物时，不考虑是否在墙角。
                 if(exist_id[0].count(tmpId)&&check_slope(tmpId,it.first) &&it.first!=tmpId){
-                    double dis= (fabs(i-idi)+fabs(j-idj)==2)?pow(2,0.5):1;
+                    double dis= (abs(i-idi)+abs(j-idj)==2)?pow(2,0.5):1;
                     graph_edge[0][it.first].push_back(Graph_node(tmpId,dis,it.first));
                 }
             }
@@ -5001,7 +5005,7 @@ void getEdgeRalative(){
                 if(isInCorner&&isSlope&&(exist_id[1].count(SlopeCheckId1)||exist_id[1].count(SlopeCheckId2))){
 
                 }else if(exist_id[1].count(tmpId)&&it.first!=tmpId&&check_slope(tmpId,it.first)){
-                    double dis= (fabs(i-idi)+fabs(j-idj)==2)?pow(2,0.5):1;
+                    double dis= (abs(i-idi)+abs(j-idj)==2)?pow(2,0.5):1;
                     graph_edge[1][it.first].push_back(Graph_node(tmpId,dis,it.first));
                 }
             }
@@ -5046,7 +5050,7 @@ void Dijkstra(int studio_id, int is_take) {
     s = studios[studio_id].node_id;
 
     bool cerr_flag = false;
-    // if(studio_id == 1 && is_take == 0) cerr_flag = true;
+    // if(studio_id == 0 && is_take == 1) cerr_flag = true;
 
     if(cerr_flag) {
         cerr<<"start-studio:"<<studio_id<<endl;
@@ -5108,6 +5112,50 @@ int trans_pos_to_nodeID(pair<double, double> pos) {
 
 int trans_pos_to_nodeID(int robot_id) {
     return trans_pos_to_nodeID(robots[robot_id].pos);
+}
+
+bool is_connected(int node_id_a, int node_id_b, int is_take) {
+    return get_bar_num(node_id_a, node_id_b, is_take) == 0;
+}
+
+int get_bar_num(int node_id_a, int node_id_b, int is_take) {
+    int x1, x2, y1, y2;
+    x1 = min(node_id_a / 100, node_id_b / 100);
+    x2 = max(node_id_a / 100, node_id_b / 100);
+    y1 = min(node_id_a % 100, node_id_b % 100);
+    y2 = max(node_id_a % 100, node_id_b % 100);
+    if(x2 == 0 && y2 == 0)
+        return bar_sum[x2][y2][is_take];
+    if(x2 == 0)
+        return bar_sum[x2][y2][is_take] - bar_sum[x2][y1][is_take];
+    if(y2 == 0)
+        return bar_sum[x2][y2][is_take] - bar_sum[x1][y2][is_take];
+    return bar_sum[x2][y2][is_take] - bar_sum[x2][y1][is_take] - bar_sum[x1][y2][is_take] + bar_sum[x1][y1][is_take];
+}
+
+void init_bar_sum() {
+    for(int stu_id = 0; stu_id < studios.size(); ++stu_id) {
+        for(int i = 0; i < 100; ++i) {
+            // if(stu_id != 0 && )
+            for(int j = 0; j < 100; ++j) {
+                if(stu_id == 0) {
+                    bar_sum[i][j][0] = (next_node[stu_id][0][i * 100 + j] == -1);
+                    bar_sum[i][j][1] = (next_node[stu_id][1][i * 100 + j] == -1);
+                }
+                else {
+                    bar_sum[i][j][0] = min(bar_sum[i][j][0], (int)(next_node[stu_id][0][i * 100 + j] == -1));
+                    bar_sum[i][j][0] = min(bar_sum[i][j][0], (int)(next_node[stu_id][0][i * 100 + j] == -1));
+                }
+                if(i > 0) {
+                    bar_sum[i][j][0] += bar_sum[i - 1][j][0];
+                    bar_sum[i][j][1] += bar_sum[i - 1][j][1];
+                }
+                if(j > 0) {
+                    bar_sum[i][j][0] += bar_sum[i][j - 1][0] - bar_sum[i - 1][j - 1][0];
+                }
+            }
+        }
+    }
 }
 
 
@@ -5367,7 +5415,7 @@ void setVirPos(Robot& robot){
     for(int i=ret_next(robot,cnt);i!=ret_next(robot,i) && i!=-1;i=ret_next(robot,i)){
         int tmpId=i;
  
-        if(i<0)cerr<<"i<0错误"<<endl;
+        // if(i<0)cerr<<"i<0错误"<<endl;
         if(check_can_arrival(1,now_id,tmpId)){
             // if(robot.id==0){
             //     cerr<<" 合并的tar "<<robot.cnt_tar<<" ";

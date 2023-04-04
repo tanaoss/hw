@@ -14,7 +14,7 @@ int main()
     std::cin.tie(0);    // IO
     // cerr<<"sss"<<endl;
     readMapUntilOK();
-    cerr << "sss" << endl;
+    // cerr << "sss" << endl;
     // divide_space();
     // deal_graph();
     // cerr << "sss" << endl;
@@ -31,7 +31,7 @@ int main()
     }
     // cerr << "bbb" << endl;
     // cerr<<studios[10].node_id<<endl;
-    // print_dijkstra(10, 1, 1);
+    // print_dijkstra(1, 1, 1);
     // for(int i = 0; i < 4; ++i) {
     //     Dijkstra(i, 0, 1);
     // }

@@ -408,6 +408,9 @@ void print_dijkstra(int studio_id, int is_take, int is_path);
 int trans_pos_to_nodeID(pair<double, double> pos);
 int trans_pos_to_nodeID(int robot_id);
 void init_vector();
+bool is_connected(int node_id_a, int node_id_b, int is_take);
+int get_bar_num(int node_id_a, int node_id_b, int is_take);
+void init_bar_sum();
 
 
 vector<int> get_future_node(int robot_id);
