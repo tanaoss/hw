@@ -55,7 +55,6 @@ int main()
         cout<<state.FrameID<<endl;
         if(count == 0)new_first_action();
         else new_robot_action();
-        adjust_virtual_pos_total();
         payloads.clear();
         for(int i=0;i<4;++i){
             payloads.push_back(calPayload(robots[i], robots[i].virtual_pos));
