@@ -945,10 +945,15 @@ double get_at_stop_test(double t,double a,double v,int sign_v1){
 // }
 bool check_no_send(int studio_id){
     int i;
-    for(i = 1;i<= studio_material[studios[studio_id].type-4][0];i++){
-        if(studios_rid[studio_id][i]!=-1)break;
+    if(studios[studio_id].type>3){
+        for(i = 1;i<= studio_material[studios[studio_id].type-4][0];i++){
+            // if(state.FrameID>=2110&&state.FrameID<=2130&&studio_id==0){
+            //     cerr<< "studio 10 rid = "<<studios_rid[studio_id][i]<<"type = "<<i<<endl;
+            // }
+            if(studios_rid[studio_id][i]!=-1)break;
+        }
+        if(i!=studio_material[studios[studio_id].type-4][0]+1)return false;
     }
-    if(i!=studio_material[studios[studio_id].type-4][0]+1)return false;
     return true;
 }
 // bool check_send_dis(int studio_id ,double dist){
@@ -2125,17 +2130,23 @@ pair<pair<int,int>,double> new_pick_point(int robot_id,int state_type){
                                 if(studios[material_studio_id].r_id != -1){
                                     if(lt(dist/6/0.02,product_time[studios[material_studio_id].type]))continue;
                                 }
+                                if(!check_no_send(material_studio_id))continue;
                                 if(studios[material_studio_id].pStatus != 1 ){
-                                    if(!check_no_send(material_studio_id))continue;
+                                    // if(!check_no_send(material_studio_id)){
+                                    //     // if(state.FrameID>2110 &&state.FrameID<2130)
+                                    //     //     cerr<<material_studio_id<<" have robot to send"<<endl;
+                                    //     continue;
+                                    // }
                                     if(lt(dist/6/0.02,studios[material_studio_id].r_time)){
                                         dist += (studios[material_studio_id].r_time-(dist/6/0.02))*0.02*6;
                                     }
                                 }
                                 dist += dis_to_studios[i][1][studios[material_studio_id].node_id];
                                 income_ratio = (income/dist);
-                                // if(state.FrameID>3754 &&state.FrameID<4000){
+                                // if(state.FrameID>2110 &&state.FrameID<2130){
                                 // cerr<<"to buy dist = "<< dis_to_studios[material_studio_id][0][robots[robot_id].node_id]<<" to send dist = "<<dis_to_studios[i][1][studios[material_studio_id].node_id]<<endl;
                                 // cerr<< "robot : "<<robot_id<<" buy : "<<material_studio_id<<" type : "<<studios[material_studio_id].type<<" send : "<<i<<" type : "<< studios[i].type<<" income_ratio : "<<income_ratio<<" income = "<<income<<" dist = "<<dist<<endl;
+                                // }
                                 if(gt(income_ratio,max)){
                                     max = income_ratio;
                                     studio_buy = material_studio_id;
@@ -2192,8 +2203,10 @@ pair<pair<int,int>,double> new_pick_point(int robot_id,int state_type){
             }
         }
     }
-    // cerr<<" buy = "<<studio_buy<<" send = "<<studio_send<<endl;
-    // cerr<<"income_ratio "<<max<<endl;
+    // if(state.FrameID>2110 &&state.FrameID<2130){
+    //     cerr<<" buy = "<<studio_buy<<" send = "<<studio_send<<endl;
+    //     cerr<<"income_ratio "<<max<<endl;
+    // }
     pair<int,int> road (studio_buy,studio_send);
     return pair<pair<int,int>,double>(road,max);
 }
@@ -2338,8 +2351,8 @@ void new_robot_action(){
         if(robots[i].get_type != 0)robot_get_type[robots[i].get_type]++;
         else if(robots[i].target_id != -1)robot_get_type[studios[robots[i].target_id].type]++;
     }
-    // if(state.FrameID >=2200 &&state.FrameID <= 2300){
-        // cerr<<" r_id "<<studios_rid[20][1]<<endl;
+    // if(state.FrameID >=2110 &&state.FrameID <= 2300){
+    //     cerr<<" r_id "<<studios_rid[20][1]<<endl;
     // }
     new_robot_judge();
 }
