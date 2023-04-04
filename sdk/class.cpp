@@ -701,13 +701,12 @@ double calc_priority(int studio_id){
 void control(vector<PayLoad> payLoad){
     contr_print_flag=1;
      for(int i=0;i<4;i++){
-        
         auto tins=contr_one_rob(robots[i],payLoad[i]);
         ins[i].forward=tins.forward;
         ins[i].rotate=tins.rotate;
         ins[i].robID=i;
-        
     }
+    
     // if(state.FrameID>=1003&&state.FrameID<=1023){
     //     cerr<<state.FrameID<<" "<< ins[2].forward<<" "<<payLoad[2].distance<<" "<<payLoad[2].distance*sin(payLoad[2].angle) << endl;
     //     // cerr<<state.FrameID<<" "<<stop_dis<<" "<<payload.speed<<" "<<can_st<<" "<<(sin(cmpAngle)*payload.distance)<<" "<<robot.need_rote_wall<<endl;
@@ -2544,7 +2543,7 @@ bool will_impact(const Robot& robot,double dis){
 }
 int special_test(int i1,int i2){
     int cnt=5;
-    int base=0.02;
+    double base=0.02;
     double radius=robots[i1].get_type==0? 0.45:0.53;
     for(int i=1;i<=cnt;i++){
         double time=i*base;
@@ -2580,7 +2579,7 @@ double get_angle_1(pair<double,double> p1,pair<double,double> p2){
     return acos(cos_t(v1,v2)) ;
 }
 bool is_less(int i1,int i2){
-        int base=0.02;
+        double base=0.02;
         double time=2*base;
         auto p1=make_pair<double,double>(robots[i1].pos.first+robots[i1].xy_pos.first*time,
         robots[i1].pos.second+robots[i1].xy_pos.second*time
@@ -3608,17 +3607,19 @@ PayLoad calPayload_trajectory(Robot rob,int studioID){
 }
 Ins contr_one_rob(Robot& robot , PayLoad& payload){
     Flag_sumulate=0;
-    adjust_virtual_pos_total(robot);
-    payload=calPayload(robot,robot.virtual_pos);
-    if(robot.id==0&&state.FrameID>=10&&state.FrameID<=100&&contr_print_flag){
-        cerr<<" FrameID "<< state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
-    }
     Ins ins_t;
     if(robot.target_id==-1){
         ins_t.forward=0;
         ins_t.rotate=0;
         return ins_t;
     }
+    adjust_virtual_pos_total(robot);
+    
+    payload=calPayload(robot,robot.virtual_pos);
+    if(robot.id==0&&state.FrameID>=10&&state.FrameID<=100&&contr_print_flag){
+        cerr<<" FrameID "<< state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
+    }
+    
     // if(contr_print_flag&&state.FrameID>=1354&&state.FrameID<=1450&&robot.id==0){
     //     cerr<<" FrameID "<<state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
     //     cerr<<exist_id_type[1][robot.virtual_id]<<endl;
@@ -5281,6 +5282,7 @@ void setVirPos(Robot& robot){
             break;
         }
     }
+
     int tar1=robot.cnt_tar;
     if(exist_id[istake].count(tar1)==0){
         cerr<<"路径选点错误 "<<endl;

@@ -63,10 +63,8 @@ int main()
         
         for(int i=0;i<4;++i) robots[i].radius = payloads[i].radius;
         pl_g=payloads;
-        // cerr<<"222"<<endl;
         control(payloads);
         count++;
-        // cerr<<"333"<<endl;
 
         if(state.FrameID == 3053) {
             for(int i = 0; i < 4; ++i) {
