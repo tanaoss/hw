@@ -3624,23 +3624,6 @@ Ins contr_one_rob(Robot& robot , PayLoad& payload){
         ins_t.rotate=0;
         return ins_t;
     }
-    int flag_type=robot.get_type==0?0:1;
-    auto tmpVec=get_future_node(robot.id);
-    bool needSlow=true;
-    if(tmpVec.size()>0){
-        auto tmpPos1=exist_id[flag_type][robot.virtual_id];
-        auto tmpPos2=exist_id[flag_type][tmpVec[0]];
-        auto tmpPos3=tmpVec.size()>1?exist_id[flag_type][tmpVec[1]]:make_pair<double,double>(-7,-7);
-        needSlow=is_need_slow(robot,tmpPos2,tmpPos3);
-        // int signX=le(tmpPos1.first,tmpPos2.first)?-1:1;
-        // int signY=le(tmpPos1.second,tmpPos2.second)?-1:1;
-        // int subx=tmpPos1.first-tmpPos2.first;
-        // int suby=tmpPos1.second-tmpPos2.second;
-        // if(!eq(subx,0)&&!eq(suby,0)){
-        //     exist_id[flag_type][robot.virtual_id]={tmpPos2.first+signX*0.5,tmpPos2.second+signY*0.5};
-        // }
-    }
-    robot.virtual_pos=exist_id[flag_type][robot.virtual_id];
     // if(contr_print_flag&&state.FrameID>=1354&&state.FrameID<=1450&&robot.id==0){
     //     cerr<<" FrameID "<<state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
     //     cerr<<exist_id_type[1][robot.virtual_id]<<endl;
@@ -3668,6 +3651,8 @@ Ins contr_one_rob(Robot& robot , PayLoad& payload){
     }
     if(!p1.second){
         if(!robot.isVir)
+            ins_t.forward=0;
+        else if(lt(payload.distance,1.5))
             ins_t.forward=0;
     }
     if(!robot.isVir&&lt(payload.distance,0.3)){
@@ -4831,8 +4816,8 @@ double Angle_conversion(double angle){
     return fabs(angle)/Pi;
 }//将角度转换为距离
 bool check_4(int i,int j){
-    if(i<0||j<0||i>=100||j>=100)return false;
-    if(i+1>=100||j-1<0)return false;
+    if(i<0||j<0||i>99||j>99)return false;
+    if(i+1>99||j-1<0)return false;
     return graph_trans[i][j]!=-2&&graph_trans[i][j-1]!=-2&&graph_trans[i+1][j-1]!=-2&&graph_trans[i+1][j]!=-2;
 }//检查坐标i,j是否是一个四个格子的合法点
 pair<int,pair<double,double>> check_8(int i,int j){
@@ -4913,7 +4898,6 @@ void getEdgeRalative(){
                 if(i==idi&&j==idj)continue;
                 int tmpId=i*100+j;
                 int ckeck_id=idi*100+j;
-                if(exist_id[0].count(tmpId)==0)continue;
                 // if(it.first==studios[0].node_id){
                 //     cerr<<graph_edge[0][it.first].size()<<" "<<exist_id[0].count(tmpId)<<" "<<exist_id[0].count(ckeck_id)<<endl;
                 //     cerr<<idi<<"-"<<idj<<" "<<i<<"-"<<j<<endl;
@@ -4943,7 +4927,6 @@ void getEdgeRalative(){
             for(int j=idj-1;j<=idj+1;j++){
                 if(i==idi&&j==idj)continue;
                 int tmpId=i*100+j;
-                if(exist_id[1].count(tmpId)==0)continue;
                 if(is_corner(it.first)||is_corner(tmpId)){
                     continue;
                 }
@@ -5268,7 +5251,7 @@ bool check_can_arrival(int istake,int id1,int id2){
     // }
     for(int j=j1;j<=j2;j++){
         int tmp=sum_matrix[istake][i2][j]-(i1>0?sum_matrix[istake][i1-1][j]:0);
-        if(tmp<(j2-j1+1))return false;
+        if(tmp<(i2-i1+1))return false;
     }
     return true;
 
@@ -5309,19 +5292,19 @@ void setVirPos(Robot& robot){
     auto virPos=exist_id[istake][tar1];
     robot.isVir=false;
     bool con1=false;
-    // if(next_node[tarID][istake].size()-robot.cnt_tar>=3){
-    //     con1=true;
-    //     int tar2=next_node[tarID][istake][robot.cnt_tar];
-    //     int tar3=next_node[tarID][istake][robot.cnt_tar];
-    //     auto set1=getEqID(istake,tar1);
-    //     auto set2=getEqID(istake,tar2);
-    //     auto set3=getEqID(istake,tar3);
-    //     set<int> tmpSet;
-    //     vector<int> ansSet;
-    //     set_intersection(set1.begin(),set1.end(),set2.begin(),set2.end(),inserter(tmpSet,tmpSet.begin()));
-    //     set_intersection(tmpSet.begin(),tmpSet.end(),set3.begin(),set3.end(),inserter(ansSet,ansSet.begin()));
-    //     virPos=select_visPos(robot,ansSet,tar3);
-    // }
+    if(at_least_three(robot,tar1)){
+        con1=true;
+        int tar2=next_node[tarID][istake][robot.cnt_tar];
+        int tar3=next_node[tarID][istake][tar2];
+        auto set1=getEqID(istake,tar1);
+        auto set2=getEqID(istake,tar2);
+        auto set3=getEqID(istake,tar3);
+        set<int> tmpSet;
+        vector<int> ansSet;
+        set_intersection(set1.begin(),set1.end(),set2.begin(),set2.end(),inserter(tmpSet,tmpSet.begin()));
+        set_intersection(tmpSet.begin(),tmpSet.end(),set3.begin(),set3.end(),inserter(ansSet,ansSet.begin()));
+        virPos=select_visPos(robot,ansSet,tar3);
+    }
     robot.virtual_pos=virPos;
     int vir_i=robot.virtual_id/100;
     int vir_j=robot.virtual_id-100*vir_i;
@@ -5334,7 +5317,10 @@ pair<double,double>select_visPos(Robot& robot,vector<int> range,int tar3){
     int now_id=robot.node_id;
     int tarID=robot.target_id;
     int istake=robot.get_type==0?0:1;
-    int tar1=next_node[tarID][istake][robot.cnt_tar];
+    int tar1=robot.cnt_tar;
+    if(exist_id[istake].count(tar1)==0){
+        cerr<<"路径选点错误 "<<endl;
+    }
     auto virPos=exist_id[istake][tar1];
     for(auto it: range){
         if(check_can_arrival(istake,now_id,it)){
