@@ -31,7 +31,7 @@ int main()
         Dijkstra(i, 1);
         // if(i==1) print_dijkstra();
     }
-    cerr << "bbb" << endl;
+    // cerr << "bbb" << endl;
     // print_dijkstra(1, 1);
     // for(int i = 0; i < 4; ++i) {
     //     Dijkstra(i, 0, 1);
@@ -46,9 +46,9 @@ int main()
     cout.flush();
     int count = 0;
     initrobotInfo();
-    cerr<<"kkk"<<endl;
+    // cerr<<"kkk"<<endl;
     init_studio_parameter();
-    cerr<<"eee"<<endl;
+    // cerr<<"eee"<<endl;
      while (cin >> state.FrameID)
     {
         // cerr<<" time "<<state.FrameID<<endl;
