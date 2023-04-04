@@ -717,13 +717,12 @@ double calc_priority(int studio_id){
 void control(vector<PayLoad> payLoad){
     contr_print_flag=1;
      for(int i=0;i<4;i++){
-        
         auto tins=contr_one_rob(robots[i],payLoad[i]);
         ins[i].forward=tins.forward;
         ins[i].rotate=tins.rotate;
         ins[i].robID=i;
-        
     }
+    
     // if(state.FrameID>=1003&&state.FrameID<=1023){
     //     cerr<<state.FrameID<<" "<< ins[2].forward<<" "<<payLoad[2].distance<<" "<<payLoad[2].distance*sin(payLoad[2].angle) << endl;
     //     // cerr<<state.FrameID<<" "<<stop_dis<<" "<<payload.speed<<" "<<can_st<<" "<<(sin(cmpAngle)*payload.distance)<<" "<<robot.need_rote_wall<<endl;
@@ -2573,7 +2572,7 @@ bool will_impact(const Robot& robot,double dis){
 }
 int special_test(int i1,int i2){
     int cnt=5;
-    int base=0.02;
+    double base=0.02;
     double radius=robots[i1].get_type==0? 0.45:0.53;
     for(int i=1;i<=cnt;i++){
         double time=i*base;
@@ -2609,7 +2608,7 @@ double get_angle_1(pair<double,double> p1,pair<double,double> p2){
     return acos(cos_t(v1,v2)) ;
 }
 bool is_less(int i1,int i2){
-        int base=0.02;
+        double base=0.02;
         double time=2*base;
         auto p1=make_pair<double,double>(robots[i1].pos.first+robots[i1].xy_pos.first*time,
         robots[i1].pos.second+robots[i1].xy_pos.second*time
@@ -3637,26 +3636,20 @@ PayLoad calPayload_trajectory(Robot rob,int studioID){
 }
 Ins contr_one_rob(Robot& robot , PayLoad& payload){
     Flag_sumulate=0;
-    adjust_virtual_pos_total(robot);
-    payload=calPayload(robot,robot.virtual_pos);
-    if(robot.id==0&&state.FrameID>=10&&state.FrameID<=100&&contr_print_flag){
-        cerr<<" FrameID "<< state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
-    }
     Ins ins_t;
     if(robot.target_id==-1){
         ins_t.forward=0;
         ins_t.rotate=0;
         return ins_t;
     }
-    // if(contr_print_flag&&state.FrameID>=1354&&state.FrameID<=1450&&robot.id==0){
-    //     cerr<<" FrameID "<<state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
-    //     cerr<<exist_id_type[1][robot.virtual_id]<<endl;
-    //     cerr<<robot.virtual_id<<endl;
-    //     cerr<<needSlow<<endl;
-    // }
+    adjust_virtual_pos_total(robot);
+   
+    payload=calPayload(robot,robot.virtual_pos);
+    if(robot.id==1&&state.FrameID>=10&&state.FrameID<=100&&contr_print_flag){
+        cerr<<" FrameID "<< state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
+    }
     auto p1=get_w_now(robot,payload);
     ins_t.rotate=p1.first;
-    // ins_t.forward=get_v_now(robot,payload);
     ins_t.forward=6;
     if(lt(payload.distance,1)){
             if(robot.isVir){
@@ -3672,13 +3665,7 @@ Ins contr_one_rob(Robot& robot , PayLoad& payload){
         if(!robot.isVir){ 
             ins_t.forward=0;
         }
-    }
-    if(!p1.second){
-        if(!robot.isVir)
-            ins_t.forward=0;
-        else if(lt(payload.distance,1.5))
-            ins_t.forward=0;
-    }
+    } 
     if(!robot.isVir&&lt(payload.distance,0.3)){
         robot.cnt_tar=ret_next(robot,robot.cnt_tar);
     }
@@ -5266,6 +5253,7 @@ void adjust_virtual_pos_total(Robot& rob){
     adjust_virtual_pos(rob);
 }
 bool check_can_arrival(int istake,int id1,int id2){
+   
     int i1=min(id1/100,id2/100),i2=max(id1/100,id2/100);
     int j1=min(id1-id1/100*100,id2-id2/100*100),j2=max(id1-id1/100*100,id2-id2/100*100);
     // if(!eq(i1-i2,0)&&!eq(j1-j2,0)){
@@ -5274,10 +5262,15 @@ bool check_can_arrival(int istake,int id1,int id2){
     //     j1=max(j1-1,0);
     //     j2=min(j2+1,99);
     // }
+    if(i1<0||j1<0||i2<0||j2<0)cerr<<" 错误"<<endl;
     for(int j=j1;j<=j2;j++){
         int tmp=sum_matrix[istake][i2][j]-(i1>0?sum_matrix[istake][i1-1][j]:0);
-        if(tmp<(i2-i1+1))return false;
+        if(tmp<(i2-i1+1)){
+            
+            return false;
+        }
     }
+
     return true;
 
 }
@@ -5301,15 +5294,20 @@ void setVirPos(Robot& robot){
 
     int now_id=robot.node_id;
     int cnt=robot.cnt_tar;
-    
+   
     for(int i=ret_next(robot,cnt);i!=ret_next(robot,i);i=ret_next(robot,i)){
         int tmpId=i;
+ 
+        if(i<0)cerr<<"错误"<<endl;
         if(check_can_arrival(istake,now_id,tmpId)){
             robot.cnt_tar=tmpId;
         }else{
             break;
         }
+        
     }
+  
+   
     int tar1=robot.cnt_tar;
     if(exist_id[istake].count(tar1)==0){
         cerr<<"路径选点错误 "<<endl;
@@ -5357,6 +5355,8 @@ pair<double,double>select_visPos(Robot& robot,vector<int> range,int tar3){
 }
 int ret_next(Robot& robot,int tar_cnt){
     int tarID=robot.target_id;
+    if(tarID==-1)cerr<<"错误"<<endl;
+    if(robot.target_id==-1)cerr<<"错误"<<endl;
     int istake=robot.get_type==0?0:1;
     return next_node[tarID][istake][tar_cnt];
 }
@@ -5369,4 +5369,17 @@ bool at_least_three(Robot& robot,int tar_cnt){
         if(cnt1==0)return true;
     }
     return false;
+}
+double calMinAngle(Robot& robot,pair<double,double>pos){
+    int now_j= robot.pos.first/0.5;
+    int now_i= robot.pos.second/0.5;
+    int tar_j=pos.first/0.5;
+    int tar_i=pos.second/0.5; 
+    int t1=fabs(now_i-tar_i);
+    int t2=fabs(now_j-tar_j);
+    auto p1=subVector(pos,robot.pos);
+    auto p2=make_pair<double,double>(cos(robot.direction),sin(robot.direction));
+    Vec v1(p1);
+    Vec v2(p2);
+    return 0;
 }
