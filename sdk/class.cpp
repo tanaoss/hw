@@ -3683,8 +3683,8 @@ Ins contr_one_rob(Robot& robot){
     }
   
         ins_t.forward=vir_v(robot);
-        if(robot.id==0)
-        cerr<<state.FrameID<<"---"<<ins_t.forward<<endl;
+        // if(robot.id==0)
+        // cerr<<state.FrameID<<"---"<<ins_t.forward<<endl;
    
     return ins_t;
 }
