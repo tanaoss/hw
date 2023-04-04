@@ -5463,7 +5463,7 @@ bool can_trajectory_virpos(Robot rob,double v,int cnt){
                 }
                 return false;
             }
-        }
+        
         double seta=rob.direction;
         double w=rob.angular_velocity==0?0.00001:rob.angular_velocity;
         double a=return_ac(pay.angular_acceleration,rob.angular_velocity,w_next);
