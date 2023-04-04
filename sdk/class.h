@@ -166,7 +166,7 @@ struct Robot
         //     return false;
         // if(fabs(a.angular_velocity) - fabs(angular_velocity) > 1e-10)
         //     return true;
-        if (get_type == get_type){
+        if (get_type == a.get_type){
             if(fabs(time_val * collision_val - a.time_val * a.collision_val) < 1e-10)
                 return id < a.id;
             return time_val * collision_val - a.time_val * a.collision_val < 1e-10;
