@@ -2321,7 +2321,7 @@ void new_robot_judge(){
                 if(studios[robots[i].target_id_send].type!=8&&studios[robots[i].target_id_send].type!=9)studios_rid[robots[i].target_id_send][studios[robots[i].get_type].type] = i;
             }
         }
-        // cerr<<"robot : "<<i<<" target id = "<<robots[i].target_id<<" virtual target id = "<<robots[i].virtual_id<<" ins[i].buy = "<<ins[i].buy<<" ins[i].sell = "<<ins[i].sell<<endl;
+        // cerr<<"robot : "<<i<<" target id = "<<robots[i].target_id<<" virtual target id = "<<robots[i].virtual_id<<" virtual target pos = "<<robots[i].virtual_pos.first<<' '<<robots[i].virtual_pos.second<<" ins[i].buy = "<<ins[i].buy<<" ins[i].sell = "<<ins[i].sell<<endl;
     }
 }
 void new_first_action(){
