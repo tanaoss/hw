@@ -2290,7 +2290,7 @@ void new_robot_judge(){
                     robots[i].cnt_tar=robots[i].node_id;
                 }
                 else{
-                    cerr<<"robot: "<<i<<" wait "<<endl;
+                    // cerr<<"robot: "<<i<<" wait "<<endl;
                     ins[i].buy = -1;   //wait;
                     ins[i].sell = -1;
                 }
@@ -2337,7 +2337,7 @@ void new_robot_action(){
         else if(robots[i].target_id != -1)robot_get_type[studios[robots[i].target_id].type]++;
     }
     // if(state.FrameID >=2200 &&state.FrameID <= 2300){
-    //     cerr<<" r_id "<<studios[20].r_id<<endl;
+        // cerr<<" r_id "<<studios_rid[20][1]<<endl;
     // }
     new_robot_judge();
 }
