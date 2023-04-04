@@ -49,7 +49,7 @@ int main()
     cerr<<"eee"<<endl;
      while (cin >> state.FrameID)
     {
-        cerr<<" time "<<state.FrameID<<endl;
+        // cerr<<" time "<<state.FrameID<<endl;
         readStatusUntilOK() ;
         
         cout<<state.FrameID<<endl;
