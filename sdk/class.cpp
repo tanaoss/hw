@@ -3757,38 +3757,13 @@ double get_v_now(const Robot& robot, const PayLoad& payload){
 
 
 bool cmp_robot(Robot a, Robot b) {
-    if((check_wall_r(a.id) && check_wall_r(b.id))){
-        // cerr<<state.FrameID<<"both near wall :"<<a.id<<"-"<<b.id<<endl;
-        return gt(payloads[a.id].distance, payloads[b.id].distance);
-    }
-    
-    if(a.target_id == b.target_id && a.target_id != -1) {
-        if(lt(fabs(payloads[a.id].distance - payloads[b.id].distance), 1))
-            return a.get_type < b.get_type;
-        return gt(payloads[a.id].distance, payloads[b.id].distance);
-    }
-
-    // if(lt(fabs(payloads[a.id].speed), 2) && lt(fabs(payloads[b.id].speed), 2)) {
-    //     return gt(payloads[a.id].speed, fabs(payloads[b.id].speed));
-    // }
-    else if(check_wall_r(a.id) && lt(calcuDis(a.pos, studios[b.target_id].pos), payloads[b.id].distance))
-        return false;
-    else if(check_wall_r(b.id)  && lt(calcuDis(b.pos, studios[a.target_id].pos), payloads[a.id].distance))
+    if(a.target_id == -1) 
         return true;
-    // else if(check_wall_r(a.id) || (lt(fabs(payloads[a.id].speed), 2)) )
-    //     return false;
-    // else if(check_wall_r(b.id) || (lt(fabs(payloads[b.id].speed), 2)) )
-    //     return true;
-    if(eq(payloads[a.id].speed, 0) && eq(payloads[b.id].speed, 0)) {
-        return gt(payloads[a.id].distance, payloads[b.id].distance);
-    }
-    if(eq(payloads[a.id].speed, 0))
+    if(b.target_id == -1) 
         return false;
-    if(eq(payloads[b.id].speed, 0))
-        return true;
-
-    if((a.get_type != 0 && b.get_type !=0) || (a.get_type == 0 && b.get_type ==0))
-        return gt(payloads[a.id].distance, payloads[b.id].distance);
+    if(a.get_type == b.get_type) {
+        return dis_to_studios[a.target_id][(a.get_type != 0)][a.node_id] <dis_to_studios[b.target_id][(b.get_type != 0)][b.node_id];
+    }
     return a.get_type < b.get_type;
 }
 
