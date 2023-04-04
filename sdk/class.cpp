@@ -3707,6 +3707,7 @@ Ins contr_one_rob(Robot& robot){
     Flag_sumulate=0;
     Ins ins_t;
     if(robot.target_id==-1){
+        cerr<<" FrameID "<< state.FrameID<<endl;
         ins_t.forward=0;
         ins_t.rotate=Pi;
         return ins_t;
@@ -3714,12 +3715,13 @@ Ins contr_one_rob(Robot& robot){
     adjust_virtual_pos_total(robot);
     double tmpDis=calcuDis(robot.pos,exist_id[0][robot.node_id]);
     PayLoad payload=calPayload(robot,robot.virtual_pos);
-    // if(robot.id==0&&state.FrameID>=10&&state.FrameID<=100&&contr_print_flag){
-    //     cerr<<" FrameID "<< state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
-    //     cerr<<check_can_arrival(robot.get_type==0?0:1,robot.node_id,robot.virtual_id)<<endl;
-    //     cerr<<calcuDis(robot.pos,exist_id[0][robot.node_id])<<endl;
-    //     cerr<<robot.node_id<<" "<<robot.virtual_id<<endl;
-    // }
+    if(robot.id==0&&state.FrameID>=2&&state.FrameID<=100&&contr_print_flag){
+        cerr<<" FrameID "<< state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
+        cerr<<check_can_arrival(robot.get_type==0?0:1,robot.node_id,robot.virtual_id)<<endl;
+        cerr<<calcuDis(robot.pos,exist_id[0][robot.node_id])<<endl;
+        cerr<<robot.node_id<<" "<<robot.virtual_id<<endl;
+        cerr<<robot.target_id<<endl;
+    }
     
     auto p1=get_w_now(robot,payload);
     ins_t.rotate=p1.first;
