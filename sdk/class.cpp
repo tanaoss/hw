@@ -5149,15 +5149,16 @@ int get_bar_num(int node_id_a, int node_id_b, int is_take) {
 void init_bar_sum() {
     for(int stu_id = 0; stu_id < studios.size(); ++stu_id) {
         for(int i = 0; i < 100; ++i) {
-            // if(stu_id != 0 && )
-            for(int j = 0; j < 100; ++j) {
+            if(stu_id != 0 && get_bar_num(studios[stu_id].node_id, max((studios[stu_id].node_id / 100) - 1, 0) * 100 + max((studios[stu_id].node_id % 100) - 1, 0), 0)  == 0)
+                continue;
+            for(int j = 0; j < 100; ++j) { 
                 if(stu_id == 0) {
                     bar_sum[i][j][0] = (next_node[stu_id][0][i * 100 + j] == -1);
                     bar_sum[i][j][1] = (next_node[stu_id][1][i * 100 + j] == -1);
                 }
                 else {
                     bar_sum[i][j][0] = min(bar_sum[i][j][0], (int)(next_node[stu_id][0][i * 100 + j] == -1));
-                    bar_sum[i][j][0] = min(bar_sum[i][j][0], (int)(next_node[stu_id][0][i * 100 + j] == -1));
+                    bar_sum[i][j][1] = min(bar_sum[i][j][0], (int)(next_node[stu_id][1][i * 100 + j] == -1));
                 }
                 if(i > 0) {
                     bar_sum[i][j][0] += bar_sum[i - 1][j][0];
@@ -5165,6 +5166,7 @@ void init_bar_sum() {
                 }
                 if(j > 0) {
                     bar_sum[i][j][0] += bar_sum[i][j - 1][0] - bar_sum[i - 1][j - 1][0];
+                    bar_sum[i][j][1] += bar_sum[i][j - 1][1] - bar_sum[i - 1][j - 1][1];
                 }
             }
         }
@@ -5408,8 +5410,8 @@ set<int> getEqID(int istake,int id1) {
     int i1=id1/100;
     int j1=id1-i1*100;
     set<int> ans;
-    for(int i=i1-2;i<=i1+2;i++){
-        for(int j=j1-2;j<=j1+2;j++){
+    for(int i=i1-4;i<=i1+4;i++){
+        for(int j=j1-4;j<=j1+4;j++){
             int tmpID=i*100+j;
             if(check_can_arrival(istake,id1,tmpID)){
                 ans.insert(tmpID);
@@ -5445,10 +5447,11 @@ void setVirPos(Robot& robot){
         }
         
     }
-  
+    if(robot.cnt_tar==-1){
+        robot.cnt_tar=robot.node_id;
+    }
    
     int tar1=robot.cnt_tar;
-    int tmpMabeUse=next_node[robot.target_id][istake][robot.node_id];
     pair<double,double>virPos=make_pair(-1,-1);
     int virID=-1;
     // if(state.FrameID==1990||)
@@ -5458,11 +5461,29 @@ void setVirPos(Robot& robot){
         virPos.second=tmpPos.second;
         virID=getPosID(virPos);
     }else{
-        auto tmpPos=exist_id[0][tmpMabeUse];
+        cerr<<state.FrameID<<" --dasd-- "<<robot.id<<" "<<endl;
+        int tmp_is_take=istake==0?1:0;
+        auto tmpSet=getEqID(tmp_is_take,robot.node_id);
+        int tmpID=-1;
+        int now_j= robot.pos.first/0.5;
+        int now_i= robot.pos.second/0.5;
+        for(int i=now_i-1;i<=now_i+1;i++){
+            for(int j=now_j-1;j<=now_j+1;j++){
+                if(exist_id[istake].count(i*100+j)!=0){
+                    tmpID=i*100+j;
+                }
+            }
+        }
+        if(tmpID==-1){
+            cerr<<"球体长大后错误且无法解决"<<" "<<tmpSet.size() <<endl;
+        }
+        virID=tmpID;
+        robot.cnt_tar=virID;
+        auto tmpPos=exist_id[tmp_is_take][virID];
         virPos.first=tmpPos.first;
         virPos.second=tmpPos.second;
-        virID=tmpMabeUse;
-        robot.cnt_tar=tmpMabeUse;
+        // cerr<<virID<<endl;
+        // cerr<<robot.cnt_tar<<endl;
     }
     robot.isVir=false;
     bool con1=false;
@@ -5470,6 +5491,7 @@ void setVirPos(Robot& robot){
         con1=true;
         int tar2=next_node[tarID][istake][robot.cnt_tar];
         int tar3=next_node[tarID][istake][tar2];
+
         auto set1=getEqID(istake,tar1);
         auto set2=getEqID(istake,tar2);
         auto set3=getEqID(istake,tar3);
@@ -5490,6 +5512,7 @@ pair<double,double>select_visPos(Robot& robot,vector<int> range,int tar3){
     int istake=robot.get_type==0?0:1;
     int tar1=robot.cnt_tar;
     if(exist_id[istake].count(tar1)==0){
+        cerr<<tar1<<endl;
         cerr<<"路径选点错误 "<<endl;
     }
     auto virPos=exist_id[istake][tar1];
@@ -5513,7 +5536,7 @@ bool at_least_three(Robot& robot,int tar_cnt){
     int cnt1=3;
     int cnt=robot.cnt_tar;
     
-    for(int i=ret_next(robot,cnt);i!=ret_next(robot,i);i=ret_next(robot,i)){
+    for(int i=ret_next(robot,cnt);i!=ret_next(robot,i)&&i!=-1;i=ret_next(robot,i)){
         cnt1--;
         if(cnt1==0)return true;
     }
