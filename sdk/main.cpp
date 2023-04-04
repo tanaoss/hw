@@ -7,8 +7,6 @@ using namespace std;
 extern vector<Studio> studios;
 extern vector<Robot> robots;
 extern State state;//当前帧数，全局可见
-extern vector<PayLoad> pl_g;;
-extern vector<PayLoad> payloads;
 extern int class_map;
 int main()
 {
@@ -16,7 +14,7 @@ int main()
     std::cin.tie(0);    // IO
     // cerr<<"sss"<<endl;
     readMapUntilOK();
-    // cerr << "sss" << endl;
+    cerr << "sss" << endl;
     // divide_space();
     // deal_graph();
     // cerr << "sss" << endl;
@@ -31,6 +29,7 @@ int main()
         Dijkstra(i, 1);
         // if(i==1) print_dijkstra();
     }
+    cerr << "bbb" << endl;
     // print_dijkstra(1, 1);
     // for(int i = 0; i < 4; ++i) {
     //     Dijkstra(i, 0, 1);
@@ -45,9 +44,9 @@ int main()
     cout.flush();
     int count = 0;
     initrobotInfo();
-    // cerr<<"aaa"<<endl;
+    cerr<<"kkk"<<endl;
     init_studio_parameter();
-    // cerr<<"bbb"<<endl;
+    cerr<<"eee"<<endl;
      while (cin >> state.FrameID)
     {
         // cerr<<" time "<<state.FrameID<<endl;
@@ -56,15 +55,8 @@ int main()
         cout<<state.FrameID<<endl;
         if(count == 0)new_first_action();
         else new_robot_action();
-        payloads.clear();
-        for(int i=0;i<4;++i){
-            payloads.push_back(calPayload(robots[i], robots[i].virtual_pos));
-        }
         
-        for(int i=0;i<4;++i) robots[i].radius = payloads[i].radius;
-        pl_g=payloads;
-        control(payloads);
-      
+        control();
         count++;
 
         if(state.FrameID == 3053) {
@@ -76,3 +68,5 @@ int main()
     return 0;
    
 }
+
+// ./Robot -f -m maps/4.txt -c ./sdk "./main" 2>1.txt
