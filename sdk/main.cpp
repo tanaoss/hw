@@ -25,12 +25,13 @@ int main()
     init_vector();
     // printEdge(0);
     // printMap(1);
+    
     for(int i = 0; i < studios.size(); ++i) {
         Dijkstra(i, 0);
         Dijkstra(i, 1);
         // if(i==1) print_dijkstra();
     }
-    // print_dijkstra(1, 0);
+    // print_dijkstra(1, 1);
     // for(int i = 0; i < 4; ++i) {
     //     Dijkstra(i, 0, 1);
     // }
@@ -55,7 +56,6 @@ int main()
         cout<<state.FrameID<<endl;
         if(count == 0)new_first_action();
         else new_robot_action();
-        adjust_virtual_pos_total();
         payloads.clear();
         for(int i=0;i<4;++i){
             payloads.push_back(calPayload(robots[i], robots[i].virtual_pos));

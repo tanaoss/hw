@@ -4,6 +4,7 @@
 #include <string>
 #include <cmath>
 #include <map>
+#include <set>
 using namespace std;
 
 #define Pi 3.141592653589793
@@ -105,6 +106,8 @@ struct Robot
     int pane_id;
     pair<double,double> virtual_pos;
     int robot_area_type[2];
+    int cnt_tar;//标定的路径tar
+    bool isVir;
     bool operator!=(Robot s1){
     if(s1.id!=id||target_id!=s1.target_id||s1.loc_id!=loc_id||xy_pos!=s1.xy_pos||pos!=s1.pos){
             return true;
@@ -130,6 +133,8 @@ struct Robot
         need_rote_wall=false;
         radius = _radius;
         node_id = _node_id;
+        isVir=false;
+        cnt_tar=0;
     }
     void set(int _id, int _loc_id, int _get_type, double _time_val, double _collision_val, double _angular_velocity, pair<double, double> &&_xy_pos,
              double _direction, pair<double, double> &&_pos)
@@ -340,7 +345,7 @@ vector<pair<double, double>> Calculate_the_trajectory(Robot& rob, int cnt, int t
 PayLoad calPayload_trajectory(Robot rob,int studioID);
 vector<pair<double,double>>Calculate_the_trajectory(Robot& rob,Ins ins, int forward_change, int rotate_change,const vector<pair<double,double>>& tra,int cnt,int tar,double rob_dis,double pre_dis=100);
 double get_at_stop(double t,double a,double v,int sign_v1);
-Ins contr_one_rob(Robot& robot ,const PayLoad& payload);
+Ins contr_one_rob(Robot& robot ,PayLoad& payload);
 vector<double>  get_T_limits(Robot& rob);
 double get_at_stop_a(double t,double x,double v,int sign_v1);
 double return_time_root_v(double a,double b,double c,double v,double a1);
@@ -408,8 +413,13 @@ void init_vector();
 vector<int> get_future_node(int robot_id);
 bool is_need_slow(Robot& robot,pair<double,double> pos,pair<double,double> pos1);
 void adjust_virtual_pos(Robot& robot);
-void adjust_virtual_pos_total();
+void adjust_virtual_pos_total(Robot& robot);
 bool check_can_arrival(int istake,int id1,int id2);
-vector<int> getEqID(int istake,int id1,int tar);bool checkEnough(int robot_id, int target_id, int frame);
+set<int> getEqID(int istake,int id1);
+bool checkEnough(int robot_id, int target_id, int frame);
 void new_robot_action();
 void new_first_action();
+void setVirPos(Robot& robot);
+pair<double,double>select_visPos(Robot& robot,vector<int> range,int tar3);
+int ret_next(Robot& robot,int tar_cnt);
+bool at_least_three(Robot& robot,int tar_cnt);
