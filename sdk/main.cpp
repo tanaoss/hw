@@ -31,7 +31,7 @@ int main()
     }
     // cerr << "bbb" << endl;
     // cerr<<studios[10].node_id<<endl;
-    // print_dijkstra(10, 0, 1);
+    // print_dijkstra(6, 0, 1);
     // for(int i = 0; i < 4; ++i) {
     //     Dijkstra(i, 0, 1);
     // }
