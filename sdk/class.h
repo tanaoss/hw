@@ -114,6 +114,7 @@ struct Robot
     bool need_adjust_statues;
     bool adjust_w;
     bool adjust_pos;
+    bool need_slow;
     bool operator!=(Robot s1){
     if(s1.id!=id||target_id!=s1.target_id||s1.loc_id!=loc_id||xy_pos!=s1.xy_pos||pos!=s1.pos){
             return true;
@@ -145,6 +146,7 @@ struct Robot
         adjust_pos=false;
         cnt_tar=0;
         target_id_pre=-1;
+        need_slow=false;
     }
     void set(int _id, int _loc_id, int _get_type, double _time_val, double _collision_val, double _angular_velocity, pair<double, double> &&_xy_pos,
              double _direction, pair<double, double> &&_pos)
@@ -452,3 +454,5 @@ pair<double,bool> get_vir_w(Robot& rob,PayLoad& payload);
 void init_rob_status(Robot& rob);
 bool check_can_arrival_z(int id1,int id2);
 bool check_corner_collosion(Robot& rob);
+bool has_next(Robot& rob);
+bool check_tar_line(Robot& rob,double dis);

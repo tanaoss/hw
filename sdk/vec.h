@@ -18,8 +18,13 @@ struct Vec
         y=p1.second;
     }
 };
-using Point = Vec;                    
-struct Line_Ta { Point P; Vec v; };      
+using Point_Ta = Vec;                     
+struct Line_Ta { Point_Ta P; Vec v;
+    Line_Ta(Point_Ta _p,Vec _v){
+        P=_p;
+        v=_v;
+    }
+ };    
 struct Circle{
     double r;
     pair<double,double>pos;
@@ -28,18 +33,17 @@ struct Circle{
         r=_r;
     }
 };
-Vec r90a(Vec v) { return {-v.y, v.x}; }                          // 逆时针旋转90度的向量
-Vec r90c(Vec v) { return {v.y, -v.x}; }                          // 顺时针旋转90度的向量
+Vec r90a(Vec v) { return {-v.y, v.x}; }                         
+Vec r90c(Vec v) { return {v.y, -v.x}; }                         
 Vec operator+(Vec u, Vec v) { return {u.x + v.x, u.y + v.y}; }   // 向量加向量
 Vec operator-(Vec u, Vec v) { return {u.x - v.x, u.y - v.y}; }   // 向量减向量
 Vec operator*(double k, Vec v) { return {k * v.x, k * v.y}; }    // 数乘
 double operator*(Vec u, Vec v) { return u.x * v.x + u.y * v.y; } // 点乘
 double operator^(Vec u, Vec v) { return u.x * v.y - u.y * v.x; } // 叉乘
 double len(Vec v) { return sqrt(v.x * v.x + v.y * v.y); }        // 向量长度
-double slope(Vec v) { return v.y / v.x; }                        // 斜率 // NOTE 不要用isinf判断斜率不存在，用后面的paral_y
+double slope(Vec v) { return v.y / v.x; }                        // 斜率 
 double cos_t(Vec u, Vec v) { return u * v / len(u) / len(v); }
-// 归一化向量（与原向量方向相同的单位向量）
-// DEPENDS len
+double dis_lp(Point_Ta P, Line_Ta l) { return abs((P ^ l.v) - (l.P ^ l.v)) / len(l.v); }
 Vec norm(Vec v) { return {v.x / len(v), v.y / len(v)}; }
 double get_angle(double s1,double s2);
 double get_angle(pair<double,double> p1,pair<double,double> p2);
