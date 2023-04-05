@@ -31,7 +31,7 @@ int main()
     }
     // cerr << "bbb" << endl;
     // cerr<<studios[10].node_id<<endl;
-    print_dijkstra(10, 0, 1);
+    // print_dijkstra(10, 0, 1);
     // for(int i = 0; i < 4; ++i) {
     //     Dijkstra(i, 0, 1);
     // }
@@ -65,9 +65,10 @@ int main()
         control();
         count++;
 
-        // if(state.FrameID == 3053) {
-        //     for(int i = 0; i < 4; ++i) {
-        //         cerr<<i<<"-target:"<<robots[i].target_id<<endl;
+        // if(state.FrameID >= 4143 && state.FrameID < 4302) {
+        //     cerr<<" time "<<state.FrameID<<endl;
+        //     for(int i = 0; i < 1; ++i) {
+        //         cerr<<i<<"-target:"<<robots[i].target_id<<" type:"<<studios[robots[i].target_id].type<<endl;
         //     }
         // }
     }
