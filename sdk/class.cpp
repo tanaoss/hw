@@ -4001,7 +4001,7 @@ void collision_solve(int frame){
 
 
     // if(state.FrameID >= 5600 && state.FrameID <= 5630 && 999==999)
-        cerr_falg = true;
+        // cerr_falg = true;
 
 
     for(i = 0; i < 4; ++i)
