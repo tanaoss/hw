@@ -36,6 +36,8 @@ struct PayLoad
         distance = _distance;
         sign = _sign;
     }
+    PayLoad()
+    {}
 };
 
 struct State
@@ -422,6 +424,11 @@ void init_vector();
 bool is_connected(int node_id_a, int node_id_b, int is_take);
 int get_bar_num(int node_id_a, int node_id_b, int is_take);
 void init_bar_sum();
+PayLoad calPayload_back(Robot robot, pair<double, double> virtual_pos);
+PayLoad choose_best_pay(Robot &ro);
+double get_dis(Robot ro1, Robot ro2);
+int choose_close_node(int tar, int is_take, pair<double, double> pos);
+
 
 
 vector<int> get_future_node(int robot_id);
