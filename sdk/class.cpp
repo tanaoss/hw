@@ -3492,7 +3492,7 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot& rob,Ins ins_in, int f
     // }
     double t=0.02;
     Ins ins=contr_one_rob(rob);
-    cerr<<"kkk";
+    // cerr<<"kkk";
     PayLoad pay=calPayload(rob,rob.virtual_pos);
 
     Flag_sumulate=0;
@@ -3760,7 +3760,7 @@ Ins contr_one_rob(Robot& robot){
     Flag_sumulate=0;
     Ins ins_t;
     if(robot.target_id==-1){
-        cerr<<" FrameID "<< state.FrameID<<endl;
+        // cerr<<" FrameID "<< state.FrameID<<endl;
         ins_t.forward=0;
         ins_t.rotate=Pi;
         return ins_t;
@@ -3768,13 +3768,13 @@ Ins contr_one_rob(Robot& robot){
     adjust_virtual_pos_total(robot);
     double tmpDis=calcuDis(robot.pos,exist_id[0][robot.node_id]);
     PayLoad payload=calPayload(robot,robot.virtual_pos);
-    if(robot.id==0&&state.FrameID>=2&&state.FrameID<=100&&contr_print_flag){
-        cerr<<" FrameID "<< state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
-        cerr<<check_can_arrival(robot.get_type==0?0:1,robot.node_id,robot.virtual_id)<<endl;
-        cerr<<calcuDis(robot.pos,exist_id[0][robot.node_id])<<endl;
-        cerr<<robot.node_id<<" "<<robot.virtual_id<<endl;
-        cerr<<robot.target_id<<endl;
-    }
+    // if(robot.id==0&&state.FrameID>=2&&state.FrameID<=100&&contr_print_flag){
+    //     cerr<<" FrameID "<< state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
+    //     cerr<<check_can_arrival(robot.get_type==0?0:1,robot.node_id,robot.virtual_id)<<endl;
+    //     cerr<<calcuDis(robot.pos,exist_id[0][robot.node_id])<<endl;
+    //     cerr<<robot.node_id<<" "<<robot.virtual_id<<endl;
+    //     cerr<<robot.target_id<<endl;
+    // }
     
     auto p1=get_w_now(robot,payload);
     ins_t.rotate=p1.first;
@@ -3864,7 +3864,7 @@ bool cmp_robot(Robot a, Robot b) {
     if(b.target_id == -1) 
         return false;
     if(a.get_type == b.get_type) {
-        return dis_to_studios[a.target_id][(a.get_type != 0)][a.node_id] <dis_to_studios[b.target_id][(b.get_type != 0)][b.node_id];
+        return dis_to_studios[a.target_id][(a.get_type != 0)][a.node_id] < dis_to_studios[b.target_id][(b.get_type != 0)][b.node_id];
     }
     return a.get_type < b.get_type;
 }
@@ -3962,211 +3962,211 @@ void collision_solve(int frame){
         }
     }
 
-    // x = -1;
-    // for(i = 0; i < 2; ++i) {
-    //     choose_id = -1;
-    //     //选择碰撞最多的小球改变状态
-    //     for(j = 0; j < 4; ++j){
-    //         if(vis[j] || coll[j].size() == 0)
-    //             continue;
-    //         if(choose_id == -1 || coll[j].size() - ((x == j)) > coll[choose_id].size()) {
-    //             choose_id = j;
-    //         }
-    //     }
+    x = -1;
+    for(i = 0; i < 2; ++i) {
+        choose_id = -1;
+        //选择碰撞最多的小球改变状态
+        for(j = 0; j < 4; ++j){
+            if(vis[j] || coll[j].size() == 0)
+                continue;
+            if(choose_id == -1 || coll[j].size() - ((x == j)) > coll[choose_id].size()) {
+                choose_id = j;
+            }
+        }
 
               
         
-    //     //No collision
-    //     if(choose_id == -1 || coll[choose_id].size() - (x == choose_id) == 0)
-    //         break;
+        //No collision
+        if(choose_id == -1 || coll[choose_id].size() - (x == choose_id) == 0)
+            break;
 
 
-    //     // if(cerr_falg) {
-    //     //     cerr<<state.FrameID<<endl;
-    //     //     cerr<<check_wall_r(1)<<endl;
-    //     //     for(j=0;j<4;++j){
-    //     //         cerr<<ro[j].id<<":"<<payloads[ro[j].id].speed<<" target:"<<ro[j].target_id<<endl;
-    //     //     }
-    //     // }
+        // if(cerr_falg) {
+        //     cerr<<state.FrameID<<endl;
+        //     cerr<<check_wall_r(1)<<endl;
+        //     for(j=0;j<4;++j){
+        //         cerr<<ro[j].id<<":"<<payloads[ro[j].id].speed<<" target:"<<ro[j].target_id<<endl;
+        //     }
+        // }
 
 
 
-    //     tmp = 9000;
-    //     //避让最zao发生的碰撞
-    //     for(j = 0; j < coll[choose_id].size(); ++j) {
-    //         if(coll_time[choose_id][coll[choose_id][j]] < tmp) {
-    //             x = coll[choose_id][j];
-    //             tmp = coll_time[choose_id][coll[choose_id][j]];
-    //         }
-    //     }
+        tmp = 9000;
+        //避让最zao发生的碰撞
+        for(j = 0; j < coll[choose_id].size(); ++j) {
+            if(coll_time[choose_id][coll[choose_id][j]] < tmp) {
+                x = coll[choose_id][j];
+                tmp = coll_time[choose_id][coll[choose_id][j]];
+            }
+        }
 
-    //     if(cmp_robot(ro[x], ro[choose_id]) && vis[x] != 1) {
-    //         tmp = x;
-    //         x = choose_id;
-    //         choose_id = tmp;
-    //     }
+        if(cmp_robot(ro[x], ro[choose_id]) && vis[x] != 1) {
+            tmp = x;
+            x = choose_id;
+            choose_id = tmp;
+        }
 
-    //     vis[choose_id] = 1;
+        vis[choose_id] = 1;
 
         
-    //     if(x == -1) {
-    //         // if(cerr_falg)
-    //         // {cerr<<choose_id<<"*"<<coll[choose_id].size();
-    //         // cerr<<"xx"<<x<<endl;}
-    //         break;
-    //     }
+        if(x == -1) {
+            // if(cerr_falg)
+            // {cerr<<choose_id<<"*"<<coll[choose_id].size();
+            // cerr<<"xx"<<x<<endl;}
+            break;
+        }
 
-    //     if(cerr_falg) {
-    //         cerr<<ro[choose_id].id<<"target:"<<ro[choose_id].target_id<<" angle:"<<payloads[ro[choose_id].id].speed<<endl;
-    //         cerr<<ro[x].id<<"target:"<<ro[x].target_id<<" angle:"<<payloads[ro[x].id].speed<<endl;
-    //         cerr<<ro[choose_id].id<<"avoid"<< ro[x].id<<endl;
-    //     }
+        if(cerr_falg) {
+            cerr<<ro[choose_id].id<<"target:"<<ro[choose_id].target_id<<" angle:"<<payloads[ro[choose_id].id].speed<<endl;
+            cerr<<ro[x].id<<"target:"<<ro[x].target_id<<" angle:"<<payloads[ro[x].id].speed<<endl;
+            cerr<<ro[choose_id].id<<"avoid"<< ro[x].id<<endl;
+        }
 
 
-    //     ans = -1;
-    //     dis = 1000;
-    //     min_size = 27;
-    //     mindis = ro[choose_id].radius + ro[x].radius + 0.1;
-    //     ins_num = ((le(payloads[ro[choose_id].id].speed, 1) && le(payloads[ro[choose_id].id].distance, 2)) || eq(payloads[ro[choose_id].id].speed, 0) && !isNearWall(ro[choose_id].id))? 8: 7; 
-    //     for(k = 0; k < ins_num; ++k) {
-    //         if(k < 3) {
-    //             tmp_tra = Calculate_the_trajectory(ro[choose_id], ins_set[k], 1, 1, trajectory[x], 0, 25, mindis + 0.2, 100);
-    //         }
-    //         else if(k < 6) {
-    //             tmp_tra = Calculate_the_trajectory(ro[choose_id], ins_set[k], 0, 1, trajectory[x], 0, 25, mindis + 0.2, 100);
-    //         }
-    //         else {
-    //             tmp_tra = Calculate_the_trajectory(ro[choose_id], ins_set[k], 1, 0, trajectory[x], 0, 25, mindis, 100);
-    //         }
+        ans = -1;
+        dis = 1000;
+        min_size = 27;
+        mindis = ro[choose_id].radius + ro[x].radius + 0.1;
+        ins_num = ((le(payloads[ro[choose_id].id].speed, 1) && le(payloads[ro[choose_id].id].distance, 2)) || eq(payloads[ro[choose_id].id].speed, 0) && !isNearWall(ro[choose_id].id))? 8: 7; 
+        for(k = 0; k < ins_num; ++k) {
+            if(k < 3) {
+                tmp_tra = Calculate_the_trajectory(ro[choose_id], ins_set[k], 1, 1, trajectory[x], 0, 25, mindis + 0.2, 100);
+            }
+            else if(k < 6) {
+                tmp_tra = Calculate_the_trajectory(ro[choose_id], ins_set[k], 0, 1, trajectory[x], 0, 25, mindis + 0.2, 100);
+            }
+            else {
+                tmp_tra = Calculate_the_trajectory(ro[choose_id], ins_set[k], 1, 0, trajectory[x], 0, 25, mindis, 100);
+            }
 
-    //         if(cerr_falg) cerr<<k<<"-"<<tmp_tra.size()<<endl;
-    //         if(tmp_tra.size() == 0) continue;
-    //         flag = false;
+            if(cerr_falg) cerr<<k<<"-"<<tmp_tra.size()<<endl;
+            if(tmp_tra.size() == 0) continue;
+            flag = false;
 
-    //         //检测是否会和其他小球发生碰撞
-    //         // for(j = 0; j < 4; ++j){
-    //         //     if(j == choose_id) continue;
-    //         //     if(checkNoCollision(tmp_tra, trajectory[j], ro[choose_id].radius + ro[j].radius) == 9000) {
-    //         //         flag =true;
-    //         //         break;
-    //         //     }
-    //         // }
-    //         //若和其他小球碰撞则更换策略
-    //         // if(flag) continue;
-    //         dis_tmp = calcuDis(tmp_tra[tmp_tra.size() - 1], studios[ro[choose_id].target_id].pos);
-    //         if(cerr_falg) cerr<<"dis:"<<dis_tmp<<endl;
+            //检测是否会和其他小球发生碰撞
+            // for(j = 0; j < 4; ++j){
+            //     if(j == choose_id) continue;
+            //     if(checkNoCollision(tmp_tra, trajectory[j], ro[choose_id].radius + ro[j].radius) == 9000) {
+            //         flag =true;
+            //         break;
+            //     }
+            // }
+            //若和其他小球碰撞则更换策略
+            // if(flag) continue;
+            dis_tmp = calcuDis(tmp_tra[tmp_tra.size() - 1], studios[ro[choose_id].target_id].pos);
+            if(cerr_falg) cerr<<"dis:"<<dis_tmp<<endl;
 
-    //         if((le(dis_tmp, dis) && min_size >= tmp_tra.size()) || min_size > tmp_tra.size() ) {
-    //             min_size = tmp_tra.size();
-    //             dis = dis_tmp;
-    //             ans = k;
-    //             tra = tmp_tra;
-    //         }
-    //     }
+            if((le(dis_tmp, dis) && min_size >= tmp_tra.size()) || min_size > tmp_tra.size() ) {
+                min_size = tmp_tra.size();
+                dis = dis_tmp;
+                ans = k;
+                tra = tmp_tra;
+            }
+        }
 
-    //     if(ans != -1) {
-    //         if(cerr_falg) {
-    //             cerr<<payloads[ro[choose_id].id].angle<<"-"<<payloads[ro[choose_id].id].sign<<endl;
-    //             cerr<<"old solution:"<<ins[ro[choose_id].id].forward<<"**"<<ins[ro[choose_id].id].rotate<<endl;
-    //         }
-    //         trajectory[choose_id] = tra;
-    //         // if(cerr_falg) cerr<<"ans"<<ans<<endl;
-    //         updateIns(ro[choose_id].id, ans);
-    //         coll_time[x][choose_id] = 0;
-    //         last_solution[ro[choose_id].id][ro[x].id] = ans;
-    //         last_solution[ro[x].id][ro[choose_id].id] = -1;
+        if(ans != -1) {
+            if(cerr_falg) {
+                cerr<<payloads[ro[choose_id].id].angle<<"-"<<payloads[ro[choose_id].id].sign<<endl;
+                cerr<<"old solution:"<<ins[ro[choose_id].id].forward<<"**"<<ins[ro[choose_id].id].rotate<<endl;
+            }
+            trajectory[choose_id] = tra;
+            // if(cerr_falg) cerr<<"ans"<<ans<<endl;
+            updateIns(ro[choose_id].id, ans);
+            coll_time[x][choose_id] = 0;
+            last_solution[ro[choose_id].id][ro[x].id] = ans;
+            last_solution[ro[x].id][ro[choose_id].id] = -1;
 
-    //         if(ro[choose_id].target_id == ro[x].target_id && ro[choose_id].target_id != -1) {
+            if(ro[choose_id].target_id == ro[x].target_id && ro[choose_id].target_id != -1) {
 
-    //             reachTime[ro[x].id] = getTimeToStudio(ro[x].id, trajectory[x]);
+                reachTime[ro[x].id] = getTimeToStudio(ro[x].id, trajectory[x]);
                     
-    //             stopID = ro[choose_id].id;
-    //             goID = ro[x].id;
-    //             ins[stopID].forward = min(payloads[stopID].distance / (reachTime[goID]*0.02 + 0.5), ins[stopID].forward);
+                stopID = ro[choose_id].id;
+                goID = ro[x].id;
+                ins[stopID].forward = min(payloads[stopID].distance / (reachTime[goID]*0.02 + 0.5), ins[stopID].forward);
 
 
-    //                 if(cerr_falg) {
-    //                     // cerr<<"time:"<<state.FrameID<<endl;
-    //                     // cerr<<ro[i].id<<"reach time:"<<reachTime[ro[i].id]<<endl;
-    //                     // cerr<<ro[j].id<<"reach time:"<<reachTime[ro[j].id]<<endl;
-    //                     cerr<<stopID<<"stop:"<<ins[stopID].forward<<endl;
-    //                 }
-    //         }
+                    if(cerr_falg) {
+                        // cerr<<"time:"<<state.FrameID<<endl;
+                        // cerr<<ro[i].id<<"reach time:"<<reachTime[ro[i].id]<<endl;
+                        // cerr<<ro[j].id<<"reach time:"<<reachTime[ro[j].id]<<endl;
+                        cerr<<stopID<<"stop:"<<ins[stopID].forward<<endl;
+                    }
+            }
 
-    //         if(cerr_falg) {
-    //             cerr<<ans<<endl;
-    //             cerr<<ro[x].id<<"-"<<ro[choose_id].id<<":"<<last_solution[ro[x].id][ro[choose_id].id]<<endl;
-    //             if(ans<3) {
-    //                 cerr<<"chose solution11:"<<ins[ro[choose_id].id].forward<<"**"<<ins[ro[choose_id].id].rotate<<endl;
-    //             }
-    //             else if(ans<6) {
-    //                 cerr<<"chose solution01:"<<ins[ro[choose_id].id].forward<<"**"<<ins[ro[choose_id].id].rotate<<endl;
-    //             }
-    //             else {
-    //                 cerr<<"chose solution10:"<<ins[ro[choose_id].id].forward<<"**"<<ins[ro[choose_id].id].rotate<<endl;
-    //             }
+            if(cerr_falg) {
+                cerr<<ans<<endl;
+                cerr<<ro[x].id<<"-"<<ro[choose_id].id<<":"<<last_solution[ro[x].id][ro[choose_id].id]<<endl;
+                if(ans<3) {
+                    cerr<<"chose solution11:"<<ins[ro[choose_id].id].forward<<"**"<<ins[ro[choose_id].id].rotate<<endl;
+                }
+                else if(ans<6) {
+                    cerr<<"chose solution01:"<<ins[ro[choose_id].id].forward<<"**"<<ins[ro[choose_id].id].rotate<<endl;
+                }
+                else {
+                    cerr<<"chose solution10:"<<ins[ro[choose_id].id].forward<<"**"<<ins[ro[choose_id].id].rotate<<endl;
+                }
                                 
-    //             // if(state.FrameID == 3487){
-    //             //     cerr<<"-----------"<<endl;
-    //             //     for(int t = 0; t<tra.size(); ++t){
-    //             //         if(state.FrameID+t>3600) break;
-    //             //         cerr<<state.FrameID+t;
-    //             //         cerr<<"pos:("<<tra[t].first<<", "<<tra[t].second<<")--("<<trajectory[x][t].first<<", "<<trajectory[x][t].second<<") dis:"<<calcuDis(trajectory[x][t], tra[t])<<endl;
-    //             //     }
-    //             //     cerr<<"-----------"<<endl;
-    //             // }
+                // if(state.FrameID == 3487){
+                //     cerr<<"-----------"<<endl;
+                //     for(int t = 0; t<tra.size(); ++t){
+                //         if(state.FrameID+t>3600) break;
+                //         cerr<<state.FrameID+t;
+                //         cerr<<"pos:("<<tra[t].first<<", "<<tra[t].second<<")--("<<trajectory[x][t].first<<", "<<trajectory[x][t].second<<") dis:"<<calcuDis(trajectory[x][t], tra[t])<<endl;
+                //     }
+                //     cerr<<"-----------"<<endl;
+                // }
                 
-    //             // updateIns(ro[choose_id].id, 7);
-    //             // int t = 1;
-    //             // cerr<<"pos:("<<tra[t].first<<", "<<tra[t].second<<")--("<<trajectory[x][t].first<<", "<<trajectory[x][t].second<<") dis:"<<calcuDis(trajectory[x][t], tra[t])<<endl;
-    //             // cerr<<state.FrameID;
-    //             // cerr<<"pos:("<<ro[choose_id].pos.first<<", "<<ro[choose_id].pos.second<<")--("<<ro[x].pos.first<<", "<<ro[x].pos.second<<") dis:"<<calcuDis(ro[choose_id].pos, ro[x].pos)<<endl;
-    //         }
-    //     }
-    //     else{
-    //         // if(cerr_falg) updateIns(ro[choose_id].id, 4);
-    //         // else
-    //         // adjust_collo_new(ro[choose_id].id, ro[x].id, payloads[ro[choose_id].id].sign);
-    //         // solveNoSolution(ro[choose_id].id, ro[x].id);
-    //         // if(cerr_falg)
-    //         if(cerr_falg) {
-    //             cerr<<"~old solution:"<<ins[ro[choose_id].id].forward<<"**"<<ins[ro[choose_id].id].rotate<<endl;
-    //             // cerr<<ro[choose_id].id<<"-"<<ro[x].id<<":"<<"last_solution[choose_id][x]"<<last_solution[ro[choose_id].id][ro[x].id]<<endl;
-    //         }
-    //         // cerr<<state.FrameID<<"no solution to avoid collision"<<ro[choose_id].id<<"-"<<ro[x].id<<"*"<<coll_time[choose_id][x]<<endl;
+                // updateIns(ro[choose_id].id, 7);
+                // int t = 1;
+                // cerr<<"pos:("<<tra[t].first<<", "<<tra[t].second<<")--("<<trajectory[x][t].first<<", "<<trajectory[x][t].second<<") dis:"<<calcuDis(trajectory[x][t], tra[t])<<endl;
+                // cerr<<state.FrameID;
+                // cerr<<"pos:("<<ro[choose_id].pos.first<<", "<<ro[choose_id].pos.second<<")--("<<ro[x].pos.first<<", "<<ro[x].pos.second<<") dis:"<<calcuDis(ro[choose_id].pos, ro[x].pos)<<endl;
+            }
+        }
+        else{
+            // if(cerr_falg) updateIns(ro[choose_id].id, 4);
+            // else
+            // adjust_collo_new(ro[choose_id].id, ro[x].id, payloads[ro[choose_id].id].sign);
+            // solveNoSolution(ro[choose_id].id, ro[x].id);
+            // if(cerr_falg)
+            if(cerr_falg) {
+                cerr<<"~old solution:"<<ins[ro[choose_id].id].forward<<"**"<<ins[ro[choose_id].id].rotate<<endl;
+                // cerr<<ro[choose_id].id<<"-"<<ro[x].id<<":"<<"last_solution[choose_id][x]"<<last_solution[ro[choose_id].id][ro[x].id]<<endl;
+            }
+            // cerr<<state.FrameID<<"no solution to avoid collision"<<ro[choose_id].id<<"-"<<ro[x].id<<"*"<<coll_time[choose_id][x]<<endl;
 
-    //         if(last_solution[ro[choose_id].id][ro[x].id] != -1) {
-    //             if(le(payloads[ro[choose_id].id].speed, 0) && le(ro[choose_id].angular_velocity, 0))
-    //                 updateIns(ro[choose_id].id, 7);
-    //             else updateIns(ro[choose_id].id, last_solution[ro[choose_id].id][ro[x].id]);
+            if(last_solution[ro[choose_id].id][ro[x].id] != -1) {
+                if(le(payloads[ro[choose_id].id].speed, 0) && le(ro[choose_id].angular_velocity, 0))
+                    updateIns(ro[choose_id].id, 7);
+                else updateIns(ro[choose_id].id, last_solution[ro[choose_id].id][ro[x].id]);
                 
-    //             if(cerr_falg)
-    //             {
-    //                 if(last_solution[ro[choose_id].id][ro[x].id]<3) {
-    //                     cerr<<"~chose solution11:"<<ins[ro[choose_id].id].forward<<"**"<<ins[ro[choose_id].id].rotate<<endl;
-    //                 }
-    //                 else if(last_solution[ro[choose_id].id][ro[x].id]<6) {
-    //                     cerr<<"~chose solution01:"<<ins[ro[choose_id].id].forward<<"**"<<ins[ro[choose_id].id].rotate<<endl;
-    //                 }
-    //                 else {
-    //                     cerr<<"~chose solution10:"<<ins[ro[choose_id].id].forward<<"**"<<ins[ro[choose_id].id].rotate<<endl;
-    //                 }
-    //             }
-    //         }
-    //         else {
-    //             if(vis[x] && vis[choose_id]) {
-    //                 // ins[ro[choose_id].id].forward = -2;
-    //                 if(cerr_falg) cerr<<"no way"<<endl;
-    //                 adjust_collo_new(ro[choose_id].id, ro[x].id, payloads[ro[choose_id].id].sign);
-    //                 continue;
-    //             }
-    //             choose_id = x;
-    //             x = -1;
-    //             i--;
-    //         }            
-    //     }
+                if(cerr_falg)
+                {
+                    if(last_solution[ro[choose_id].id][ro[x].id]<3) {
+                        cerr<<"~chose solution11:"<<ins[ro[choose_id].id].forward<<"**"<<ins[ro[choose_id].id].rotate<<endl;
+                    }
+                    else if(last_solution[ro[choose_id].id][ro[x].id]<6) {
+                        cerr<<"~chose solution01:"<<ins[ro[choose_id].id].forward<<"**"<<ins[ro[choose_id].id].rotate<<endl;
+                    }
+                    else {
+                        cerr<<"~chose solution10:"<<ins[ro[choose_id].id].forward<<"**"<<ins[ro[choose_id].id].rotate<<endl;
+                    }
+                }
+            }
+            else {
+                if(vis[x] && vis[choose_id]) {
+                    // ins[ro[choose_id].id].forward = -2;
+                    if(cerr_falg) cerr<<"no way"<<endl;
+                    // adjust_collo_new(ro[choose_id].id, ro[x].id, payloads[ro[choose_id].id].sign);
+                    continue;
+                }
+                choose_id = x;
+                x = -1;
+                i--;
+            }            
+        }
           
-    // }
+    }
 
     // if(state.FrameID == 182 || state.FrameID == 187) {
     //     int a,b;
