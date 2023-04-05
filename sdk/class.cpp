@@ -812,7 +812,7 @@ void control(){
     //     cerr<<state.FrameID<<" ins befoer "<<ins[0].forward<<endl;
     //     cerr<<check_will_colloWithWall(robots[0])<<endl;
     // }
-    collision_solve(25);
+    // collision_solve(25);
 
     // if(state.FrameID >= 5600 && state.FrameID < 5610) {
     //     cerr<<"~ins:"<<ins[2].forward<<"  "<<ins[2].rotate<<endl;
@@ -3618,11 +3618,11 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot& rob,Ins ins_in, int f
         return {};
     }
     // 撞障碍物，返回空
-    // if(checkNearBar(rob.pos, rob.radius)){
-    //     printPair(rob.pos);
-    //     cerr<<"撞障碍物"<<endl;
-    //     return {};
-    // }
+    if(checkNearBar(rob.pos, rob.radius)){
+        // printPair(rob.pos);
+        // cerr<<"撞障碍物"<<endl;
+        return {};
+    }
     cnt++;
     
     double seta=rob.direction;
@@ -3966,6 +3966,17 @@ void print_robot_infor(Robot r) {
     printPair(r.pos);
 }
 
+bool change_target(int id1, int id2) {
+    if(robots[id1].loc_id == robots[id1].target_id || robots[id2].loc_id == robots[id2].target_id)
+        return false;
+    int cnt;
+    cnt = robots[id1].target_id;
+    robots[id1].target_id = robots[id2].target_id;
+    robots[id1].cnt_tar = robots[id1].node_id;
+    robots[id2].target_id = cnt;
+    robots[id2].cnt_tar = robots[id2].node_id;
+    return true;
+}
 
 bool cmp_robot(Robot a, Robot b) {
     if(a.target_id == -1) 
@@ -4001,13 +4012,13 @@ void collision_solve(int frame){
 
 
     // if(state.FrameID >= 5600 && state.FrameID <= 5630 && 999==999)
-        // cerr_falg = true;
+        cerr_falg = true;
 
 
     for(i = 0; i < 4; ++i)
         ro.emplace_back(robots[i]);
     sort(ro.begin(), ro.end(), cmp_robot);
-    for(i = 0; i < 4; ++i) trajectory[i] = Calculate_the_trajectory(ro[i], 1, frame, 0);
+    for(i = 0; i < 4; ++i) trajectory[i] = Calculate_the_trajectory(ro[i], 0, frame, 0);
 
     // if(state.FrameID == 2) {
     //     cerr<<"predict"<<endl;
@@ -4131,24 +4142,30 @@ void collision_solve(int frame){
             cerr<<ro[choose_id].id<<"avoid"<< ro[x].id<<endl;
         }
 
+        if(ro[choose_id].get_type == ro[x].get_type) {
+            //交换目标
+            if(change_target(ro[choose_id].id, ro[x].id))
+                continue;
+        }
+
 
         ans = -1;
         dis = 1000;
         min_size = 27;
         mindis = ro[choose_id].radius + ro[x].radius + 0.1;
-        ins_num = 5;
+        ins_num = 4;
         for(k = 0; k < ins_num; ++k) {
             if(k < 3) {
-                tmp_tra = Calculate_the_trajectory(ro[choose_id], ins_set[k], 0, 1, trajectory[x], 1, 25, mindis + 0.2, 100);
+                tmp_tra = Calculate_the_trajectory(ro[choose_id], ins_set[k], 0, 1, trajectory[x], 0, 25, mindis + 0.2, 100);
             }
             // else if(k < 4) {
             //     tmp_tra = Calculate_the_trajectory(ro[choose_id], ins_set[k], 1, 1, trajectory[x], 0, 25, mindis + 0.2, 100);
             // }
             else {
-                tmp_tra = Calculate_the_trajectory(ro[choose_id], ins_set[k], 1, 0, trajectory[x], 1, 25, mindis, 100);
+                tmp_tra = Calculate_the_trajectory(ro[choose_id], ins_set[k], 1, 0, trajectory[x], 0, 25, mindis, 100);
             }
 
-            if(cerr_falg) cerr<<k<<"-"<<tmp_tra.size()<<endl;
+            // if(cerr_falg) cerr<<k<<"-"<<tmp_tra.size()<<endl;
             if(tmp_tra.size() == 0) continue;
             flag = false;
 
@@ -4163,7 +4180,7 @@ void collision_solve(int frame){
             //若和其他小球碰撞则更换策略
             // if(flag) continue;
             dis_tmp = calcuDis(tmp_tra[tmp_tra.size() - 1], studios[ro[choose_id].target_id].pos);
-            if(cerr_falg) cerr<<"dis:"<<dis_tmp<<endl;
+            // if(cerr_falg) cerr<<"dis:"<<dis_tmp<<endl;
 
             if((le(dis_tmp, dis) && min_size >= tmp_tra.size()) || min_size > tmp_tra.size() ) {
                 min_size = tmp_tra.size();
@@ -4171,7 +4188,7 @@ void collision_solve(int frame){
                 ans = k;
                 tra = tmp_tra;
             }
-                }
+        }
 
         if(ans != -1) {
             if(cerr_falg) {
@@ -4237,7 +4254,8 @@ void collision_solve(int frame){
             // else
             // adjust_collo_new(ro[choose_id].id, ro[x].id, payloads[ro[choose_id].id].sign);
             // solveNoSolution(ro[choose_id].id, ro[x].id);
-            // if(cerr_falg)
+            if(cerr_falg)
+                cerr<<"back"<<endl;
 
             updateIns(choose_id, 4);
             
@@ -4344,9 +4362,34 @@ void updateIns(int id, int i) {
     }
     if(i == 4 && le(payloads[id].speed, 0)) {
         PayLoad pay=calPayload(robots[id], trans_nodeID_to_pos(next_node[robots[id].target_id][(robots[id].get_type != 0)][robots[id].node_id]));
-        ins[id].rotate = pay.sign * Pi;
+        ins[id].rotate = get_w_now(robots[id], pay).first;
+        cerr<<robots[id].node_id<<"-"<<next_node[robots[id].target_id][(robots[id].get_type != 0)][robots[id].node_id]<<endl;
+        cerr<<pay.angle<<"*"<<pay.sign<<endl;
+        cerr<<ins[id].rotate<<endl;
     }
     robots[i].cnt_tar = robots[i].node_id;
+}
+
+
+int choose_best_nodeID(const Robot &ro) {
+    int is_take = (ro.get_type != 0);
+    int tar = ro.target_id;
+    pair<double, double> node_pos = trans_nodeID_to_pos(ro.node_id);
+    int best_node;
+    double dis, tmp, angle;
+    if(next_node[tar][is_take][ro.node_id] != -1) return;
+    for(int i = (ro.node_id / 100)-1; i < (ro.node_id / 100) + 2; ++i) {
+        for(int j = (ro.node_id % 100) -1; j < (ro.node_id % 100) +2; ++j) {
+            if(next_node[tar][is_take][i * 100 + j + ro.node_id] == -1) continue;
+            // angle = calAngle(ro.direction, subVector(ro.pos, make_pair(j * 0.5 + 0.25, i * 0.5 + 0.25)));
+            tmp = calcuDis(ro.pos, make_pair(node_pos.first + j * 0.5, node_pos.second + i * 0.5));
+            if(gt(dis, tmp)){
+                dis = tmp;
+                best_node = i * 100 + j + ro.node_id;
+            }
+        }
+    }
+    return best_node;
 }
 
 
