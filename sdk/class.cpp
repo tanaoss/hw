@@ -1148,8 +1148,8 @@ pair<pair<int,int>,double> new_pick_point(int robot_id,int state_type,int change
                                     }
                                     income_ratio = (income/dist);
                                     // if(state.FrameID>=690 &&state.FrameID< 720){
-                                    // cerr<<"to buy dist = "<< dis_to_studios[material_studio_id][0][robots[robot_id].node_id]<<" to send dist = "<<dis_to_studios[i][1][studios[material_studio_id].node_id]<<endl;
-                                    // cerr<< "robot : "<<robot_id<<" buy : "<<material_studio_id<<" type : "<<studios[material_studio_id].type<<" send : "<<i<<" type : "<< studios[i].type<<" income_ratio : "<<income_ratio<<" income = "<<income<<" dist = "<<dist<<endl;
+                                    cerr<<"to buy dist = "<< dis_to_studios[material_studio_id][0][robots[robot_id].node_id]<<" to send dist = "<<dis_to_studios[i][1][studios[material_studio_id].node_id]<<endl;
+                                    cerr<< "robot : "<<robot_id<<" buy : "<<material_studio_id<<" type : "<<studios[material_studio_id].type<<" send : "<<i<<" type : "<< studios[i].type<<" income_ratio : "<<income_ratio<<" income = "<<income<<" dist = "<<dist<<endl;
                                     // }
                                     if(gt(income_ratio,max)){
                                         max = income_ratio;
@@ -1362,18 +1362,18 @@ void new_robot_judge(){
         if(studios[robots[i].target_id_send].type>3&&studios[robots[i].target_id_send].type<=7){
             if(robots[i].get_type == 0){
                 if(studios_rid[robots[i].target_id_send][studios[robots[i].target_id].type]==-1){
-                    cerr<<" robot : "<<i<<" send target : "<<robots[i].target_id_send<<" type: "<<studios[robots[i].target_id_send].type<<" r_id == -1"<<" buy type: "<<studios[robots[i].target_id].type<<endl;
+                    // cerr<<" robot : "<<i<<" send target : "<<robots[i].target_id_send<<" type: "<<studios[robots[i].target_id_send].type<<" r_id == -1"<<" buy type: "<<studios[robots[i].target_id].type<<endl;
                     studios_rid[robots[i].target_id_send][studios[robots[i].target_id].type] = i;
                 }
             }
             else if(robots[i].get_type != 0){
                 if(studios_rid[robots[i].target_id_send][robots[i].get_type]==-1){
-                    cerr<<" robot : "<<i<<" send target : "<<robots[i].target_id_send<<" type: "<<studios[robots[i].target_id_send].type<<" r_id == -1"<<" buy type: "<<robots[i].get_type<<endl;
+                    // cerr<<" robot : "<<i<<" send target : "<<robots[i].target_id_send<<" type: "<<studios[robots[i].target_id_send].type<<" r_id == -1"<<" buy type: "<<robots[i].get_type<<endl;
                     studios_rid[robots[i].target_id_send][robots[i].get_type] = i;
                 }
             }
         }
-        // cerr<<"robot : "<<i<<" target id = "<<robots[i].target_id<<" virtual target id = "<<robots[i].virtual_id<<" virtual target pos = "<<robots[i].virtual_pos.first<<' '<<robots[i].virtual_pos.second<<" ins[i].buy = "<<ins[i].buy<<" ins[i].sell = "<<ins[i].sell<<endl;
+        // cerr<<"robot : "<<i<<" target id = "<<robots[i].target_id<<"from "<<robots[i].target_id_buy<<" - "<<robots[i].target_id_send<<" ins[i].buy = "<<ins[i].buy<<" ins[i].sell = "<<ins[i].sell<<endl;
     }
 }
 void new_first_action(){
@@ -1390,9 +1390,9 @@ void new_robot_action(){
         if(robots[i].get_type != 0)robot_get_type[robots[i].get_type]++;
         else if(robots[i].target_id != -1)robot_get_type[studios[robots[i].target_id].type]++;
     }
-    if(state.FrameID >=10830 &&state.FrameID <= 11100){
-        cerr<<" r_id "<<studios[6].r_id<<endl;
-    }
+    // if(state.FrameID >=10830 &&state.FrameID <= 11100){
+    //     cerr<<" r_id "<<studios[6].r_id<<endl;
+    // }
     new_robot_judge();
 }
 
@@ -2820,7 +2820,7 @@ void print_robot_infor(Robot r) {
 }
 
 bool change_target(int id1, int id2) {
-    if(robots[id1].loc_id == robots[id1].target_id || robots[id2].loc_id == robots[id2].target_id)
+    if(lt(calcuDis(robots[id1].pos,studios[robots[id1].target_id].pos),0.7)|| lt(calcuDis(robots[id2].pos,studios[robots[id2].target_id].pos),0.7))
         return false;
     //keyouhua
     if(robots[id1].target_id != -1 && le(get_dis(robots[id1], robots[id2]), 0)) return false;
@@ -2828,11 +2828,34 @@ bool change_target(int id1, int id2) {
     if(robots[id1].target_id == robots[id2].target_id) return false;
     // cerr<<"change_target"<<endl;
     int cnt;
+    if(robots[id1].get_type==robots[id2].get_type && robots[id1].get_type == 0){
+        // cerr<<" studio rid : "<<studios[robots[id1].target_id_buy].r_id<<" - "<<studios[robots[id2].target_id_buy].r_id <<endl;
+        cnt = studios[robots[id1].target_id_buy].r_id;
+        studios[robots[id1].target_id_buy].r_id = studios[robots[id2].target_id_buy].r_id;
+        studios[robots[id2].target_id_buy].r_id = cnt;
+        // cerr<<" studio rid : "<<studios[robots[id1].target_id_buy].r_id<<" - "<<studios[robots[id2].target_id_buy].r_id <<endl;
+    }
+    // cerr<<"material_rid "<<studios_rid[robots[id1].target_id_send][studios[robots[id1].target_id_buy].type]<<" - "<<studios_rid[robots[id2].target_id_send][studios[robots[id2].target_id_buy].type]<<endl;
+    cnt = studios_rid[robots[id1].target_id_send][studios[robots[id1].target_id_buy].type];
+    studios_rid[robots[id1].target_id_send][studios[robots[id1].target_id_buy].type] = studios_rid[robots[id2].target_id_send][studios[robots[id2].target_id_buy].type];
+    studios_rid[robots[id2].target_id_send][studios[robots[id2].target_id_buy].type] = cnt;
+    // cerr<<"material_rid "<<studios_rid[robots[id1].target_id_send][studios[robots[id1].target_id_buy].type]<<" - "<<studios_rid[robots[id2].target_id_send][studios[robots[id2].target_id_buy].type] <<endl;
+    // cerr<<" target_send : "<<robots[id1].target_id_send<<" - "<<robots[id2].target_id_send<<endl;
+    cnt = robots[id1].target_id_send;
+    robots[id1].target_id_send = robots[id2].target_id_send;
+    robots[id2].target_id_send = cnt;
+    // cerr<<" target_send : "<<robots[id1].target_id_send<<" - "<<robots[id2].target_id_send<<endl;
+    // cerr<<" target_buy : "<<robots[id1].target_id_buy<<" - "<<robots[id2].target_id_buy<<endl;
+    cnt = robots[id1].target_id_buy;
+    robots[id1].target_id_buy = robots[id2].target_id_buy;
+    robots[id2].target_id_buy = cnt;
+    cerr<<" target_id : "<<robots[id1].target_id<<" - "<<robots[id2].target_id<<endl;
     cnt = robots[id1].target_id;
     robots[id1].target_id = robots[id2].target_id;
     robots[id1].cnt_tar = robots[id1].node_id;
     robots[id2].target_id = cnt;
     robots[id2].cnt_tar = robots[id2].node_id;
+    cerr<<" target_id : "<<robots[id1].target_id<<" - "<<robots[id2].target_id<<endl;
     return true;
 }
 
