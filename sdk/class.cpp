@@ -4364,7 +4364,7 @@ int choose_best_nodeID(const Robot &ro) {
     pair<double, double> node_pos = trans_nodeID_to_pos(ro.node_id);
     int best_node;
     double dis, tmp, angle;
-    if(next_node[tar][is_take][ro.node_id] != -1) return;
+    if(next_node[tar][is_take][ro.node_id] != -1) return next_node[tar][is_take][ro.node_id];
     for(int i = (ro.node_id / 100)-1; i < (ro.node_id / 100) + 2; ++i) {
         for(int j = (ro.node_id % 100) -1; j < (ro.node_id % 100) +2; ++j) {
             if(next_node[tar][is_take][i * 100 + j + ro.node_id] == -1) continue;
