@@ -1362,13 +1362,13 @@ void new_robot_judge(){
         if(studios[robots[i].target_id_send].type>3&&studios[robots[i].target_id_send].type<=7){
             if(robots[i].get_type == 0){
                 if(studios_rid[robots[i].target_id_send][studios[robots[i].target_id].type]==-1){
-                    // cerr<<" robot : "<<i<<" send target : "<<robots[i].target_id_send<<" type: "<<studios[robots[i].target_id_send].type<<" r_id == -1"<<" buy type: "<<studios[robots[i].target_id].type<<endl;
+                    cerr<<" robot : "<<i<<" send target : "<<robots[i].target_id_send<<" type: "<<studios[robots[i].target_id_send].type<<" r_id == -1"<<" buy type: "<<studios[robots[i].target_id].type<<endl;
                     studios_rid[robots[i].target_id_send][studios[robots[i].target_id].type] = i;
                 }
             }
             else if(robots[i].get_type != 0){
                 if(studios_rid[robots[i].target_id_send][robots[i].get_type]==-1){
-                    // cerr<<" robot : "<<i<<" send target : "<<robots[i].target_id_send<<" type: "<<studios[robots[i].target_id_send].type<<" r_id == -1"<<" buy type: "<<robots[i].get_type<<endl;
+                    cerr<<" robot : "<<i<<" send target : "<<robots[i].target_id_send<<" type: "<<studios[robots[i].target_id_send].type<<" r_id == -1"<<" buy type: "<<robots[i].get_type<<endl;
                     studios_rid[robots[i].target_id_send][robots[i].get_type] = i;
                 }
             }
@@ -1379,6 +1379,7 @@ void new_robot_judge(){
 void new_first_action(){
     for(int i=0;i<robots.size();i++){
         // cerr<<"aaa"<<endl;
+        robots[i].real_get_type = robots[i].get_type;
         complete_trans(i,0);
         robots[i].cnt_tar=robots[i].node_id;
         // cerr<<"robot : "<<i<<" target id = "<<robots[i].target_id<<endl;
@@ -1387,6 +1388,7 @@ void new_first_action(){
 void new_robot_action(){
     for(int i =0;i<=7;i++)robot_get_type[i]=0;
     for(int i = 0;i<4;i++){
+        robots[i].real_get_type = robots[i].get_type;
         if(robots[i].get_type != 0)robot_get_type[robots[i].get_type]++;
         else if(robots[i].target_id != -1)robot_get_type[studios[robots[i].target_id].type]++;
     }
@@ -2820,6 +2822,14 @@ void print_robot_infor(Robot r) {
 }
 
 bool change_target(int id1, int id2) {
+    if(robots[id1].loc_id != -1){
+        if(lt(calcuDis(robots[id1].pos,studios[robots[id1].loc_id].pos),0.4))
+            return false;
+    }
+    if(robots[id2].loc_id != -1){
+        if(lt(calcuDis(robots[id2].pos,studios[robots[id2].loc_id].pos),0.4))
+            return false;
+    }
     if(lt(calcuDis(robots[id1].pos,studios[robots[id1].target_id].pos),0.7)|| lt(calcuDis(robots[id2].pos,studios[robots[id2].target_id].pos),0.7))
         return false;
     //keyouhua

@@ -103,6 +103,7 @@ struct Robot
     int pre_cnt;
     int wait;
     int node_id;
+    int real_get_type;
     int last_get_type;
     bool need_rote_wall;
     double radius;
