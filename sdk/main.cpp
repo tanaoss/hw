@@ -61,8 +61,9 @@ int main()
         // if(state.FrameID == 4064) {
         //     cerr<<robots[1].target_id<<endl;
         // }
-        
+
         control();
+
         count++;
 
         // if(state.FrameID >= 4143 && state.FrameID < 4302) {
