@@ -2707,8 +2707,8 @@ Ins contr_one_rob(Robot& robot){
     }
     bool con_get_type=false;
     if(robot.get_type!=0){
-        if(gt(payload.angle,Pi/8));
-        con_get_type=true;
+        if(gt(payload.angle,Pi/8))
+            con_get_type=true;
     }else{
         if(gt(payload.angle,Pi/2)){
             con_get_type=true;
@@ -2825,7 +2825,7 @@ bool change_target(int id1, int id2) {
     //keyouhua
     if(gt(get_dis(robots[id1], robots[id2]), 0)) return false;
     if(gt(get_dis(robots[id2], robots[id1]), 0)) return false;
-    cerr<<"change_target"<<endl;
+    // cerr<<"change_target"<<endl;
     int cnt;
     cnt = robots[id1].target_id;
     robots[id1].target_id = robots[id2].target_id;
@@ -3253,9 +3253,9 @@ void do_back(int id, pair<double, double> pos) {
         PayLoad pay=choose_best_pay(robots[id], pos);
         // PayLoad pay= payloads[id];
         ins[id].rotate = get_w_now(robots[id], pay).first;
-        cerr<<robots[id].node_id<<"-"<<next_node[robots[id].target_id][(robots[id].get_type != 0)][robots[id].node_id]<<endl;
-        cerr<<pay.angle<<"*"<<pay.sign<<endl;
-        cerr<<ins[id].rotate<<endl;
+        // cerr<<robots[id].node_id<<"-"<<next_node[robots[id].target_id][(robots[id].get_type != 0)][robots[id].node_id]<<endl;
+        // cerr<<pay.angle<<"*"<<pay.sign<<endl;
+        // cerr<<ins[id].rotate<<endl;
     }
 }
 
