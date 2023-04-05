@@ -36,6 +36,8 @@ struct PayLoad
         distance = _distance;
         sign = _sign;
     }
+    PayLoad()
+    {}
 };
 
 struct State
@@ -112,6 +114,7 @@ struct Robot
     bool need_adjust_statues;
     bool adjust_w;
     bool adjust_pos;
+    bool need_slow;
     bool operator!=(Robot s1){
     if(s1.id!=id||target_id!=s1.target_id||s1.loc_id!=loc_id||xy_pos!=s1.xy_pos||pos!=s1.pos){
             return true;
@@ -143,6 +146,7 @@ struct Robot
         adjust_pos=false;
         cnt_tar=0;
         target_id_pre=-1;
+        need_slow=false;
     }
     void set(int _id, int _loc_id, int _get_type, double _time_val, double _collision_val, double _angular_velocity, pair<double, double> &&_xy_pos,
              double _direction, pair<double, double> &&_pos)
@@ -420,6 +424,11 @@ void init_vector();
 bool is_connected(int node_id_a, int node_id_b, int is_take);
 int get_bar_num(int node_id_a, int node_id_b, int is_take);
 void init_bar_sum();
+PayLoad calPayload_back(Robot robot, pair<double, double> virtual_pos);
+PayLoad choose_best_pay(Robot &ro);
+double get_dis(Robot ro1, Robot ro2);
+int choose_close_node(int tar, int is_take, pair<double, double> pos);
+
 
 
 vector<int> get_future_node(int robot_id);
@@ -443,3 +452,5 @@ pair<double,bool> get_vir_w(Robot& rob,PayLoad& payload);
 void init_rob_status(Robot& rob);
 bool check_can_arrival_z(int id1,int id2);
 bool check_corner_collosion(Robot& rob);
+bool has_next(Robot& rob);
+bool check_tar_line(Robot& rob,double dis);

@@ -75,7 +75,7 @@ unordered_map<int,int> stu_transID;//建立工作台id与转换后id的关系
 unordered_map<int,int> rob_transID;//建立机器人id与转换后id的关系
 unordered_map<int,bool> can_arrival[2];//判断任意两个小格之间是否可以直达;
 int graph_trans[100][100];
-
+bool print_cerr_flag_ta;
 vector<int> next_node[50][2];//next_node[studio_id][2][node_id]:node_id去往studio_id工作台的下一个点
 vector<double> dis_to_studios[50][2];//dis_studios[studio_id][2][node_id]:node_id去往studio_id工作台的距离
 
@@ -772,7 +772,7 @@ void control(){
     //     cerr<<state.FrameID<<" ins befoer "<<ins[0].forward<<endl;
     //     cerr<<check_will_colloWithWall(robots[0])<<endl;
     // }
-    // collision_solve(25);
+    collision_solve(25);
 
     // if(state.FrameID >= 5600 && state.FrameID < 5610) {
     //     cerr<<"~ins:"<<ins[2].forward<<"  "<<ins[2].rotate<<endl;
@@ -2650,6 +2650,7 @@ PayLoad calPayload_trajectory(Robot rob,int studioID){
     return PayLoad((robot.get_type == 0? 0.45: 0.53), angle, angular_acceleration, acceleration, distance, speed, sign);    
 }
 Ins contr_one_rob(Robot& robot){
+    print_cerr_flag_ta=false;
     Flag_sumulate=0;
     Ins ins_t;
     if(robot.target_id==-1){
@@ -2688,47 +2689,52 @@ Ins contr_one_rob(Robot& robot){
     if(!robot.need_adjust_statues&&!robot.isVir&&lt(payload.distance,0.2)){
         robot.cnt_tar=ret_next(robot,robot.cnt_tar);
     }
-    if(robot.adjust_pos&&!robot.isVir&&lt(payload.distance,0.2)){
-        robot.cnt_tar=ret_next(robot,robot.cnt_tar);
-        robot.adjust_pos=false;
-    }
-    if(robot.need_adjust_statues&&!robot.adjust_pos&&!p1.second){
+    if(gt(payload.speed,0.8)&&robot.need_slow&&robot.need_adjust_statues){
         ins_t.forward=0;
-    }
-    if(robot.need_adjust_statues&&!robot.adjust_pos&&p1.second){
-        robot.need_adjust_statues=false;
-        robot.adjust_w=false;
+    }else if(robot.need_adjust_statues){
+        if(robot.adjust_pos&&!robot.isVir&&lt(payload.distance,0.1)){
+            robot.cnt_tar=ret_next(robot,robot.cnt_tar);
+            robot.adjust_pos=false;
+        }
+        if(robot.need_adjust_statues&&!robot.adjust_pos&&!p1.second){
+            ins_t.forward=0;
+        }
+        if(robot.need_adjust_statues&&!robot.adjust_pos&&p1.second){
+            robot.need_adjust_statues=false;
+            robot.adjust_w=false;
+        }
     }
     if(!robot.need_adjust_statues&&gt(payload.distance,1.1)&&!p1.second)
     {
         ins_t.forward=vir_v(robot);
-        // if(robot.id==0)
-        // cerr<<"-"<<state.FrameID<<" 采样速度 "<<ins_t.forward<<endl;
+        if(robot.id==0&&print_cerr_flag_ta)
+        cerr<<"-"<<state.FrameID<<" 采样速度 "<<ins_t.forward<<endl;
         if(ins_t.forward==-1){
             ins_t.forward=0.5;
-            if(gt(payload.angle,Pi/2)){
+            if(gt(payload.angle,Pi/3)){
                 robot.need_adjust_statues=true;
                 ins_t.forward=0;
+                cerr<<"重置状态"<<endl;
             }else{
                 robot.cnt_tar=robot.node_id;
             }
-        // cerr<<state.FrameID<<" 采样速度失败 "<<endl;
+        cerr<<state.FrameID<<" 采样速度失败 "<<endl;
         }
     }
  
-//    if(robot.id==0&&state.FrameID>=1&&state.FrameID<=200&&contr_print_flag){
-//     cerr<<" FrameID "<< state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
-//     cerr<<"forward: "<<ins_t.forward<<endl;
-//     cerr<<"angle "<<payload.angle<<endl;
-//     cerr<<"dis "<<payload.distance<<endl;
-//     cerr<<robot.isVir<<endl;
-//     printPair(robot.pos);
-//     printPair(robot.virtual_pos);
-//     cerr<<getPosID(robot.virtual_pos)<<endl;
-//     printPair(exist_id[0][ret_next(robot,robot.cnt_tar)]);
-//     cerr<<getPosID(exist_id[0][ret_next(robot,robot.cnt_tar)])<<endl;
-//     cerr<<p1.second<<endl;
-//    }
+   if(print_cerr_flag_ta&&robot.id==0&&state.FrameID>=200&&state.FrameID<=400&&contr_print_flag){
+    cerr<<" FrameID "<< state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
+    cerr<<"forward: "<<ins_t.forward<<endl;
+    cerr<<"angle "<<payload.angle<<endl;
+    cerr<<"dis "<<payload.distance<<endl;
+    cerr<<robot.isVir<<endl;
+    printPair(robot.pos);
+    printPair(robot.virtual_pos);
+    cerr<<getPosID(robot.virtual_pos)<<endl;
+    printPair(exist_id[0][ret_next(robot,robot.cnt_tar)]);
+    cerr<<getPosID(exist_id[0][ret_next(robot,robot.cnt_tar)])<<endl;
+    cerr<<p1.second<<endl;
+   }
     return ins_t;
 }
 
@@ -2852,8 +2858,8 @@ void collision_solve(int frame){
     bool cerr_falg = false;
 
 
-    // if(state.FrameID >= 5600 && state.FrameID <= 5630 && 999==999)
-        cerr_falg = true;
+    // if(state.FrameID >= 1692 && state.FrameID <= 1705 && 999==999)
+        // cerr_falg = true;
 
 
     for(i = 0; i < 4; ++i)
@@ -3098,7 +3104,8 @@ void collision_solve(int frame){
             if(cerr_falg)
                 cerr<<"back"<<endl;
 
-            updateIns(choose_id, 4);
+            updateIns(ro[choose_id].id, 4);
+            if(lt(get_dis(ro[choose_id], ro[x]), 1) && gt(payloads[ro[choose_id].id].speed, 0)) updateIns(ro[x].id, 4);
             
             // if(cerr_falg) {
             //     cerr<<"~old solution:"<<ins[ro[choose_id].id].forward<<"**"<<ins[ro[choose_id].id].rotate<<endl;
@@ -3138,25 +3145,31 @@ void collision_solve(int frame){
         }
         if(cerr_falg) cerr<<"------------"<<endl;
     }
+    
 
-    // if(state.FrameID == 182 || state.FrameID == 187) {
+    // if(state.FrameID == 1692 || state.FrameID == 1693) {
     //     int a,b;
     //     for(i = 0; i < 4; ++i){
-    //         if(ro[i].id == 2) a = i;
-    //         if(ro[i].id == 3) b =i;
+    //         if(ro[i].id == 1) a = i;
+    //         if(ro[i].id == 2) b =i;
     //     }
+    //     cerr<<state.FrameID;
     //     printPredictRobotsDis(trajectory[a], trajectory[b]);
     // }
 
-    // if(state.FrameID >= 182 && state.FrameID <= 187) {
+    // if(state.FrameID >= 1693 && state.FrameID <= 1730) {
     //     cerr<<state.FrameID;
-    //     printRobotsDis(2,3);
+    //     printRobotsDis(1,2);
     // }
     
     updateGetType();
 }
 
-
+double get_dis(Robot ro1, Robot ro2) {
+    int is_take = (ro1.get_type != 0);
+    int tar = ro1.target_id;
+    return dis_to_studios[tar][is_take][choose_close_node(tar, is_take, ro1.pos)] - dis_to_studios[tar][is_take][choose_close_node(tar, is_take, ro2.pos)];
+}
 
 
 void printRobotsDis(int i, int j){
@@ -3202,35 +3215,97 @@ void updateIns(int id, int i) {
         // cerr<<"chose solution10:"<<ins[id].forward<<"**"<<ins[id].rotate<<endl;
     }
     if(i == 4 && le(payloads[id].speed, 0)) {
-        PayLoad pay=calPayload(robots[id], trans_nodeID_to_pos(next_node[robots[id].target_id][(robots[id].get_type != 0)][robots[id].node_id]));
+
+        PayLoad pay=choose_best_pay(robots[id]);
+        // PayLoad pay= payloads[id];
         ins[id].rotate = get_w_now(robots[id], pay).first;
-        cerr<<robots[id].node_id<<"-"<<next_node[robots[id].target_id][(robots[id].get_type != 0)][robots[id].node_id]<<endl;
-        cerr<<pay.angle<<"*"<<pay.sign<<endl;
-        cerr<<ins[id].rotate<<endl;
+        // cerr<<robots[id].node_id<<"-"<<next_node[robots[id].target_id][(robots[id].get_type != 0)][robots[id].node_id]<<endl;
+        // cerr<<pay.angle<<"*"<<pay.sign<<endl;
+        // cerr<<ins[id].rotate<<endl;
     }
     robots[i].cnt_tar = robots[i].node_id;
 }
 
+PayLoad calPayload_back(Robot robot, pair<double, double> virtual_pos) {
+    double distance = calcuDis(robot.pos, virtual_pos);
+    double angular_acceleration = robot.get_type == 0? angular_acceleration_no :angular_acceleration_has;
+    double acceleration = robot.get_type == 0? acceleration_no: acceleration_has;
+    double speed = calVectorSize(robot.xy_pos) * (ge(calVectorProduct(robot.xy_pos, transformVector(robot.direction)), 0.0)? 1: -1);
 
-int choose_best_nodeID(const Robot &ro) {
-    int is_take = (ro.get_type != 0);
-    int tar = ro.target_id;
-    pair<double, double> node_pos = trans_nodeID_to_pos(ro.node_id);
-    int best_node;
-    double dis, tmp, angle;
-    if(next_node[tar][is_take][ro.node_id] != -1) return next_node[tar][is_take][ro.node_id];
-    for(int i = (ro.node_id / 100)-1; i < (ro.node_id / 100) + 2; ++i) {
-        for(int j = (ro.node_id % 100) -1; j < (ro.node_id % 100) +2; ++j) {
-            if(next_node[tar][is_take][i * 100 + j + ro.node_id] == -1) continue;
-            // angle = calAngle(ro.direction, subVector(ro.pos, make_pair(j * 0.5 + 0.25, i * 0.5 + 0.25)));
-            tmp = calcuDis(ro.pos, make_pair(node_pos.first + j * 0.5, node_pos.second + i * 0.5));
-            if(gt(dis, tmp)){
+    // 计算机器人与目标点构成的向量与x轴正方向夹角
+    pair<double, double> robotToStudio = subVector(virtual_pos, robot.pos);
+    double angle1 = calAngle(robotToStudio);
+
+    double angle2 = ge(robot.direction, 0.0)? robot.direction: 2 * Pi + robot.direction;
+    angle2 += Pi;
+    angle2 = gt(angle2, 2 * Pi)? angle2 - Pi * 2: angle2;
+    // double angle2 = calAngle(robot.xy_pos);
+
+    double angle = angle2 - angle1;
+
+    
+    // if(state.FrameID==7010&& robotID==2) {
+    //     printPair(robot.xy_pos);
+    //     cerr<<"payload-speed:"<<speed<<endl;
+    // }
+    int sign;
+
+    if(ge(angle, 0) && lt(angle, Pi) || lt(angle, -Pi))
+        sign = -1;
+    else
+        sign = 1;
+    angle = fabs(angle);
+    angle  = gt(angle, Pi)? 2 * Pi - angle: angle;
+
+
+    // cerr<<"**"<< angle1<<"**dir:"<<robot.direction<<"**"<<angle2<<endl;
+    // cerr<<"**"<< angle << "**"<<distance<<"**"<<sign<<endl;
+
+    return PayLoad((robot.get_type == 0? 0.45: 0.53), angle, angular_acceleration, acceleration, distance, speed, sign);
+}
+
+int choose_close_node(int tar, int is_take, pair<double, double> pos) {
+    int close_node;
+    double dis, tmp;
+    int node_id = trans_pos_to_nodeID(pos);
+    dis = 10000;
+    if(next_node[tar][is_take][node_id] != -1) return node_id;
+    for(int i = (node_id / 100)-1; i < (node_id / 100) + 2; ++i) {
+        for(int j = (node_id % 100) -1; j < (node_id % 100) +2; ++j) {
+            if(next_node[tar][is_take][i * 100 + j] == -1) continue;
+            tmp = calcuDis(pos, trans_nodeID_to_pos(i * 100 + j));
+            if(lt(tmp, dis)) {
                 dis = tmp;
-                best_node = i * 100 + j + ro.node_id;
+                close_node = i * 100 + j;
             }
         }
     }
-    return best_node;
+    return close_node;
+}
+
+
+PayLoad choose_best_pay(Robot &ro) {
+    int is_take = (ro.get_type != 0);
+    int tar = ro.target_id;
+    int best_node;
+    double dis, tmp, angle = Pi;
+    PayLoad pay, pay_best;
+    if(next_node[tar][is_take][ro.node_id] != -1) 
+        return calPayload(ro, trans_nodeID_to_pos(next_node[tar][is_take][ro.node_id]));
+    for(int i = (ro.node_id / 100)-1; i < (ro.node_id / 100) + 2; ++i) {
+        for(int j = (ro.node_id % 100) -1; j < (ro.node_id % 100) +2; ++j) {
+            if(next_node[tar][is_take][i * 100 + j + ro.node_id] == -1) continue;
+            if(lt(payloads[ro.id].speed, 0))
+                pay = calPayload_back(ro, make_pair(j * 0.5 + 0.25, i * 0.5 + 0.25));
+            else
+                pay = calPayload(ro, make_pair(j * 0.5 + 0.25, i * 0.5 + 0.25));
+            if(gt(angle, pay.angle)){
+                angle = pay.angle;
+                pay_best = pay;
+            }
+        }
+    }
+    return pay_best;
 }
 
 
@@ -4457,10 +4532,14 @@ void adjust_virtual_pos_total(Robot& rob){
         rob.need_adjust_statues=true;
         rob.adjust_pos=true;
         rob.adjust_w=true;
+        rob.need_slow=true;
         rob.target_id_pre=rob.target_id;
         init_rob_status(rob);
     }else if(rob.need_adjust_statues&&rob.adjust_pos){
-        init_rob_status(rob);
+        if(lt(return_v(rob),0.8)){
+            init_rob_status(rob);
+            rob.need_slow=false;
+        }
     }else{
         setVirPos(rob);
     }
@@ -4669,8 +4748,8 @@ bool calMinAngle(Robot& robot,pair<double,double>pos){
     return true;;
 }
 double vir_v(Robot rob){
-   for(int v=5;v>=0;v--){
-    if(can_trajectory_virpos(rob,v,25))return v;
+   for(int v=4;v>=0;v--){
+    if(can_trajectory_virpos(rob,v,50))return v;
    }
    
    return -1;
@@ -4681,16 +4760,26 @@ bool can_trajectory_virpos(Robot rob,double v,int cnt){
     for(int i=0;i<cnt;i++){
         auto pay=calPayload(rob,rob.virtual_pos);
         if(checkNearBar(rob.pos,pay.radius)){
+            if(print_cerr_flag_ta&&rob.id==0&&state.FrameID>=200&&state.FrameID<=400&&contr_print_flag){
+                cerr<<"采样失败速度 "<<v<<" 失败时间 "<<state.FrameID+ i<<" 失败原因 :  撞墙"<<endl;
+            }
             return false;
         };
         auto tmpPair=get_vir_w(rob,pay);
         double w_next=tmpPair.first;
+        double tar_dis=calcuDis(rob.pos,exist_id[rob.get_type==0?0:1][rob.cnt_tar]);
+        int tarID=getPosID(rob.virtual_pos);
+        int now_id=getPosID(rob.pos);
+        int istake=rob.get_type==0?0:1;
+        if(check_can_arrival(istake,now_id,tarID)&&lt(tar_dis,0.5)&&check_tar_line(rob,0.2)){
+            if(print_cerr_flag_ta&&rob.id==0&&state.FrameID>=200&&state.FrameID<=400&&contr_print_flag){
+            cerr<<"采样速度 "<<v<<" 时间 "<<state.FrameID+ i<<" 原因 :  到达目标"<<endl;
+            }
+            return true;
+        }
         if(tmpPair.second){
-            int tarID=getPosID(rob.virtual_pos);
-            int now_id=getPosID(rob.pos);
-            int istake=rob.get_type==0?0:1;
             if(check_can_arrival(istake,now_id,tarID)){
-                // if(rob.id==0){
+                // if(print_cerr_flag_ta&&rob.id==0){
                 //     cerr<<now_id<<" "<<tarID<<endl;
                 //     cerr<<"检查到的对齐点: \n";
                 //     printPair(rob.pos);
@@ -4700,8 +4789,13 @@ bool can_trajectory_virpos(Robot rob,double v,int cnt){
 
                 return true;
             }
-            else
+            else{
+                 if(print_cerr_flag_ta&&rob.id==0&&state.FrameID>=200&&state.FrameID<=400&&contr_print_flag){
+                    cerr<<"采样失败速度 "<<v<<" 失败时间 "<<state.FrameID+ i<<" 失败原因 :  对起点不能到达目标"<<endl;
+                 }
                 return false;
+            }
+                
         }
         double seta=rob.direction;
         double w=rob.angular_velocity==0?0.00001:rob.angular_velocity;
@@ -4749,6 +4843,9 @@ bool can_trajectory_virpos(Robot rob,double v,int cnt){
         // if(rob.id==0){
         // cerr<<"未检查到对齐"<<endl;
         // }
+        if(print_cerr_flag_ta&&rob.id==0&&state.FrameID>=200&&state.FrameID<=400&&contr_print_flag){
+                cerr<<"采样失败速度 "<<v<<" 失败时间 "<<state.FrameID+ cnt<<" 失败原因 :  对起点不能到达目标"<<endl;
+        }
         return true;
     }    
     else{
@@ -4760,63 +4857,42 @@ int getPosID(pair<double,double>pos){
     return int(pos.second/0.5)*100+int(pos.first/0.5);
 }
 pair<double,bool> get_vir_w(Robot& robot,PayLoad& payload){
-   int robStuID=robot.target_id;
-    if(robStuID==-1){
-         robStuID=0;
-    }
-    int robID=robot.id;
-    double Dev_val=get_at_stop(0.02,payload.angular_acceleration
-    ,robot.angular_velocity,payload.sign);
-    double rateAngle_fabs=0;
-    if(!robot.need_adjust_statues){
-        if(gt(payload.angle,0.3)){
-            rateAngle_fabs=Pi;
-        }else if(gt(payload.angle,0.15)){
-            rateAngle_fabs=Pi/2;
-        }else if(gt(payload.angle,0.075)){
-            rateAngle_fabs=Pi/4;
+    if(has_next(robot)){
+        int istake=robot.get_type==0?0:1;
+        int tar=robot.cnt_tar;
+        int tar1=next_node[robot.target_id][istake][robot.cnt_tar];
+        auto p1=subVector(exist_id[istake][tar1],exist_id[istake][tar]);
+        Vec v1(p1);
+        Vec v2(robot.xy_pos);
+        double angle=acos(cos_t(v1,v2));
+        double rateAngle_fabs=0;
+        if(!robot.need_adjust_statues){
+            if(gt(angle,0.3)){
+                rateAngle_fabs=Pi;
+            }else if(gt(angle,0.15)){
+                rateAngle_fabs=Pi/2;
+            }else if(gt(angle,0.075)){
+                rateAngle_fabs=Pi/4;
+            }else{
+                rateAngle_fabs=Pi/8;
+            }
         }else{
-            rateAngle_fabs=Pi/8;
+            if(gt(angle,0.4)){
+                rateAngle_fabs=Pi;
+            }else if(gt(angle,0.3)){
+                rateAngle_fabs=Pi/3;
+            }else if(gt(angle,0.2)){
+                rateAngle_fabs=Pi/4;
+            }else{
+                rateAngle_fabs=Pi/8;
+            }        
         }
+        bool can_st=lt(fabs(angle),0.1)?true:false;
+        double tmpAngle =rateAngle_fabs*payload.sign;
+        return {tmpAngle,can_st} ;
     }else{
-        if(gt(payload.angle,0.4)){
-            rateAngle_fabs=Pi;
-        }else if(gt(payload.angle,0.3)){
-            rateAngle_fabs=Pi/3;
-        }else if(gt(payload.angle,0.2)){
-            rateAngle_fabs=Pi/4;
-        }else{
-            rateAngle_fabs=Pi/8;
-        }        
+        return get_w_now(robot,payload);
     }
-    double angle=get_at_v_limt(0.02,payload.angular_acceleration
-    ,robot.angular_velocity,rateAngle_fabs,payload.sign);
-    double StopA=0;
-    double real_angle=angle;
-    int can_stop_flag=0;
-    bool con1=gt(Dev_val,payload.angle);
-    if(con1){
-        real_angle=get_at_v_limt(0.02,payload.angular_acceleration
-            ,robot.angular_velocity,0,payload.sign);
-        can_stop_flag=1;
-        StopA=0;
-    } 
-    double cmpAngle=fabs(payload.angle-real_angle);
-    
-    bool can_st=lt(fabs(cmpAngle),0.5)?true:false;
-    if(can_st){
-        can_stop_flag=1;
-        StopA=0;        
-    }
-    if(robot.need_adjust_statues){
-        can_st|=can_stop_flag;
-    }
-    // if(state.FrameID>=161&&state.FrameID<=1452){
-    //     cerr<<"ID: "<<state.FrameID<<" "<<robot.id<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<" "<<payload.distance<<endl;
-    //     cerr<<can_st<<endl;
-    // }
-    double tmpAngle =can_stop_flag?StopA:rateAngle_fabs*payload.sign;
-    return {tmpAngle,can_st} ;
 }
 
 void init_rob_status(Robot& rob){
@@ -4850,4 +4926,23 @@ void init_rob_status(Robot& rob){
         rob.virtual_pos.second=tmpPos.second;
         rob.cnt_tar=tmpID;
     }
+}
+bool has_next(Robot& rob){
+    int tarID=rob.target_id;
+    if(tarID==-1){
+        return false;
+        // cerr<<"tarID==-1错误"<<endl;
+    }
+    return next_node[rob.target_id][rob.get_type==0?0:1][rob.cnt_tar]!=-1?true:false;
+}
+bool check_tar_line(Robot& robot,double dis){
+    if(!has_next(robot))return false;
+    int istake=robot.get_type==0?0:1;
+    int tar=robot.cnt_tar;
+    int tar1=next_node[robot.target_id][istake][robot.cnt_tar];
+    auto p1=subVector(exist_id[istake][tar1],exist_id[istake][tar]);   
+    Line_Ta line( exist_id[istake][tar],p1);
+    Point_Ta point(robot.pos);
+    double tmpdis= dis_lp(point,line);
+    return lt(tmpdis,dis);
 }
