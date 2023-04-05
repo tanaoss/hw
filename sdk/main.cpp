@@ -31,7 +31,7 @@ int main()
     }
     // cerr << "bbb" << endl;
     // cerr<<studios[10].node_id<<endl;
-    // print_dijkstra(1, 1, 1);
+    print_dijkstra(1, 0, 1);
     // for(int i = 0; i < 4; ++i) {
     //     Dijkstra(i, 0, 1);
     // }
@@ -51,7 +51,7 @@ int main()
     // print_dijkstra(0,1,1);
      while (cin >> state.FrameID)
     {
-        cerr<<" time "<<state.FrameID<<endl;
+        // cerr<<" time "<<state.FrameID<<endl;
         readStatusUntilOK() ;
         
         cout<<state.FrameID<<endl;
