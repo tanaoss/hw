@@ -4359,9 +4359,9 @@ void updateIns(int id, int i) {
         PayLoad pay=choose_best_pay(robots[id]);
         // PayLoad pay= payloads[id];
         ins[id].rotate = get_w_now(robots[id], pay).first;
-        cerr<<robots[id].node_id<<"-"<<next_node[robots[id].target_id][(robots[id].get_type != 0)][robots[id].node_id]<<endl;
-        cerr<<pay.angle<<"*"<<pay.sign<<endl;
-        cerr<<ins[id].rotate<<endl;
+        // cerr<<robots[id].node_id<<"-"<<next_node[robots[id].target_id][(robots[id].get_type != 0)][robots[id].node_id]<<endl;
+        // cerr<<pay.angle<<"*"<<pay.sign<<endl;
+        // cerr<<ins[id].rotate<<endl;
     }
     robots[i].cnt_tar = robots[i].node_id;
 }
