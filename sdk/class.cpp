@@ -75,7 +75,7 @@ unordered_map<int,int> stu_transID;//建立工作台id与转换后id的关系
 unordered_map<int,int> rob_transID;//建立机器人id与转换后id的关系
 unordered_map<int,bool> can_arrival[2];//判断任意两个小格之间是否可以直达;
 int graph_trans[100][100];
-
+bool print_cerr_flag_ta;
 vector<int> next_node[50][2];//next_node[studio_id][2][node_id]:node_id去往studio_id工作台的下一个点
 vector<double> dis_to_studios[50][2];//dis_studios[studio_id][2][node_id]:node_id去往studio_id工作台的距离
 
@@ -3796,6 +3796,7 @@ PayLoad calPayload_trajectory(Robot rob,int studioID){
     return PayLoad((robot.get_type == 0? 0.45: 0.53), angle, angular_acceleration, acceleration, distance, speed, sign);    
 }
 Ins contr_one_rob(Robot& robot){
+    print_cerr_flag_ta=false;
     Flag_sumulate=0;
     Ins ins_t;
     if(robot.target_id==-1){
@@ -3852,7 +3853,7 @@ Ins contr_one_rob(Robot& robot){
     if(!robot.need_adjust_statues&&gt(payload.distance,1.1)&&!p1.second)
     {
         ins_t.forward=vir_v(robot);
-        if(robot.id==2)
+        if(robot.id==0&&print_cerr_flag_ta)
         cerr<<"-"<<state.FrameID<<" 采样速度 "<<ins_t.forward<<endl;
         if(ins_t.forward==-1){
             ins_t.forward=0.5;
@@ -3867,7 +3868,7 @@ Ins contr_one_rob(Robot& robot){
         }
     }
  
-   if(robot.id==2&&state.FrameID>=200&&state.FrameID<=400&&contr_print_flag){
+   if(print_cerr_flag_ta&&robot.id==0&&state.FrameID>=200&&state.FrameID<=400&&contr_print_flag){
     cerr<<" FrameID "<< state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
     cerr<<"forward: "<<ins_t.forward<<endl;
     cerr<<"angle "<<payload.angle<<endl;
@@ -5905,7 +5906,7 @@ bool can_trajectory_virpos(Robot rob,double v,int cnt){
     for(int i=0;i<cnt;i++){
         auto pay=calPayload(rob,rob.virtual_pos);
         if(checkNearBar(rob.pos,pay.radius)){
-            if(rob.id==2&&state.FrameID>=200&&state.FrameID<=400&&contr_print_flag){
+            if(print_cerr_flag_ta&&rob.id==0&&state.FrameID>=200&&state.FrameID<=400&&contr_print_flag){
                 cerr<<"采样失败速度 "<<v<<" 失败时间 "<<state.FrameID+ i<<" 失败原因 :  撞墙"<<endl;
             }
             return false;
@@ -5917,25 +5918,25 @@ bool can_trajectory_virpos(Robot rob,double v,int cnt){
         int now_id=getPosID(rob.pos);
         int istake=rob.get_type==0?0:1;
         if(check_can_arrival(istake,now_id,tarID)&&lt(tar_dis,0.5)&&check_tar_line(rob,0.2)){
-            if(rob.id==2&&state.FrameID>=200&&state.FrameID<=400&&contr_print_flag){
+            if(print_cerr_flag_ta&&rob.id==0&&state.FrameID>=200&&state.FrameID<=400&&contr_print_flag){
             cerr<<"采样速度 "<<v<<" 时间 "<<state.FrameID+ i<<" 原因 :  到达目标"<<endl;
             }
             return true;
         }
         if(tmpPair.second){
             if(check_can_arrival(istake,now_id,tarID)){
-                if(rob.id==2){
-                    cerr<<now_id<<" "<<tarID<<endl;
-                    cerr<<"检查到的对齐点: \n";
-                    printPair(rob.pos);
-                    printPair(rob.virtual_pos);
-                    cerr<<state.FrameID+ i<<endl;
-                }
+                // if(print_cerr_flag_ta&&rob.id==0){
+                //     cerr<<now_id<<" "<<tarID<<endl;
+                //     cerr<<"检查到的对齐点: \n";
+                //     printPair(rob.pos);
+                //     printPair(rob.virtual_pos);
+                //     cerr<<state.FrameID+ i<<endl;
+                // }
 
                 return true;
             }
             else{
-                 if(rob.id==2&&state.FrameID>=200&&state.FrameID<=400&&contr_print_flag){
+                 if(print_cerr_flag_ta&&rob.id==0&&state.FrameID>=200&&state.FrameID<=400&&contr_print_flag){
                     cerr<<"采样失败速度 "<<v<<" 失败时间 "<<state.FrameID+ i<<" 失败原因 :  对起点不能到达目标"<<endl;
                  }
                 return false;
@@ -5988,7 +5989,7 @@ bool can_trajectory_virpos(Robot rob,double v,int cnt){
         // if(rob.id==0){
         // cerr<<"未检查到对齐"<<endl;
         // }
-        if(rob.id==2&&state.FrameID>=200&&state.FrameID<=400&&contr_print_flag){
+        if(print_cerr_flag_ta&&rob.id==0&&state.FrameID>=200&&state.FrameID<=400&&contr_print_flag){
                 cerr<<"采样失败速度 "<<v<<" 失败时间 "<<state.FrameID+ cnt<<" 失败原因 :  对起点不能到达目标"<<endl;
         }
         return true;
