@@ -1806,10 +1806,6 @@ int check_lack(int studio_id){
         {
             if ((studios[studio_id].bitSatus & (int)pow(2, studio_material[studios[studio_id].type - 4][i])) != 0) 
                 count ++;
-            // else{
-            //     if(studios_rid[studio_id][studio_material[studios[studio_id].type - 4][i]]!=-1)
-            //         count++;
-            // }
                 
         }
         if(count != studio_material[studios[studio_id].type - 4][0]){
@@ -2325,8 +2321,8 @@ void charge_target(int robot_id){
         temp=new_pick_point(i,2);
         double income = price[studios[robots[i].target_id_buy].type][1]-price[studios[robots[i].target_id_buy].type][0];
         double income_ratio =  income/(dis_to_studios[robots[i].target_id_buy][0][robots[i].node_id]+dis_to_studios[robots[i].target_id_send][1][studios[robots[i].target_id_buy].node_id]);
-        if(lt(income_ratio,temp.second)){
-            // cerr<<" robot : "<<i<<" change_target_id "<<"from "<<robots[i].target_id_buy<<" - "<<robots[i].target_id_send<<" to "<<temp.first.first<<" - "<<temp.first.second<<" income = "<<income_ratio<<" after change income = "<<temp.second<<endl;
+        if(lt(income_ratio,temp.second)&&temp.first.second != robots[i].target_id_buy){
+            cerr<<" robot : "<<i<<" change_target_id "<<"from "<<robots[i].target_id_buy<<" - "<<robots[i].target_id_send<<" to "<<temp.first.first<<" - "<<temp.first.second<<" income = "<<income_ratio<<" after change income = "<<temp.second<<endl;
             if (studios[robots[i].target_id].r_id >= 50)
                 studios[robots[i].target_id].r_id -= 50;
             else
@@ -2341,8 +2337,8 @@ void charge_target(int robot_id){
         temp=new_pick_point(i,3);
         double income = price[robots[i].get_type][1]-price[robots[i].get_type][0];
         double income_ratio =  income/(dis_to_studios[robots[i].target_id][1][robots[robot_id].node_id]);
-        if(lt(income_ratio,temp.second)){
-            // cerr<<" robot : "<<i<<" change_target_id "<<"from "<<robots[i].target_id_buy<<" - "<<robots[i].target_id_send<<" to "<<temp.first.first<<" - "<<temp.first.second<<" income = "<<income_ratio<<" after change income = "<<temp.second<<endl;
+        if(lt(income_ratio,temp.second)&& temp.first.second != robots[i].target_id_send){
+            cerr<<" robot : "<<i<<" change_target_id "<<"from "<<robots[i].target_id_buy<<" - "<<robots[i].target_id_send<<" to "<<temp.first.first<<" - "<<temp.first.second<<" income = "<<income_ratio<<" after change income = "<<temp.second<<endl;
             if(studios[robots[i].target_id_send].type!=8&&studios[robots[i].target_id_send].type!=9)studios_rid[robots[i].target_id_send][studios[robots[i].target_id_buy].type] = -1;
             robots[i].target_id_send = temp.first.second;
             robots[i].target_id = robots[i].target_id_send;
@@ -2408,8 +2404,8 @@ void new_robot_judge(){
             ins[i].sell = -1;
             
             //change_targte
-            if(robots[i].target_id != -1)
-                charge_target(i);
+            // if(robots[i].target_id != -1)
+                // charge_target(i);
         }
         if(robots[i].target_id == -1){
             // cerr<<"ddd"<<endl;
@@ -3811,7 +3807,7 @@ Ins contr_one_rob(Robot& robot){
     Flag_sumulate=0;
     Ins ins_t;
     if(robot.target_id==-1){
-        if(robot.id!=3)
+        // if(robot.id!=3)
         // cerr<<" 丢失 FrameID "<< state.FrameID<<endl;
         ins_t.forward=0;
         ins_t.rotate=Pi;
