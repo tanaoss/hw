@@ -407,7 +407,6 @@ bool is_corner(int id);//判断工作台是不是在墙角
 
 
 double calAngleToDis(int x, int y, int z);//nodeID转角度转距离
-int transID(int from_id, int is_robot, int to_id);//from_id -> to_id 转化为 road_id
 void init_data();
 void printMap(int f);
 void printEdge(int id);
@@ -416,6 +415,7 @@ void printPath(int from_id, int is_robot, int to_id, int is_take);
 void print_dijkstra(int studio_id, int is_take, int is_path);
 int trans_pos_to_nodeID(pair<double, double> pos);
 int trans_pos_to_nodeID(int robot_id);
+pair<double, double> trans_nodeID_to_pos(int nodeID);
 void init_vector();
 bool is_connected(int node_id_a, int node_id_b, int is_take);
 int get_bar_num(int node_id_a, int node_id_b, int is_take);
