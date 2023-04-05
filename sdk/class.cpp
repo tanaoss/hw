@@ -3669,6 +3669,7 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot& rob,int cnt,int tar,i
     double t=0.02;
     Robot tmp=rob;
     Ins ins=contr_one_rob(rob);
+    PayLoad pay=calPayload(rob,rob.virtual_pos);
     double w_next=ins.rotate;
     double v_next=ins.forward;
     if(cnt>tar){
