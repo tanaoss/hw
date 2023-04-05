@@ -88,6 +88,7 @@ struct Robot
     double direction;
     pair<double, double> pos;
     int target_id; // 正在赶往的工作台；
+    int target_id_pre;//
     int last_target_id;
     int target_id_send;
     int target_id_buy;
@@ -108,6 +109,7 @@ struct Robot
     int robot_area_type[2];
     int cnt_tar;//标定的路径tar
     bool isVir;
+    bool need_adjust_statues;
     bool operator!=(Robot s1){
     if(s1.id!=id||target_id!=s1.target_id||s1.loc_id!=loc_id||xy_pos!=s1.xy_pos||pos!=s1.pos){
             return true;
@@ -134,7 +136,9 @@ struct Robot
         radius = _radius;
         node_id = _node_id;
         isVir=false;
+        need_adjust_statues=true;
         cnt_tar=0;
+        target_id_pre=-1;
     }
     void set(int _id, int _loc_id, int _get_type, double _time_val, double _collision_val, double _angular_velocity, pair<double, double> &&_xy_pos,
              double _direction, pair<double, double> &&_pos)
@@ -274,6 +278,7 @@ void first_pick_point();
 void robot_action();
 void process();
 PayLoad calPayload(Robot robot, pair<double, double> virtual_pos);                               // 计算机器人与目标之间的夹角、距离等信息
+PayLoad calPayload_back(Robot robot, pair<double, double> virtual_pos);                               // 计算机器人后退与目标之间的夹角、距离等信息
 vector<double> get_T_limits(pair<double, double> pos,const Robot& robot, int ctr = -1, double dis = 0.0); // 靠近墙体时，需要把方向转到那个范围才能加速
 pair<double, double> subVector(pair<double, double> a, pair<double, double> b);                // 向量减（a-b）
 double calVectorProduct(pair<double, double> a, pair<double, double> b);                       // 向量乘
@@ -430,3 +435,6 @@ bool calMinAngle(Robot& robot,pair<double,double>pos);
 double vir_v(Robot rob);
 bool can_trajectory_virpos(Robot rob,double v,int cnt);
 int getPosID(pair<double,double>pos);
+pair<double,bool> get_vir_w(Robot& rob);
+void init_rob_status(Robot& rob);
+bool check_can_arrival_z(int id1,int id2);
