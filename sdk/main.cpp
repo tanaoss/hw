@@ -61,7 +61,6 @@ int main()
         // if(state.FrameID == 4064) {
         //     cerr<<robots[1].target_id<<endl;
         // }
-
         control();
 
         count++;

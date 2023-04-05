@@ -2823,8 +2823,9 @@ bool change_target(int id1, int id2) {
     if(robots[id1].loc_id == robots[id1].target_id || robots[id2].loc_id == robots[id2].target_id)
         return false;
     //keyouhua
-    if(gt(get_dis(robots[id1], robots[id2]), 0)) return false;
-    if(gt(get_dis(robots[id2], robots[id1]), 0)) return false;
+    if(robots[id1].target_id != -1 && gt(get_dis(robots[id1], robots[id2]), 0)) return false;
+    if(robots[id2].target_id != -1 && gt(get_dis(robots[id2], robots[id1]), 0)) return false;
+    if(robots[id2].target_id == robots[id2].target_id) return false;
     // cerr<<"change_target"<<endl;
     int cnt;
     cnt = robots[id1].target_id;
@@ -2875,14 +2876,16 @@ void collision_solve(int frame){
     bool cerr_falg = false;
 
 
-    // if(state.FrameID >= 1692 && state.FrameID <= 1705 && 999==999)
-        // cerr_falg = true;
+    if(state.FrameID >= 5712 && state.FrameID <= 5712 && 999==999)
+        cerr_falg = true;
 
 
     for(i = 0; i < 4; ++i)
         ro.emplace_back(robots[i]);
     sort(ro.begin(), ro.end(), cmp_robot);
     for(i = 0; i < 4; ++i) trajectory[i] = Calculate_the_trajectory(ro[i], 0, frame, 0);
+
+    
 
     // if(state.FrameID == 2) {
     //     cerr<<"predict"<<endl;
@@ -3196,7 +3199,15 @@ void collision_solve(int frame){
 double get_dis(Robot ro1, Robot ro2) {
     int is_take = (ro1.get_type != 0);
     int tar = ro1.target_id;
-    return dis_to_studios[tar][is_take][choose_close_node(tar, is_take, ro1.pos)] - dis_to_studios[tar][is_take][choose_close_node(tar, is_take, ro2.pos)];
+    if(tar == -1) cerr<<"error!!!";
+    int node1 = choose_close_node(tar, is_take, ro1.pos);
+    int node2 = choose_close_node(tar, is_take, ro2.pos);
+    // if(state.FrameID == 5712) {
+    //     cerr<<"node1:"<<choose_close_node(tar, is_take, ro1.pos)<<endl;
+    //     cerr<<"node2:"<<choose_close_node(tar, is_take, ro2.pos)<<endl;
+    // }
+    
+    return dis_to_studios[tar][is_take][node1] - dis_to_studios[tar][is_take][node2];
 }
 
 
@@ -3303,8 +3314,8 @@ int choose_close_node(int tar, int is_take, pair<double, double> pos) {
     int node_id = trans_pos_to_nodeID(pos);
     dis = 10000;
     if(next_node[tar][is_take][node_id] != -1) return node_id;
-    for(int i = (node_id / 100)-1; i < (node_id / 100) + 2; ++i) {
-        for(int j = (node_id % 100) -1; j < (node_id % 100) +2; ++j) {
+    for(int i = (node_id / 100)-2; i < (node_id / 100) + 3; ++i) {
+        for(int j = (node_id % 100) -2; j < (node_id % 100) +3; ++j) {
             if(next_node[tar][is_take][i * 100 + j] == -1) continue;
             tmp = calcuDis(pos, trans_nodeID_to_pos(i * 100 + j));
             if(lt(tmp, dis)) {
