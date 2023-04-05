@@ -5740,7 +5740,7 @@ int ret_next(Robot& robot,int tar_cnt){
     int tarID=robot.target_id;
     if(tarID==-1){
         return -1;
-        cerr<<"tarID==-1错误"<<endl;
+        // cerr<<"tarID==-1错误"<<endl;
     }
     if(robot.target_id==-1)cerr<<"robot.target_id==-1错误"<<endl;
     int istake=robot.get_type==0?0:1;
