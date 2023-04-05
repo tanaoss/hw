@@ -2826,7 +2826,7 @@ bool change_target(int id1, int id2) {
     if(robots[id1].target_id != -1 && le(get_dis(robots[id1], robots[id2]), 0)) return false;
     if(robots[id2].target_id != -1 && le(get_dis(robots[id2], robots[id1]), 0)) return false;
     if(robots[id1].target_id == robots[id2].target_id) return false;
-    cerr<<"change_target"<<endl;
+    // cerr<<"change_target"<<endl;
     int cnt;
     cnt = robots[id1].target_id;
     robots[id1].target_id = robots[id2].target_id;
@@ -3202,13 +3202,13 @@ double get_dis(Robot ro1, Robot ro2) {
     if(tar == -1) cerr<<"error!!!";
     int node1 = choose_close_node(tar, is_take, ro1.pos);
     int node2 = choose_close_node(tar, is_take, ro2.pos);
-    if(state.FrameID == 675) {
-        cerr<<"tar:"<<tar<<endl;
-        cerr<<"node1:"<<choose_close_node(tar, is_take, ro1.pos)<<endl;
-        cerr<<"node2:"<<choose_close_node(tar, is_take, ro2.pos)<<endl;
-        cerr<<"ro"<<ro1.id<<":"<<dis_to_studios[tar][is_take][node1]<<endl;
-        cerr<<"ro"<<ro2.id<<":"<<dis_to_studios[tar][is_take][node2]<<endl;
-    }
+    // if(state.FrameID == 675) {
+    //     cerr<<"tar:"<<tar<<endl;
+    //     cerr<<"node1:"<<choose_close_node(tar, is_take, ro1.pos)<<endl;
+    //     cerr<<"node2:"<<choose_close_node(tar, is_take, ro2.pos)<<endl;
+    //     cerr<<"ro"<<ro1.id<<":"<<dis_to_studios[tar][is_take][node1]<<endl;
+    //     cerr<<"ro"<<ro2.id<<":"<<dis_to_studios[tar][is_take][node2]<<endl;
+    // }
     
     return dis_to_studios[tar][is_take][node1] - dis_to_studios[tar][is_take][node2];
 }
