@@ -110,6 +110,8 @@ struct Robot
     int cnt_tar;//标定的路径tar
     bool isVir;
     bool need_adjust_statues;
+    bool adjust_w;
+    bool adjust_pos;
     bool operator!=(Robot s1){
     if(s1.id!=id||target_id!=s1.target_id||s1.loc_id!=loc_id||xy_pos!=s1.xy_pos||pos!=s1.pos){
             return true;
@@ -137,6 +139,8 @@ struct Robot
         node_id = _node_id;
         isVir=false;
         need_adjust_statues=true;
+        adjust_w=false;
+        adjust_pos=false;
         cnt_tar=0;
         target_id_pre=-1;
     }
@@ -435,6 +439,7 @@ bool calMinAngle(Robot& robot,pair<double,double>pos);
 double vir_v(Robot rob);
 bool can_trajectory_virpos(Robot rob,double v,int cnt);
 int getPosID(pair<double,double>pos);
-pair<double,bool> get_vir_w(Robot& rob);
+pair<double,bool> get_vir_w(Robot& rob,PayLoad& payload);
 void init_rob_status(Robot& rob);
 bool check_can_arrival_z(int id1,int id2);
+bool check_corner_collosion(Robot& rob);
