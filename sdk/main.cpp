@@ -8,6 +8,9 @@ extern vector<Studio> studios;
 extern vector<Robot> robots;
 extern State state;//当前帧数，全局可见
 extern int class_map;
+extern int cerr_flag_j;
+extern int start_time;
+extern int end_time;
 int main()
 {
     std::ios::sync_with_stdio(false);   
@@ -31,7 +34,7 @@ int main()
     }
     // cerr << "bbb" << endl;
     // cerr<<studios[10].node_id<<endl;
-    // print_dijkstra(0, 0, 1);
+    // print_dijkstra(4, 0, 1);
     // for(int i = 0; i < 4; ++i) {
     //     Dijkstra(i, 0, 1);
     // }
