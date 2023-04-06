@@ -34,7 +34,7 @@ int main()
     }
     // cerr << "bbb" << endl;
     // cerr<<studios[10].node_id<<endl;
-    // print_dijkstra(8, 1, 1);
+    // print_dijkstra(8, 0, 1);
     // for(int i = 0; i < 4; ++i) {
     //     Dijkstra(i, 0, 1);
     // }
@@ -54,7 +54,9 @@ int main()
     // print_dijkstra(0,1,1);
      while (cin >> state.FrameID)
     {
-        // cerr<<" time "<<state.FrameID<<endl;
+        if(state.FrameID>start_time && state.FrameID<end_time &&cerr_flag_j){
+            cerr<<" time "<<state.FrameID<<endl;
+        }
         readStatusUntilOK() ;
         
         cout<<state.FrameID<<endl;
@@ -68,12 +70,12 @@ int main()
 
         count++;
 
-        // if(state.FrameID >= 4143 && state.FrameID < 4302) {
-        //     cerr<<" time "<<state.FrameID<<endl;
-        //     for(int i = 0; i < 1; ++i) {
-        //         cerr<<i<<"-target:"<<robots[i].target_id<<" type:"<<studios[robots[i].target_id].type<<endl;
-        //     }
-        // }
+        if(state.FrameID >= 4160 && state.FrameID < 2300) {
+            cerr<<" time "<<state.FrameID<<endl;
+            for(int i = 1; i < 2; ++i) {
+                cerr<<i<<"-target:"<<robots[i].target_id<<" type:"<<studios[robots[i].target_id].type<<endl;
+            }
+        }
     }
     return 0;
    

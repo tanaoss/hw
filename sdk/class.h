@@ -207,11 +207,12 @@ struct Studio
     int bitSatus; // 原材料格状态
     int pStatus;  // 产品格状态
     int wait_time; //等待时间
-    int area;
     int studio_area_type[2];
-    int pane_id;
     int node_id;
+    int pane_id;
+    int has_suspicious_spots;
     vector<int> material_studios[8];
+    vector<int> suspicious_spots;
     bool corner;
     Studio(int _id, int _type, int _r_id, pair<double, double> &_pos, int _r_time, int _bitSatus, int _pStatus, int _node_id) : id(_id), type(_type), r_id(_r_id), pos(_pos), r_time(_r_time), bitSatus(_bitSatus), pStatus(_pStatus), node_id(_node_id)
     {
@@ -446,13 +447,15 @@ bool is_connected(int node_id_a, int node_id_b, int is_take);
 int get_bar_num(int node_id_a, int node_id_b, int is_take);
 void init_bar_sum();
 PayLoad calPayload_back(Robot robot, pair<double, double> virtual_pos);
-PayLoad choose_best_pay(Robot &ro, pair<double, double> pos);
+int choose_best_to(Robot &ro, pair<double, double> pos);
 double get_dis(const Robot &ro1, const Robot &ro2);
 int choose_close_node(int is_take, pair<double, double> pos);
 void do_back(int id, pair<double, double> pos);
 bool check_speed(Robot ro_a, Robot ro_b, double mindis);
 bool check_node_illegal(int x, int y);
-bool check_nead_slow_down(const Robot &ro, const Robot &ro_static);
+bool check_nead_slow_down(const Robot &ro, const Robot &ro_static, double mindis, int coll_frame);
+double get_rotation_stop_time(const Robot &ro, PayLoad pay);
+double get_stop_time(double x, double v0, int sign, double acceleration);
 
 
 
@@ -488,4 +491,4 @@ void get_point_type() ;
 void check_robot_pos_status(Robot& robot);
 void adjust_illegal_pos(Robot& robot);
 bool check_will_collison_wall(Robot& robot);
-void  select_the_standard_id(Robot& robot);
+void  select_the_standard_id(Robot& robot);void check_suspicious_spots(int studio_id);
