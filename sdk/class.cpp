@@ -986,7 +986,7 @@ int check_lack(int studio_id){
     }
     return 0;
 }
-bool check_other_robot_close(int robot_id){
+bool check_other_robot_close(int robot_id,double threshold){
     int studio_id = robots[robot_id].target_id;
     int robot;
     if(studios[studio_id].type>=3 &&studios[studio_id].type<=7){
@@ -994,9 +994,9 @@ bool check_other_robot_close(int robot_id){
         {
             robot = studios_rid[studio_id][studio_material[studios[studio_id].type - 4][i]];
             if(robot!=-1 &&robots[robot].get_type!=0){
-                cerr<<"robot "<<robot_id<<"wait studio :"<<studio_id<<"robot :"<<robot<<"close close dis = "<<dis_to_studios[studio_id][1][robots[robot].node_id]<<endl;
-                if(lt(dis_to_studios[studio_id][1][robots[robot].node_id],10)){
-                    cerr<<"true"<<endl;
+                // cerr<<"robot "<<robot_id<<"wait studio :"<<studio_id<<"robot :"<<robot<<"close close dis = "<<dis_to_studios[studio_id][1][robots[robot].node_id]<<endl;
+                if(lt(dis_to_studios[studio_id][1][robots[robot].node_id],threshold)){
+                    // cerr<<"true"<<endl;
                     return true;
                 }
             }         
@@ -1029,21 +1029,21 @@ bool check_material_consumption(int studio_id,double dis){
             }
             if(studios[studio_id].r_time==-1){
                 if(gt(dis,max_dist)){
-                    cerr<<"true1"<<endl;
+                    // cerr<<"true1"<<endl;
                     return true;
                 }
             }
             else if(studios[studio_id].r_time>0&&studios[studio_id].pStatus!=1){
                 if(gt((dist/6/0.02),studios[studio_id].r_time)){
                     if(gt(dis,max_dist)){
-                        cerr<<"true2"<<endl;
+                        // cerr<<"true2"<<endl;
                         return true;
                     }
                 }
             }
         }
     }
-    cerr<<"false"<<endl;
+    // cerr<<"false"<<endl;
     return false;
 }
 
@@ -1251,39 +1251,68 @@ void complete_trans(int robot_id,int change_target_flag){
     change_status(robot_id,temp);
     // cerr<<"robot_id : "<<robot_id<<endl;
 }
+bool check_robots_change_closest(int robot_id, pair<pair<int,int>,double>temp){
+    int i,count=0;
+    double income;
+    double dist;
+    double income_ratio;
+    income = price[studios[temp.first.first].type][1]-price[studios[temp.first.first].type][0];
+    income = income + (price[studios[temp.first.second].type][1]-price[studios[temp.first.second].type][0])/(studio_material[studios[temp.first.second].type-4][0]*2)*check_lack(temp.first.second);
+    for(int i=0;i<robots.size();i++){
+        if(i!=robot_id){
+            dist = dis_to_studios[temp.first.first][0][robots[robot_id].node_id]; 
+            dist += dis_to_studios[temp.first.second][1][studios[temp.first.first].node_id];
+            if(robots[i].get_type!=0){
+                dist += dis_to_studios[robots[robot_id].target_id][1][robots[robot_id].node_id];
+            }
+            income_ratio = (income/dist);
+            if(income_ratio>temp.second)count++;
+        }
+    }
+    if(count>0){
+        return false;
+    }
+    return true;
+}
 
 void charge_target(int robot_id){
     int i =robot_id;
     pair<pair<int,int>,double>temp;
     if(robots[i].get_type==0){
         temp=new_pick_point(i,2,1);
-        double income = (price[studios[robots[i].target_id_buy].type][1]-price[studios[robots[i].target_id_buy].type][0]);
-        income += (price[studios[robots[i].target_id_send].type][1]-price[studios[robots[i].target_id_send].type][0])/(studio_material[studios[robots[i].target_id_send].type-4][0]*2)*check_lack(robots[i].target_id_send);
-        double income_ratio =  income/(dis_to_studios[robots[i].target_id_buy][0][robots[i].node_id]+dis_to_studios[robots[i].target_id_send][1][studios[robots[i].target_id_buy].node_id]);
-        if(lt(income_ratio,temp.second)&&temp.first.second != robots[i].target_id_buy){
-            // cerr<<" robot : "<<i<<" change_target_id "<<"from "<<robots[i].target_id_buy<<" - "<<robots[i].target_id_send<<" to "<<temp.first.first<<" - "<<temp.first.second<<" income = "<<income_ratio<<" after change income = "<<temp.second<<endl;
-            if (studios[robots[i].target_id].r_id >= 50)
-                studios[robots[i].target_id].r_id -= 50;
-            else
-                studios[robots[i].target_id].r_id = -1;
-            if(studios[robots[i].target_id_send].type!=8&&studios[robots[i].target_id_send].type!=9)studios_rid[robots[i].target_id_send][studios[robots[i].target_id_buy].type] = -1;
-            robot_get_type[studios[robots[i].target_id].type]--;
-            change_status(i,temp);
-            robots[i].cnt_tar=robots[i].node_id;
+        if(temp.first.first != -1){
+            double income = (price[studios[robots[i].target_id_buy].type][1]-price[studios[robots[i].target_id_buy].type][0]);
+            income += (price[studios[robots[i].target_id_send].type][1]-price[studios[robots[i].target_id_send].type][0])/(studio_material[studios[robots[i].target_id_send].type-4][0]*2)*check_lack(robots[i].target_id_send);
+            double income_ratio =  income/(dis_to_studios[robots[i].target_id_buy][0][robots[i].node_id]+dis_to_studios[robots[i].target_id_send][1][studios[robots[i].target_id_buy].node_id]);
+            if(lt(income_ratio,temp.second)&&temp.first.second != robots[i].target_id_buy){
+                // cerr<<" robot : "<<i<<" change_target_id "<<"from "<<robots[i].target_id_buy<<" - "<<robots[i].target_id_send<<" to "<<temp.first.first<<" - "<<temp.first.second<<" income = "<<income_ratio<<" after change income = "<<temp.second<<endl;
+                if(check_robots_change_closest(robot_id,temp)){
+                    if (studios[robots[i].target_id].r_id >= 50)
+                        studios[robots[i].target_id].r_id -= 50;
+                    else
+                        studios[robots[i].target_id].r_id = -1;
+                    if(studios[robots[i].target_id_send].type!=8&&studios[robots[i].target_id_send].type!=9)studios_rid[robots[i].target_id_send][studios[robots[i].target_id_buy].type] = -1;
+                    robot_get_type[studios[robots[i].target_id].type]--;
+                    change_status(i,temp);
+                    robots[i].cnt_tar=robots[i].node_id;
+                }
+            }
         }
     }
     else{
         temp=new_pick_point(i,3,1);
-        double income = (price[robots[i].get_type][1]-price[robots[i].get_type][0]);
-        income += (price[studios[robots[i].target_id_send].type][1]-price[studios[robots[i].target_id_send].type][0])/(studio_material[studios[robots[i].target_id_send].type-4][0]*2)*check_lack(robots[i].target_id_send);
-        double income_ratio =  income/(dis_to_studios[robots[i].target_id][1][robots[robot_id].node_id]);
-        if(lt(income_ratio,temp.second)&& temp.first.second != robots[i].target_id_send){
-            // cerr<<" robot : "<<i<<" change_target_id "<<"from "<<robots[i].target_id_buy<<" - "<<robots[i].target_id_send<<" to "<<temp.first.first<<" - "<<temp.first.second<<" income = "<<income_ratio<<" after change income = "<<temp.second<<endl;
-            if(studios[robots[i].target_id_send].type!=8&&studios[robots[i].target_id_send].type!=9)studios_rid[robots[i].target_id_send][studios[robots[i].target_id_buy].type] = -1;
-            robots[i].target_id_send = temp.first.second;
-            robots[i].target_id = robots[i].target_id_send;
-            robots[i].cnt_tar=robots[i].node_id;
-            if(studios[robots[i].target_id_send].type!=8&&studios[robots[i].target_id_send].type!=9 &&studios_rid[robots[i].target_id_send][studios[robots[i].get_type].type] == -1)studios_rid[robots[i].target_id_send][studios[robots[i].get_type].type] = i;
+        if(temp.first.second != -1){
+            double income = (price[robots[i].get_type][1]-price[robots[i].get_type][0]);
+            income += (price[studios[robots[i].target_id_send].type][1]-price[studios[robots[i].target_id_send].type][0])/(studio_material[studios[robots[i].target_id_send].type-4][0]*2)*check_lack(robots[i].target_id_send);
+            double income_ratio =  income/(dis_to_studios[robots[i].target_id][1][robots[robot_id].node_id]);
+            if(lt(income_ratio,temp.second)&& temp.first.second != robots[i].target_id_send){
+                // cerr<<" robot : "<<i<<" change_target_id "<<"from "<<robots[i].target_id_buy<<" - "<<robots[i].target_id_send<<" to "<<temp.first.first<<" - "<<temp.first.second<<" income = "<<income_ratio<<" after change income = "<<temp.second<<endl;
+                if(studios[robots[i].target_id_send].type!=8&&studios[robots[i].target_id_send].type!=9)studios_rid[robots[i].target_id_send][studios[robots[i].target_id_buy].type] = -1;
+                robots[i].target_id_send = temp.first.second;
+                robots[i].target_id = robots[i].target_id_send;
+                robots[i].cnt_tar=robots[i].node_id;
+                if(studios[robots[i].target_id_send].type!=8&&studios[robots[i].target_id_send].type!=9 &&studios_rid[robots[i].target_id_send][studios[robots[i].get_type].type] == -1)studios_rid[robots[i].target_id_send][studios[robots[i].get_type].type] = i;
+            }
         }
 
     }
@@ -1327,15 +1356,15 @@ void new_robot_judge(){
                     // cerr<<"robot: "<<i<<" wait "<<endl;
                     ins[i].buy = -1;   //wait;
                     ins[i].sell = -1;
-                    // if(check_other_robot_close(i)){
-                    //     cerr<<"change"<<endl;
-                    //     complete_trans(i,0);
-                    //     if (studios[robots[i].loc_id].r_id >= 50)
-                    //         studios[robots[i].loc_id].r_id -= 50;
-                    //     else
-                    //         studios[robots[i].loc_id].r_id = -1;
-                    //     robots[i].cnt_tar=robots[i].node_id;
-                    // }
+                    if(check_other_robot_close(i,10)){
+                        // cerr<<"change"<<endl;
+                        complete_trans(i,0);
+                        if (studios[robots[i].loc_id].r_id >= 50)
+                            studios[robots[i].loc_id].r_id -= 50;
+                        else
+                            studios[robots[i].loc_id].r_id = -1;
+                        robots[i].cnt_tar=robots[i].node_id;
+                    }
                 }
             }
         }
@@ -1356,7 +1385,6 @@ void new_robot_judge(){
             }
             else{
                 robots[i].target_id_send = new_pick_point(i,3,0).first.second;
-                
                 robots[i].target_id = robots[i].target_id_send;
                 robots[i].cnt_tar=robots[i].node_id;
                 if(studios[robots[i].target_id_send].type!=8&&studios[robots[i].target_id_send].type!=9)studios_rid[robots[i].target_id_send][studios[robots[i].get_type].type] = i;
@@ -1376,12 +1404,13 @@ void new_robot_judge(){
                 }
             }
         }
-        // cerr<<"robot : "<<i<<" target id = "<<robots[i].target_id<<" virtual target id = "<<robots[i].virtual_id<<" virtual target pos = "<<robots[i].virtual_pos.first<<' '<<robots[i].virtual_pos.second<<" ins[i].buy = "<<ins[i].buy<<" ins[i].sell = "<<ins[i].sell<<endl;
+        // cerr<<"robot : "<<i<<" target id = "<<robots[i].target_id<<"from "<<robots[i].target_id_buy<<" - "<<robots[i].target_id_send<<" ins[i].buy = "<<ins[i].buy<<" ins[i].sell = "<<ins[i].sell<<endl;
     }
 }
 void new_first_action(){
     for(int i=0;i<robots.size();i++){
         // cerr<<"aaa"<<endl;
+        robots[i].real_get_type = robots[i].get_type;
         complete_trans(i,0);
         robots[i].cnt_tar=robots[i].node_id;
         // cerr<<"robot : "<<i<<" target id = "<<robots[i].target_id<<endl;
@@ -1390,12 +1419,13 @@ void new_first_action(){
 void new_robot_action(){
     for(int i =0;i<=7;i++)robot_get_type[i]=0;
     for(int i = 0;i<4;i++){
+        robots[i].real_get_type = robots[i].get_type;
         if(robots[i].get_type != 0)robot_get_type[robots[i].get_type]++;
         else if(robots[i].target_id != -1)robot_get_type[studios[robots[i].target_id].type]++;
     }
-    if(state.FrameID >=10830 &&state.FrameID <= 11100){
-        cerr<<" r_id "<<studios[6].r_id<<endl;
-    }
+    // if(state.FrameID >=10830 &&state.FrameID <= 11100){
+    //     cerr<<" r_id "<<studios[6].r_id<<endl;
+    // }
     new_robot_judge();
 }
 
@@ -2655,7 +2685,7 @@ PayLoad calPayload_trajectory(Robot rob,int studioID){
     return PayLoad((robot.get_type == 0? 0.45: 0.53), angle, angular_acceleration, acceleration, distance, speed, sign);    
 }
 Ins contr_one_rob_1(Robot& robot){
-    print_cerr_flag_ta=true;
+    // print_cerr_flag_ta=true;
     Flag_sumulate=0;
     Ins ins_t;
     if(robot.target_id==-1){
@@ -2784,7 +2814,7 @@ Ins contr_one_rob_1(Robot& robot){
     return ins_t;
 }
 Ins contr_one_rob_0(Robot& robot){
-    print_cerr_flag_ta=true;
+    // print_cerr_flag_ta=true;
     Flag_sumulate=0;
     Ins ins_t;
     if(robot.target_id==-1){
@@ -2995,14 +3025,50 @@ void print_robot_infor(Robot r) {
 }
 
 bool change_target(int id1, int id2) {
-    if(robots[id1].loc_id == robots[id1].target_id || robots[id2].loc_id == robots[id2].target_id)
+    if(robots[id1].loc_id != -1){
+        if(lt(calcuDis(robots[id1].pos,studios[robots[id1].loc_id].pos),0.4))
+            return false;
+    }
+    if(robots[id2].loc_id != -1){
+        if(lt(calcuDis(robots[id2].pos,studios[robots[id2].loc_id].pos),0.4))
+            return false;
+    }
+    if(lt(calcuDis(robots[id1].pos,studios[robots[id1].target_id].pos),0.7)|| lt(calcuDis(robots[id2].pos,studios[robots[id2].target_id].pos),0.7))
         return false;
+    //keyouhua
+    if(robots[id1].target_id != -1 && le(get_dis(robots[id1], robots[id2]), 0)) return false;
+    if(robots[id2].target_id != -1 && le(get_dis(robots[id2], robots[id1]), 0)) return false;
+    if(robots[id1].target_id == robots[id2].target_id) return false;
+    // cerr<<"change_target"<<endl;
     int cnt;
+    if(robots[id1].get_type==robots[id2].get_type && robots[id1].get_type == 0){
+        // cerr<<" studio rid : "<<studios[robots[id1].target_id_buy].r_id<<" - "<<studios[robots[id2].target_id_buy].r_id <<endl;
+        cnt = studios[robots[id1].target_id_buy].r_id;
+        studios[robots[id1].target_id_buy].r_id = studios[robots[id2].target_id_buy].r_id;
+        studios[robots[id2].target_id_buy].r_id = cnt;
+        // cerr<<" studio rid : "<<studios[robots[id1].target_id_buy].r_id<<" - "<<studios[robots[id2].target_id_buy].r_id <<endl;
+    }
+    // cerr<<"material_rid "<<studios_rid[robots[id1].target_id_send][studios[robots[id1].target_id_buy].type]<<" - "<<studios_rid[robots[id2].target_id_send][studios[robots[id2].target_id_buy].type]<<endl;
+    cnt = studios_rid[robots[id1].target_id_send][studios[robots[id1].target_id_buy].type];
+    studios_rid[robots[id1].target_id_send][studios[robots[id1].target_id_buy].type] = studios_rid[robots[id2].target_id_send][studios[robots[id2].target_id_buy].type];
+    studios_rid[robots[id2].target_id_send][studios[robots[id2].target_id_buy].type] = cnt;
+    // cerr<<"material_rid "<<studios_rid[robots[id1].target_id_send][studios[robots[id1].target_id_buy].type]<<" - "<<studios_rid[robots[id2].target_id_send][studios[robots[id2].target_id_buy].type] <<endl;
+    // cerr<<" target_send : "<<robots[id1].target_id_send<<" - "<<robots[id2].target_id_send<<endl;
+    cnt = robots[id1].target_id_send;
+    robots[id1].target_id_send = robots[id2].target_id_send;
+    robots[id2].target_id_send = cnt;
+    // cerr<<" target_send : "<<robots[id1].target_id_send<<" - "<<robots[id2].target_id_send<<endl;
+    // cerr<<" target_buy : "<<robots[id1].target_id_buy<<" - "<<robots[id2].target_id_buy<<endl;
+    cnt = robots[id1].target_id_buy;
+    robots[id1].target_id_buy = robots[id2].target_id_buy;
+    robots[id2].target_id_buy = cnt;
+    // cerr<<" target_id : "<<robots[id1].target_id<<" - "<<robots[id2].target_id<<endl;
     cnt = robots[id1].target_id;
     robots[id1].target_id = robots[id2].target_id;
     robots[id1].cnt_tar = robots[id1].node_id;
     robots[id2].target_id = cnt;
     robots[id2].cnt_tar = robots[id2].node_id;
+    // cerr<<" target_id : "<<robots[id1].target_id<<" - "<<robots[id2].target_id<<endl;
     return true;
 }
 
@@ -3017,6 +3083,13 @@ bool cmp_robot(Robot a, Robot b) {
     return a.get_type < b.get_type;
 }
 
+bool check_speed(Robot ro_a, Robot ro_b, double mindis) {
+    pair<double, double> speed = subVector(ro_a.xy_pos, ro_b.xy_pos);
+    pair<double, double> pos = subVector(ro_b.pos, ro_a.pos);
+    double t = (payloads[ro_a.id].speed + payloads[ro_b.id].speed) / payloads[ro_a.id].acceleration + 0.04;
+    pair<double, double> next_pos = calVectorProduct(speed, t);
+    return gt(calcuDis(next_pos, pos), mindis);
+}
 
 void collision_solve(int frame){
     int i, j, k, z;
@@ -3039,7 +3112,7 @@ void collision_solve(int frame){
     bool cerr_falg = false;
 
 
-    // if(state.FrameID >= 1692 && state.FrameID <= 1705 && 999==999)
+    // if(state.FrameID >= 5712 && state.FrameID <= 5712 && 999==999)
         // cerr_falg = true;
 
 
@@ -3047,6 +3120,8 @@ void collision_solve(int frame){
         ro.emplace_back(robots[i]);
     sort(ro.begin(), ro.end(), cmp_robot);
     for(i = 0; i < 4; ++i) trajectory[i] = Calculate_the_trajectory(ro[i], 0, frame, 0);
+
+    
 
     // if(state.FrameID == 2) {
     //     cerr<<"predict"<<endl;
@@ -3285,8 +3360,19 @@ void collision_solve(int frame){
             if(cerr_falg)
                 cerr<<"back"<<endl;
 
-            updateIns(ro[choose_id].id, 4);
-            if(lt(get_dis(ro[choose_id], ro[x]), 1) && gt(payloads[ro[choose_id].id].speed, 0)) updateIns(ro[x].id, 4);
+            do_back(ro[choose_id].id, ro[x].pos);
+            if(cerr_falg) cerr<<"dis:"<<get_dis(ro[choose_id], ro[x])<<endl;
+            if(le(get_dis(ro[choose_id], ro[x]), 2) && gt(payloads[ro[choose_id].id].speed, 0)){
+                do_back(ro[x].id, ro[choose_id].pos);
+                if(cerr_falg) {
+                    cerr<<"x doback"<<endl;
+                    
+                }
+            }
+            if(eq(payloads[ro[choose_id].id].speed, -2) && check_speed(ro[x], ro[choose_id], mindis)) {
+                if(cerr_falg) cerr<<"x减速"<<endl;
+                ins[ro[x].id].forward = min(fabs(payloads[ro[choose_id].id].speed), ins[ro[x].id].forward);
+            }
             
             // if(cerr_falg) {
             //     cerr<<"~old solution:"<<ins[ro[choose_id].id].forward<<"**"<<ins[ro[choose_id].id].rotate<<endl;
@@ -3349,7 +3435,18 @@ void collision_solve(int frame){
 double get_dis(Robot ro1, Robot ro2) {
     int is_take = (ro1.get_type != 0);
     int tar = ro1.target_id;
-    return dis_to_studios[tar][is_take][choose_close_node(tar, is_take, ro1.pos)] - dis_to_studios[tar][is_take][choose_close_node(tar, is_take, ro2.pos)];
+    if(tar == -1) cerr<<"error!!!";
+    int node1 = choose_close_node(tar, is_take, ro1.pos);
+    int node2 = choose_close_node(tar, is_take, ro2.pos);
+    // if(state.FrameID == 675) {
+    //     cerr<<"tar:"<<tar<<endl;
+    //     cerr<<"node1:"<<choose_close_node(tar, is_take, ro1.pos)<<endl;
+    //     cerr<<"node2:"<<choose_close_node(tar, is_take, ro2.pos)<<endl;
+    //     cerr<<"ro"<<ro1.id<<":"<<dis_to_studios[tar][is_take][node1]<<endl;
+    //     cerr<<"ro"<<ro2.id<<":"<<dis_to_studios[tar][is_take][node2]<<endl;
+    // }
+    
+    return dis_to_studios[tar][is_take][node1] - dis_to_studios[tar][is_take][node2];
 }
 
 
@@ -3395,16 +3492,21 @@ void updateIns(int id, int i) {
         ins[id].forward = ins_set[i].forward;
         // cerr<<"chose solution10:"<<ins[id].forward<<"**"<<ins[id].rotate<<endl;
     }
-    if(i == 4 && le(payloads[id].speed, 0)) {
+    robots[id].cnt_tar = robots[id].node_id;
+}
 
-        PayLoad pay=choose_best_pay(robots[id]);
+
+void do_back(int id, pair<double, double> pos) {
+    ins[id].forward = -2;
+    robots[id].cnt_tar = robots[id].node_id;
+    if(le(payloads[id].speed, 0)) {
+        PayLoad pay=choose_best_pay(robots[id], pos);
         // PayLoad pay= payloads[id];
         ins[id].rotate = get_w_now(robots[id], pay).first;
         // cerr<<robots[id].node_id<<"-"<<next_node[robots[id].target_id][(robots[id].get_type != 0)][robots[id].node_id]<<endl;
         // cerr<<pay.angle<<"*"<<pay.sign<<endl;
         // cerr<<ins[id].rotate<<endl;
     }
-    robots[i].cnt_tar = robots[i].node_id;
 }
 
 PayLoad calPayload_back(Robot robot, pair<double, double> virtual_pos) {
@@ -3451,8 +3553,8 @@ int choose_close_node(int tar, int is_take, pair<double, double> pos) {
     int node_id = trans_pos_to_nodeID(pos);
     dis = 10000;
     if(next_node[tar][is_take][node_id] != -1) return node_id;
-    for(int i = (node_id / 100)-1; i < (node_id / 100) + 2; ++i) {
-        for(int j = (node_id % 100) -1; j < (node_id % 100) +2; ++j) {
+    for(int i = (node_id / 100)-2; i < (node_id / 100) + 3; ++i) {
+        for(int j = (node_id % 100) -2; j < (node_id % 100) +3; ++j) {
             if(next_node[tar][is_take][i * 100 + j] == -1) continue;
             tmp = calcuDis(pos, trans_nodeID_to_pos(i * 100 + j));
             if(lt(tmp, dis)) {
@@ -3465,27 +3567,24 @@ int choose_close_node(int tar, int is_take, pair<double, double> pos) {
 }
 
 
-PayLoad choose_best_pay(Robot &ro) {
+PayLoad choose_best_pay(Robot &ro, pair<double, double> pos) {
     int is_take = (ro.get_type != 0);
     int tar = ro.target_id;
-    int best_node;
+    int node_id = choose_close_node(tar, is_take, ro.pos);
+    int to, to_max;
     double dis, tmp, angle = Pi;
-    PayLoad pay, pay_best;
-    if(next_node[tar][is_take][ro.node_id] != -1) 
-        return calPayload(ro, trans_nodeID_to_pos(next_node[tar][is_take][ro.node_id]));
-    for(int i = (ro.node_id / 100)-1; i < (ro.node_id / 100) + 2; ++i) {
-        for(int j = (ro.node_id % 100) -1; j < (ro.node_id % 100) +2; ++j) {
-            if(next_node[tar][is_take][i * 100 + j + ro.node_id] == -1) continue;
-            if(lt(payloads[ro.id].speed, 0))
-                pay = calPayload_back(ro, make_pair(j * 0.5 + 0.25, i * 0.5 + 0.25));
-            else
-                pay = calPayload(ro, make_pair(j * 0.5 + 0.25, i * 0.5 + 0.25));
-            if(gt(angle, pay.angle)){
-                angle = pay.angle;
-                pay_best = pay;
-            }
+    PayLoad pay_best;
+    // if(next_node[tar][is_take][ro.node_id] != -1) 
+    //     return calPayload(ro, trans_nodeID_to_pos(next_node[tar][is_take][ro.node_id]));
+    for(int i = 0; i < graph_edge[is_take][node_id].size(); ++i) {
+        to = graph_edge[is_take][node_id][i].id;
+        tmp = calcuDis(pos, trans_nodeID_to_pos(to));
+        if(gt(tmp, dis)) {
+            dis = tmp;
+            to_max = to;
         }
     }
+    pay_best = calPayload_back(ro, trans_nodeID_to_pos(to_max));
     return pay_best;
 }
 

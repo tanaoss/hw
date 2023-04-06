@@ -103,6 +103,7 @@ struct Robot
     int pre_cnt;
     int wait;
     int node_id;
+    int real_get_type;
     int last_get_type;
     bool need_rote_wall;
     double radius;
@@ -429,9 +430,11 @@ bool is_connected(int node_id_a, int node_id_b, int is_take);
 int get_bar_num(int node_id_a, int node_id_b, int is_take);
 void init_bar_sum();
 PayLoad calPayload_back(Robot robot, pair<double, double> virtual_pos);
-PayLoad choose_best_pay(Robot &ro);
+PayLoad choose_best_pay(Robot &ro, pair<double, double> pos);
 double get_dis(Robot ro1, Robot ro2);
 int choose_close_node(int tar, int is_take, pair<double, double> pos);
+void do_back(int id, pair<double, double> pos);
+bool check_speed(Robot ro_a, Robot ro_b, double mindis);
 
 
 
