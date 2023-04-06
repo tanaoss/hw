@@ -54,9 +54,9 @@ int main()
     // print_dijkstra(0,1,1);
      while (cin >> state.FrameID)
     {
-        if(state.FrameID>start_time && state.FrameID<end_time &&cerr_flag_j){
-            cerr<<" time "<<state.FrameID<<endl;
-        }
+        // if(state.FrameID>start_time && state.FrameID<end_time &&cerr_flag_j){
+            // cerr<<" time "<<state.FrameID<<endl;
+        // }
         readStatusUntilOK() ;
         
         cout<<state.FrameID<<endl;

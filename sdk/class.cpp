@@ -211,6 +211,14 @@ void init_studio_parameter(){
                 // cerr<<endl;
             }
         }
+        check_suspicious_spots(i);
+        // if(studios[i].has_suspicious_spots == 1){
+        //     // cerr<<"studio : "<<i<<endl;
+        //     // for(int j = 0;j<studios[i].suspicious_spots.size();i++){
+        //     //     // cerr<<" suspicious node_Id = "<<studios[i].suspicious_spots[j]<<' ';
+        //     // }
+        //     cerr<<endl;
+        // }
     }
 
 }
@@ -1131,6 +1139,47 @@ bool check_robots_wait_closest(int robot_id, double dist_robot,int studio_id){
     }
     return true;
 }
+void check_suspicious_spots(int studio_id){
+    int i,j;
+    double dist1,dist2;
+    i = (int)(studios[studio_id].node_id/100);
+    j = studios[studio_id].node_id%100;
+    for(int x =(i-1);x<(i+2);x++){
+        for(int y = (j-1);y<(j+2);y++){
+            if(x==i&&y==j)continue;
+            if(x<0||x>99)continue;
+            if(y<0||y>99)continue;
+            dist1 = dis_to_studios[studio_id][0][x*100+y];
+            if(eq(dist1,10000))continue;
+            dist2 = dis_to_studios[studio_id][1][x*100+y];
+            if(eq(dist2,10000))continue;
+            // cerr<<"studio : "<<studio_id<<" x = "<<x<<" y = "<<y<<" dist no take = "<<dist1<<"dist take = "<<dist2<<endl;
+            if(lt(dist1,1.5) &&gt(dist2,2)){
+                // cerr<<x*100+y<<endl;
+                studios[studio_id].suspicious_spots.push_back(x*100+y);
+                studios[studio_id].has_suspicious_spots = 1;
+            }
+        }
+    }
+    if(studios[studio_id].has_suspicious_spots != 1)studios[studio_id].has_suspicious_spots != 0;
+}
+double check_suspicious_dis(int robot_id,int studio_id,int send_id,double dis){
+    double min_dist = dis;
+    double dist;
+    int min_subscript = -1;
+    if(lt(dis_to_studios[studio_id][1][robots[robot_id].node_id],dis_to_studios[send_id][1][robots[robot_id].node_id])){
+        return dis;
+    }
+    for(int i = 0;i<studios[studio_id].suspicious_spots.size();i++){
+        dist = dis_to_studios[send_id][1][studios[studio_id].suspicious_spots[i]];
+        if(lt(dist,(min_dist-3))){
+            min_dist = dist;
+            min_subscript = studios[studio_id].suspicious_spots[i];
+        }
+    }
+    // cerr<<"studio from "<<studio_id<<" - "<<send_id<<"offset : "<<min_subscript<<" change dist "<<dis<<" to "<<min_dist<<endl;
+    return min_dist;
+}
 pair<pair<int,int>,double> new_pick_point(int robot_id,int state_type,int change_target_flag){
     double max = 0;
     int studio_buy = -1,studio_send = -1;
@@ -1188,7 +1237,10 @@ pair<pair<int,int>,double> new_pick_point(int robot_id,int state_type,int change
                                         dist += dist2;
                                     }
                                 }
-                                dist += dis_to_studios[i][1][studios[material_studio_id].node_id];
+                                if(studios[material_studio_id].has_suspicious_spots){
+                                    dist += check_suspicious_dis(robot_id,material_studio_id,i,dis_to_studios[i][1][studios[material_studio_id].node_id]);
+                                }
+                                else dist += dis_to_studios[i][1][studios[material_studio_id].node_id];
                                 income_ratio = (income/dist);
                                 if(state.FrameID>start_time&&state.FrameID<end_time&&cerr_flag_j){
                                     cerr<<"to buy dist = "<< dis_to_studios[material_studio_id][0][robots[robot_id].node_id]<<" to send dist = "<<dis_to_studios[i][1][studios[material_studio_id].node_id]<<endl;
@@ -1461,6 +1513,7 @@ void new_robot_judge(){
                 //do something buy;
                 // cerr<<"bbb"<<endl;
                 if(studios[robots[i].target_id].pStatus==1){
+                    
                     ins[i].buy = 1;
                     ins[i].sell = -1;
                     robots[i].lastSign=0;
@@ -1474,6 +1527,7 @@ void new_robot_judge(){
                     robots[i].target_id = robots[i].target_id_send;
                     robots[i].cnt_tar=robots[i].node_id;
                 }
+                   
                 else{
                     // cerr<<"robot: "<<i<<" wait "<<endl;
                     ins[i].buy = -1;   //wait;
