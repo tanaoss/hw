@@ -118,6 +118,7 @@ struct Robot
     bool need_slow;
     bool is_illegal;
     bool is_dangerous;
+    bool is_new_tar_ing;
     bool operator!=(Robot s1){
     if(s1.id!=id||target_id!=s1.target_id||s1.loc_id!=loc_id||xy_pos!=s1.xy_pos||pos!=s1.pos){
             return true;
@@ -152,6 +153,7 @@ struct Robot
         need_slow=false;
         is_illegal=false;
         is_dangerous=false;
+        is_new_tar_ing=false;
     }
     void set(int _id, int _loc_id, int _get_type, double _time_val, double _collision_val, double _angular_velocity, pair<double, double> &&_xy_pos,
              double _direction, pair<double, double> &&_pos)
@@ -255,6 +257,13 @@ struct Graph_node{
         angle_sum = 0;
     }
 
+    Graph_node(int _id,double _dis,int _pre_id, double _angle_sum){
+        id=_id;
+        dis=_dis;
+        pre_id=_pre_id;
+        angle_sum = _angle_sum;
+    }
+
     Graph_node(int _id,double _dis,int _pre_id, double _angle_sum, int _dangerous_sum){
         id=_id;
         dis=_dis;
@@ -269,8 +278,8 @@ struct cmp_Graph_node
 {
     bool operator()(const Graph_node &a,const Graph_node &b)
     {
-        if(a.dangerous_sum != b.dangerous_sum)
-            return a.dangerous_sum > b.dangerous_sum;
+        // if(a.dangerous_sum != b.dangerous_sum)
+        //     return a.dangerous_sum > b.dangerous_sum;
         if(fabs(a.dis - b.dis) < 1e-7) {
             return a.angle_sum > b.angle_sum;
         }
@@ -436,9 +445,11 @@ void init_bar_sum();
 PayLoad calPayload_back(Robot robot, pair<double, double> virtual_pos);
 PayLoad choose_best_pay(Robot &ro, pair<double, double> pos);
 double get_dis(Robot ro1, Robot ro2);
-int choose_close_node(int tar, int is_take, pair<double, double> pos);
+int choose_close_node(int is_take, pair<double, double> pos);
 void do_back(int id, pair<double, double> pos);
 bool check_speed(Robot ro_a, Robot ro_b, double mindis);
+bool check_node_illegal(int x, int y);
+bool check_nead_slow_down(const Robot & ro, pair<double, double> pos);
 
 
 
@@ -469,6 +480,7 @@ bool has_next(Robot& rob);
 bool check_tar_line(Robot& rob,double dis);
 Ins contr_one_rob_0(Robot& robot);
 Ins contr_one_rob_1(Robot& robot);
+Ins contr_new_tar(Robot& robot);
 void get_point_type() ;
 void check_robot_pos_status(Robot& robot);
 void adjust_illegal_pos(Robot& robot);
