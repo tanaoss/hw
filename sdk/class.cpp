@@ -797,6 +797,7 @@ void control(){
     //     cerr<<state.FrameID<<" ins befoer "<<ins[0].forward<<"\n";
     //     cerr<<check_will_colloWithWall(robots[0])<<"\n";
     // }
+    
     collision_solve(25);
 
     // if(state.FrameID >= 5600 && state.FrameID < 5610) {
