@@ -3191,7 +3191,7 @@ bool change_target(int id1, int id2) {
     if(robots[id1].target_id != -1 && le(get_dis(robots[id1], robots[id2]), 0)) return false;
     if(robots[id2].target_id != -1 && le(get_dis(robots[id2], robots[id1]), 0)) return false;
     if(robots[id1].target_id == robots[id2].target_id) return false;
-    cerr<<"change target"<<endl;
+    // cerr<<"change target"<<endl;
     int cnt;
     if(robots[id1].get_type==robots[id2].get_type && robots[id1].get_type == 0){
         // cerr<<" studio rid : "<<studios[robots[id1].target_id_buy].r_id<<" - "<<studios[robots[id2].target_id_buy].r_id <<endl;
@@ -3251,9 +3251,9 @@ bool check_speed(Robot ro_a, Robot ro_b, double mindis) {
     Vec pos = subVector(ro_b.pos, ro_a.pos);
     double dd = speed * pos;
     if(le(calcuDis(ro_a.pos, ro_b.pos), mindis + 0.5)) return true;
-    printPair(speed);
-    printPair(pos);
-    cerr<<"dd:"<<dd<<endl;
+    // printPair(speed);
+    // printPair(pos);
+    // cerr<<"dd:"<<dd<<endl;
     
     if(lt(dd, 0)) return false;
 
