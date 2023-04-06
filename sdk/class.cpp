@@ -783,7 +783,7 @@ void control(){
     //     cerr<<state.FrameID<<" ins befoer "<<ins[0].forward<<endl;
     //     cerr<<check_will_colloWithWall(robots[0])<<endl;
     // }
-    // collision_solve(25);
+    collision_solve(25);
 
     // if(state.FrameID >= 5600 && state.FrameID < 5610) {
     //     cerr<<"~ins:"<<ins[2].forward<<"  "<<ins[2].rotate<<endl;
@@ -1472,9 +1472,9 @@ void new_robot_judge(){
                 }
             }
         }
-        if(state.FrameID>start_time&&state.FrameID<end_time&&cerr_flag_j){
-        cerr<<"robot : "<<i<<" target id = "<<robots[i].target_id<<"from "<<robots[i].target_id_buy<<" - "<<robots[i].target_id_send<<" ins[i].buy = "<<ins[i].buy<<" ins[i].sell = "<<ins[i].sell<<"loc_id :"<<robots[i].loc_id;
-        }    
+        // if(state.FrameID>start_time&&state.FrameID<end_time&&cerr_flag_j){
+        // cerr<<"robot : "<<i<<" target id = "<<robots[i].target_id<<"from "<<robots[i].target_id_buy<<" - "<<robots[i].target_id_send<<" ins[i].buy = "<<ins[i].buy<<" ins[i].sell = "<<ins[i].sell<<"loc_id :"<<robots[i].loc_id;
+        // }    
     }
 }
 void new_first_action(){
@@ -3246,7 +3246,7 @@ bool check_speed(Robot ro_a, Robot ro_b, double mindis) {
     if(le(calcuDis(ro_a.pos, ro_b.pos), mindis + 0.5)) return true;
     printPair(speed);
     printPair(pos);
-    cerr<<"dd:"<<dd<<endl;
+    // cerr<<"dd:"<<dd<<endl;
     
     if(lt(dd, 0)) return false;
 
@@ -3276,7 +3276,7 @@ void collision_solve(int frame){
 
 
     // if(state.FrameID >= 5712 && state.FrameID <= 5712 && 999==999)
-        cerr_falg = true;
+        // cerr_falg = true;
 
 
     for(i = 0; i < 4; ++i)
