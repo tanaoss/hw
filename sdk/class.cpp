@@ -3337,7 +3337,7 @@ void print_robot_infor(Robot r) {
     printPair(r.xy_pos);
     cerr<<"speed:"<<payloads[r.id].speed<<" rotate:"<<r.angular_velocity<<" dir:"<<r.direction<<"\n";
     printPair(r.pos);
-    cerr<<"dis to tar:" << dis_to_studios[r.target_id][(r.get_type!=0)][r.close_node]<<"\n";
+    if(r.target_id != -1) cerr<<"dis to tar:" << dis_to_studios[r.target_id][(r.get_type!=0)][r.close_node]<<"\n";
     cerr<<"virtual_";
     printPair(r.virtual_pos);
 }
@@ -3647,6 +3647,7 @@ void collision_solve(int frame){
             }
         }
 
+        
         if(ans != -1 && (ans != 3 || gt(payloads[ro[choose_id].id].speed, 1) || !check_nead_slow_down(ro[x], ro[choose_id], mindis, coll_time[choose_id][x]))) {
             if(collision_cerr_flag) {
                 cerr<<payloads[ro[choose_id].id].angle<<"-"<<payloads[ro[choose_id].id].sign<<"\n";
@@ -3970,6 +3971,7 @@ bool check_nead_slow_down(const Robot &ro, const Robot &ro_static, double mindis
                 break;
             }
         }
+        if(tar == -1) return false;
     }
     // if(collision_cerr_flag) {
     //     cerr<<"###########\n"<<"mindis:"<<mindis<<"\n";
@@ -4100,9 +4102,16 @@ int choose_best_to(Robot &ro, pair<double, double> pos) {
 
 int checkNoCollision(const vector<pair<double,double>> &a, const vector<pair<double,double>> &b, double mindis) {
     int count = min(a.size(), b.size());
+    double dis;
+    bool flag = 0;
     for(int i = 0; i < count; ++i) {
-        if(lt(calcuDis(a[i], b[i]), mindis))
-            return i;
+        dis = calcuDis(a[i], b[i]);
+        if(lt(dis, mindis)) {
+            if(i == 0) {
+                mindis = dis;
+            }
+            else return i;
+        }
     }
     return 9000;
 }
