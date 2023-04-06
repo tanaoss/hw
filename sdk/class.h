@@ -249,6 +249,7 @@ struct Graph_node{
     int pre_id;//最短路中的前置pre_id;
     double dis;
     double angle_sum;
+    int dangerous_sum;
     Graph_node(int _id,double _dis,int _pre_id){
         id=_id;
         dis=_dis;
@@ -256,10 +257,11 @@ struct Graph_node{
         angle_sum = 0;
     }
 
-    Graph_node(int _id,double _dis,int _pre_id, double _angle_sum){
+    Graph_node(int _id,double _dis,int _pre_id, double _angle_sum, int _dangerous_sum){
         id=_id;
         dis=_dis;
         pre_id=_pre_id;
+        dangerous_sum = _dangerous_sum;
         angle_sum = _angle_sum;
     }
     
@@ -269,6 +271,8 @@ struct cmp_Graph_node
 {
     bool operator()(const Graph_node &a,const Graph_node &b)
     {
+        if(a.dangerous_sum != b.dangerous_sum)
+            return a.dangerous_sum > b.dangerous_sum;
         if(fabs(a.dis - b.dis) < 1e-7) {
             return a.angle_sum > b.angle_sum;
         }
