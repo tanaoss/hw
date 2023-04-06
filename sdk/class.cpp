@@ -2899,10 +2899,11 @@ Ins contr_new_tar(Robot& robot){
 }
 Ins contr_one_rob_0(Robot& robot){
     //ta_aaaa
-    print_cerr_flag_ta=true;
+    print_cerr_flag_ta=false;
     Flag_sumulate=0;
     int print_rob_id=2;
     Ins ins_t;
+    
     if(robot.target_id==-1){
         ins_t.forward=0;
         ins_t.rotate=Pi;
@@ -2997,7 +2998,24 @@ Ins contr_one_rob_0(Robot& robot){
         robot.cnt_tar=ret_next(robot,robot.cnt_tar);
     }
 
-
+    bool con_get_type=false;
+    if(gt(payload.angle,Pi/2-0.2))
+        con_get_type=true;
+    if(!robot.need_adjust_statues&&gt(payload.distance,1.1)&&!p1.second&&con_get_type)
+    {
+        ins_t.forward=vir_v_0(robot);
+        if(robot.id==0&&print_cerr_flag_ta)
+            cerr<<"-"<<state.FrameID<<" 采样速度 "<<ins_t.forward<<endl;
+        if(ins_t.forward==-1){
+            ins_t.forward=0;
+            if(robot.id==0&&print_cerr_flag_ta){
+                cerr<<"状态调整准备开始"<<endl;
+                cerr<<"当前速度 "<<return_v(robot)<<endl;
+            }
+            robot.need_adjust_statues=true;
+          
+        }
+    }
  
      int istake=robot.get_type==0?0:1;
     Robot tmpRob=robot;
@@ -3028,7 +3046,7 @@ Ins contr_one_rob(Robot& robot){
     print_cerr_flag_ta=false;
     if(robot.is_illegal&&!robot.need_adjust_statues){
         if(robot.id==2&&print_cerr_flag_ta){
-            cerr<<"机器人0在非法位置："<<endl;
+            cerr<<"机器人2在非法位置："<<endl;
             printPair(robot.pos);
             cerr<<"标准坐标"<<endl;
             printPair(exist_id[robot.get_type==0?0:1][robot.node_id]);
