@@ -778,7 +778,7 @@ void control(){
     //     cerr<<state.FrameID<<" ins befoer "<<ins[0].forward<<endl;
     //     cerr<<check_will_colloWithWall(robots[0])<<endl;
     // }
-    collision_solve(25);
+    // collision_solve(25);
 
     // if(state.FrameID >= 5600 && state.FrameID < 5610) {
     //     cerr<<"~ins:"<<ins[2].forward<<"  "<<ins[2].rotate<<endl;
