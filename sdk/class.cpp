@@ -2423,7 +2423,7 @@ bool checkNearBar(const pair<double,double> &a, double radius){
     double x1, x2, y1, y2;
     double cross_y1, cross_y2, dis, radius2, dis1;
     int x_min, x_max, y_min, y_max;
-    double radius2 = radius * radius;
+    radius2 = radius * radius;
     x1 = a.first - radius;
     x2 = a.first + radius;
 
