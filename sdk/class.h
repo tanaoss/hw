@@ -488,3 +488,4 @@ void get_point_type() ;
 void check_robot_pos_status(Robot& robot);
 void adjust_illegal_pos(Robot& robot);
 bool check_will_collison_wall(Robot& robot);
+void  select_the_standard_id(Robot& robot);
