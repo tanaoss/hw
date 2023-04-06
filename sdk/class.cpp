@@ -797,8 +797,7 @@ void control(){
     //     cerr<<state.FrameID<<" ins befoer "<<ins[0].forward<<endl;
     //     cerr<<check_will_colloWithWall(robots[0])<<endl;
     // }
-    // collision_solve(25);
-    // collision_solve(25);
+    collision_solve(25);
 
     // if(state.FrameID >= 5600 && state.FrameID < 5610) {
     //     cerr<<"~ins:"<<ins[2].forward<<"  "<<ins[2].rotate<<endl;
@@ -3422,8 +3421,8 @@ void collision_solve(int frame){
     {
         for (j = i + 1; j < 4; j++)
         {
-            mindis = ro[i].radius + ro[j].radius;
-            tmp = checkNoCollision(trajectory[i], trajectory[j], mindis + 0.4);
+            mindis = ro[i].radius + ro[j].radius + 0.4;
+            tmp = checkNoCollision(trajectory[i], trajectory[j], mindis);
             // if(state.FrameID == 1588 && ((ro[i].id == 3 && ro[j].id == 0) || (ro[i].id == 0 && ro[j].id == 3)))
             //     cerr<<"mindis:"<<mindis<<endl;
             coll_time[i][j] = tmp;
@@ -3577,7 +3576,7 @@ void collision_solve(int frame){
             }
         }
 
-        if(ans != -1) {
+        if(ans != -1 && (ans != 3 || gt(payloads[ro[choose_id].id].speed, linear_velocity[ro[choose_id].get_type != 0]) || !check_nead_slow_down(ro[x], ro[choose_id], mindis, coll_time[choose_id][x]))) {
             if(collision_cerr_flag) {
                 cerr<<payloads[ro[choose_id].id].angle<<"-"<<payloads[ro[choose_id].id].sign<<endl;
                 cerr<<"old solution:"<<ins[ro[choose_id].id].forward<<"**"<<ins[ro[choose_id].id].rotate<<endl;
@@ -3636,7 +3635,7 @@ void collision_solve(int frame){
                 // cerr<<"pos:("<<ro[choose_id].pos.first<<", "<<ro[choose_id].pos.second<<")--("<<ro[x].pos.first<<", "<<ro[x].pos.second<<") dis:"<<calcuDis(ro[choose_id].pos, ro[x].pos)<<endl;
             }
                     }
-        else{
+        else {
             // if(collision_cerr_flag) updateIns(ro[choose_id].id, 4);
             // else
             // adjust_collo_new(ro[choose_id].id, ro[x].id, payloads[ro[choose_id].id].sign);
@@ -3644,7 +3643,7 @@ void collision_solve(int frame){
             
             // double dis = calcuDis(ro[choose_id].pos, ro[x].pos);
             // bool back_flag = lt(dis, mindis + 0.2);
-            if(check_nead_slow_down(ro[choose_id], ro[x])) {
+            if(check_nead_slow_down(ro[choose_id], ro[x], mindis, coll_time[choose_id][x])) {
                 do_back(ro[choose_id].id, ro[x].pos);
                 if(collision_cerr_flag){
                     cerr<<"choose back"<<endl;
@@ -3655,7 +3654,7 @@ void collision_solve(int frame){
                     cerr<<"dis:"<<get_dis(ro[choose_id], ro[x])<<endl;
                     cerr<<"speed:"<<speed<<endl;
                 }
-                if(check_nead_slow_down(ro[x], ro[choose_id]) && check_speed(ro[x], ro[choose_id], mindis)) {
+                if(check_nead_slow_down(ro[x], ro[choose_id], mindis + 0.2, coll_time[choose_id][x]) && check_speed(ro[x], ro[choose_id], mindis)) {
                     if(le(fabs(get_dis(ro[choose_id], ro[x])), 4) && gt(speed, -1)){
                         do_back(ro[x].id, ro[choose_id].pos);
                         if(collision_cerr_flag) {
@@ -3669,7 +3668,7 @@ void collision_solve(int frame){
                     }
                 }
             }
-            else if(check_nead_slow_down(ro[x], ro[choose_id])) {
+            else if(check_nead_slow_down(ro[x], ro[choose_id], mindis, coll_time[choose_id][x])) {
                 do_back(ro[x].id, ro[choose_id].pos);
                 if(collision_cerr_flag){
                     cerr<<"choose not back"<<endl;
@@ -3853,11 +3852,12 @@ bool check_node_illegal(int x, int y) {
     return false;
 }
 
-bool check_nead_slow_down(const Robot &ro, const Robot &ro_static) {
+bool check_nead_slow_down(const Robot &ro, const Robot &ro_static, double mindis, int coll_frame) {
     int tar = ro.target_id;
     int is_take = (ro.get_type != 0);
     int node1 = ro.close_node;
-    int node2 = choose_close_node(is_take, ro_static.pos);
+    int cnt = 0;
+    // int node2 = choose_close_node(is_take, ro_static.pos);
     if(tar == -1) {
         for(int i = 0; i < studios.size(); ++i) {
             if(!eq(dis_to_studios[i][is_take][node1], 10000)){
@@ -3866,15 +3866,30 @@ bool check_nead_slow_down(const Robot &ro, const Robot &ro_static) {
             }
         }
     }
-
+    if(collision_cerr_flag) {
+        cerr<<"###########"<<endl<<"mindis:"<<mindis<<endl;
+        cerr<<ro.id<<endl;
+    }
     while(next_node[tar][is_take][node1] != node1) {
         node1 = next_node[tar][is_take][node1];
-        for(int i = (node1 / 100) - 1; i < (node1 / 100) + 2; ++i) {
-            for(int j = (node1 % 100) -1; j < (node1 % 100) +2; ++j) {
-                if(i * 100 + j == node2) return true;
-            }
+        cnt++;
+        if(lt(calcuDis(exist_id[is_take][node1], ro_static.pos), mindis))
+            return true;
+        if(collision_cerr_flag) {
+            cerr<<"ddd:"<< calcuDis(exist_id[is_take][node1], ro_static.pos) <<endl;
         }
     }
+
+    if(cnt < coll_frame && is_take == 0 && studios[tar].pStatus == 0 && studios[tar].r_time > coll_frame) {
+        return true;
+    }
+
+    if(collision_cerr_flag) {
+        // cerr<<"node2:"<<node2<<endl;
+        cerr<<"studio state:"<<studios[tar].pStatus<<" "<<studios[tar].r_time<<endl;
+        cerr<<"###########"<<endl;
+    }
+
     return false;
 }
 
