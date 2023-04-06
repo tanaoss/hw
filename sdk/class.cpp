@@ -5054,6 +5054,12 @@ void adjust_virtual_pos(Robot& robot){
     return ;
 }
 void adjust_virtual_pos_total(Robot& rob){
+
+    if(rob.cnt_tar==-1){
+        rob.cnt_tar=rob.node_id;
+        rob.virtual_id=rob.node_id;
+        rob.virtual_pos=exist_id[rob.get_type==0?0:1][rob.cnt_tar];
+    }
     if((rob.target_id_pre==-1)||(rob.target_id_pre!=rob.target_id)){
         rob.need_adjust_statues=true;
         rob.adjust_pos=true;
@@ -5061,7 +5067,7 @@ void adjust_virtual_pos_total(Robot& rob){
         rob.need_slow=true;
         rob.target_id_pre=rob.target_id;
         init_rob_status(rob);
-        if(rob.id==2)cerr<<0<<endl;
+        // if(rob.id==2)cerr<<0<<endl;
     }else if(rob.need_adjust_statues){
         if(lt(return_v(rob),0.8)&&rob.need_slow&&!rob.is_new_tar_ing){
             if(rob.id==2&&print_cerr_flag_ta){
@@ -5081,7 +5087,7 @@ void adjust_virtual_pos_total(Robot& rob){
             rob.adjust_w=true;
             rob.need_slow=true;
             rob.target_id_pre=rob.target_id;
-            if(rob.id==2)cerr<<1<<endl;
+            // if(rob.id==2)cerr<<1<<endl;
         }else if(!rob.adjust_pos&&!rob.is_new_tar_ing){
             setVirPos(rob);
         }else if(rob.is_new_tar_ing){
@@ -5091,7 +5097,7 @@ void adjust_virtual_pos_total(Robot& rob){
             rob.need_slow=true;
             rob.target_id_pre=rob.target_id; 
             rob.is_new_tar_ing=false; 
-            if(rob.id==2)cerr<<2<<endl;
+            // if(rob.id==2)cerr<<2<<endl;
         }
     }else{
         setVirPos(rob);
@@ -5348,10 +5354,11 @@ bool can_trajectory_virpos_0(Robot rob,double v,int cnt){
         };
         auto tmpPair=get_w_now(rob,pay);
         double w_next=tmpPair.first;
-        if(rob.cnt_tar<0){
-            cerr<<"cnt_tar errr"<<endl;
-            return false;
-        }
+        // if(rob.cnt_tar<0){
+        //     cerr<<"cnt_tar errr1"<<endl;
+        //     cerr<<i<<endl;
+        //     return false;
+        // }
         if(exist_id[rob.get_type==0?0:1].count(rob.cnt_tar)==0){
             cerr<<"exist_id errr"<<endl;
             return false;
