@@ -61,6 +61,9 @@ int product_time[8];
 // double studio_dis[2][50][50];
 // double init_robot_dis[4][50];
 double new_cllo_time = 0;
+int cerr_flag_j=0;
+int start_time=740;
+int end_time = 1800;
 pair<double ,double> Root;
 pair<double ,double> Collision_point;
 
@@ -986,6 +989,30 @@ int check_lack(int studio_id){
     }
     return 0;
 }
+int check_lack_to_studio(int studio_id){
+    int count_lack=0,count_have=0;
+    if(studios[studio_id].type>3&&studios[studio_id].type<7){
+        for(int i=0;i< studios_type[7].size();i++){
+            if(studios[studios_type[7][i]].bitSatus!=0){
+                if((studios[studios_type[7][i]].bitSatus & (int)pow(2 , studios[studio_id].type))==0)
+                {
+                    count_lack++;
+                }
+            }
+        }
+        for(int i=0;i<studios_type[studios[studio_id].type].size();i++){
+            if(studios[studios_type[studios[studio_id].type][i]].pStatus==1||studios[studios_type[studios[studio_id].type][i]].r_time>0){
+                count_have++;
+            }
+        }
+    }
+    // if(state.FrameID>start_time&&state.FrameID<end_time&&cerr_flag_j)
+        // cerr<<"count_lack-count_have "<<(count_lack-count_have)<<"studio_type :"<<studios[studio_id].type<<endl;
+    if(count_lack > count_have){
+        return (count_lack-count_have);
+    }
+    return 0;
+}
 bool check_other_robot_close(int robot_id,double threshold){
     int studio_id = robots[robot_id].target_id;
     int robot;
@@ -1072,7 +1099,8 @@ pair<pair<int,int>,double> new_pick_point(int robot_id,int state_type,int change
                             if((studios[material_studio_id].pStatus == 1||(studios[material_studio_id].r_time>0)) && studios[material_studio_id].r_id < 50 ){         //
                                 income = price[studios[material_studio_id].type][1]-price[studios[material_studio_id].type][0];
                                 // cerr<<"studio : "<<i<<" check_lack_material : "<<check_lack(i)<<endl;
-                                income = income + (price[studios[i].type][1]-price[studios[i].type][0])/(studio_material[studios[i].type-4][0]*2)*check_lack(i);
+                                income = income + (price[studios[i].type][1]-price[studios[i].type][0])/(studio_material[studios[i].type-4][0]*2)*(check_lack(i));
+                                income += check_lack_to_studio(i)*((price[7][1]-price[7][0])/6);
                                 dist = dis_to_studios[material_studio_id][0][robots[robot_id].node_id];   //
                                 if(eq(dist,10000))continue;
                                 if(studios[material_studio_id].r_id != -1){
@@ -1097,9 +1125,9 @@ pair<pair<int,int>,double> new_pick_point(int robot_id,int state_type,int change
                                 }
                                 dist += dis_to_studios[i][1][studios[material_studio_id].node_id];
                                 income_ratio = (income/dist);
-                                // if(state.FrameID>=690 &&state.FrameID< 720){
-                                // cerr<<"to buy dist = "<< dis_to_studios[material_studio_id][0][robots[robot_id].node_id]<<" to send dist = "<<dis_to_studios[i][1][studios[material_studio_id].node_id]<<endl;
-                                // cerr<< "robot : "<<robot_id<<" buy : "<<material_studio_id<<" type : "<<studios[material_studio_id].type<<" send : "<<i<<" type : "<< studios[i].type<<" income_ratio : "<<income_ratio<<" income = "<<income<<" dist = "<<dist<<endl;
+                                // if(state.FrameID>start_time&&state.FrameID<end_time&&cerr_flag_j){
+                                //     cerr<<"to buy dist = "<< dis_to_studios[material_studio_id][0][robots[robot_id].node_id]<<" to send dist = "<<dis_to_studios[i][1][studios[material_studio_id].node_id]<<endl;
+                                //     cerr<< "robot : "<<robot_id<<" buy : "<<material_studio_id<<" type : "<<studios[material_studio_id].type<<" send : "<<i<<" type : "<< studios[i].type<<" income_ratio : "<<income_ratio<<" income = "<<income<<" dist = "<<dist<<endl;
                                 // }
                                 if(gt(income_ratio,max)){
                                     max = income_ratio;
@@ -1122,7 +1150,8 @@ pair<pair<int,int>,double> new_pick_point(int robot_id,int state_type,int change
                                 if((studios[material_studio_id].pStatus == 1||(studios[material_studio_id].r_time>0)) && studios[material_studio_id].r_id < 50 ){         //
                                     income = price[studios[material_studio_id].type][1]-price[studios[material_studio_id].type][0];
                                     // cerr<<"studio : "<<i<<" check_lack_material : "<<check_lack(i)<<endl;
-                                    income = income + (price[studios[i].type][1]-price[studios[i].type][0])/(studio_material[studios[i].type-4][0]*2)*check_lack(i);
+                                    income = income + (price[studios[i].type][1]-price[studios[i].type][0])/(studio_material[studios[i].type-4][0]*2)*(check_lack(i));
+                                    income += check_lack_to_studio(i)*((price[7][1]-price[7][0])/6);
                                     dist = dis_to_studios[material_studio_id][0][robots[robot_id].node_id];   //
                                     if(eq(dist,10000))continue;
                                     if(studios[material_studio_id].r_id != -1){
@@ -1179,8 +1208,13 @@ pair<pair<int,int>,double> new_pick_point(int robot_id,int state_type,int change
                             if(eq(dist,10000))continue;
                             income = price[item_type][1]-price[item_type][0];
                             // cerr<<"studio : "<<i<<" check_lack_material : "<<check_lack(i)<<endl;
-                            income = income + (price[studios[i].type][1]-price[studios[i].type][0])/(studio_material[studios[i].type-4][0]*2)*check_lack(i);
+                            income = income + (price[studios[i].type][1]-price[studios[i].type][0])/(studio_material[studios[i].type-4][0]*2)*(check_lack(i));
+                            income += check_lack_to_studio(i)*((price[7][1]-price[7][0])/6);
                             income_ratio = (income/dist);
+                            if(state.FrameID>start_time&&state.FrameID<end_time&&cerr_flag_j){
+                                    cerr<<" to send dist = "<<dis_to_studios[i][1][robots[robot_id].node_id]<<endl;
+                                    cerr<< "robot : "<<robot_id<<" send : "<<i<<" type : "<< studios[i].type<<" income_ratio : "<<income_ratio<<" income = "<<income<<" dist = "<<dist<<endl;
+                            }
                             if(gt(income_ratio,max)){
                                 max = income_ratio;
                                 studio_send = i;
@@ -1193,7 +1227,8 @@ pair<pair<int,int>,double> new_pick_point(int robot_id,int state_type,int change
                         dist = dis_to_studios[i][1][robots[robot_id].node_id];
                         if(eq(dist,10000))continue;
                         income = price[item_type][1]-price[item_type][0];
-                        income = income + (price[studios[i].type][1]-price[studios[i].type][0])/(studio_material[studios[i].type-4][0]*2)*check_lack(i);
+                        income = income + (price[studios[i].type][1]-price[studios[i].type][0])/(studio_material[studios[i].type-4][0]*2)*(check_lack(i));
+                        // income += check_lack_to_studio(i)*((price[7][1]-price[7][0])/6);
                         income_ratio = (income/dist);
                         if(gt(income_ratio,max)){
                             max = income_ratio;
@@ -1207,6 +1242,10 @@ pair<pair<int,int>,double> new_pick_point(int robot_id,int state_type,int change
                 if(eq(dist,10000))continue;
                 income = price[item_type][1]-price[item_type][0];
                 income_ratio = (income/dist);
+                if(state.FrameID>start_time&&state.FrameID<end_time&&cerr_flag_j){
+                    cerr<<" to send dist = "<<dis_to_studios[i][1][robots[robot_id].node_id]<<endl;
+                    cerr<< "robot : "<<robot_id<<" send : "<<i<<" type : "<< studios[i].type<<" income_ratio : "<<income_ratio<<" income = "<<income<<" dist = "<<dist<<endl;
+                }
                 if(gt(income_ratio,max)){
                     max = income_ratio;
                     studio_send = i;
@@ -1214,10 +1253,10 @@ pair<pair<int,int>,double> new_pick_point(int robot_id,int state_type,int change
             }
         }
     }
-    // if(state.FrameID>2110 &&state.FrameID<2130){
-    //     cerr<<" buy = "<<studio_buy<<" send = "<<studio_send<<endl;
-    //     cerr<<"income_ratio "<<max<<endl;
-    // }
+    if(state.FrameID>start_time&&state.FrameID<end_time&&cerr_flag_j){
+        cerr<<" buy = "<<studio_buy<<" send = "<<studio_send<<endl;
+        cerr<<"income_ratio "<<max<<endl;
+    }
     pair<int,int> road (studio_buy,studio_send);
     return pair<pair<int,int>,double>(road,max);
 }
@@ -1258,6 +1297,7 @@ bool check_robots_change_closest(int robot_id, pair<pair<int,int>,double>temp){
     double income_ratio;
     income = price[studios[temp.first.first].type][1]-price[studios[temp.first.first].type][0];
     income = income + (price[studios[temp.first.second].type][1]-price[studios[temp.first.second].type][0])/(studio_material[studios[temp.first.second].type-4][0]*2)*check_lack(temp.first.second);
+    income += check_lack_to_studio(temp.first.second)*((price[7][1]-price[7][0])/6);
     for(int i=0;i<robots.size();i++){
         if(i!=robot_id){
             dist = dis_to_studios[temp.first.first][0][robots[robot_id].node_id]; 
@@ -1282,7 +1322,8 @@ void charge_target(int robot_id){
         temp=new_pick_point(i,2,1);
         if(temp.first.first != -1){
             double income = (price[studios[robots[i].target_id_buy].type][1]-price[studios[robots[i].target_id_buy].type][0]);
-            income += (price[studios[robots[i].target_id_send].type][1]-price[studios[robots[i].target_id_send].type][0])/(studio_material[studios[robots[i].target_id_send].type-4][0]*2)*check_lack(robots[i].target_id_send);
+            income += (price[studios[robots[i].target_id_send].type][1]-price[studios[robots[i].target_id_send].type][0])/(studio_material[studios[robots[i].target_id_send].type-4][0]*2)*(check_lack(robots[i].target_id_send));
+            income += check_lack_to_studio(robots[i].target_id_send)*((price[7][1]-price[7][0])/6);
             double income_ratio =  income/(dis_to_studios[robots[i].target_id_buy][0][robots[i].node_id]+dis_to_studios[robots[i].target_id_send][1][studios[robots[i].target_id_buy].node_id]);
             if(lt(income_ratio,temp.second)&&temp.first.second != robots[i].target_id_buy){
                 // cerr<<" robot : "<<i<<" change_target_id "<<"from "<<robots[i].target_id_buy<<" - "<<robots[i].target_id_send<<" to "<<temp.first.first<<" - "<<temp.first.second<<" income = "<<income_ratio<<" after change income = "<<temp.second<<endl;
@@ -1303,9 +1344,14 @@ void charge_target(int robot_id){
         temp=new_pick_point(i,3,1);
         if(temp.first.second != -1){
             double income = (price[robots[i].get_type][1]-price[robots[i].get_type][0]);
-            income += (price[studios[robots[i].target_id_send].type][1]-price[studios[robots[i].target_id_send].type][0])/(studio_material[studios[robots[i].target_id_send].type-4][0]*2)*check_lack(robots[i].target_id_send);
+            income += (price[studios[robots[i].target_id_send].type][1]-price[studios[robots[i].target_id_send].type][0])/(studio_material[studios[robots[i].target_id_send].type-4][0]*2)*(check_lack(robots[i].target_id_send));
+            income += check_lack_to_studio(robots[i].target_id_send)*((price[7][1]-price[7][0])/6);
             double income_ratio =  income/(dis_to_studios[robots[i].target_id][1][robots[robot_id].node_id]);
             if(lt(income_ratio,temp.second)&& temp.first.second != robots[i].target_id_send){
+                if(state.FrameID>1100&&state.FrameID<1400 && i==2){
+                    cerr<<income<<"dist = "<<(dis_to_studios[robots[i].target_id][1][robots[robot_id].node_id])<<endl;
+                    cerr<<income_ratio<<" change to "<<temp.second<<endl;
+                }
                 // cerr<<" robot : "<<i<<" change_target_id "<<"from "<<robots[i].target_id_buy<<" - "<<robots[i].target_id_send<<" to "<<temp.first.first<<" - "<<temp.first.second<<" income = "<<income_ratio<<" after change income = "<<temp.second<<endl;
                 if(studios[robots[i].target_id_send].type!=8&&studios[robots[i].target_id_send].type!=9)studios_rid[robots[i].target_id_send][studios[robots[i].target_id_buy].type] = -1;
                 robots[i].target_id_send = temp.first.second;
@@ -1393,18 +1439,24 @@ void new_robot_judge(){
         if(studios[robots[i].target_id_send].type>3&&studios[robots[i].target_id_send].type<=7){
             if(robots[i].get_type == 0){
                 if(studios_rid[robots[i].target_id_send][studios[robots[i].target_id].type]==-1){
-                   // cerr<<" robot : "<<i<<" send target : "<<robots[i].target_id_send<<" type: "<<studios[robots[i].target_id_send].type<<" r_id == -1"<<" buy type: "<<studios[robots[i].target_id].type<<endl;
+                    if(state.FrameID>start_time&&state.FrameID<end_time&&cerr_flag_j){
+                        cerr<<" robot : "<<i<<" send target : "<<robots[i].target_id_send<<" type: "<<studios[robots[i].target_id_send].type<<" r_id == -1"<<" buy type: "<<studios[robots[i].target_id].type<<endl;
+                    }
                     studios_rid[robots[i].target_id_send][studios[robots[i].target_id].type] = i;
                 }
             }
             else if(robots[i].get_type != 0){
                 if(studios_rid[robots[i].target_id_send][robots[i].get_type]==-1){
-                   // cerr<<" robot : "<<i<<" send target : "<<robots[i].target_id_send<<" type: "<<studios[robots[i].target_id_send].type<<" r_id == -1"<<" buy type: "<<robots[i].get_type<<endl;
+                    if(state.FrameID>start_time&&state.FrameID<end_time&&cerr_flag_j){
+                        cerr<<" robot : "<<i<<" send target : "<<robots[i].target_id_send<<" type: "<<studios[robots[i].target_id_send].type<<" r_id == -1"<<" buy type: "<<robots[i].get_type<<endl;
+                    }
                     studios_rid[robots[i].target_id_send][robots[i].get_type] = i;
                 }
             }
         }
-        // cerr<<"robot : "<<i<<" target id = "<<robots[i].target_id<<"from "<<robots[i].target_id_buy<<" - "<<robots[i].target_id_send<<" ins[i].buy = "<<ins[i].buy<<" ins[i].sell = "<<ins[i].sell<<endl;
+        if(state.FrameID>start_time&&state.FrameID<end_time&&cerr_flag_j){
+        cerr<<"robot : "<<i<<" target id = "<<robots[i].target_id<<"from "<<robots[i].target_id_buy<<" - "<<robots[i].target_id_send<<" ins[i].buy = "<<ins[i].buy<<" ins[i].sell = "<<ins[i].sell<<endl;
+        }    
     }
 }
 void new_first_action(){
