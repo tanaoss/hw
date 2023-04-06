@@ -1160,7 +1160,7 @@ void check_suspicious_spots(int studio_id){
             }
         }
     }
-    if(studios[studio_id].has_suspicious_spots != 1)studios[studio_id].has_suspicious_spots != 0;
+    if(studios[studio_id].has_suspicious_spots != 1) studios[studio_id].has_suspicious_spots = 0;
 }
 double check_suspicious_dis(int robot_id,int studio_id,int send_id,double dis){
     double min_dist = dis;
@@ -3402,7 +3402,6 @@ void collision_solve(int frame){
     sort(ro.begin(), ro.end(), cmp_robot);
     for(i = 0; i < 4; ++i) trajectory[i] = Calculate_the_trajectory(ro[i], 0, frame, 0);
 
-    
 
     // if(state.FrameID == 2) {
     //     cerr<<"predict\n";
@@ -3480,13 +3479,12 @@ void collision_solve(int frame){
                 choose_id = j;
             }
         }
-
-              
         
         //No collision
         if(choose_id == -1 || coll[choose_id].size() == 0)
             break;
 
+        
 
         // if(collision_cerr_flag) {
         //     cerr<<state.FrameID<<"\n";
@@ -3507,6 +3505,13 @@ void collision_solve(int frame){
             }
         }
 
+        if(x == -1) {
+            // if(collision_cerr_flag)
+            // {cerr<<choose_id<<"*"<<coll[choose_id].size();
+            // cerr<<"xx"<<x<<"\n";}
+            break;
+        }
+
         if(cmp_robot(ro[x], ro[choose_id]) && vis[x] != 1) {
             tmp = x;
             x = choose_id;
@@ -3516,11 +3521,15 @@ void collision_solve(int frame){
         vis[choose_id] = 1;
 
         
-        if(x == -1) {
-            // if(collision_cerr_flag)
-            // {cerr<<choose_id<<"*"<<coll[choose_id].size();
-            // cerr<<"xx"<<x<<"\n";}
-            break;
+        vector<int>::iterator it = find(coll[choose_id].begin(), coll[choose_id].end(), x);
+        if(it != coll[choose_id].end()) {
+            coll[choose_id].erase(it);
+            if(collision_cerr_flag) cerr<<"x delete success\n";
+        }
+        it = find(coll[x].begin(), coll[x].end(), choose_id);
+        if(it != coll[x].end()) {
+            coll[x].erase(it);
+            if(collision_cerr_flag) cerr<<"choose_id delete success\n";
         }
 
         if(collision_cerr_flag) {
@@ -3637,7 +3646,7 @@ void collision_solve(int frame){
                 // cerr<<state.FrameID;
                 // cerr<<"pos:("<<ro[choose_id].pos.first<<", "<<ro[choose_id].pos.second<<")--("<<ro[x].pos.first<<", "<<ro[x].pos.second<<") dis:"<<calcuDis(ro[choose_id].pos, ro[x].pos)<<"\n";
             }
-                    }
+        }
         else {
             // if(collision_cerr_flag) updateIns(ro[choose_id].id, 4);
             // else
@@ -3725,8 +3734,7 @@ void collision_solve(int frame){
             // }            
         }
         if(collision_cerr_flag) cerr<<"------------\n";
-        coll[choose_id].erase(find(coll[choose_id].begin(), coll[choose_id].end(), x));
-        coll[x].erase(find(coll[x].begin(), coll[x].end(), choose_id));
+        
     }
     
 
