@@ -2871,11 +2871,25 @@ bool cmp_robot(Robot a, Robot b) {
 }
 
 bool check_speed(Robot ro_a, Robot ro_b, double mindis) {
-    pair<double, double> speed = subVector(ro_a.xy_pos, ro_b.xy_pos);
-    pair<double, double> pos = subVector(ro_b.pos, ro_a.pos);
-    double t = (payloads[ro_a.id].speed + payloads[ro_b.id].speed) / payloads[ro_a.id].acceleration + 0.04;
-    pair<double, double> next_pos = calVectorProduct(speed, t);
-    return gt(calcuDis(next_pos, pos), mindis);
+    // pair<double, double> speed = subVector(ro_a.xy_pos, ro_b.xy_pos);
+    // Vec pos = subVector(ro_b.pos, ro_a.pos);
+    // double t = (payloads[ro_a.id].speed + payloads[ro_b.id].speed) / payloads[ro_a.id].acceleration + 0.04;
+    // Vec next_pos = calVectorProduct(speed, t);
+    // Vec path_dir = norm(next_pos);
+    // double dd = path_dir * pos;
+    // if(lt(dd, 0)) return false;
+    // if(gt(dd, len(next_pos))) return false;
+    // if(gt(pos * pos - dd * dd, mindis * mindis)) return false;
+
+    Vec speed = ro_a.xy_pos;
+    Vec pos = subVector(ro_b.pos, ro_a.pos);
+    double dd = speed * pos;
+    if(state.FrameID == 1642) {
+        cerr<<"dd"<<dd<<endl;
+    }
+    if(lt(dd, 0)) return false;
+
+    return true;
 }
 
 void collision_solve(int frame){
@@ -2900,7 +2914,7 @@ void collision_solve(int frame){
 
 
     // if(state.FrameID >= 5712 && state.FrameID <= 5712 && 999==999)
-        cerr_falg = true;
+        // cerr_falg = true;
 
 
     for(i = 0; i < 4; ++i)
@@ -2928,7 +2942,7 @@ void collision_solve(int frame){
         for (j = i + 1; j < 4; j++)
         {
             mindis = ro[i].radius + ro[j].radius;
-            tmp = checkNoCollision(trajectory[i], trajectory[j], mindis + 0.2);
+            tmp = checkNoCollision(trajectory[i], trajectory[j], mindis + 0.4);
             // if(state.FrameID == 1588 && ((ro[i].id == 3 && ro[j].id == 0) || (ro[i].id == 0 && ro[j].id == 3)))
             //     cerr<<"mindis:"<<mindis<<endl;
             coll_time[i][j] = tmp;
@@ -3146,17 +3160,20 @@ void collision_solve(int frame){
             // solveNoSolution(ro[choose_id].id, ro[x].id);
             if(cerr_falg)
                 cerr<<"back"<<endl;
-
+            double dis = calcuDis(ro[choose_id].pos, ro[x].pos);
+            bool back_flag = lt(dis, mindis + 0.2);
             do_back(ro[choose_id].id, ro[x].pos);
             if(cerr_falg) cerr<<"dis:"<<get_dis(ro[choose_id], ro[x])<<endl;
-            if(le(get_dis(ro[choose_id], ro[x]), 2) && gt(payloads[ro[choose_id].id].speed, 0)){
+            double speed = calVectorProduct(ro[choose_id].xy_pos, transformVector(ro[choose_id].direction));
+            if(cerr_falg) cerr<<speed<<endl;
+            if(le(fabs(get_dis(ro[choose_id], ro[x])), 2) && gt(speed, -1)){
                 do_back(ro[x].id, ro[choose_id].pos);
                 if(cerr_falg) {
                     cerr<<"x doback"<<endl;
                     
                 }
             }
-            if(eq(payloads[ro[choose_id].id].speed, -2) && check_speed(ro[x], ro[choose_id], mindis)) {
+            if(lt(speed, -1.5) && check_speed(ro[x], ro[choose_id], mindis)) {
                 if(cerr_falg) cerr<<"x减速"<<endl;
                 ins[ro[x].id].forward = min(fabs(payloads[ro[choose_id].id].speed), ins[ro[x].id].forward);
             }
@@ -3340,8 +3357,8 @@ int choose_close_node(int tar, int is_take, pair<double, double> pos) {
     int node_id = trans_pos_to_nodeID(pos);
     dis = 10000;
     if(next_node[tar][is_take][node_id] != -1) return node_id;
-    for(int i = (node_id / 100)-2; i < (node_id / 100) + 3; ++i) {
-        for(int j = (node_id % 100) -2; j < (node_id % 100) +3; ++j) {
+    for(int i = (node_id / 100)-1; i < (node_id / 100) + 2; ++i) {
+        for(int j = (node_id % 100) -1; j < (node_id % 100) +2; ++j) {
             if(next_node[tar][is_take][i * 100 + j] == -1) continue;
             tmp = calcuDis(pos, trans_nodeID_to_pos(i * 100 + j));
             if(lt(tmp, dis)) {
@@ -3360,15 +3377,18 @@ PayLoad choose_best_pay(Robot &ro, pair<double, double> pos) {
     int node_id = choose_close_node(tar, is_take, ro.pos);
     int to, to_max;
     double dis, tmp, angle = Pi;
+    int tmp_size;
     PayLoad pay_best;
     // if(next_node[tar][is_take][ro.node_id] != -1) 
     //     return calPayload(ro, trans_nodeID_to_pos(next_node[tar][is_take][ro.node_id]));
     for(int i = 0; i < graph_edge[is_take][node_id].size(); ++i) {
         to = graph_edge[is_take][node_id][i].id;
+        if(graph_edge[is_take][to].size() <= 1) continue;
         tmp = calcuDis(pos, trans_nodeID_to_pos(to));
         if(gt(tmp, dis)) {
             dis = tmp;
             to_max = to;
+            // cerr<<"to"<<to<<endl;
         }
     }
     pay_best = calPayload_back(ro, trans_nodeID_to_pos(to_max));
