@@ -1102,6 +1102,28 @@ bool check_double_choose(int robot_id,int studio_id,int material_id){
     }
     return false;
 }
+bool check_robots_wait_closest(int robot_id, double dist_robot,int studio_id){
+    int i,count=0;
+    double income;
+    double dist;
+    double income_ratio;
+    for(int i=0;i<robots.size();i++){
+        if(i!=robot_id){
+            if(robots[i].get_type == 0){
+                dist = dis_to_studios[studio_id][0][robots[i].node_id]; 
+            }
+            else{
+                dist = dis_to_studios[robots[i].target_id][1][robots[i].node_id];
+                dist += dis_to_studios[studio_id][0][studios[robots[i].target_id].node_id];
+            }
+            if(gt(dist,dist_robot))count++;
+        }
+    }
+    if(count>0){
+        return false;
+    }
+    return true;
+}
 pair<pair<int,int>,double> new_pick_point(int robot_id,int state_type,int change_target_flag){
     double max = 0;
     int studio_buy = -1,studio_send = -1;
@@ -1154,7 +1176,9 @@ pair<pair<int,int>,double> new_pick_point(int robot_id,int state_type,int change
                                     //     continue;
                                     // }
                                     if(lt(dist/6/0.02,studios[material_studio_id].r_time)){
-                                        dist += (studios[material_studio_id].r_time-(dist/6/0.02))*0.02*6;
+                                        dist2 = (studios[material_studio_id].r_time-(dist/6/0.02))*0.02*6;
+                                        if(!check_robots_wait_closest(robot_id,dist2+5,material_studio_id))continue;
+                                        dist += dist2;
                                     }
                                 }
                                 dist += dis_to_studios[i][1][studios[material_studio_id].node_id];
@@ -1407,7 +1431,7 @@ void charge_target(int robot_id){
     // }
 }
 void new_robot_judge(){
-    
+    double dist;
     for(int i=0;i<4;i++){
         if(robots[i].loc_id == robots[i].target_id && robots[i].target_id != -1){
             if(robots[i].get_type != 0){
@@ -1447,7 +1471,8 @@ void new_robot_judge(){
                     // cerr<<"robot: "<<i<<" wait "<<endl;
                     ins[i].buy = -1;   //wait;
                     ins[i].sell = -1;
-                    if(check_other_robot_close(i,10)){
+                    dist = studios[robots[i].target_id].r_time*6*0.02;
+                    if(!check_robots_wait_closest(i,dist,robots[i].target_id)){
                         cerr<<"change"<<endl;
                         complete_trans(i,0);
                         if (studios[robots[i].loc_id].r_id >= 50)
