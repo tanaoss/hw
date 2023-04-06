@@ -436,9 +436,10 @@ void init_bar_sum();
 PayLoad calPayload_back(Robot robot, pair<double, double> virtual_pos);
 PayLoad choose_best_pay(Robot &ro, pair<double, double> pos);
 double get_dis(Robot ro1, Robot ro2);
-int choose_close_node(int tar, int is_take, pair<double, double> pos);
+int choose_close_node(int is_take, pair<double, double> pos);
 void do_back(int id, pair<double, double> pos);
 bool check_speed(Robot ro_a, Robot ro_b, double mindis);
+bool check_node_illegal(int x, int y);
 
 
 
