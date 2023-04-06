@@ -444,7 +444,7 @@ bool is_connected(int node_id_a, int node_id_b, int is_take);
 int get_bar_num(int node_id_a, int node_id_b, int is_take);
 void init_bar_sum();
 PayLoad calPayload_back(Robot robot, pair<double, double> virtual_pos);
-PayLoad choose_best_pay(Robot &ro, pair<double, double> pos);
+int choose_best_to(Robot &ro, pair<double, double> pos);
 double get_dis(const Robot &ro1, const Robot &ro2);
 int choose_close_node(int is_take, pair<double, double> pos);
 void do_back(int id, pair<double, double> pos);
