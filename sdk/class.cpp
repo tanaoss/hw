@@ -62,8 +62,8 @@ int product_time[8];
 // double init_robot_dis[4][50];
 double new_cllo_time = 0;
 int cerr_flag_j=0;
-int start_time=2000;
-int end_time = 4000;
+int start_time=0;
+int end_time =1000;
 pair<double ,double> Root;
 pair<double ,double> Collision_point;
 
@@ -1309,13 +1309,16 @@ bool check_robots_change_closest(int robot_id, pair<pair<int,int>,double>temp){
     income += check_lack_to_studio(temp.first.second)*((price[7][1]-price[7][0])/3);
     for(int i=0;i<robots.size();i++){
         if(i!=robot_id){
-            dist = dis_to_studios[temp.first.first][0][robots[robot_id].node_id]; 
+            dist = dis_to_studios[temp.first.first][0][robots[i].node_id]; 
             dist += dis_to_studios[temp.first.second][1][studios[temp.first.first].node_id];
             if(robots[i].get_type!=0){
-                dist += dis_to_studios[robots[robot_id].target_id][1][robots[robot_id].node_id];
+                dist += dis_to_studios[robots[i].target_id][1][robots[i].node_id];
             }
             income_ratio = (income/dist);
-            if(income_ratio>temp.second)count++;
+            // if(state.FrameID>3315 &&state.FrameID<3500){
+                // cerr<<"robot :"<< i<<"studio :"<<temp.first.first<<" - "<<temp.first.second<<"dist = "<<dist<<" income = "<<income<<" ratio = "<<income_ratio<<endl; 
+            // }
+            if(gt(income_ratio,temp.second))count++;
         }
     }
     if(count>0){
@@ -1349,7 +1352,7 @@ void charge_target(int robot_id){
             }
         }
     }
-    else{
+    // else{
         // temp=new_pick_point(i,3,1);
         // if(studios[temp.first.second].type!=9){
         //     if(temp.first.second != -1){
@@ -1371,7 +1374,7 @@ void charge_target(int robot_id){
         //         }
         //     }
         // }
-    }
+    // }
 }
 void new_robot_judge(){
     
@@ -1465,7 +1468,7 @@ void new_robot_judge(){
             }
         }
         if(state.FrameID>start_time&&state.FrameID<end_time&&cerr_flag_j){
-        cerr<<"robot : "<<i<<" target id = "<<robots[i].target_id<<"from "<<robots[i].target_id_buy<<" - "<<robots[i].target_id_send<<" ins[i].buy = "<<ins[i].buy<<" ins[i].sell = "<<ins[i].sell<<endl;
+        cerr<<"robot : "<<i<<" target id = "<<robots[i].target_id<<"from "<<robots[i].target_id_buy<<" - "<<robots[i].target_id_send<<" ins[i].buy = "<<ins[i].buy<<" ins[i].sell = "<<ins[i].sell<<"loc_id :"<<robots[i].loc_id;
         }    
     }
 }
@@ -4537,7 +4540,7 @@ void Translation_graph_has(){
                 exist_id[1][id]=tmp.second;
                 for(int t=0;t<studios.size();t++){
                     double tmpDis=calcuDis(studios[t].pos,pos);
-                    if(!is_corner(studios[t].node_id)&&((le(tmpDis,0.71)&&tmp.first==1)||le(tmpDis,0.4))&&id!=studios[t].node_id){
+                    if(((le(tmpDis,0.71)&&tmp.first==1)||le(tmpDis,0.4))&&id!=studios[t].node_id){
                         double dis= (abs(i-(studios[t].node_id/100))+abs(j-(studios[t].node_id%100))==2)?pow(2,0.5):1;
                         graph_edge[1][id].push_back(Graph_node(studios[t].node_id,dis,id));
                         graph_edge[1][studios[t].node_id].push_back(Graph_node(id,dis,studios[t].node_id));
@@ -4545,7 +4548,7 @@ void Translation_graph_has(){
                 }
                 for(int t=0;t<4;t++){
                     double tmpDis=calcuDis(robots[t].pos,pos);
-                    if(!is_corner(studios[t].node_id)&&((le(tmpDis,0.71)&&tmp.first==1)||le(tmpDis,0.4))&&id!=robots[t].node_id){
+                    if(((le(tmpDis,0.71)&&tmp.first==1)||le(tmpDis,0.4))&&id!=robots[t].node_id){
                         double dis= (abs(i-(robots[t].node_id/100))+abs(j-(robots[t].node_id%100))==2)?pow(2,0.5):1;
                         graph_edge[1][id].push_back(Graph_node(robots[t].node_id,dis,id));
                         graph_edge[1][robots[t].node_id].push_back(Graph_node(id,dis,robots[t].node_id));
