@@ -748,8 +748,8 @@ void control(){
     //     // cerr<<state.FrameID<<" "<<stop_dis<<" "<<payload.speed<<" "<<can_st<<" "<<(sin(cmpAngle)*payload.distance)<<" "<<robot.need_rote_wall<<endl;
     //     // cerr<<robot.pos.first<<"-"<<robot.pos.second<<endl;
     // }
-    cerr<<"2 rob forward "<<ins[2].forward<<endl;
-    printPair(robots[2].xy_pos);
+    // cerr<<"2 rob forward "<<ins[2].forward<<endl;
+    // printPair(robots[2].xy_pos);
      contr_print_flag=0;
     for(int i=0;i<4;i++){
         if(ins[i].forward==-1||ins[i].rotate==-1){
@@ -3027,19 +3027,20 @@ Ins contr_one_rob_0(Robot& robot){
                 cerr<<"当前速度 "<<return_v(robot)<<endl;
             }
             robot.need_adjust_statues=true;
-          
+        }
+        
+    }else{
+        int istake=robot.get_type==0?0:1;
+        Robot tmpRob=robot;
+        // cerr<<"预测是否会撞墙： "<<(!can_trajectory_virpos_0(tmpRob,2,5))<<endl;
+        // cerr<<robot.is_illegal<<endl;
+        // cerr<<(!robot.need_adjust_statues)<<endl;
+        if(robot.is_illegal&&!robot.need_adjust_statues&&!can_trajectory_virpos_0(tmpRob,2,5)){
+            robot.need_adjust_statues=true;
+            robot.is_new_tar_ing=true;
         }
     }
- 
-     int istake=robot.get_type==0?0:1;
-    Robot tmpRob=robot;
-    cerr<<"预测是否会撞墙： "<<(!can_trajectory_virpos_0(tmpRob,2,5))<<endl;
-    cerr<<robot.is_illegal<<endl;
-    cerr<<(!robot.need_adjust_statues)<<endl;
-    if(robot.is_illegal&&!robot.need_adjust_statues&&!can_trajectory_virpos_0(tmpRob,2,5)){
-        robot.need_adjust_statues=true;
-        robot.is_new_tar_ing=true;
-    }
+
 //    if(print_cerr_flag_ta&&robot.id==0&&state.FrameID>=0&&state.FrameID<=400&&contr_print_flag){
 //     cerr<<" FrameID "<< state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
 //     cerr<<"forward: "<<ins_t.forward<<endl;
@@ -5699,9 +5700,9 @@ void get_point_type(){
             }
         }
     }
-     cerr<<"pos 4321";
-     printPair(exist_id[0][4321]);
-     cerr<<illegal_point[0].count(4321)<<endl;
+    //  cerr<<"pos 4321";
+    //  printPair(exist_id[0][4321]);
+    //  cerr<<illegal_point[0].count(4321)<<endl;
 }
 void check_robot_pos_status(Robot& robot){
     int id=robot.node_id;
