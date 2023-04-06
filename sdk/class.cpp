@@ -2782,7 +2782,7 @@ Ins contr_one_rob_1(Robot& robot){
     if(!robot.need_adjust_statues&&gt(payload.distance,1.1)&&!p1.second&&con_get_type)
     {
         double vLimit=3;
-        if(gt(payload.angle,Pi/3)){
+        if(gt(payload.angle,Pi/2)){
             double vLimit=3;
         }else{
             double vLimit=6;
@@ -2921,7 +2921,7 @@ Ins contr_one_rob_0(Robot& robot){
         robot.cnt_tar=ret_next(robot,robot.cnt_tar);
     }
     bool con_get_type=false;
-    if(gt(payload.angle,Pi/2-0.2))
+    if(gt(payload.angle,Pi-0.2))
         con_get_type=true;
     if(!robot.need_adjust_statues&&gt(payload.distance,1.1)&&!p1.second&&con_get_type)
     {
@@ -2957,36 +2957,24 @@ Ins contr_one_rob_0(Robot& robot){
 }
 Ins contr_one_rob(Robot& robot){
     print_cerr_flag_ta=true;
-    // if(robot.is_new_tar_ing){
-    //     if(robot.id==2&&print_cerr_flag_ta){
-    //         cerr<<"机器人2开始新位置调整："<<endl;
-    //         cerr<<"调整位置："<<endl;
-    //         printPair(robot.virtual_pos); 
-    //         cerr<<"当前位置："<<endl;
-    //         printPair(robot.pos); 
-    //     }
-    //     return contr_new_tar(robot);
-    // }
-    // if(robot.id==2&&print_cerr_flag_ta){
-    //         cerr<<"机器人2位置："<<endl;
-    //         printPair(robot.pos);
-    //         cerr<<"目标坐标"<<endl;
-    //         printPair(robot.virtual_pos);   
-    //         cerr<<"id"<<endl;
-    //         cerr<<robot.node_id<<endl;
-    // }
-    // if(robot.is_illegal){
-    //     if(robot.id==2&&print_cerr_flag_ta){
-    //         cerr<<"机器人2在非法位置："<<endl;
-    //         printPair(robot.pos);
-    //     }
-    //     adjust_illegal_pos(robot);
-    // }else if(robot.is_dangerous){
-    //     if(robot.id==2&&print_cerr_flag_ta){
-    //         cerr<<"机器人2在危险位置："<<endl;
-    //         printPair(robot.pos);
-    //     }
-    // }
+    if(robot.is_illegal){
+        if(robot.id==2&&print_cerr_flag_ta){
+            cerr<<"机器人2在非法位置："<<endl;
+            printPair(robot.pos);
+            cerr<<"标准坐标"<<endl;
+            printPair(exist_id[robot.get_type==0?0:1][robot.node_id]);
+            cerr<<"目标";
+            printPair(robot.virtual_pos);
+            cerr<<getPosID(exist_id[robot.get_type==0?0:1][robot.node_id])<<"-"
+            <<getPosID(robot.virtual_pos)<<endl;
+        }
+        //adjust_illegal_pos(robot);
+    }else if(robot.is_dangerous){
+        if(robot.id==2&&print_cerr_flag_ta){
+            cerr<<"机器人2在危险位置："<<endl;
+            printPair(robot.pos);
+        }
+    }
     print_cerr_flag_ta=false;
     return robot.get_type==0?contr_one_rob_0(robot):contr_one_rob_1(robot);
 }
@@ -4385,7 +4373,7 @@ void Translation_graph_no(){
                 exist_id[0][id]=pos;
                 for(int t=0;t<studios.size();t++){
                     double tmpDis=calcuDis(studios[t].pos,pos);
-                    if(le(tmpDis,0.4)&&id!=studios[t].node_id){
+                    if(le(tmpDis,0.5)&&id!=studios[t].node_id){
                         double dis= (abs(i-(studios[t].node_id/100))+abs(j-(studios[t].node_id%100))==2)?pow(2,0.5):1;
                         graph_edge[0][id].push_back(Graph_node(studios[t].node_id,dis,id));
                         graph_edge[0][studios[t].node_id].push_back(Graph_node(id,dis,studios[t].node_id));
@@ -4695,8 +4683,6 @@ void init_data(){
     Translation_graph_no();
     Translation_graph_has();
     getEdgeRalative();
-     get_point_type();
-   
     // trans_studio_rob_toID();
     for(int j=0;j<100;j++){
         for(int i=1;i<100;i++){
@@ -4705,6 +4691,7 @@ void init_data(){
             sum_matrix[1][i][j]=sum_matrix[1][i-1][j]+ (exist_id[1].count(id));
         }
     }
+    get_point_type();
 
 }
 void printMap(int f){
@@ -5115,8 +5102,9 @@ bool calMinAngle(Robot& robot,pair<double,double>pos){
     return true;;
 }
 double vir_v_1(Robot rob,int v_limit){
+    int cnt=gt(return_v(rob),3)?35:25;
    for(int v=v_limit;v>=1;v--){
-        if(can_trajectory_virpos(rob,v,25)){
+        if(can_trajectory_virpos(rob,v,cnt)){
             return v;
         }
    }
@@ -5240,7 +5228,10 @@ bool can_trajectory_virpos(Robot rob,double v,int cnt){
         }
     
         int istake=rob.get_type==0?0:1;
-        if(check_can_arrival(istake,now_id,tarID)&&lt(tar_dis,0.5)&&check_tar_line(rob,0.2)){
+        int posID_tmp=getPosID(rob.pos);
+        if(illegal_point[istake][posID_tmp])return false;
+        if(check_can_arrival(istake,now_id,tarID)
+        &&(check_tar_line(rob,0.3))){
             if(print_cerr_flag_ta&&rob.id==0&&state.FrameID>=200&&state.FrameID<=400&&contr_print_flag){
             cerr<<"采样速度 "<<v<<" 时间 "<<state.FrameID+ i<<" 原因 :  到达目标"<<endl;
             }
@@ -5430,6 +5421,42 @@ void get_point_type(){
             if(exist_id[1].count(id)==0&&stu_transID.count(id)==0){
                 illegal_point[1][id]=true;
             }
+            // for(int i1=i-1;i1<=i+1;i1++){
+            //     for(int j1=j-1;j1<=j+1;j1++){
+            //         int tmpID=i1*100+j;
+            //         if(illegal_point[0][id]&&exist_id[0].count(tmpID)&&!illegal_point[0][tmpID]){
+            //             exist_id[0][id]=exist_id[0][tmpID];
+                
+            //         }
+            //         if(illegal_point[1][id]&&exist_id[1].count(tmpID)&&!illegal_point[1][tmpID]){
+            //             exist_id[1][id]=exist_id[1][tmpID];
+            //         }
+            //     }
+            // }
+        }
+    }
+    for(int i=0;i<100;i++){
+        for(int j=0;j<100;j++){
+            int id=i*100+j;
+            for(int i1=i-1;i1<=i+1;i1++){
+                for(int j1=j-1;j1<=j+1;j1++){
+                    if(i1<0||j1>99)continue;
+                    int tmpID=i1*100+j;
+                    if(illegal_point[0][id]&&exist_id[0].count(tmpID)&&!illegal_point[0][tmpID]
+                    ){
+                        exist_id[0][id]=exist_id[0][tmpID];
+                        if(id==3731){
+                            cerr<<tmpID<<endl;
+                            cerr<<i<<" "<<j<<endl;
+                            cerr<<i1<<" "<<j1<<endl;
+                            printPair (exist_id[0][id]);}
+                
+                    }
+                    if(illegal_point[1][id]&&exist_id[1].count(tmpID)&&!illegal_point[1][tmpID]){
+                        exist_id[1][id]=exist_id[1][tmpID];
+                    }
+                }
+            }            
         }
     }
     for(int i=0;i<100;i++){
@@ -5438,6 +5465,7 @@ void get_point_type(){
             for(int i1=i-1;i1<=i+1;i1++){
                 for(int j1=j-1;j1<=j+1;j1++){
                     int tmpID=i1*100+j;
+                    if(i1<0||j1>99)continue;
                     if(!illegal_point[0][id]&&exist_id[0].count(id)&&exist_id[0].count(tmpID)==0){
                         dangerous_point[0][id]=true;
                     }
