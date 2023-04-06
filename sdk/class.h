@@ -118,6 +118,7 @@ struct Robot
     bool need_slow;
     bool is_illegal;
     bool is_dangerous;
+    bool is_new_tar_ing;
     bool operator!=(Robot s1){
     if(s1.id!=id||target_id!=s1.target_id||s1.loc_id!=loc_id||xy_pos!=s1.xy_pos||pos!=s1.pos){
             return true;
@@ -152,6 +153,7 @@ struct Robot
         need_slow=false;
         is_illegal=false;
         is_dangerous=false;
+        is_new_tar_ing=false;
     }
     void set(int _id, int _loc_id, int _get_type, double _time_val, double _collision_val, double _angular_velocity, pair<double, double> &&_xy_pos,
              double _direction, pair<double, double> &&_pos)
@@ -470,6 +472,7 @@ bool has_next(Robot& rob);
 bool check_tar_line(Robot& rob,double dis);
 Ins contr_one_rob_0(Robot& robot);
 Ins contr_one_rob_1(Robot& robot);
+Ins contr_new_tar(Robot& robot);
 void get_point_type() ;
 void check_robot_pos_status(Robot& robot);
 void adjust_illegal_pos(Robot& robot);

@@ -2813,6 +2813,21 @@ Ins contr_one_rob_1(Robot& robot){
      
     return ins_t;
 }
+Ins contr_new_tar(Robot& robot){
+    Ins ins_t;
+    PayLoad payload=calPayload(robot,robot.virtual_pos);
+    auto p1=get_w_now(robot,payload);
+    ins_t.forward=1;
+    ins_t.rotate=p1.first;
+    if(lt(payload.distance,0.2)){
+            ins_t.forward=0;
+            robot.cnt_tar=ret_next(robot,robot.cnt_tar);
+            robot.is_new_tar_ing=false;
+            robot.need_adjust_statues=true;
+            cerr<<"完成目标点更新"<<endl;
+    } 
+    return ins_t;
+}
 Ins contr_one_rob_0(Robot& robot){
     // print_cerr_flag_ta=true;
     Flag_sumulate=0;
@@ -2941,7 +2956,38 @@ Ins contr_one_rob_0(Robot& robot){
     return ins_t;
 }
 Ins contr_one_rob(Robot& robot){
-    
+    print_cerr_flag_ta=true;
+    // if(robot.is_new_tar_ing){
+    //     if(robot.id==2&&print_cerr_flag_ta){
+    //         cerr<<"机器人2开始新位置调整："<<endl;
+    //         cerr<<"调整位置："<<endl;
+    //         printPair(robot.virtual_pos); 
+    //         cerr<<"当前位置："<<endl;
+    //         printPair(robot.pos); 
+    //     }
+    //     return contr_new_tar(robot);
+    // }
+    // if(robot.id==2&&print_cerr_flag_ta){
+    //         cerr<<"机器人2位置："<<endl;
+    //         printPair(robot.pos);
+    //         cerr<<"目标坐标"<<endl;
+    //         printPair(robot.virtual_pos);   
+    //         cerr<<"id"<<endl;
+    //         cerr<<robot.node_id<<endl;
+    // }
+    // if(robot.is_illegal){
+    //     if(robot.id==2&&print_cerr_flag_ta){
+    //         cerr<<"机器人2在非法位置："<<endl;
+    //         printPair(robot.pos);
+    //     }
+    //     adjust_illegal_pos(robot);
+    // }else if(robot.is_dangerous){
+    //     if(robot.id==2&&print_cerr_flag_ta){
+    //         cerr<<"机器人2在危险位置："<<endl;
+    //         printPair(robot.pos);
+    //     }
+    // }
+    print_cerr_flag_ta=false;
     return robot.get_type==0?contr_one_rob_0(robot):contr_one_rob_1(robot);
 }
 
@@ -4676,6 +4722,7 @@ void init_data(){
     Translation_graph_has();
     getEdgeRalative();
      get_point_type();
+   
     // trans_studio_rob_toID();
     for(int j=0;j<100;j++){
         for(int i=1;i<100;i++){
@@ -4684,6 +4731,7 @@ void init_data(){
             sum_matrix[1][i][j]=sum_matrix[1][i-1][j]+ (exist_id[1].count(id));
         }
     }
+
 }
 void printMap(int f){
     // for(int i=0;i<100;i++){
@@ -5416,26 +5464,44 @@ void get_point_type(){
             for(int i1=i-1;i1<=i+1;i1++){
                 for(int j1=j-1;j1<=j+1;j1++){
                     int tmpID=i1*100+j;
-                    if(exist_id[0].count(tmpID)==0){
+                    if(!illegal_point[0][id]&&exist_id[0].count(id)&&exist_id[0].count(tmpID)==0){
                         dangerous_point[0][id]=true;
                     }
-                    if(exist_id[1].count(tmpID)==0){
+                    if(!illegal_point[1][id]&&exist_id[1].count(id)&&exist_id[1].count(tmpID)==0){
                         dangerous_point[1][id]=true;
                     }
                 }
             }
         }
     }
+     
 }
 void check_robot_pos_status(Robot& robot){
     int id=robot.node_id;
     int istake=robot.get_type==0?0:1;
-    if(dangerous_point[istake][id]){
-        robot.is_dangerous=true;
-    }else if(illegal_point[istake][id]){
+    if(illegal_point[istake][id]){
         robot.is_illegal=true;
+    }else if(dangerous_point[istake][id]){
+        robot.is_dangerous=true;
     }
 }
 void adjust_illegal_pos(Robot& robot){
-    robot.cnt_tar=0;
+    // robot.cnt_tar =0;
+    //在机器人四周寻找一个与目标的直达pos;
+    // int id=robot.node_id;
+    // int istake=robot.get_type==0?0:1;
+    // for(int i=-1;i<=1;i++){
+    //     for(int j=-1;j<=1;j++){
+    //         int tmpID=id+100*i+j;
+     
+    //         if(exist_id[istake].count(tmpID) &&check_can_arrival(istake,tmpID,robot.cnt_tar)){
+    //             robot.virtual_id=tmpID;
+    //             robot.virtual_pos=exist_id[istake][tmpID];
+    //             robot.cnt_tar=tmpID;
+    //             robot.is_new_tar_ing=true;
+    //             return;
+    //         }
+    //     }
+    // }
+    // return;
 }
