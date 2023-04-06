@@ -8,6 +8,9 @@ extern vector<Studio> studios;
 extern vector<Robot> robots;
 extern State state;//当前帧数，全局可见
 extern int class_map;
+extern int cerr_flag_j;
+extern int start_time;
+extern int end_time;
 int main()
 {
     std::ios::sync_with_stdio(false);   
@@ -51,7 +54,9 @@ int main()
     // print_dijkstra(0,1,1);
      while (cin >> state.FrameID)
     {
-        // cerr<<" time "<<state.FrameID<<endl;
+        if(state.FrameID>start_time&&state.FrameID<end_time&&cerr_flag_j){
+            cerr<<" time "<<state.FrameID<<endl;
+        }
         readStatusUntilOK() ;
         
         cout<<state.FrameID<<endl;
