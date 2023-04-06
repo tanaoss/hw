@@ -775,7 +775,7 @@ void control(){
     //     cerr<<state.FrameID<<" ins befoer "<<ins[0].forward<<endl;
     //     cerr<<check_will_colloWithWall(robots[0])<<endl;
     // }
-    collision_solve(25);
+    // collision_solve(25);
 
     // if(state.FrameID >= 5600 && state.FrameID < 5610) {
     //     cerr<<"~ins:"<<ins[2].forward<<"  "<<ins[2].rotate<<endl;
@@ -3066,6 +3066,8 @@ double get_v_now(const Robot& robot, const PayLoad& payload){
 
 void print_robot_infor(Robot r) {
     cerr<<"robot:"<<r.id<<" get_type:"<<r.get_type<<" tar:"<<r.target_id<<"-"<<studios[r.target_id].type<<endl;
+    cerr<<"xy_";
+    printPair(r.xy_pos);
     cerr<<"speed:"<<payloads[r.id].speed<<" rotate:"<<r.angular_velocity<<" dir:"<<r.direction<<endl;
     printPair(r.pos);
 }
@@ -3140,13 +3142,14 @@ bool check_speed(Robot ro_a, Robot ro_b, double mindis) {
     // if(gt(dd, len(next_pos))) return false;
     // if(gt(pos * pos - dd * dd, mindis * mindis)) return false;
 
-    Vec speed = ro_a.xy_pos;
+    Vec speed = subVector(ro_a.xy_pos, ro_b.xy_pos);
     Vec pos = subVector(ro_b.pos, ro_a.pos);
     double dd = speed * pos;
-    if(state.FrameID == 1642) {
-        cerr<<"dd"<<dd<<endl;
-    }
+
+    cerr<<"dd"<<dd<<endl;
+    
     if(lt(dd, 0)) return false;
+
 
     return true;
 }
@@ -3173,7 +3176,7 @@ void collision_solve(int frame){
 
 
     // if(state.FrameID >= 5712 && state.FrameID <= 5712 && 999==999)
-        // cerr_falg = true;
+        cerr_falg = true;
 
 
     for(i = 0; i < 4; ++i)
@@ -3430,17 +3433,20 @@ void collision_solve(int frame){
                 cerr<<"dis:"<<get_dis(ro[choose_id], ro[x])<<endl;
                 cerr<<"speed:"<<speed<<endl;
             }
-            if(le(fabs(get_dis(ro[choose_id], ro[x])), 2) && gt(speed, -1)){
-                do_back(ro[x].id, ro[choose_id].pos);
-                if(cerr_falg) {
-                    cerr<<"x doback"<<endl;
-                    cerr<<"ins:"<<ins[ro[x].id].forward<<" "<<ins[ro[x].id].rotate<<endl;
+            if(check_nead_slow_down(ro[x], ro[choose_id].pos) && check_speed(ro[x], ro[choose_id], mindis)) {
+                if(le(fabs(get_dis(ro[choose_id], ro[x])), 2) && gt(speed, -1)){
+                    do_back(ro[x].id, ro[choose_id].pos);
+                    if(cerr_falg) {
+                        cerr<<"x doback"<<endl;
+                        cerr<<"ins:"<<ins[ro[x].id].forward<<" "<<ins[ro[x].id].rotate<<endl;
+                    }
+                }
+                if(lt(speed, -1.5)) {
+                    if(cerr_falg) cerr<<"x减速"<<endl;
+                    ins[ro[x].id].forward = min(fabs(payloads[ro[choose_id].id].speed), ins[ro[x].id].forward);
                 }
             }
-            if(lt(speed, -1.5) && check_speed(ro[x], ro[choose_id], mindis)) {
-                if(cerr_falg) cerr<<"x减速"<<endl;
-                ins[ro[x].id].forward = min(fabs(payloads[ro[choose_id].id].speed), ins[ro[x].id].forward);
-            }
+            
             
             // if(cerr_falg) {
             //     cerr<<"~old solution:"<<ins[ro[choose_id].id].forward<<"**"<<ins[ro[choose_id].id].rotate<<endl;
@@ -3605,15 +3611,42 @@ bool check_node_illegal(int x, int y) {
     return false;
 }
 
+bool check_nead_slow_down(const Robot & ro, pair<double, double> pos) {
+    int tar = ro.target_id;
+    int is_take = (ro.get_type != 0);
+    int node1 = choose_close_node(is_take, ro.pos);
+    int node2 = choose_close_node(is_take, pos);
+    if(tar == -1) {
+        for(int i = 0; i < studios.size(); ++i) {
+            if(!eq(dis_to_studios[i][is_take][node1], 10000)){
+                tar = i;
+                break;
+            }
+        }
+    }
+
+    while(next_node[tar][is_take][node1] != node1) {
+        node1 = next_node[tar][is_take][node1];
+        for(int i = (node1 / 100)-1; i < (node1 / 100) + 2; ++i) {
+            for(int j = (node1 % 100) -1; j < (node1 % 100) +2; ++j) {
+                if(i * 100 + j == node2) return true;
+            }
+        }
+    }
+    return false;
+}
+
 
 double get_dis(Robot ro1, Robot ro2) {
     int is_take = (ro1.get_type != 0);
     int tar = ro1.target_id;
+    cerr<<ro1.node_id<<"-"<<ro2.node_id<<" *";
     int node1 = choose_close_node(is_take, ro1.pos);
     int node2 = choose_close_node(is_take, ro2.pos);
+    cerr<<node1<<"-"<<node2<<" ";
     if(tar == -1) {
         for(int i = 0; i < studios.size(); ++i) {
-            if(dis_to_studios[tar][is_take][node1] != 10000){
+            if(!eq(dis_to_studios[i][is_take][node1], 10000)){
                 tar = i;
                 break;
             }
@@ -4548,7 +4581,8 @@ void Dijkstra(int studio_id, int is_take) {
     int from, pre_id, num, i, to;
     double dis, new_dis, angle_sum;
     int s, danger_sum;
-    int vis_node[10000], danger_node[10000];
+    int vis_node[10000];
+    // int danger_node[10000];
     double angle_node[10000];
 
     s = studios[studio_id].node_id;
@@ -4562,14 +4596,14 @@ void Dijkstra(int studio_id, int is_take) {
 
     for(i = 0; i < 10000; ++i) {
         vis_node[i] = 0;
-        danger_node[i] = 10000;
+        // danger_node[i] = 10000;
         dis_to_studios[studio_id][is_take][i] = 10000;
     }
 
     q.push(Graph_node(s, 0, s, 0, 0));
     dis_to_studios[studio_id][is_take][s] = 0;
     next_node[studio_id][is_take][s] = s;
-    danger_node[s] = 0;
+    // danger_node[s] = 0;
     
     while(!q.empty()) {
         Graph_node now_node = q.top();
@@ -4593,15 +4627,16 @@ void Dijkstra(int studio_id, int is_take) {
 
             angle_sum = now_node.angle_sum + calAngleToDis(pre_id, from, to);
             new_dis = dis + graph_edge[is_take][from][i].dis;
-            danger_sum = now_node.dangerous_sum + dangerous_point[is_take].count(to);
+            // danger_sum = now_node.dangerous_sum + dangerous_point[is_take].count(to);
             // cerr<<"to_id:"<<to<<" new-dis:"<<dis<<" old-dis:"<<dis_node[to]<<endl;
-            if(danger_node[to] >= danger_sum && (lt(new_dis, dis_to_studios[studio_id][is_take][to]) || (eq(new_dis, dis_to_studios[studio_id][is_take][to]) && lt(angle_sum, angle_node[to])))) {
+            // if(danger_node[to] >= danger_sum && (lt(new_dis, dis_to_studios[studio_id][is_take][to]) || (eq(new_dis, dis_to_studios[studio_id][is_take][to]) && lt(angle_sum, angle_node[to])))) {
+            if (lt(new_dis, dis_to_studios[studio_id][is_take][to]) || (eq(new_dis, dis_to_studios[studio_id][is_take][to]) && lt(angle_sum, angle_node[to]))) {
                 q.push(Graph_node{to, new_dis, from, angle_sum, danger_sum});
                 if(cerr_flag) cerr<<"update-to_id:"<<to<<" new-dis:"<<new_dis<<" old-dis:"<<dis_to_studios[studio_id][is_take][to]<<"angle"<<angle_sum<<" danger_sum:"<<danger_sum<<endl;
                 dis_to_studios[studio_id][is_take][to] = new_dis;
                 next_node[studio_id][is_take][to] = from;
                 angle_node[to] = angle_sum;
-                danger_node[to] = danger_sum;
+                // danger_node[to] = danger_sum;
             }
             // else if(is_take && eq(new_dis, dis_to_studios[to][studio_id][is_take]) && eq(angle_sum, angle_node[to])) {
             //     q.push(Graph_node{to, new_dis, from, angle_sum});
