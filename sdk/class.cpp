@@ -5359,10 +5359,10 @@ bool can_trajectory_virpos_0(Robot rob,double v,int cnt){
         //     cerr<<i<<endl;
         //     return false;
         // }
-        if(exist_id[rob.get_type==0?0:1].count(rob.cnt_tar)==0){
-            cerr<<"exist_id errr"<<endl;
-            return false;
-        }
+        // if(exist_id[rob.get_type==0?0:1].count(rob.cnt_tar)==0){
+        //     cerr<<"exist_id errr"<<endl;
+        //     return false;
+        // }
  
         double tar_dis=calcuDis(rob.pos,exist_id[rob.get_type==0?0:1][rob.cnt_tar]);
         int tarID=getPosID(rob.virtual_pos);
