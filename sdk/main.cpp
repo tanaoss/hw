@@ -54,7 +54,7 @@ int main()
     // print_dijkstra(0,1,1);
      while (cin >> state.FrameID)
     {
-        // cerr<<" time "<<state.FrameID<<endl;
+        cerr<<" time "<<state.FrameID<<endl;
         readStatusUntilOK() ;
         
         cout<<state.FrameID<<endl;
