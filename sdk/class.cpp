@@ -63,8 +63,8 @@ int product_time[8];
 // double init_robot_dis[4][50];
 double new_cllo_time = 0;
 int cerr_flag_j=0;
-int start_time=8900;
-int end_time =10000;
+int start_time=0;
+int end_time =10;
 pair<double ,double> Root;
 pair<double ,double> Collision_point;
 
@@ -797,7 +797,7 @@ void control(){
     //     cerr<<state.FrameID<<" ins befoer "<<ins[0].forward<<"\n";
     //     cerr<<check_will_colloWithWall(robots[0])<<"\n";
     // }
-    collision_solve(25);
+    // collision_solve(25);
 
     // if(state.FrameID >= 5600 && state.FrameID < 5610) {
     //     cerr<<"~ins:"<<ins[2].forward<<"  "<<ins[2].rotate<<"\n";
@@ -1028,11 +1028,11 @@ int check_lack_to_studio(int studio_id){
             }
         }
     }
-    // if(state.FrameID>start_time&&state.FrameID<end_time&&cerr_flag_j)
-    //     cerr<<"count_lack-count_have "<<(count_lack-count_have)<<"studio_type :"<<studios[studio_id].type<<"\n";
-    // if(count_lack > count_have){
-    //     return (count_lack-count_have);
-    // }
+    if(state.FrameID>start_time&&state.FrameID<end_time&&cerr_flag_j)
+        cerr<<"count_lack-count_have "<<(count_lack-count_have)<<"studio_type :"<<studios[studio_id].type<<endl;
+    if(count_lack > count_have){
+        return (count_lack-count_have);
+    }
     return 0;
 }
 bool check_other_robot_close(int robot_id,double threshold){
@@ -1122,7 +1122,7 @@ bool check_robots_wait_closest(int robot_id, double dist_robot,int studio_id){
     double dist;
     double income_ratio;
     for(int i=0;i<robots.size();i++){
-        if(i!=robot_id){
+        if(i!=robot_id&&robots[i].target_id != -1){
             if(robots[i].get_type == 0){
                 dist = dis_to_studios[studio_id][0][robots[i].node_id]; 
             }
@@ -1137,6 +1137,28 @@ bool check_robots_wait_closest(int robot_id, double dist_robot,int studio_id){
         return false;
     }
     return true;
+}
+bool check_robot_close(int robot_id,int studio_id){
+    int count = 0;
+    double dist;
+    // cerr<<robot_id<<' '<<studio_id<<' '<<endl;
+    double dist_robot = dis_to_studios[studio_id][0][robots[robot_id].node_id];
+    // cerr<<"dist_robot : "<<dist_robot<<endl;
+    for(int i = 0;i<robots.size();i++){
+        if(i!=robot_id &&robots[i].target_id != -1){
+            if(robots[i].get_type != 0){
+                dist = dis_to_studios[robots[i].target_id][1][robots[i].node_id];
+                dist += dis_to_studios[studio_id][0][studios[robots[i].target_id].node_id];
+            }
+            if(lt(dist,dist_robot))count++;
+        }
+        // cerr<<"robot : "<<i<<" count : "<<count<<endl;
+
+    }
+    if(count>0){
+        return true;
+    }
+    return false;
 }
 void check_suspicious_spots(int studio_id){
     int i,j;
@@ -1160,7 +1182,7 @@ void check_suspicious_spots(int studio_id){
             }
         }
     }
-    if(studios[studio_id].has_suspicious_spots != 1) studios[studio_id].has_suspicious_spots = 0;
+    if(studios[studio_id].has_suspicious_spots != 1)studios[studio_id].has_suspicious_spots = 0;
 }
 double check_suspicious_dis(int robot_id,int studio_id,int send_id,double dis){
     double min_dist = dis;
@@ -1199,9 +1221,9 @@ pair<pair<int,int>,double> new_pick_point(int robot_id,int state_type,int change
             if(studios[i].type>3){
                 for(int j = 1;j<=studio_material[studios[i].type-4][0];j++){
                     if(((studios[i].bitSatus & (int)pow(2,studio_material[studios[i].type-4][j])) == 0||(check_material_full(i)&&studios[i].r_time == -1)) && studios_rid[i][studio_material[studios[i].type-4][j]]==-1){
-                        // if(state.FrameID>start_time&&state.FrameID<end_time&&cerr_flag_j){
-                        //     cerr<<"studio : "<<i<<"material_type : "<<studio_material[studios[i].type-4][j]<<" material rid : "<<studios_rid[i][studio_material[studios[i].type-4][j]]<<"\n";
-                        // }
+                        if(state.FrameID>start_time&&state.FrameID<end_time&&cerr_flag_j){
+                            cerr<<"studio : "<<i<<"material_type : "<<studio_material[studios[i].type-4][j]<<" material rid : "<<studios_rid[i][studio_material[studios[i].type-4][j]]<<endl;
+                        }
                         for(int k=0;k<studios[i].material_studios[j-1].size();k++){
                             material_studio_id = studios[i].material_studios[j-1][k];
                             if(state.FrameID>start_time&&state.FrameID<end_time&&cerr_flag_j){
@@ -1209,7 +1231,9 @@ pair<pair<int,int>,double> new_pick_point(int robot_id,int state_type,int change
                             }
                             if((studios[material_studio_id].pStatus == 1||(studios[material_studio_id].r_time>0)) && studios[material_studio_id].r_id < 50 ){         //
                                 income = price[studios[material_studio_id].type][1]-price[studios[material_studio_id].type][0];
-                                // cerr<<"studio : "<<i<<" check_lack_material : "<<check_lack(i)<<"\n";
+                                if(state.FrameID>start_time&&state.FrameID<end_time&&cerr_flag_j){
+                                    cerr<<"studio : "<<i<<" check_lack_material : "<<check_lack(i)<<endl;
+                                }
                                 income = income + (price[studios[i].type][1]-price[studios[i].type][0])/(studio_material[studios[i].type-4][0]*2)*(check_lack(i));
                                 income += check_lack_to_studio(i)*((price[7][1]-price[7][0])/3);
                                 dist = dis_to_studios[material_studio_id][0][robots[robot_id].node_id];   //
@@ -1240,6 +1264,13 @@ pair<pair<int,int>,double> new_pick_point(int robot_id,int state_type,int change
                                     dist += check_suspicious_dis(robot_id,material_studio_id,i,dis_to_studios[i][1][studios[material_studio_id].node_id]);
                                 }
                                 else dist += dis_to_studios[i][1][studios[material_studio_id].node_id];
+                                // cerr<<"kkk"<<endl;
+
+                                if(check_robot_close(robot_id,material_studio_id)){
+                                    // cerr<<"into"<<endl;
+                                    continue;
+                                }
+                                // cerr<<"out"<<endl;
                                 income_ratio = (income/dist);
                                 if(state.FrameID>start_time&&state.FrameID<end_time&&cerr_flag_j){
                                     cerr<<"to buy dist = "<< dis_to_studios[material_studio_id][0][robots[robot_id].node_id]<<" to send dist = "<<dis_to_studios[i][1][studios[material_studio_id].node_id]<<"\n";
