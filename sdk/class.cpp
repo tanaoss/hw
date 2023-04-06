@@ -4475,14 +4475,14 @@ void Dijkstra(int studio_id, int is_take) {
     priority_queue<Graph_node, vector<Graph_node>, cmp_Graph_node> q;
     int from, pre_id, num, i, to;
     double dis, new_dis, angle_sum;
-    int s;
-    int vis_node[10000];
+    int s, danger_sum;
+    int vis_node[10000], danger_node[10000];
     double angle_node[10000];
 
     s = studios[studio_id].node_id;
 
     bool cerr_flag = false;
-    // if(studio_id == 0 && is_take == 1) cerr_flag = true;
+    // if(studio_id == 0 && is_take == 0) cerr_flag = true;
 
     if(cerr_flag) {
         cerr<<"start-studio:"<<studio_id<<endl;
@@ -4490,12 +4490,14 @@ void Dijkstra(int studio_id, int is_take) {
 
     for(i = 0; i < 10000; ++i) {
         vis_node[i] = 0;
+        danger_node[i] = 10000;
         dis_to_studios[studio_id][is_take][i] = 10000;
     }
 
-    q.push(Graph_node(s, 0, s));
+    q.push(Graph_node(s, 0, s, 0, 0));
     dis_to_studios[studio_id][is_take][s] = 0;
     next_node[studio_id][is_take][s] = s;
+    danger_node[s] = 0;
     
     while(!q.empty()) {
         Graph_node now_node = q.top();
@@ -4507,7 +4509,7 @@ void Dijkstra(int studio_id, int is_take) {
         vis_node[now_node.id] = 1;
 
         if(cerr_flag) 
-            cerr<<"node_id:"<<from<<" dis:"<<dis<<" pre_id:"<<pre_id<<endl;
+            cerr<<"node_id:"<<from<<" dis:"<<dis<<" pre_id:"<<pre_id<<"danger_sum:"<<now_node.dangerous_sum<<endl;
 
 
         num = graph_edge[is_take][from].size();
@@ -4519,13 +4521,15 @@ void Dijkstra(int studio_id, int is_take) {
 
             angle_sum = now_node.angle_sum + calAngleToDis(pre_id, from, to);
             new_dis = dis + graph_edge[is_take][from][i].dis;
+            danger_sum = now_node.dangerous_sum + dangerous_point[is_take].count(to);
             // cerr<<"to_id:"<<to<<" new-dis:"<<dis<<" old-dis:"<<dis_node[to]<<endl;
-            if(lt(new_dis, dis_to_studios[studio_id][is_take][to]) || (eq(new_dis, dis_to_studios[studio_id][is_take][to]) && lt(angle_sum, angle_node[to]))) {
-                q.push(Graph_node{to, new_dis, from, angle_sum});
-                if(cerr_flag) cerr<<"update-to_id:"<<to<<" new-dis:"<<new_dis<<" old-dis:"<<dis_to_studios[studio_id][is_take][to]<<endl;
+            if(danger_node[to] >= danger_sum && (lt(new_dis, dis_to_studios[studio_id][is_take][to]) || (eq(new_dis, dis_to_studios[studio_id][is_take][to]) && lt(angle_sum, angle_node[to])))) {
+                q.push(Graph_node{to, new_dis, from, angle_sum, danger_sum});
+                if(cerr_flag) cerr<<"update-to_id:"<<to<<" new-dis:"<<new_dis<<" old-dis:"<<dis_to_studios[studio_id][is_take][to]<<"angle"<<angle_sum<<" danger_sum:"<<danger_sum<<endl;
                 dis_to_studios[studio_id][is_take][to] = new_dis;
                 next_node[studio_id][is_take][to] = from;
                 angle_node[to] = angle_sum;
+                danger_node[to] = danger_sum;
             }
             // else if(is_take && eq(new_dis, dis_to_studios[to][studio_id][is_take]) && eq(angle_sum, angle_node[to])) {
             //     q.push(Graph_node{to, new_dis, from, angle_sum});
