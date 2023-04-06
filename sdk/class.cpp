@@ -2445,7 +2445,7 @@ bool checkNearBar(const pair<double,double> &a, double radius){
         y_max = (int)(y2 / 0.5);
 
         for(j = y_min; j < y_max; ++j) {
-            if(graph[i][j] == -2)
+            if(graph[j][i] == -2)
                 return true;
         }
     }
@@ -2899,9 +2899,9 @@ Ins contr_new_tar(Robot& robot){
 }
 Ins contr_one_rob_0(Robot& robot){
     //ta_aaaa
-    print_cerr_flag_ta=false;
+    print_cerr_flag_ta=true;
     Flag_sumulate=0;
-    int print_rob_id=0;
+    int print_rob_id=2;
     Ins ins_t;
     if(robot.target_id==-1){
         ins_t.forward=0;
@@ -2996,51 +2996,38 @@ Ins contr_one_rob_0(Robot& robot){
     if(!robot.need_adjust_statues&&lt(payload.distance,0.2)){
         robot.cnt_tar=ret_next(robot,robot.cnt_tar);
     }
-    bool con_get_type=false;
-    if(gt(payload.angle,Pi-0.2))
-        con_get_type=true;
-    if(!robot.need_adjust_statues&&gt(payload.distance,1.1)&&!p1.second&&con_get_type)
-    {
-        ins_t.forward=vir_v_0(robot);
-        if(robot.id==0&&print_cerr_flag_ta)
-            cerr<<"-"<<state.FrameID<<" 采样速度 "<<ins_t.forward<<endl;
-        if(ins_t.forward==-1){
-            ins_t.forward=0;
-            if(robot.id==0&&print_cerr_flag_ta){
-                cerr<<"状态调整准备开始"<<endl;
-                cerr<<"当前速度 "<<return_v(robot)<<endl;
-            }
-            robot.need_adjust_statues=true;
-          
-        }
-    }
+
+
+ 
      int istake=robot.get_type==0?0:1;
     Robot tmpRob=robot;
-    cerr<<"预测是否会撞墙： "<<can_trajectory_virpos_0(tmpRob,2,5)<<endl;
+    cerr<<"预测是否会撞墙： "<<(!can_trajectory_virpos_0(tmpRob,2,5))<<endl;
+    cerr<<robot.is_illegal<<endl;
+    cerr<<(!robot.need_adjust_statues)<<endl;
     if(robot.is_illegal&&!robot.need_adjust_statues&&!can_trajectory_virpos_0(tmpRob,2,5)){
         robot.need_adjust_statues=true;
         robot.is_new_tar_ing=true;
     }
-   if(print_cerr_flag_ta&&robot.id==0&&state.FrameID>=0&&state.FrameID<=400&&contr_print_flag){
-    cerr<<" FrameID "<< state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
-    cerr<<"forward: "<<ins_t.forward<<endl;
-    cerr<<"angle "<<payload.angle<<endl;
-    cerr<<"dis "<<payload.distance<<endl;
-    cerr<<robot.isVir<<endl;
-    printPair(robot.pos);
-    printPair(robot.virtual_pos);
-    cerr<<getPosID(robot.virtual_pos)<<endl;
-    printPair(exist_id[0][ret_next(robot,robot.cnt_tar)]);
-    cerr<<getPosID(exist_id[0][ret_next(robot,robot.cnt_tar)])<<endl;
-    cerr<<p1.second<<endl;
-   }
+//    if(print_cerr_flag_ta&&robot.id==0&&state.FrameID>=0&&state.FrameID<=400&&contr_print_flag){
+//     cerr<<" FrameID "<< state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
+//     cerr<<"forward: "<<ins_t.forward<<endl;
+//     cerr<<"angle "<<payload.angle<<endl;
+//     cerr<<"dis "<<payload.distance<<endl;
+//     cerr<<robot.isVir<<endl;
+//     printPair(robot.pos);
+//     printPair(robot.virtual_pos);
+//     cerr<<getPosID(robot.virtual_pos)<<endl;
+//     printPair(exist_id[0][ret_next(robot,robot.cnt_tar)]);
+//     cerr<<getPosID(exist_id[0][ret_next(robot,robot.cnt_tar)])<<endl;
+//     cerr<<p1.second<<endl;
+//    }
      
     return ins_t;
 }
 Ins contr_one_rob(Robot& robot){
     print_cerr_flag_ta=false;
     if(robot.is_illegal&&!robot.need_adjust_statues){
-        if(robot.id==0&&print_cerr_flag_ta){
+        if(robot.id==2&&print_cerr_flag_ta){
             cerr<<"机器人0在非法位置："<<endl;
             printPair(robot.pos);
             cerr<<"标准坐标"<<endl;
@@ -5318,7 +5305,7 @@ bool can_trajectory_virpos_0(Robot rob,double v,int cnt){
     for(int i=0;i<cnt;i++){
 
         auto pay=calPayload(rob,rob.virtual_pos);
-        if(checkNearBar(rob.pos,pay.radius*0.5)){
+        if(checkNearBar(rob.pos,pay.radius*0.8)){
             if(print_cerr_flag_ta&&rob.id==0&&state.FrameID>=200&&state.FrameID<=400&&contr_print_flag){
                 cerr<<"采样失败速度 "<<v<<" 失败时间 "<<state.FrameID+ i<<" 失败原因 :  撞墙"<<endl;
                 
