@@ -5154,10 +5154,10 @@ void setVirPos(Robot& robot){
         robot.cnt_tar=robot.node_id;
     }
     int cnt=robot.cnt_tar;
-    if(robot.id==2){
-        cerr<<"now_id "<<now_id<<endl;
-        cerr<<"now_tar "<<cnt<<endl;
-    }
+    // if(robot.id==2){
+    //     cerr<<"now_id "<<now_id<<endl;
+    //     cerr<<"now_tar "<<cnt<<endl;
+    // }
     for(int i=ret_next(robot,cnt);i!=ret_next(robot,i) && i!=-1;i=ret_next(robot,i)){
         int tmpId=i;
  
@@ -5181,11 +5181,11 @@ void setVirPos(Robot& robot){
         
    
     int tar1=robot.cnt_tar;
-    if(robot.id==2){
+    // if(robot.id==2){
        
-        cerr<<"new_tar "<<tar1<<endl;
-        cerr<<"-----------"<<endl;
-    }
+    //     cerr<<"new_tar "<<tar1<<endl;
+    //     cerr<<"-----------"<<endl;
+    // }
     pair<double,double>virPos=make_pair(-1,-1);
     int virID=-1;
     // if(state.FrameID==1990||)
