@@ -103,6 +103,7 @@ struct Robot
     int pre_cnt;
     int wait;
     int node_id;
+    int real_get_type;
     int last_get_type;
     bool need_rote_wall;
     double radius;
@@ -115,6 +116,8 @@ struct Robot
     bool adjust_w;
     bool adjust_pos;
     bool need_slow;
+    bool is_illegal;
+    bool is_dangerous;
     bool operator!=(Robot s1){
     if(s1.id!=id||target_id!=s1.target_id||s1.loc_id!=loc_id||xy_pos!=s1.xy_pos||pos!=s1.pos){
             return true;
@@ -147,6 +150,8 @@ struct Robot
         cnt_tar=0;
         target_id_pre=-1;
         need_slow=false;
+        is_illegal=false;
+        is_dangerous=false;
     }
     void set(int _id, int _loc_id, int _get_type, double _time_val, double _collision_val, double _angular_velocity, pair<double, double> &&_xy_pos,
              double _direction, pair<double, double> &&_pos)
@@ -312,7 +317,7 @@ void robot_action();                                                           /
 pair<int, double> pick_point(int robot_id, int state);                         // Robot selection point
 bool judge_full(int level, double threshold);                                  // Set the load factor to determine whether the 4567 product is full
 void robot_judge(int full);                                                    // The robot makes buy and sell judgments based on the current state
-bool can_stop(pair<double, double> p1, pair<double, double> p2, double angle,bool isWall); // 能够停止转动
+bool can_stop(pair<double, double> p1, pair<double, double> p2, double angle,bool isWall,int ctr=1); // 能够停止转动
 bool is_range(double dire, vector<double> &tmp);                               // 判断角度是否在范围内123
 pair<double, double> set_af(int robID);                                        // 给出机器人的速度和角度
 bool can_speed_z(int stuID, pair<double, double> xy_pos, pair<double, double> pos, double acceleration);
@@ -447,7 +452,9 @@ pair<double,double>select_visPos(Robot& robot,vector<int> range,int tar3);
 int ret_next(Robot& robot,int tar_cnt);
 bool at_least_three(Robot& robot,int tar_cnt);
 bool calMinAngle(Robot& robot,pair<double,double>pos);
-double vir_v(Robot rob);
+double vir_v_1(Robot rob,int v_limit);
+bool can_trajectory_virpos_0(Robot rob,double v,int cnt);
+double vir_v_0(Robot rob);
 bool can_trajectory_virpos(Robot rob,double v,int cnt);
 int getPosID(pair<double,double>pos);
 pair<double,bool> get_vir_w(Robot& rob,PayLoad& payload);
@@ -456,3 +463,8 @@ bool check_can_arrival_z(int id1,int id2);
 bool check_corner_collosion(Robot& rob);
 bool has_next(Robot& rob);
 bool check_tar_line(Robot& rob,double dis);
+Ins contr_one_rob_0(Robot& robot);
+Ins contr_one_rob_1(Robot& robot);
+void get_point_type() ;
+void check_robot_pos_status(Robot& robot);
+void adjust_illegal_pos(Robot& robot);
