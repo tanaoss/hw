@@ -2892,7 +2892,7 @@ Ins contr_new_tar(Robot& robot){
 }
 Ins contr_one_rob_0(Robot& robot){
     //ta_aaaa
-    print_cerr_flag_ta=true;
+    print_cerr_flag_ta=false;
     Flag_sumulate=0;
     int print_rob_id=0;
     Ins ins_t;
@@ -3031,7 +3031,7 @@ Ins contr_one_rob_0(Robot& robot){
     return ins_t;
 }
 Ins contr_one_rob(Robot& robot){
-    print_cerr_flag_ta=true;
+    print_cerr_flag_ta=false;
     if(robot.is_illegal&&!robot.need_adjust_statues){
         if(robot.id==0&&print_cerr_flag_ta){
             cerr<<"机器人0在非法位置："<<endl;
