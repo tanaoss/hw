@@ -2442,8 +2442,8 @@ bool checkNearBar(const pair<double,double> &a, double radius){
         y_min = (int)(y1 / 0.5);
         y_max = (int)(y2 / 0.5);
 
-        for(j = y_min; j < y_max; ++j) {
-            if(graph[i][j] == -2)
+        for(j = y_min; j <= y_max; ++j) {
+            if(graph[j][i] == -2)
                 return true;
         }
     }
@@ -3521,7 +3521,7 @@ void collision_solve(int frame){
                     }
                 }
             }
-            else {
+            else if(check_nead_slow_down(ro[x], ro[choose_id])) {
                 do_back(ro[x].id, ro[choose_id].pos);
                 if(cerr_falg){
                     cerr<<"choose not back"<<endl;
@@ -3789,7 +3789,7 @@ PayLoad choose_best_pay(Robot &ro, pair<double, double> pos) {
         if(graph_edge[is_take][to].size() <= 1) continue;
         danger = dangerous_point[is_take].count(to);
         tmp = calcuDis(pos, exist_id[is_take][to]);
-        if(lt(tmp, dis_old) && gt(tmp, dis) && danger <= is_dangerous) {
+        if(gt(tmp, dis_old) && gt(tmp, dis) && danger <= is_dangerous) {
             dis = tmp;
             to_max = to;
             is_dangerous = danger;
