@@ -3435,29 +3435,29 @@ if(state.FrameID>13000)print_cerr_flag_ta=true;
         // }
     // }
 // print_cerr_flag_ta=true;
-   if(state.FrameID>=13466&&state.FrameID<=16600&&robot.id==1){
-    cerr<<"robot.id "<<robot.id<<endl;
-    cerr<<" FrameID "<< state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
-    cerr<<"forward: "<<ins_t.forward<<endl;
-    cerr<<"angle "<<payload.angle<<endl;
-    cerr<<"dis "<<payload.distance<<endl;
-    cerr<<robot.isVir<<endl;
-    cerr<<"rob node_id"<<robot.close_node<<endl;
-    cerr<<" robot.cnt_tar "<<robot.cnt_tar<<endl;
-    cerr<<" robot.virtual_id "<<robot.virtual_id<<endl;
-    cerr<<"next tar "<<next_tar<<" "<<dangerous_nums[istake][next_tar]<<endl;
-    cerr<<dangerous_nums[0][robot .node_id]<<endl;
-    cerr<<dangerous_nums[0][robot.cnt_tar]<<endl;
-    cerr<<dangerous_nums[0][next_tar]<<endl;
-    printPair(robot.pos);
-    printPair(robot.virtual_pos);
-    cerr<<"合法？："<<robot.is_illegal <<endl;
-    cerr<<p1.second<<endl;
-    cerr<<"可以到达？"<<check_can_arrival(istake,robot.close_node,robot.cnt_tar)<<" "<<robot.virtual_id<<endl;
-    cerr<<" robot.cnt_tar "<<robot.cnt_tar<<endl;
-    cerr<<robot.is_new_tar_ing<<endl;
-    cerr<<ins_t.forward<<endl;
-   }
+//    if(state.FrameID>=13466&&state.FrameID<=16600&&robot.id==1){
+//     cerr<<"robot.id "<<robot.id<<endl;
+//     cerr<<" FrameID "<< state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
+//     cerr<<"forward: "<<ins_t.forward<<endl;
+//     cerr<<"angle "<<payload.angle<<endl;
+//     cerr<<"dis "<<payload.distance<<endl;
+//     cerr<<robot.isVir<<endl;
+//     cerr<<"rob node_id"<<robot.close_node<<endl;
+//     cerr<<" robot.cnt_tar "<<robot.cnt_tar<<endl;
+//     cerr<<" robot.virtual_id "<<robot.virtual_id<<endl;
+//     cerr<<"next tar "<<next_tar<<" "<<dangerous_nums[istake][next_tar]<<endl;
+//     cerr<<dangerous_nums[0][robot .node_id]<<endl;
+//     cerr<<dangerous_nums[0][robot.cnt_tar]<<endl;
+//     cerr<<dangerous_nums[0][next_tar]<<endl;
+//     printPair(robot.pos);
+//     printPair(robot.virtual_pos);
+//     cerr<<"合法？："<<robot.is_illegal <<endl;
+//     cerr<<p1.second<<endl;
+//     cerr<<"可以到达？"<<check_can_arrival(istake,robot.close_node,robot.cnt_tar)<<" "<<robot.virtual_id<<endl;
+//     cerr<<" robot.cnt_tar "<<robot.cnt_tar<<endl;
+//     cerr<<robot.is_new_tar_ing<<endl;
+//     cerr<<ins_t.forward<<endl;
+//    }
      
     return ins_t;
 }
