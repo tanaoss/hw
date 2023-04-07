@@ -58,22 +58,24 @@ int main()
         //     cerr<<" time "<<state.FrameID<<endl;
         // }
         // cerr<<" time "<<state.FrameID<<endl;
+
         readStatusUntilOK() ;
-        
+        // cerr<<"11\n";
         cout<<state.FrameID<<endl;
         if(count == 0)new_first_action();
         else new_robot_action();
-
+        // cerr<<"kk\n";
         // if(state.FrameID == 4064) {
         //     cerr<<robots[1].target_id<<endl;
         // }
+        
         control();
 
         count++;
 
-        // if(state.FrameID >= 4160 && state.FrameID < 2300) {
+        // if(state.FrameID >= 13200 && state.FrameID < 13300) {
         //     cerr<<" time "<<state.FrameID<<endl;
-        //     for(int i = 1; i < 2; ++i) {
+        //     for(int i = 0; i < 1; ++i) {
         //         cerr<<i<<"-target:"<<robots[i].target_id<<" type:"<<studios[robots[i].target_id].type<<endl;
         //     }
         // }
