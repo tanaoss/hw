@@ -765,6 +765,10 @@ void control(){
         ins[i].robID=i;
         payloads.emplace_back(calPayload(robots[i], robots[i].virtual_pos));
     }
+    // if(state.FrameID>=13000&&state.FrameID<=13700&&contr_print_flag){
+    //     cerr<<"初始控制速度"<<ins[1].forward<<endl;
+    //     cerr<<"机器人类型"<<robots[1].get_type<<endl;
+    // }
 //     if(state.FrameID>=800&&state.FrameID<=1900&&contr_print_flag){
 //         cerr<<"-----------------"<<endl;
 //     cerr<<" FrameID "<< state.FrameID<<" "<<robots[3].virtual_pos.first<<"-"<<robots[3].virtual_pos.second<<endl;
@@ -890,7 +894,9 @@ void control(){
     // }
 
     updateLastRate();
-
+    // if(state.FrameID>=13000&&state.FrameID<=15700){
+    //     cerr<<"最终控制速度"<<ins[3].forward<<endl;
+    // }
     out_put();
 }
 double get_at_stop_test(double t,double a,double v,int sign_v1){
@@ -1720,14 +1726,16 @@ void new_robot_judge(){
                         // cerr<<"change\n";
                         // complete_trans(i,0);
                         temp=new_pick_point(i,2,0);
-                        if (studios[robots[i].target_id].r_id >= 50)
-                            studios[robots[i].target_id].r_id -= 50;
-                        else
-                            studios[robots[i].target_id].r_id = -1;
-                        if(studios[robots[i].target_id_send].type!=8&&studios[robots[i].target_id_send].type!=9)studios_rid[robots[i].target_id_send][studios[robots[i].target_id_buy].type] = -1;
-                        robot_get_type[studios[robots[i].target_id].type]--;
-                        change_status(i,temp);
-                        robots[i].cnt_tar=robots[i].node_id;
+                        if(temp.first.first != -1){
+                            if (studios[robots[i].target_id].r_id >= 50)
+                                studios[robots[i].target_id].r_id -= 50;
+                            else
+                                studios[robots[i].target_id].r_id = -1;
+                            if(studios[robots[i].target_id_send].type!=8&&studios[robots[i].target_id_send].type!=9)studios_rid[robots[i].target_id_send][studios[robots[i].target_id_buy].type] = -1;
+                            robot_get_type[studios[robots[i].target_id].type]--;
+                            change_status(i,temp);
+                            robots[i].cnt_tar=robots[i].node_id;
+                        }
                     }
                 }
             }
@@ -3098,6 +3106,7 @@ Ins contr_one_rob_1(Robot& robot){
         ins_t.rotate=Pi;
         return ins_t;
     }
+
     adjust_virtual_pos_total(robot);
     PayLoad payload=calPayload(robot,robot.virtual_pos);
     auto p1=get_w_now(robot,payload);
@@ -3258,17 +3267,20 @@ Ins contr_one_rob_0(Robot& robot){
     if(robot.target_id==-1){
         ins_t.forward=0;
         ins_t.rotate=Pi;
+        cerr<<"-1返回"<<endl;
         return ins_t;
     }
     
     adjust_virtual_pos_total(robot);
 
 
-
+    if( state.FrameID>13372&&robot.id==1){
+        cerr<<robot.need_adjust_statues<<" rob "<<robot.id<<endl;
+    }
 
     PayLoad payload=calPayload(robot,robot.virtual_pos);
     auto p1=get_w_now(robot,payload);
-// if(state.FrameID>13000)print_cerr_flag_ta=true;
+if(state.FrameID>13000)print_cerr_flag_ta=true;
 // cerr<<print_cerr_flag_ta<<endl;
     if(gt(return_v(robot),0.8)&&robot.need_slow&&robot.need_adjust_statues){
         ins_t.forward=0;
@@ -3416,7 +3428,8 @@ Ins contr_one_rob_0(Robot& robot){
         // }
     // }
 print_cerr_flag_ta=true;
-   if(print_cerr_flag_ta1&&robot.id==2&&state.FrameID>=13466&&state.FrameID<=13500){
+   if(state.FrameID>=13466&&state.FrameID<=16600&&robot.id==1){
+    cerr<<"robot.id "<<robot.id<<endl;
     cerr<<" FrameID "<< state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
     cerr<<"forward: "<<ins_t.forward<<endl;
     cerr<<"angle "<<payload.angle<<endl;
@@ -3448,6 +3461,9 @@ Ins contr_one_rob(Robot& robot){
         ins_t.forward=0;
         ins_t.rotate=0;
         return ins_t;
+    }
+    if(robot.id==1){
+        cerr<<"进入运动控制函数"<<endl;
     }
     if(robot.is_illegal&&!robot.need_adjust_statues){
         if(robot.id==2&&print_cerr_flag_ta){
