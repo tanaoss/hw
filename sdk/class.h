@@ -445,8 +445,8 @@ int trans_pos_to_nodeID(pair<double, double> pos);
 int trans_pos_to_nodeID(int robot_id);
 pair<double, double> trans_nodeID_to_pos(int nodeID);
 void init_vector();
-bool is_connected(int node_id_a, int node_id_b, int is_take);
-int get_bar_num(int node_id_a, int node_id_b, int is_take);
+bool is_connected(int node_id_a, int node_id_b);
+int get_bar_num(int node_id_a, int node_id_b);
 void init_bar_sum();
 PayLoad calPayload_back(Robot robot, pair<double, double> virtual_pos);
 int choose_best_to(Robot &ro, pair<double, double> pos);
@@ -458,6 +458,7 @@ bool check_node_illegal(int x, int y);
 bool check_nead_slow_down(const Robot &ro, const Robot &ro_static, double mindis, int coll_frame);
 double get_rotation_stop_time(const Robot &ro, PayLoad pay);
 double get_stop_time(double x, double v0, int sign, double acceleration);
+bool check_node_safe(int node_id, double mindis, const Robot &ro);
 
 
 
