@@ -1520,7 +1520,7 @@ void charge_target(int robot_id){
             income += (price[studios[robots[i].target_id_send].type][1]-price[studios[robots[i].target_id_send].type][0])/(studio_material[studios[robots[i].target_id_send].type-4][0]*2)*(check_lack(robots[i].target_id_send));
             income += check_lack_to_studio(robots[i].target_id_send)*((price[7][1]-price[7][0])/3);
             double income_ratio =  income/(dis_to_studios[robots[i].target_id_buy][0][robots[i].node_id]+dis_to_studios[robots[i].target_id_send][1][studios[robots[i].target_id_buy].node_id]);
-            if(lt(income_ratio,temp.second)&&temp.first.second != robots[i].target_id_buy){
+            if(lt(income_ratio+15,temp.second)&&temp.first.second != robots[i].target_id_buy){
                 // cerr<<" robot : "<<i<<" change_target_id "<<"from "<<robots[i].target_id_buy<<" - "<<robots[i].target_id_send<<" to "<<temp.first.first<<" - "<<temp.first.second<<" income = "<<income_ratio<<" after change income = "<<temp.second<<"\n";
                 if(check_robots_change_closest(robot_id,temp)){
                     if (studios[robots[i].target_id].r_id >= 50)
@@ -1688,6 +1688,12 @@ void new_robot_action(){
         cerr<<" r_id "<<studios_rid[2][1]<<"\n";
     }
     new_robot_judge();
+    // for(int i = 0;i<4;i++){
+    //     if(robots[i].last_target_id != robots[i].target_id){
+    //         cerr<<"time = "<<state.FrameID<<endl;
+    //         cerr<<"robot : "<<i<<" change target id = "<<robots[i].target_id<<"from "<<robots[i].target_id_buy<<" - "<<robots[i].target_id_send<<endl;
+    //     }
+    // }
 }
 
 vector<double>  get_T_limits(Robot& robot){
