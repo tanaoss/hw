@@ -32,7 +32,7 @@ int main()
         Dijkstra(i, 1);
         // if(i==1) print_dijkstra();
     }
-    // cerr << "bbb" << endl;
+    
     // cerr<<studios[10].node_id<<endl;
     // print_dijkstra(1, 0, 1);
     // for(int i = 0; i < 4; ++i) {
@@ -68,7 +68,8 @@ int main()
         // if(state.FrameID == 4064) {
         //     cerr<<robots[1].target_id<<endl;
         // }
-        
+
+
         control();
 
         count++;
