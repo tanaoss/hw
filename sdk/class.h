@@ -497,3 +497,4 @@ bool check_will_collison_wall(Robot& robot);
 void  select_the_standard_id(Robot& robot);
 void check_suspicious_spots(int studio_id);
 bool  need_to_step_back(const Robot& rob);
+int get_best_pos(const Robot& rob);
