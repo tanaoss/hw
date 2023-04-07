@@ -3991,7 +3991,7 @@ void collision_solve(int frame){
                     // }
                 }
             }
-            else if(check_nead_slow_down(ro[x], ro[choose_id], mindis, coll_time[choose_id][x])) {
+            else if(check_nead_slow_down(ro[x], ro[choose_id], mindis  + 0.1, coll_time[choose_id][x])) {
                 do_back(ro[x].id, ro[choose_id].pos);
                 if(collision_cerr_flag){
                     cerr<<"choose not back\n";
