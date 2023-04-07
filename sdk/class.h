@@ -459,7 +459,7 @@ bool check_nead_slow_down(const Robot &ro, const Robot &ro_static, double mindis
 double get_rotation_stop_time(const Robot &ro, PayLoad pay);
 double get_stop_time(double x, double v0, int sign, double acceleration);
 bool check_node_safe(int node_id, double mindis, const Robot &ro);
-
+bool empty_pos(const Robot& rob);
 
 
 vector<int> get_future_node(int robot_id);
@@ -496,4 +496,4 @@ void adjust_illegal_pos(Robot& robot);
 bool check_will_collison_wall(Robot& robot);
 void  select_the_standard_id(Robot& robot);
 void check_suspicious_spots(int studio_id);
-bool empty_pos(const Robot& rob);
+bool  need_to_step_back(const Robot& rob);
