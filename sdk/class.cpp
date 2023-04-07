@@ -3797,20 +3797,20 @@ void collision_solve(int frame){
                     cerr<<"dis:"<<get_dis(ro[choose_id], ro[x])<<"\n";
                     cerr<<"speed:"<<speed<<"\n";
                 }
-                // if(ro[choose_id].target_id != ro[x].target_id && check_nead_slow_down(ro[x], ro[choose_id], mindis + 0.2, coll_time[choose_id][x]) && check_speed(ro[x], ro[choose_id], mindis)) {
-                //     vis[x] = 1;
-                //     if(le(fabs(get_dis(ro[choose_id], ro[x])), 4) && gt(speed, -1)){
-                //         do_back(ro[x].id, ro[choose_id].pos);
-                //         if(collision_cerr_flag) {
-                //             cerr<<"x doback\n";
-                //             cerr<<"ins:"<<ins[ro[x].id].forward<<" "<<ins[ro[x].id].rotate<<"\n";
-                //         }
-                //     }
-                //     else {
-                //         if(collision_cerr_flag) cerr<<"x 减速\n";
-                //         ins[ro[x].id].forward = min(fabs(payloads[ro[choose_id].id].speed), ins[ro[x].id].forward);
-                //     }
-                // }
+                if(ro[choose_id].target_id != ro[x].target_id && check_nead_slow_down(ro[x], ro[choose_id], mindis + 0.2, coll_time[choose_id][x]) && check_speed(ro[x], ro[choose_id], mindis)) {
+                    vis[x] = 1;
+                    // if(le(fabs(get_dis(ro[choose_id], ro[x])), 4) && gt(speed, -1)){
+                    //     do_back(ro[x].id, ro[choose_id].pos);
+                    //     if(collision_cerr_flag) {
+                    //         cerr<<"x doback\n";
+                    //         cerr<<"ins:"<<ins[ro[x].id].forward<<" "<<ins[ro[x].id].rotate<<"\n";
+                    //     }
+                    // }
+                    // else {
+                        if(collision_cerr_flag) cerr<<"x 减速\n";
+                        ins[ro[x].id].forward = min(2.0, ins[ro[x].id].forward);
+                    // }
+                }
             }
             else if(check_nead_slow_down(ro[x], ro[choose_id], mindis, coll_time[choose_id][x])) {
                 do_back(ro[x].id, ro[choose_id].pos);
