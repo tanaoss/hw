@@ -71,12 +71,12 @@ int main()
 
         count++;
 
-        // if(state.FrameID >= 4160 && state.FrameID < 2300) {
-        //     cerr<<" time "<<state.FrameID<<endl;
-        //     for(int i = 1; i < 2; ++i) {
-        //         cerr<<i<<"-target:"<<robots[i].target_id<<" type:"<<studios[robots[i].target_id].type<<endl;
-        //     }
-        // }
+        if(state.FrameID >= 13200 && state.FrameID < 13300) {
+            cerr<<" time "<<state.FrameID<<endl;
+            for(int i = 0; i < 1; ++i) {
+                cerr<<i<<"-target:"<<robots[i].target_id<<" type:"<<studios[robots[i].target_id].type<<endl;
+            }
+        }
     }
     return 0;
    
