@@ -3711,7 +3711,7 @@ void collision_solve(int frame){
 
 
     // if(state.FrameID >= 5712 && state.FrameID <= 5712 && 999==999)
-        collision_cerr_flag = true;
+        // collision_cerr_flag = true;
 
 
     for(i = 0; i < 4; ++i)
