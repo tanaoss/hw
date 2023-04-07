@@ -87,7 +87,7 @@ vector<int> next_node[50][2];//next_node[studio_id][2][node_id]:node_id去往stu
 vector<double> dis_to_studios[50][2];//dis_studios[studio_id][2][node_id]:node_id去往studio_id工作台的距离
 bool collision_cerr_flag = false;
 
-int bar_sum[100][100][2];
+int bar_sum[100][100];
 
 
 void initrobotInfo() {
@@ -4056,15 +4056,19 @@ void collision_solve(int frame){
     }
     
 
-    // if(state.FrameID == 1849 || state.FrameID == 1850) {
-    //     int a,b;
-    //     for(i = 0; i < 4; ++i){
-    //         if(ro[i].id == 1) a = i;
-    //         if(ro[i].id == 2) b =i;
-    //     }
-    //     cerr<<state.FrameID;
-    //     printPredictRobotsDis(trajectory[a], trajectory[b]);
-    // }
+    if(state.FrameID >= 11931 && state.FrameID <= 11960) {
+        int a,b;
+        for(i = 0; i < 4; ++i){
+            if(ro[i].id == 1) a = i;
+            if(ro[i].id == 3) b =i;
+        }
+        cerr<<state.FrameID;
+        printPredictRobotsDis(trajectory[a], trajectory[b]);
+        cerr<<"time:"<<state.FrameID<<"\n";
+        print_robot_infor(ro[a]);
+        cerr<<"*\n";
+        print_robot_infor(ro[b]);
+    }
 
     // if(state.FrameID >= 1693 && state.FrameID <= 1730) {
     //     cerr<<state.FrameID;
@@ -4102,6 +4106,18 @@ void printPredictRobotsDis(const vector<pair<double,double>> &a, const vector<pa
 //     return 1000;
 // }
 
+bool check_will_collision(const Robot &ro1, const Robot &ro2) {
+    int node1 = ro1.node_id;
+    int node2 = ro2.node_id;
+
+    if(!is_connected(node1, node2)) return false;
+    if(ro1.target_id == -1 && ro2.target_id == -1) return false;
+
+    if(gt(fabs(get_dis(ro1, ro2)), 10)) return false;
+    
+
+    return false;
+}
 
 
 void updateIns(int id, int i) {
@@ -4260,6 +4276,24 @@ bool check_nead_slow_down(const Robot &ro, const Robot &ro_static, double mindis
     return false;
 }
 
+bool check_node_safe(int node_id, double mindis, const Robot &ro) {
+    int tar = ro.target_id;
+    int is_take = (ro.get_type != 0);
+    int node1 = ro.close_node;
+
+    if(ro.target_id == -1) return true;
+
+    while(next_node[tar][is_take][node1] != node1) {
+        node1 = next_node[tar][is_take][node1];
+        if(le(calcuDis(exist_id[is_take][node1], ro.pos), mindis))
+            return false;
+        // if(collision_cerr_flag) {
+        //     cerr<<"node"<<node1<<" ddd:"<< calcuDis(exist_id[is_take][node1], ro_static.pos) <<"\n";
+        // }
+    }
+    return true;
+}
+
 
 double get_dis(const Robot &ro1, const Robot &ro2) {
     int is_take = (ro1.get_type != 0);
@@ -4318,8 +4352,8 @@ int choose_best_to(Robot &ro, pair<double, double> pos) {
     int node_id = ro.close_node;
     int to, to_max;
     double dis, tmp, dis_old;
-    int tmp_size, is_dangerous = 1, danger;
-    PayLoad pay_best;
+    int tmp_size, dangerous = 10, danger;
+
     // if(next_node[tar][is_take][ro.node_id] != -1) 
     //     return calPayload(ro, trans_nodeID_to_pos(next_node[tar][is_take][ro.node_id]));
     dis = 0;
@@ -4329,9 +4363,10 @@ int choose_best_to(Robot &ro, pair<double, double> pos) {
             if(check_node_illegal(i, j)) continue;
             to = i * 100 + j;
             if(graph_edge[is_take].count(to) == 0 || graph_edge[is_take][to].size() <= 1) continue;
-            danger = dangerous_point[is_take].count(to);
+            danger = dangerous_nums[is_take][to];
             tmp = calcuDis(pos, exist_id[is_take][to]);
-            if(gt(tmp, dis_old) && gt(tmp, dis) && danger <= is_dangerous) {
+            if(gt(tmp, dis_old) && (danger < dangerous || gt(tmp, dis) && danger <= dangerous)) {
+                
                 if(collision_cerr_flag) {
                     cerr<<"to_tmp:"<<to<<" dis:"<<calcuDis(pos, exist_id[is_take][to])<<endl;
                     cerr<<"dis-rob:"<<calcuDis(exist_id[is_take][to], ro.pos)<<endl;
@@ -4340,23 +4375,23 @@ int choose_best_to(Robot &ro, pair<double, double> pos) {
                 }
                 dis = tmp;
                 to_max = to;
-                is_dangerous = danger;
+                dangerous = danger;
             }
         }
     }
     //点在机器人中
     if(le(calcuDis(exist_id[is_take][to_max], ro.pos), ro.radius + 0.001)) {
         node_id = to_max;
-        is_dangerous = 1;
+        dangerous = 1;
         for(int i = 0; i < graph_edge[is_take][node_id].size(); ++i) {
             to = graph_edge[is_take][node_id][i].id;
             danger = dangerous_point[is_take].count(to);
             tmp = calcuDis(pos, exist_id[is_take][to]);
-            if(gt(tmp, dis) && danger <= is_dangerous) {
+            if(gt(tmp, dis) && danger <= dangerous) {
                 if(collision_cerr_flag) cerr<<"&to_tmp:"<<to<<" dis:"<<calcuDis(pos, exist_id[is_take][to])<<endl;
                 dis = tmp;
                 to_max = to;
-                is_dangerous = danger;
+                dangerous = danger;
             }
         }
     }
@@ -5320,47 +5355,45 @@ int trans_pos_to_nodeID(int robot_id) {
     return trans_pos_to_nodeID(robots[robot_id].pos);
 }
 
-bool is_connected(int node_id_a, int node_id_b, int is_take) {
-    return get_bar_num(node_id_a, node_id_b, is_take) == 0;
+bool is_connected(int node_id_a, int node_id_b) {
+    return get_bar_num(node_id_a, node_id_b) == 0;
 }
 
-int get_bar_num(int node_id_a, int node_id_b, int is_take) {
+int get_bar_num(int node_id_a, int node_id_b) {
     int x1, x2, y1, y2;
     x1 = min(node_id_a / 100, node_id_b / 100);
     x2 = max(node_id_a / 100, node_id_b / 100);
     y1 = min(node_id_a % 100, node_id_b % 100);
     y2 = max(node_id_a % 100, node_id_b % 100);
     if(x2 == 0 && y2 == 0)
-        return bar_sum[x2][y2][is_take];
+        return bar_sum[x2][y2];
     if(x2 == 0)
-        return bar_sum[x2][y2][is_take] - bar_sum[x2][y1][is_take];
+        return bar_sum[x2][y2] - bar_sum[x2][y1];
     if(y2 == 0)
-        return bar_sum[x2][y2][is_take] - bar_sum[x1][y2][is_take];
-    return bar_sum[x2][y2][is_take] - bar_sum[x2][y1][is_take] - bar_sum[x1][y2][is_take] + bar_sum[x1][y1][is_take];
+        return bar_sum[x2][y2] - bar_sum[x1][y2];
+    return bar_sum[x2][y2] - bar_sum[x2][y1] - bar_sum[x1][y2] + bar_sum[x1][y1];
 }
 
 void init_bar_sum() {
-    for(int stu_id = 0; stu_id < studios.size(); ++stu_id) {
-        for(int i = 0; i < 100; ++i) {
-            if(stu_id != 0 && get_bar_num(studios[stu_id].node_id, max((studios[stu_id].node_id / 100) - 1, 0) * 100 + max((studios[stu_id].node_id % 100) - 1, 0), 0)  == 0)
-                continue;
-            for(int j = 0; j < 100; ++j) { 
-                if(stu_id == 0) {
-                    bar_sum[i][j][0] = (next_node[stu_id][0][i * 100 + j] == -1);
-                    bar_sum[i][j][1] = (next_node[stu_id][1][i * 100 + j] == -1);
-                }
-                else {
-                    bar_sum[i][j][0] = min(bar_sum[i][j][0], (int)(next_node[stu_id][0][i * 100 + j] == -1));
-                    bar_sum[i][j][1] = min(bar_sum[i][j][0], (int)(next_node[stu_id][1][i * 100 + j] == -1));
-                }
-                if(i > 0) {
-                    bar_sum[i][j][0] += bar_sum[i - 1][j][0];
-                    bar_sum[i][j][1] += bar_sum[i - 1][j][1];
-                }
-                if(j > 0) {
-                    bar_sum[i][j][0] += bar_sum[i][j - 1][0] - bar_sum[i - 1][j - 1][0];
-                    bar_sum[i][j][1] += bar_sum[i][j - 1][1] - bar_sum[i - 1][j - 1][1];
-                }
+    for(int i = 0; i < 100; ++i) {
+        // if(stu_id != 0 && get_bar_num(studios[stu_id].node_id, max((studios[stu_id].node_id / 100) - 1, 0) * 100 + max((studios[stu_id].node_id % 100) - 1, 0), 0)  == 0)
+        //         continue;
+        for(int j = 0; j < 100; ++j) { 
+            if( i == 0 && j == 0) {
+                bar_sum[i][j] = (graph[i][j] == -2);
+                // bar_sum[i][j][1] = (next_node[stu_id][1][i * 100 + j] == -1);
+            }
+            if(i > 0) {
+                bar_sum[i][j] += bar_sum[i - 1][j];
+                // bar_sum[i][j][1] += bar_sum[i - 1][j][1];
+            }
+            if(j > 0) {
+                bar_sum[i][j] += bar_sum[i][j - 1];
+                // bar_sum[i][j][1] += bar_sum[i][j - 1][1] - bar_sum[i - 1][j - 1][1];
+            }
+            if(i > 0 && j > 0) {
+                bar_sum[i][j] -= bar_sum[i - 1][j - 1];
+                // bar_sum[i][j][1] += bar_sum[i][j - 1][1] - bar_sum[i - 1][j - 1][1];
             }
         }
     }
