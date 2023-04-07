@@ -1143,9 +1143,11 @@ bool check_double_choose(int robot_id,int studio_id,int material_id){
                 }
             }
             // cerr<<"cc"<<endl;
-            if (j == studio_material[studios[studio_id].type - 4][0])
-            {
+            if (j == studio_material[studios[studio_id].type - 4][0]){
                 if(count>1)return true;
+            }
+            else{
+                if(count>=1) return true;
             }
         }
     }
@@ -1561,6 +1563,7 @@ void charge_target(int robot_id){
 }
 void new_robot_judge(){
     double dist;
+    pair<pair<int,int>,double>temp;
     for(int i=0;i<4;i++){
         if(robots[i].loc_id == robots[i].target_id && robots[i].target_id != -1){
             if(robots[i].get_type != 0){
@@ -1605,17 +1608,15 @@ void new_robot_judge(){
                     dist = studios[robots[i].target_id].r_time*6*0.02;
                     if(!check_robots_wait_closest(i,dist,robots[i].target_id)){
                         // cerr<<"change\n";
+                        // complete_trans(i,0);
+                        temp=new_pick_point(i,2,0);
                         if (studios[robots[i].target_id].r_id >= 50)
                             studios[robots[i].target_id].r_id -= 50;
                         else
                             studios[robots[i].target_id].r_id = -1;
                         if(studios[robots[i].target_id_send].type!=8&&studios[robots[i].target_id_send].type!=9)studios_rid[robots[i].target_id_send][studios[robots[i].target_id_buy].type] = -1;
                         robot_get_type[studios[robots[i].target_id].type]--;
-                        complete_trans(i,0);
-                        if (studios[robots[i].loc_id].r_id >= 50)
-                            studios[robots[i].loc_id].r_id -= 50;
-                        else
-                            studios[robots[i].loc_id].r_id = -1;
+                        change_status(i,temp);
                         robots[i].cnt_tar=robots[i].node_id;
                     }
                 }
@@ -1629,6 +1630,23 @@ void new_robot_judge(){
             //change_targte
             if(robots[i].target_id != -1)
                 charge_target(i);
+            if(robots[i].target_id != -1){
+                if(check_double_choose(i,robots[i].target_id_send,robots[i].target_id_buy)){
+                    temp=new_pick_point(i,2,0);
+                    if(temp.first.first!= -1){
+                        if (studios[robots[i].target_id].r_id >= 50)
+                            studios[robots[i].target_id].r_id -= 50;
+                        else
+                            studios[robots[i].target_id].r_id = -1;
+                        if(studios[robots[i].target_id_send].type!=8&&studios[robots[i].target_id_send].type!=9)studios_rid[robots[i].target_id_send][studios[robots[i].target_id_buy].type] = -1;
+                        robot_get_type[studios[robots[i].target_id].type]--;
+                        change_status(i,temp);
+                        robots[i].cnt_tar=robots[i].node_id;
+                    }
+                }
+
+            //     }
+            }
         }
         if(robots[i].target_id == -1){
             // cerr<<"ddd\n";
