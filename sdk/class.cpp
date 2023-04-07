@@ -813,7 +813,7 @@ void control(){
     //     cerr<<check_will_colloWithWall(robots[0])<<"\n";
     // }
     
-    collision_solve(25);
+    // collision_solve(25);
 
     // if(state.FrameID >= 5600 && state.FrameID < 5610) {
     //     cerr<<"~ins:"<<ins[2].forward<<"  "<<ins[2].rotate<<"\n";
@@ -3104,9 +3104,8 @@ Ins contr_new_tar(Robot& robot){
 Ins contr_one_rob_0(Robot& robot){
     //ta_aaaa
 
-    print_cerr_flag_ta=false;
     Flag_sumulate=0;
-    int print_rob_id=3;
+    int print_rob_id=0;
     Ins ins_t;
     
     if(robot.target_id==-1){
@@ -3116,7 +3115,7 @@ Ins contr_one_rob_0(Robot& robot){
     }
     
     adjust_virtual_pos_total(robot);
-   
+   print_cerr_flag_ta=true;
     PayLoad payload=calPayload(robot,robot.virtual_pos);
     auto p1=get_w_now(robot,payload);
     if(gt(return_v(robot),0.8)&&robot.need_slow&&robot.need_adjust_statues){
@@ -3257,8 +3256,8 @@ Ins contr_one_rob_0(Robot& robot){
         //     robot.need_adjust_statues=true;
         // }
     // }
-
-   if(print_cerr_flag_ta&&robot.id==print_rob_id&&state.FrameID>=10&&state.FrameID<=700&&contr_print_flag){
+print_cerr_flag_ta=true;
+   if(print_cerr_flag_ta&&robot.id==print_rob_id&&state.FrameID>=3000&&state.FrameID<=5000){
     cerr<<" FrameID "<< state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
     cerr<<"forward: "<<ins_t.forward<<endl;
     cerr<<"angle "<<payload.angle<<endl;
@@ -3304,7 +3303,7 @@ Ins contr_one_rob(Robot& robot){
         //adjust_illegal_pos(robot);
     }else if(robot.is_dangerous){
     }
-    print_cerr_flag_ta=false;
+    // print_cerr_flag_ta=false;
     return robot.get_type==0?contr_one_rob_0(robot):contr_one_rob_1(robot);
 }
 
@@ -3318,7 +3317,7 @@ pair<double,bool> get_w_now(const Robot& robot, const PayLoad& payload){
     ,robot.angular_velocity,payload.sign);
     double rateAngle_fabs=0;
     if(!robot.need_adjust_statues){
-        if(gt(payload.angle,0.3)){
+        if(gt(payload.angle,0.25)){
             rateAngle_fabs=Pi;
         }else if(gt(payload.angle,0.15)){
             rateAngle_fabs=Pi/2;
@@ -3328,11 +3327,11 @@ pair<double,bool> get_w_now(const Robot& robot, const PayLoad& payload){
             rateAngle_fabs=Pi/8;
         }
     }else{
-        if(gt(payload.angle,0.4)){
+        if(gt(payload.angle,0.15)){
             rateAngle_fabs=Pi;
-        }else if(gt(payload.angle,0.3)){
+        }else if(gt(payload.angle,0.1)){
             rateAngle_fabs=Pi/3;
-        }else if(gt(payload.angle,0.2)){
+        }else if(gt(payload.angle,0.075)){
             rateAngle_fabs=Pi/4;
         }else{
             rateAngle_fabs=Pi/8;
@@ -5408,17 +5407,19 @@ void adjust_virtual_pos_total(Robot& rob){
     if(rob.cnt_tar==-1){
         init_rob_status(rob);
     }
-    // print_cerr_flag_ta=false;
+    print_cerr_flag_ta=false;
     int istake=rob.get_type==0?0:1;
     if(!rob.is_new_tar_ing&&!rob.need_adjust_statues&&
     (!check_can_arrival(istake,rob.close_node,rob.cnt_tar))){
-        // if(rob.id==3){
+        // if(rob.id==0){
         //     cerr<<"重设状态"<<endl;
         //     cerr<<illegal_point[istake][rob.node_id]<<endl;
         //     cerr<<rob.node_id<<endl;
         // }
-        rob.is_new_tar_ing=true;
-        rob.need_adjust_statues=true;
+      
+            rob.is_new_tar_ing=true;
+            rob.need_adjust_statues=true;
+        
     }
     if(rob.need_collison){
             rob.need_adjust_statues=false;
@@ -5431,7 +5432,7 @@ void adjust_virtual_pos_total(Robot& rob){
     }
     else if(state.FrameID!=1&&((rob.target_id_pre!=-1)&&(rob.target_id_pre!=rob.target_id))){
         rob.need_adjust_statues=true;
-        // if(rob.id==3)cerr<<"target变化导致重新调整"<<endl;
+        if(rob.id==0)cerr<<"target变化导致重新调整"<<endl;
         rob.adjust_pos=true;
         rob.adjust_w=true;
         rob.need_slow=true;
@@ -5444,7 +5445,7 @@ void adjust_virtual_pos_total(Robot& rob){
             init_rob_status(rob);
         }
         if(lt(return_v(rob),0.8)&&rob.need_slow&&!rob.is_new_tar_ing){
-            if(rob.id==3&&print_cerr_flag_ta){
+            if(rob.id==0&&print_cerr_flag_ta){
                 cerr<<"状态调整正式开始\n";
                 cerr<<"v "<<return_v(rob)<<"\n";
                 printPair(rob.xy_pos);
@@ -5462,7 +5463,7 @@ void adjust_virtual_pos_total(Robot& rob){
             rob.need_slow=true;
             rob.target_id_pre=rob.target_id;
             
-            if(rob.id==3&&print_cerr_flag_ta){
+            if(rob.id==0&&print_cerr_flag_ta){
                 cerr<<"调整速度\n";
             }
             
@@ -5476,7 +5477,7 @@ void adjust_virtual_pos_total(Robot& rob){
             rob.need_slow=true;
             rob.target_id_pre=rob.target_id; 
             rob.is_new_tar_ing=false; 
-        if(rob.id==3&&print_cerr_flag_ta){
+        if(rob.id==0&&print_cerr_flag_ta){
                 cerr<<"调整new_tar_\n";
             }
             // if(rob.id==2)cerr<<2<<"\n";
