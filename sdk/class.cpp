@@ -471,7 +471,7 @@ double calAngle(pair<double, double> a, pair<double, double> b) {
 }
 
 double calAngle(pair<double, double> a) {
-
+    if(eq(calVectorSize(a), 0)) return 0;
     double angle = acos(a.first / calVectorSize(a));
     return lt(a.second, 0.0) ? 2 * Pi- angle: angle;
 }
@@ -1678,6 +1678,12 @@ void charge_target(int robot_id){
 void new_robot_judge(){
     double dist;
     pair<pair<int,int>,double>temp;
+    // if(state.FrameID==8000){
+    //     int j = 0;
+    //     for(int i = 0; i<10000; i++){
+    //         j++;
+    //     }
+    // }
     for(int i=0;i<4;i++){
         if(robots[i].loc_id == robots[i].target_id && robots[i].target_id != -1){
             if(robots[i].get_type != 0){
@@ -1807,7 +1813,7 @@ void new_robot_judge(){
             }
         }
         // if(state.FrameID>4400&&state.FrameID>4450){
-        //     cerr<<"robot : "<<i<<" target id = "<<robots[i].target_id<<"from "<<robots[i].target_id_buy<<" - "<<robots[i].target_id_send<<" ins[i].buy = "<<ins[i].buy<<" ins[i].sell = "<<ins[i].sell<<"loc_id :"<<robots[i].loc_id<<"\n";
+            // cerr<<"robot : "<<i<<" target id = "<<robots[i].target_id<<"from "<<robots[i].target_id_buy<<" - "<<robots[i].target_id_send<<" ins[i].buy = "<<ins[i].buy<<" ins[i].sell = "<<ins[i].sell<<"loc_id :"<<robots[i].loc_id<<"\n";
         // }    
     }
 }
@@ -3287,7 +3293,7 @@ Ins contr_one_rob_0(Robot& robot){
 
     PayLoad payload=calPayload(robot,robot.virtual_pos);
     auto p1=get_w_now(robot,payload);
-if(state.FrameID>13000)print_cerr_flag_ta=true;
+// if(state.FrameID>13000)print_cerr_flag_ta=true;
 // cerr<<print_cerr_flag_ta<<endl;
     if(gt(return_v(robot),0.8)&&robot.need_slow&&robot.need_adjust_statues){
         ins_t.forward=0;
@@ -3434,7 +3440,7 @@ if(state.FrameID>13000)print_cerr_flag_ta=true;
         //     robot.need_adjust_statues=true;
         // }
     // }
-// print_cerr_flag_ta=true;
+print_cerr_flag_ta=false;
 //    if(state.FrameID>=13466&&state.FrameID<=16600&&robot.id==1){
 //     cerr<<"robot.id "<<robot.id<<endl;
 //     cerr<<" FrameID "<< state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
@@ -3467,6 +3473,7 @@ Ins contr_one_rob(Robot& robot){
         Ins ins_t;
         ins_t.forward=0;
         ins_t.rotate=0;
+        robot.virtual_pos = robot.pos;
         return ins_t;
     }
     // if(robot.id==1){
@@ -4181,7 +4188,8 @@ void do_back(int id, pair<double, double> pos) {
             <<"\nback time:"<<time_back<<"\n";
     }
 
-    if(lt(time, time_back - 0.04)) {
+    
+    if(lt(time, time_back - 0.04) && gt(pay.speed, -linear_velocity[(robots[id].get_type != 0)])) {
         if(robots[id].get_type)
             ins[id].forward = 2.5;
         else
@@ -4249,13 +4257,7 @@ bool check_nead_slow_down(const Robot &ro, const Robot &ro_static, double mindis
     int cnt = 0;
     // int node2 = choose_close_node(is_take, ro_static.pos);
     if(tar == -1) {
-        for(int i = 0; i < studios.size(); ++i) {
-            if(!eq(dis_to_studios[i][is_take][node1], 10000)){
-                tar = i;
-                break;
-            }
-        }
-        if(tar == -1) return true;
+        return true;
     }
     // if(collision_cerr_flag) {
     //     cerr<<"###########\n"<<"mindis:"<<mindis<<"\n";
@@ -4288,13 +4290,16 @@ bool check_node_safe(int node_id, double mindis, const Robot &ro) {
     int tar = ro.target_id;
     int is_take = (ro.get_type != 0);
     int node1 = ro.close_node;
+    double dis, dis_pre;
 
     if(ro.target_id == -1) return true;
 
     while(next_node[tar][is_take][node1] != node1) {
         node1 = next_node[tar][is_take][node1];
-        if(le(calcuDis(exist_id[is_take][node1], ro.pos), mindis))
+        dis = calcuDis(exist_id[is_take][node1], ro.pos);
+        if(le(dis, mindis))
             return false;
+        // if(gt(dis, dis_pre)) return true;
         // if(collision_cerr_flag) {
         //     cerr<<"node"<<node1<<" ddd:"<< calcuDis(exist_id[is_take][node1], ro_static.pos) <<"\n";
         // }
@@ -4390,7 +4395,7 @@ int choose_best_to(Robot &ro, pair<double, double> pos) {
     //点在机器人中
     if(le(calcuDis(exist_id[is_take][to_max], ro.pos), ro.radius + 0.001)) {
         node_id = to_max;
-        dangerous = 1;
+        dangerous = 10;
         for(int i = 0; i < graph_edge[is_take][node_id].size(); ++i) {
             to = graph_edge[is_take][node_id][i].id;
             danger = dangerous_point[is_take].count(to);
