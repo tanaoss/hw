@@ -2482,6 +2482,10 @@ void change_getType(){
 double return_ac(double a,double v,double v1){
     int si1=ge(v,0)?1:-1;
     int si2=ge(v1,0)?1:-1;
+    if(eq(v,0)){
+        return si2*a;
+    }
+  
     //a*=lt(si1*si2,0)||gt(si1*si2,0)&&gt(fabs(v),fabs(v1));
     // if(state.FrameID==2962){
     //     cerr<<v<<":"<<si1<<"\n";
@@ -2958,6 +2962,7 @@ Ins contr_one_rob_1(Robot& robot){
     print_cerr_flag_ta=false;
     Flag_sumulate=0;
     Ins ins_t;
+    int print_rob_id=2;
     if(robot.target_id==-1){
         ins_t.forward=0;
         ins_t.rotate=Pi;
@@ -2969,19 +2974,19 @@ Ins contr_one_rob_1(Robot& robot){
     if(gt(return_v(robot),0.8)&&robot.need_slow&&robot.need_adjust_statues){
         ins_t.forward=0;
         ins_t.rotate=p1.first;
-        if(robot.id==0&&print_cerr_flag_ta){
+        if(robot.id==print_rob_id&&print_cerr_flag_ta){
                 cerr<<"正在减速\n";
                 cerr<<"当前速度 "<<return_v(robot)<<"\n";
         }
         return ins_t;
     }
     if(robot.need_adjust_statues){
-        if(robot.id==0&&print_cerr_flag_ta){
+        if(robot.id==print_rob_id&&print_cerr_flag_ta){
             cerr<<"进入位置调整检测\n";
             cerr<<robot.adjust_pos<<" "<<robot.adjust_pos<<" "<<p1.second<<"\n";
         }
         if(robot.adjust_pos){
-            if(robot.id==0&&print_cerr_flag_ta){
+            if(robot.id==print_rob_id&&print_cerr_flag_ta){
                 cerr<<"姿势1 ing\n";
                 cerr<<"摆动速度："<<p1.first<<"\n";
                 cerr<<" 目标";
@@ -2993,7 +2998,7 @@ Ins contr_one_rob_1(Robot& robot){
             ins_t.rotate=p1.first;
             if(lt(payload.distance,0.1)){
                 robot.cnt_tar=ret_next(robot,robot.cnt_tar);
-            if(robot.id==0&&print_cerr_flag_ta){
+            if(robot.id==print_rob_id&&print_cerr_flag_ta){
                 cerr<<"完成姿势1，下一个目标\n";
                 printPair(exist_id[robot.get_type==0?0:1][robot.cnt_tar]);
                 cerr<<robot.need_adjust_statues<<"\n";
@@ -3032,6 +3037,7 @@ Ins contr_one_rob_1(Robot& robot){
         }
              
     }
+    int istake=robot.get_type==0?0:1;
     ins_t.rotate=p1.first;
     ins_t.forward=6;
     if(lt(payload.distance,1)){
@@ -3047,7 +3053,9 @@ Ins contr_one_rob_1(Robot& robot){
             ins_t.forward=0;
     } 
     if(!robot.need_adjust_statues&&lt(payload.distance,0.2)){
-        robot.cnt_tar=ret_next(robot,robot.cnt_tar);
+         int tmpret=ret_next(robot,robot.cnt_tar);
+         if(tmpret!=-1)
+            robot.cnt_tar=ret_next(robot,robot.cnt_tar);
     }
 
     bool con_get_type=false;
@@ -3069,6 +3077,8 @@ Ins contr_one_rob_1(Robot& robot){
             robot.need_adjust_statues=true;
           
         }
+    }else if(gt(payload.distance,1.3)&&gt(payload.speed,5)&&dangerous_nums[istake][robot.virtual_id]>=1){
+        ins_t.forward=min(3.0,ins_t.forward);
     }
     // int istake=robot.get_type==0?0:1;
     // if(robot.is_illegal){
@@ -3883,8 +3893,8 @@ void collision_solve(int frame){
             if(ro[i].id == 1) a = i;
             if(ro[i].id == 2) b =i;
         }
-        cerr<<state.FrameID;
-        printPredictRobotsDis(trajectory[a], trajectory[b]);
+        // cerr<<state.FrameID;
+        // printPredictRobotsDis(trajectory[a], trajectory[b]);
     }
 
     // if(state.FrameID >= 1693 && state.FrameID <= 1730) {
@@ -5875,7 +5885,7 @@ bool can_trajectory_virpos(Robot rob,double v,int cnt){
         }
          
         double seta=rob.direction;
-        double w=rob.angular_velocity==0?0.00001:rob.angular_velocity;
+        double w=rob.angular_velocity;
         double a=return_ac(pay.angular_acceleration,rob.angular_velocity,w_next);
         double changeAngle=get_at_v_limt(t,pay.angular_acceleration,rob.angular_velocity,w_next,pay.sign)*pay.sign;
         double v=Calculate_the_projection_speed(rob);
