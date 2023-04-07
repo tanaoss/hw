@@ -3960,9 +3960,9 @@ void collision_solve(int frame){
             // bool back_flag = lt(dis, mindis + 0.2);
             if(check_nead_slow_down(ro[choose_id], ro[x], mindis, coll_time[choose_id][x])) {
                 do_back(ro[choose_id].id, ro[x].pos);
-                if(flag_avoid[choose_id] && eq(ins[ro[choose_id].id].forward, -2)) {
-                    ins[ro[choose_id].id].forward = max(ins[ro[choose_id].id].forward, speed_limit[choose_id]);
-                }
+                // if(flag_avoid[choose_id] && eq(ins[ro[choose_id].id].forward, -2)) {
+                //     ins[ro[choose_id].id].forward = max(ins[ro[choose_id].id].forward, speed_limit[choose_id]);
+                // }
                 if(collision_cerr_flag){
                     cerr<<"choose back\n";
                     cerr<<"ins:"<<ins[ro[choose_id].id].forward<<" "<<ins[ro[choose_id].id].rotate<<"\n";
@@ -3992,18 +3992,19 @@ void collision_solve(int frame){
                 }
             }
             else if(check_nead_slow_down(ro[x], ro[choose_id], mindis  + 0.1, coll_time[choose_id][x])) {
-                do_back(ro[x].id, ro[choose_id].pos);
+                // do_back(ro[x].id, ro[choose_id].pos);
+                ins[ro[x].id].forward = 0;
                 if(collision_cerr_flag){
                     cerr<<"choose not back\n";
                     cerr<<"ins:"<<ins[ro[x].id].forward<<" "<<ins[ro[x].id].rotate<<"\n";
                 }
-                vis[choose_id] = 0;
-                vis[x] = 1;
-                flag_avoid[choose_id] = 1;
-                if(gt(ins[ro[x].id].forward * payloads[ro[x].id].speed, 0) || lt(payloads[ro[x].id].speed, 0))
-                    speed_limit[choose_id] = payloads[ro[x].id].speed;
-                else
-                    speed_limit[choose_id] = 0;
+                // vis[choose_id] = 0;
+                // vis[x] = 1;
+                // flag_avoid[choose_id] = 1;
+                // if(gt(ins[ro[x].id].forward * payloads[ro[x].id].speed, 0) || lt(payloads[ro[x].id].speed, 0))
+                //     speed_limit[choose_id] = payloads[ro[x].id].speed;
+                // else
+                //     speed_limit[choose_id] = 0;
             }
             else {
                 vis[choose_id] = 0;
