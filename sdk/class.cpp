@@ -3912,10 +3912,10 @@ void collision_solve(int frame){
     //     printPredictRobotsDis(trajectory[a], trajectory[b]);
     // }
 
-    if(state.FrameID >= 1693 && state.FrameID <= 1730) {
-        cerr<<state.FrameID;
-        printRobotsDis(0,2);
-    }
+    // if(state.FrameID >= 1693 && state.FrameID <= 1730) {
+    //     cerr<<state.FrameID;
+    //     printRobotsDis(0,2);
+    // }
     
     updateGetType();
 }
@@ -3972,7 +3972,7 @@ double get_stop_time(double x, double v0, int sign, double acceleration) {
     v0 = fabs(v0);
     if(eq(vt2, 0)) return v0 / acceleration;
     if(lt(vt2, 0)) return (sqrt(fabs(vt2)) + v0) / acceleration;
-    cerr<<"vt2"<<vt2<<endl;
+    // cerr<<"vt2"<<vt2<<endl;
     return (sqrt(vt2) - v0 * sign) / acceleration;
 }
 
