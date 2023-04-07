@@ -109,6 +109,7 @@ struct Robot
     bool need_rote_wall;
     double radius;
     int pane_id;
+    int robot_slow_v_cnt;
     pair<double,double> virtual_pos;
     int robot_area_type[2];
     int cnt_tar;//标定的路径tar
@@ -155,6 +156,7 @@ struct Robot
         is_illegal=false;
         is_dangerous=false;
         is_new_tar_ing=false;
+        robot_slow_v_cnt=0;
     }
     void set(int _id, int _loc_id, int _get_type, double _time_val, double _collision_val, double _angular_velocity, pair<double, double> &&_xy_pos,
              double _direction, pair<double, double> &&_pos)
@@ -488,4 +490,5 @@ Ins contr_new_tar(Robot& robot);
 void get_point_type() ;
 void check_robot_pos_status(Robot& robot);
 void adjust_illegal_pos(Robot& robot);
-void check_suspicious_spots(int studio_id);
+bool check_will_collison_wall(Robot& robot);
+void  select_the_standard_id(Robot& robot);void check_suspicious_spots(int studio_id);
