@@ -3096,7 +3096,7 @@ Ins contr_one_rob_1(Robot& robot){
           
         }
     }else if(gt(payload.distance,1.3)&&gt(payload.speed,5)&&dangerous_nums[istake][robot.virtual_id]>=1){
-        ins_t.forward=min(3.0,ins_t.forward);
+        ins_t.forward=min(4.5,ins_t.forward);
     }
     // int istake=robot.get_type==0?0:1;
     // if(robot.is_illegal){
@@ -3137,11 +3137,12 @@ Ins contr_new_tar(Robot& robot){
 }
 Ins contr_one_rob_0(Robot& robot){
     //ta_aaaa
-
+// if(contr_print_flag)
+// cerr<<"rob 2"<<endl;
     Flag_sumulate=0;
-    int print_rob_id=0;
+    int print_rob_id=2;
+   bool print_cerr_flag_ta1=false;
     Ins ins_t;
-    
     if(robot.target_id==-1){
         ins_t.forward=0;
         ins_t.rotate=Pi;
@@ -3149,25 +3150,30 @@ Ins contr_one_rob_0(Robot& robot){
     }
     
     adjust_virtual_pos_total(robot);
-   print_cerr_flag_ta=false;
+
+
+
+
     PayLoad payload=calPayload(robot,robot.virtual_pos);
     auto p1=get_w_now(robot,payload);
+// if(state.FrameID>13000)print_cerr_flag_ta=true;
+// cerr<<print_cerr_flag_ta<<endl;
     if(gt(return_v(robot),0.8)&&robot.need_slow&&robot.need_adjust_statues){
         ins_t.forward=0;
         ins_t.rotate=p1.first;
-        if(robot.id==print_rob_id&&print_cerr_flag_ta){
+        if(robot.id==print_rob_id&&print_cerr_flag_ta1){
                 cerr<<"正在减速\n";
                 cerr<<"当前速度 "<<return_v(robot)<<"\n";
         }
         return ins_t;
     }
     if(robot.need_adjust_statues){
-        if(robot.id==print_rob_id&&print_cerr_flag_ta){
+        if(robot.id==print_rob_id&&print_cerr_flag_ta1){
             cerr<<"进入位置调整检测\n";
             cerr<<robot.adjust_pos<<" "<<robot.adjust_pos<<" "<<p1.second<<"\n";
         }
         if(robot.adjust_pos){
-            if(robot.id==print_rob_id&&print_cerr_flag_ta){
+            if(robot.id==print_rob_id&&print_cerr_flag_ta1){
                 cerr<<"姿势1 ing\n";
                 cerr<<"摆动速度："<<p1.first<<"\n";
                 cerr<<" 目标";
@@ -3180,7 +3186,7 @@ Ins contr_one_rob_0(Robot& robot){
             ins_t.rotate=p1.first;
             if(lt(payload.distance,0.1)){
                 robot.cnt_tar=ret_next(robot,robot.cnt_tar);
-            if(robot.id==print_rob_id&&print_cerr_flag_ta){
+            if(robot.id==print_rob_id&&print_cerr_flag_ta1){
                 cerr<<"完成姿势1，下一个目标\n";
                 printPair(exist_id[robot.get_type==0?0:1][robot.cnt_tar]);
                 cerr<<robot.need_adjust_statues<<"\n";
@@ -3195,7 +3201,7 @@ Ins contr_one_rob_0(Robot& robot){
             }
             return ins_t;
         }else if(robot.need_adjust_statues&&(!robot.adjust_pos)&&(!p1.second)){
-             if(robot.id==print_rob_id&&print_cerr_flag_ta){
+             if(robot.id==print_rob_id&&print_cerr_flag_ta1){
                 cerr<<"姿势2，ing\n";
                 cerr<<"摆动速度："<<p1.first<<"\n";
                 cerr<<" 目标";
@@ -3209,7 +3215,7 @@ Ins contr_one_rob_0(Robot& robot){
             robot.adjust_w=false;
             ins_t.forward=0.5;
             ins_t.rotate=p1.first;         
-            if(robot.id==print_rob_id&&print_cerr_flag_ta)
+            if(robot.id==print_rob_id&&print_cerr_flag_ta1)
                 cerr<<"状态调整完毕\n";
             return ins_t;
 
@@ -3219,7 +3225,9 @@ Ins contr_one_rob_0(Robot& robot){
             return ins_t;
         }
     }
-
+//    cerr<<"sha ye meigan "<<endl;
+    // print_cerr_flag_ta1=true;
+ 
     bool isSlope=false;
     int istake=robot.get_type==0?0:1;
     int cnt=robot.cnt_tar;
@@ -3237,6 +3245,7 @@ Ins contr_one_rob_0(Robot& robot){
     }
     con2=(isSlope&&isDanger);
     ins_t.rotate=p1.first;
+    double change=0.2*(state.FrameID/2==0?-1:1);
     ins_t.forward=lt(payload.distance,1.5)?3:6;
     if(lt(payload.distance,1)){
         ins_t.forward=3;
@@ -3259,10 +3268,14 @@ Ins contr_one_rob_0(Robot& robot){
     // if(lt(payload.distance,0.3)&&(con2)){
     //     robot.need_adjust_statues=true;
     // } 
-    if(next_tar!=-1&&!robot.need_adjust_statues&&lt(payload.distance,0.2)){
+    if(!robot.need_adjust_statues&&lt(payload.distance,0.2)){
         int next_tar=ret_next(robot,robot.cnt_tar);
-            robot.cnt_tar=next_tar;
+        robot.cnt_tar=next_tar;
         
+    }
+    if(gt(payload.angle,1.2)&&lt(payload.distance,5)){
+        if(gt(fabs(ins_t.forward),fabs(change)+0.2))
+            ins_t.forward+=change;
     }
     // bool con_get_type=false;
     // if(gt(payload.angle,Pi/3))
@@ -3290,8 +3303,8 @@ Ins contr_one_rob_0(Robot& robot){
         //     robot.need_adjust_statues=true;
         // }
     // }
-print_cerr_flag_ta=false;
-   if(print_cerr_flag_ta&&robot.id==print_rob_id&&state.FrameID>=3000&&state.FrameID<=5000){
+print_cerr_flag_ta=true;
+   if(print_cerr_flag_ta1&&robot.id==2&&state.FrameID>=13466&&state.FrameID<=13500){
     cerr<<" FrameID "<< state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
     cerr<<"forward: "<<ins_t.forward<<endl;
     cerr<<"angle "<<payload.angle<<endl;
@@ -3311,6 +3324,7 @@ print_cerr_flag_ta=false;
     cerr<<"可以到达？"<<check_can_arrival(istake,robot.close_node,robot.cnt_tar)<<" "<<robot.virtual_id<<endl;
     cerr<<" robot.cnt_tar "<<robot.cnt_tar<<endl;
     cerr<<robot.is_new_tar_ing<<endl;
+    cerr<<ins_t.forward<<endl;
    }
      
     return ins_t;
@@ -3337,6 +3351,8 @@ Ins contr_one_rob(Robot& robot){
         //adjust_illegal_pos(robot);
     }else if(robot.is_dangerous){
     }
+    // if(robot.id==2)
+    // cerr<<robot.id<<" "<<robot.get_type<<endl;
     // print_cerr_flag_ta=false;
     return robot.get_type==0?contr_one_rob_0(robot):contr_one_rob_1(robot);
 }
