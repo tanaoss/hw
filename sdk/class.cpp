@@ -5680,9 +5680,15 @@ void adjust_virtual_pos_total(Robot& rob){
         // if(rob.id==0)cerr<<"target变化导致重新调整"<<endl;
         int next_tar=next_node[rob.target_id][istake][rob.close_node];
         if(lt(return_v(rob),1)&&empty_pos(rob)){
+            
+            // cerr<<"使用空白点代替了工作台重置状态"<<endl;
+            // cerr<<"time"<<state.FrameID<<endl;
+            // cerr<<"机器人编号"<<rob.id<<endl;
+            // cerr<<rob.target_id_pre<<"---->"<<rob.target_id<<endl;
             rob.virtual_pos=exist_id[istake][next_tar];
             rob.virtual_id=next_tar;
             rob.cnt_tar=next_tar;
+            rob.target_id_pre=rob.target_id;
         }else{
             rob.adjust_pos=true;
             rob.adjust_w=true;
