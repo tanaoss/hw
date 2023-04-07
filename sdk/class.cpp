@@ -3128,9 +3128,8 @@ Ins contr_new_tar(Robot& robot){
 Ins contr_one_rob_0(Robot& robot){
     //ta_aaaa
 
-    print_cerr_flag_ta=false;
     Flag_sumulate=0;
-    int print_rob_id=3;
+    int print_rob_id=0;
     Ins ins_t;
     
     if(robot.target_id==-1){
@@ -3140,7 +3139,7 @@ Ins contr_one_rob_0(Robot& robot){
     }
     
     adjust_virtual_pos_total(robot);
-   
+   print_cerr_flag_ta=false;
     PayLoad payload=calPayload(robot,robot.virtual_pos);
     auto p1=get_w_now(robot,payload);
     if(gt(return_v(robot),0.8)&&robot.need_slow&&robot.need_adjust_statues){
@@ -3281,8 +3280,8 @@ Ins contr_one_rob_0(Robot& robot){
         //     robot.need_adjust_statues=true;
         // }
     // }
-
-   if(print_cerr_flag_ta&&robot.id==print_rob_id&&state.FrameID>=10&&state.FrameID<=700&&contr_print_flag){
+print_cerr_flag_ta=false;
+   if(print_cerr_flag_ta&&robot.id==print_rob_id&&state.FrameID>=3000&&state.FrameID<=5000){
     cerr<<" FrameID "<< state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
     cerr<<"forward: "<<ins_t.forward<<endl;
     cerr<<"angle "<<payload.angle<<endl;
@@ -3328,7 +3327,7 @@ Ins contr_one_rob(Robot& robot){
         //adjust_illegal_pos(robot);
     }else if(robot.is_dangerous){
     }
-    print_cerr_flag_ta=false;
+    // print_cerr_flag_ta=false;
     return robot.get_type==0?contr_one_rob_0(robot):contr_one_rob_1(robot);
 }
 
@@ -3342,9 +3341,9 @@ pair<double,bool> get_w_now(const Robot& robot, const PayLoad& payload){
     ,robot.angular_velocity,payload.sign);
     double rateAngle_fabs=0;
     if(!robot.need_adjust_statues){
-        if(gt(payload.angle,0.3)){
+        if(gt(payload.angle,0.25)){
             rateAngle_fabs=Pi;
-        }else if(gt(payload.angle,0.15)){
+        }else if(gt(payload.angle,0.2)){
             rateAngle_fabs=Pi/2;
         }else if(gt(payload.angle,0.075)){
             rateAngle_fabs=Pi/4;
@@ -3352,11 +3351,11 @@ pair<double,bool> get_w_now(const Robot& robot, const PayLoad& payload){
             rateAngle_fabs=Pi/8;
         }
     }else{
-        if(gt(payload.angle,0.4)){
+        if(gt(payload.angle,0.25)){
             rateAngle_fabs=Pi;
-        }else if(gt(payload.angle,0.3)){
+        }else if(gt(payload.angle,0.1)){
             rateAngle_fabs=Pi/3;
-        }else if(gt(payload.angle,0.2)){
+        }else if(gt(payload.angle,0.075)){
             rateAngle_fabs=Pi/4;
         }else{
             rateAngle_fabs=Pi/8;
@@ -3616,6 +3615,7 @@ void collision_solve(int frame){
                 continue;
             if(choose_id == -1 || coll[j].size()> coll[choose_id].size()) {
                 choose_id = j;
+                break;
             }
         }
         
@@ -3727,7 +3727,8 @@ void collision_solve(int frame){
         }
 
         
-        if(ans != -1 && gt(payloads[ro[choose_id].id].speed, 1) && (ans != 3|| !check_nead_slow_down(ro[x], ro[choose_id], mindis, coll_time[choose_id][x]))) {
+        if(ans != -1 && gt(payloads[ro[choose_id].id].speed, 1) && (!eq(ins[ro[choose_id].id].forward, 0) || le(calcuDis(ro[choose_id].pos, studios[ro[choose_id].target_id].pos), 1))
+                        && (ans != 3|| !check_nead_slow_down(ro[x], ro[choose_id], mindis, coll_time[choose_id][x]))) {
             if(collision_cerr_flag) {
                 cerr<<payloads[ro[choose_id].id].angle<<"-"<<payloads[ro[choose_id].id].sign<<"\n";
                 cerr<<"old solution:"<<ins[ro[choose_id].id].forward<<"**"<<ins[ro[choose_id].id].rotate<<"\n";
@@ -3809,24 +3810,24 @@ void collision_solve(int frame){
                     cerr<<"choose back\n";
                     cerr<<"ins:"<<ins[ro[choose_id].id].forward<<" "<<ins[ro[choose_id].id].rotate<<"\n";
                 }
-                double speed = calVectorProduct(ro[choose_id].xy_pos, transformVector(ro[choose_id].direction));
+                double speed = calVectorProduct(ro[choose_id].xy_pos, subVector(ro[choose_id].pos, ro[x].pos));
                 if(collision_cerr_flag) {
                     cerr<<"dis:"<<get_dis(ro[choose_id], ro[x])<<"\n";
                     cerr<<"speed:"<<speed<<"\n";
                 }
                 if(ro[choose_id].target_id != ro[x].target_id && check_nead_slow_down(ro[x], ro[choose_id], mindis + 0.2, coll_time[choose_id][x]) && check_speed(ro[x], ro[choose_id], mindis)) {
                     vis[x] = 1;
-                    if(le(fabs(get_dis(ro[choose_id], ro[x])), 4) && gt(speed, -1)){
-                        do_back(ro[x].id, ro[choose_id].pos);
-                        if(collision_cerr_flag) {
-                            cerr<<"x doback\n";
-                            cerr<<"ins:"<<ins[ro[x].id].forward<<" "<<ins[ro[x].id].rotate<<"\n";
-                        }
-                    }
-                    else {
+                    // if(le(fabs(get_dis(ro[choose_id], ro[x])), 4) && gt(speed, -1)){
+                    //     do_back(ro[x].id, ro[choose_id].pos);
+                    //     if(collision_cerr_flag) {
+                    //         cerr<<"x doback\n";
+                    //         cerr<<"ins:"<<ins[ro[x].id].forward<<" "<<ins[ro[x].id].rotate<<"\n";
+                    //     }
+                    // }
+                    // else {
                         if(collision_cerr_flag) cerr<<"x 减速\n";
-                        ins[ro[x].id].forward = min(fabs(payloads[ro[choose_id].id].speed), ins[ro[x].id].forward);
-                    }
+                        ins[ro[x].id].forward = min(2.0, ins[ro[x].id].forward);
+                    // }
                 }
             }
             else if(check_nead_slow_down(ro[x], ro[choose_id], mindis, coll_time[choose_id][x])) {
@@ -3894,15 +3895,15 @@ void collision_solve(int frame){
     }
     
 
-    // if(state.FrameID == 1692 || state.FrameID == 1693) {
-    //     int a,b;
-    //     for(i = 0; i < 4; ++i){
-    //         if(ro[i].id == 1) a = i;
-    //         if(ro[i].id == 2) b =i;
-    //     }
-    //     cerr<<state.FrameID;
-    //     printPredictRobotsDis(trajectory[a], trajectory[b]);
-    // }
+    if(state.FrameID == 1849 || state.FrameID == 1850) {
+        int a,b;
+        for(i = 0; i < 4; ++i){
+            if(ro[i].id == 1) a = i;
+            if(ro[i].id == 2) b =i;
+        }
+        cerr<<state.FrameID;
+        printPredictRobotsDis(trajectory[a], trajectory[b]);
+    }
 
     // if(state.FrameID >= 1693 && state.FrameID <= 1730) {
     //     cerr<<state.FrameID;
@@ -4067,29 +4068,29 @@ bool check_nead_slow_down(const Robot &ro, const Robot &ro_static, double mindis
         }
         if(tar == -1) return false;
     }
-    if(collision_cerr_flag) {
-        cerr<<"###########\n"<<"mindis:"<<mindis<<"\n";
-        cerr<<ro.id<<"\n";
-    }
+    // if(collision_cerr_flag) {
+    //     cerr<<"###########\n"<<"mindis:"<<mindis<<"\n";
+    //     cerr<<ro.id<<"\n";
+    // }
     while(next_node[tar][is_take][node1] != node1) {
         node1 = next_node[tar][is_take][node1];
         cnt++;
         if(lt(calcuDis(exist_id[is_take][node1], ro_static.pos), mindis))
             return true;
-        if(collision_cerr_flag) {
-            cerr<<"node"<<node1<<" ddd:"<< calcuDis(exist_id[is_take][node1], ro_static.pos) <<"\n";
-        }
+        // if(collision_cerr_flag) {
+        //     cerr<<"node"<<node1<<" ddd:"<< calcuDis(exist_id[is_take][node1], ro_static.pos) <<"\n";
+        // }
     }
 
     if(cnt < coll_frame && is_take == 0 && studios[tar].pStatus == 0 && studios[tar].r_time > coll_frame) {
         return true;
     }
 
-    if(collision_cerr_flag) {
-        // cerr<<"node2:"<<node2<<"\n";
-        cerr<<"studio state:"<<studios[tar].pStatus<<" "<<studios[tar].r_time<<"\n";
-        cerr<<"###########\n";
-    }
+    // if(collision_cerr_flag) {
+    //     // cerr<<"node2:"<<node2<<"\n";
+    //     cerr<<"studio state:"<<studios[tar].pStatus<<" "<<studios[tar].r_time<<"\n";
+    //     cerr<<"###########\n";
+    // }
 
     return false;
 }
@@ -4167,7 +4168,12 @@ int choose_best_to(Robot &ro, pair<double, double> pos) {
             danger = dangerous_point[is_take].count(to);
             tmp = calcuDis(pos, exist_id[is_take][to]);
             if(gt(tmp, dis_old) && gt(tmp, dis) && danger <= is_dangerous) {
-                // if(collision_cerr_flag) cerr<<"to_tmp:"<<to<<" dis:"<<calcuDis(pos, exist_id[is_take][to])<<endl;
+                if(collision_cerr_flag) {
+                    cerr<<"to_tmp:"<<to<<" dis:"<<calcuDis(pos, exist_id[is_take][to])<<endl;
+                    cerr<<"dis-rob:"<<calcuDis(exist_id[is_take][to], ro.pos)<<endl;
+                    cerr<<ro.radius<<endl;
+                    printPair(exist_id[is_take][to]);
+                }
                 dis = tmp;
                 to_max = to;
                 is_dangerous = danger;
@@ -4175,7 +4181,7 @@ int choose_best_to(Robot &ro, pair<double, double> pos) {
         }
     }
     //点在机器人中
-    if(le(calcuDis(exist_id[is_take][to], ro.pos), ro.radius + 0.001)) {
+    if(le(calcuDis(exist_id[is_take][to_max], ro.pos), ro.radius + 0.001)) {
         node_id = to_max;
         is_dangerous = 1;
         for(int i = 0; i < graph_edge[is_take][node_id].size(); ++i) {
@@ -4183,7 +4189,7 @@ int choose_best_to(Robot &ro, pair<double, double> pos) {
             danger = dangerous_point[is_take].count(to);
             tmp = calcuDis(pos, exist_id[is_take][to]);
             if(gt(tmp, dis) && danger <= is_dangerous) {
-                // if(collision_cerr_flag) cerr<<"to_tmp:"<<to<<" dis:"<<calcuDis(pos, exist_id[is_take][to])<<endl;
+                if(collision_cerr_flag) cerr<<"&to_tmp:"<<to<<" dis:"<<calcuDis(pos, exist_id[is_take][to])<<endl;
                 dis = tmp;
                 to_max = to;
                 is_dangerous = danger;
@@ -4202,9 +4208,10 @@ int checkNoCollision(const vector<pair<double,double>> &a, const vector<pair<dou
     bool flag = 0;
     for(int i = 0; i < count; ++i) {
         dis = calcuDis(a[i], b[i]);
-        if(le(dis, mindis)) {
+        if(le(dis, mindis + flag * 0.1)) {
             if(i == 0) {
                 mindis = dis;
+                flag = 1;
             }
             else return i;
         }
@@ -5432,17 +5439,19 @@ void adjust_virtual_pos_total(Robot& rob){
     if(rob.cnt_tar==-1){
         init_rob_status(rob);
     }
-    // print_cerr_flag_ta=false;
+    print_cerr_flag_ta=false;
     int istake=rob.get_type==0?0:1;
     if(!rob.is_new_tar_ing&&!rob.need_adjust_statues&&
     (!check_can_arrival(istake,rob.close_node,rob.cnt_tar))){
-        // if(rob.id==3){
+        // if(rob.id==0){
         //     cerr<<"重设状态"<<endl;
         //     cerr<<illegal_point[istake][rob.node_id]<<endl;
         //     cerr<<rob.node_id<<endl;
         // }
-        rob.is_new_tar_ing=true;
-        rob.need_adjust_statues=true;
+      
+            rob.is_new_tar_ing=true;
+            rob.need_adjust_statues=true;
+        
     }
     if(rob.need_collison){
             rob.need_adjust_statues=false;
@@ -5455,7 +5464,7 @@ void adjust_virtual_pos_total(Robot& rob){
     }
     else if(state.FrameID!=1&&((rob.target_id_pre!=-1)&&(rob.target_id_pre!=rob.target_id))){
         rob.need_adjust_statues=true;
-        // if(rob.id==3)cerr<<"target变化导致重新调整"<<endl;
+        // if(rob.id==0)cerr<<"target变化导致重新调整"<<endl;
         rob.adjust_pos=true;
         rob.adjust_w=true;
         rob.need_slow=true;
@@ -5468,7 +5477,7 @@ void adjust_virtual_pos_total(Robot& rob){
             init_rob_status(rob);
         }
         if(lt(return_v(rob),0.8)&&rob.need_slow&&!rob.is_new_tar_ing){
-            if(rob.id==3&&print_cerr_flag_ta){
+            if(rob.id==0&&print_cerr_flag_ta){
                 cerr<<"状态调整正式开始\n";
                 cerr<<"v "<<return_v(rob)<<"\n";
                 printPair(rob.xy_pos);
@@ -5486,7 +5495,7 @@ void adjust_virtual_pos_total(Robot& rob){
             rob.need_slow=true;
             rob.target_id_pre=rob.target_id;
             
-            if(rob.id==3&&print_cerr_flag_ta){
+            if(rob.id==0&&print_cerr_flag_ta){
                 cerr<<"调整速度\n";
             }
             
@@ -5500,7 +5509,7 @@ void adjust_virtual_pos_total(Robot& rob){
             rob.need_slow=true;
             rob.target_id_pre=rob.target_id; 
             rob.is_new_tar_ing=false; 
-        if(rob.id==3&&print_cerr_flag_ta){
+        if(rob.id==0&&print_cerr_flag_ta){
                 cerr<<"调整new_tar_\n";
             }
             // if(rob.id==2)cerr<<2<<"\n";
@@ -5963,11 +5972,11 @@ pair<double,bool> get_vir_w(Robot& robot,PayLoad& payload){
                 rateAngle_fabs=Pi/8;
             }
         }else{
-            if(gt(angle,0.4)){
+            if(gt(angle,0.3)){
                 rateAngle_fabs=Pi;
-            }else if(gt(angle,0.3)){
-                rateAngle_fabs=Pi/3;
             }else if(gt(angle,0.2)){
+                rateAngle_fabs=Pi/3;
+            }else if(gt(angle,0.1)){
                 rateAngle_fabs=Pi/4;
             }else{
                 rateAngle_fabs=Pi/8;
