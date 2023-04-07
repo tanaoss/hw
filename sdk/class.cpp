@@ -3462,9 +3462,9 @@ Ins contr_one_rob(Robot& robot){
         ins_t.rotate=0;
         return ins_t;
     }
-    if(robot.id==1){
-        cerr<<"进入运动控制函数"<<endl;
-    }
+    // if(robot.id==1){
+    //     cerr<<"进入运动控制函数"<<endl;
+    // }
     if(robot.is_illegal&&!robot.need_adjust_statues){
         if(robot.id==2&&print_cerr_flag_ta){
             cerr<<"机器人2在非法位置：\n";
