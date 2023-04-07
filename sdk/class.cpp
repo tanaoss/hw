@@ -4040,19 +4040,19 @@ void collision_solve(int frame){
     }
     
 
-    // if(state.FrameID == 11793 || state.FrameID == 11794) {
-    //     int a,b;
-    //     for(i = 0; i < 4; ++i){
-    //         if(ro[i].id == 1) a = i;
-    //         if(ro[i].id == 3) b =i;
-    //     }
-    //     cerr<<state.FrameID;
-    //     printPredictRobotsDis(trajectory[a], trajectory[b]);
-    //     cerr<<"time:"<<state.FrameID<<"\n";
-    //     print_robot_infor(ro[a]);
-    //     cerr<<"*\n";
-    //     print_robot_infor(ro[b]);
-    // }
+    if(state.FrameID >= 11931 && state.FrameID <= 11960) {
+        int a,b;
+        for(i = 0; i < 4; ++i){
+            if(ro[i].id == 1) a = i;
+            if(ro[i].id == 3) b =i;
+        }
+        cerr<<state.FrameID;
+        printPredictRobotsDis(trajectory[a], trajectory[b]);
+        cerr<<"time:"<<state.FrameID<<"\n";
+        print_robot_infor(ro[a]);
+        cerr<<"*\n";
+        print_robot_infor(ro[b]);
+    }
 
     // if(state.FrameID >= 1693 && state.FrameID <= 1730) {
     //     cerr<<state.FrameID;
@@ -4336,7 +4336,7 @@ int choose_best_to(Robot &ro, pair<double, double> pos) {
     int node_id = ro.close_node;
     int to, to_max;
     double dis, tmp, dis_old;
-    int tmp_size, is_dangerous = 1, danger;
+    int tmp_size, dangerous = 10, danger;
 
     // if(next_node[tar][is_take][ro.node_id] != -1) 
     //     return calPayload(ro, trans_nodeID_to_pos(next_node[tar][is_take][ro.node_id]));
@@ -4347,9 +4347,9 @@ int choose_best_to(Robot &ro, pair<double, double> pos) {
             if(check_node_illegal(i, j)) continue;
             to = i * 100 + j;
             if(graph_edge[is_take].count(to) == 0 || graph_edge[is_take][to].size() <= 1) continue;
-            danger = dangerous_point[is_take].count(to);
+            danger = dangerous_nums[is_take][to];
             tmp = calcuDis(pos, exist_id[is_take][to]);
-            if(gt(tmp, dis_old) && (danger < is_dangerous || gt(tmp, dis) && danger <= is_dangerous)) {
+            if(gt(tmp, dis_old) && (danger < dangerous || gt(tmp, dis) && danger <= dangerous)) {
                 
                 if(collision_cerr_flag) {
                     cerr<<"to_tmp:"<<to<<" dis:"<<calcuDis(pos, exist_id[is_take][to])<<endl;
@@ -4359,23 +4359,23 @@ int choose_best_to(Robot &ro, pair<double, double> pos) {
                 }
                 dis = tmp;
                 to_max = to;
-                is_dangerous = danger;
+                dangerous = danger;
             }
         }
     }
     //点在机器人中
     if(le(calcuDis(exist_id[is_take][to_max], ro.pos), ro.radius + 0.001)) {
         node_id = to_max;
-        is_dangerous = 1;
+        dangerous = 1;
         for(int i = 0; i < graph_edge[is_take][node_id].size(); ++i) {
             to = graph_edge[is_take][node_id][i].id;
             danger = dangerous_point[is_take].count(to);
             tmp = calcuDis(pos, exist_id[is_take][to]);
-            if(gt(tmp, dis) && danger <= is_dangerous) {
+            if(gt(tmp, dis) && danger <= dangerous) {
                 if(collision_cerr_flag) cerr<<"&to_tmp:"<<to<<" dis:"<<calcuDis(pos, exist_id[is_take][to])<<endl;
                 dis = tmp;
                 to_max = to;
-                is_dangerous = danger;
+                dangerous = danger;
             }
         }
     }
