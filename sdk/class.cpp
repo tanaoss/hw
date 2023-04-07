@@ -1678,6 +1678,12 @@ void charge_target(int robot_id){
 void new_robot_judge(){
     double dist;
     pair<pair<int,int>,double>temp;
+    // if(state.FrameID==8000){
+    //     int j = 0;
+    //     for(int i = 0; i<10000; i++){
+    //         j++;
+    //     }
+    // }
     for(int i=0;i<4;i++){
         if(robots[i].loc_id == robots[i].target_id && robots[i].target_id != -1){
             if(robots[i].get_type != 0){
@@ -1807,7 +1813,7 @@ void new_robot_judge(){
             }
         }
         // if(state.FrameID>4400&&state.FrameID>4450){
-        //     cerr<<"robot : "<<i<<" target id = "<<robots[i].target_id<<"from "<<robots[i].target_id_buy<<" - "<<robots[i].target_id_send<<" ins[i].buy = "<<ins[i].buy<<" ins[i].sell = "<<ins[i].sell<<"loc_id :"<<robots[i].loc_id<<"\n";
+            cerr<<"robot : "<<i<<" target id = "<<robots[i].target_id<<"from "<<robots[i].target_id_buy<<" - "<<robots[i].target_id_send<<" ins[i].buy = "<<ins[i].buy<<" ins[i].sell = "<<ins[i].sell<<"loc_id :"<<robots[i].loc_id<<"\n";
         // }    
     }
 }
@@ -3287,7 +3293,7 @@ Ins contr_one_rob_0(Robot& robot){
 
     PayLoad payload=calPayload(robot,robot.virtual_pos);
     auto p1=get_w_now(robot,payload);
-if(state.FrameID>13000)print_cerr_flag_ta=true;
+// if(state.FrameID>13000)print_cerr_flag_ta=true;
 // cerr<<print_cerr_flag_ta<<endl;
     if(gt(return_v(robot),0.8)&&robot.need_slow&&robot.need_adjust_statues){
         ins_t.forward=0;
@@ -3434,30 +3440,30 @@ if(state.FrameID>13000)print_cerr_flag_ta=true;
         //     robot.need_adjust_statues=true;
         // }
     // }
-// print_cerr_flag_ta=true;
-   if(state.FrameID>=13466&&state.FrameID<=16600&&robot.id==1){
-    cerr<<"robot.id "<<robot.id<<endl;
-    cerr<<" FrameID "<< state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
-    cerr<<"forward: "<<ins_t.forward<<endl;
-    cerr<<"angle "<<payload.angle<<endl;
-    cerr<<"dis "<<payload.distance<<endl;
-    cerr<<robot.isVir<<endl;
-    cerr<<"rob node_id"<<robot.close_node<<endl;
-    cerr<<" robot.cnt_tar "<<robot.cnt_tar<<endl;
-    cerr<<" robot.virtual_id "<<robot.virtual_id<<endl;
-    cerr<<"next tar "<<next_tar<<" "<<dangerous_nums[istake][next_tar]<<endl;
-    cerr<<dangerous_nums[0][robot .node_id]<<endl;
-    cerr<<dangerous_nums[0][robot.cnt_tar]<<endl;
-    cerr<<dangerous_nums[0][next_tar]<<endl;
-    printPair(robot.pos);
-    printPair(robot.virtual_pos);
-    cerr<<"合法？："<<robot.is_illegal <<endl;
-    cerr<<p1.second<<endl;
-    cerr<<"可以到达？"<<check_can_arrival(istake,robot.close_node,robot.cnt_tar)<<" "<<robot.virtual_id<<endl;
-    cerr<<" robot.cnt_tar "<<robot.cnt_tar<<endl;
-    cerr<<robot.is_new_tar_ing<<endl;
-    cerr<<ins_t.forward<<endl;
-   }
+print_cerr_flag_ta=false;
+//    if(state.FrameID>=13466&&state.FrameID<=16600&&robot.id==1){
+//     cerr<<"robot.id "<<robot.id<<endl;
+//     cerr<<" FrameID "<< state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
+//     cerr<<"forward: "<<ins_t.forward<<endl;
+//     cerr<<"angle "<<payload.angle<<endl;
+//     cerr<<"dis "<<payload.distance<<endl;
+//     cerr<<robot.isVir<<endl;
+//     cerr<<"rob node_id"<<robot.close_node<<endl;
+//     cerr<<" robot.cnt_tar "<<robot.cnt_tar<<endl;
+//     cerr<<" robot.virtual_id "<<robot.virtual_id<<endl;
+//     cerr<<"next tar "<<next_tar<<" "<<dangerous_nums[istake][next_tar]<<endl;
+//     cerr<<dangerous_nums[0][robot .node_id]<<endl;
+//     cerr<<dangerous_nums[0][robot.cnt_tar]<<endl;
+//     cerr<<dangerous_nums[0][next_tar]<<endl;
+//     printPair(robot.pos);
+//     printPair(robot.virtual_pos);
+//     cerr<<"合法？："<<robot.is_illegal <<endl;
+//     cerr<<p1.second<<endl;
+//     cerr<<"可以到达？"<<check_can_arrival(istake,robot.close_node,robot.cnt_tar)<<" "<<robot.virtual_id<<endl;
+//     cerr<<" robot.cnt_tar "<<robot.cnt_tar<<endl;
+//     cerr<<robot.is_new_tar_ing<<endl;
+//     cerr<<ins_t.forward<<endl;
+//    }
      
     return ins_t;
 }
