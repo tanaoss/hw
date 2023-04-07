@@ -57,7 +57,7 @@ int main()
         // if(state.FrameID>start_time && state.FrameID<end_time &&cerr_flag_j){
         //     cerr<<" time "<<state.FrameID<<endl;
         // }
-        cerr<<" time "<<state.FrameID<<endl;
+        // cerr<<" time "<<state.FrameID<<endl;
         readStatusUntilOK() ;
         
         cout<<state.FrameID<<endl;

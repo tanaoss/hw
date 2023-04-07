@@ -813,7 +813,7 @@ void control(){
     //     cerr<<check_will_colloWithWall(robots[0])<<"\n";
     // }
     
-    // collision_solve(25);
+    collision_solve(25);
 
     // if(state.FrameID >= 5600 && state.FrameID < 5610) {
     //     cerr<<"~ins:"<<ins[2].forward<<"  "<<ins[2].rotate<<"\n";
@@ -3121,7 +3121,7 @@ Ins contr_one_rob_0(Robot& robot){
     }
     
     adjust_virtual_pos_total(robot);
-   print_cerr_flag_ta=true;
+   print_cerr_flag_ta=false;
     PayLoad payload=calPayload(robot,robot.virtual_pos);
     auto p1=get_w_now(robot,payload);
     if(gt(return_v(robot),0.8)&&robot.need_slow&&robot.need_adjust_statues){
@@ -3325,7 +3325,7 @@ pair<double,bool> get_w_now(const Robot& robot, const PayLoad& payload){
     if(!robot.need_adjust_statues){
         if(gt(payload.angle,0.25)){
             rateAngle_fabs=Pi;
-        }else if(gt(payload.angle,0.15)){
+        }else if(gt(payload.angle,0.2)){
             rateAngle_fabs=Pi/2;
         }else if(gt(payload.angle,0.075)){
             rateAngle_fabs=Pi/4;
@@ -3333,7 +3333,7 @@ pair<double,bool> get_w_now(const Robot& robot, const PayLoad& payload){
             rateAngle_fabs=Pi/8;
         }
     }else{
-        if(gt(payload.angle,0.15)){
+        if(gt(payload.angle,0.25)){
             rateAngle_fabs=Pi;
         }else if(gt(payload.angle,0.1)){
             rateAngle_fabs=Pi/3;
@@ -5946,11 +5946,11 @@ pair<double,bool> get_vir_w(Robot& robot,PayLoad& payload){
                 rateAngle_fabs=Pi/8;
             }
         }else{
-            if(gt(angle,0.4)){
+            if(gt(angle,0.3)){
                 rateAngle_fabs=Pi;
-            }else if(gt(angle,0.3)){
-                rateAngle_fabs=Pi/3;
             }else if(gt(angle,0.2)){
+                rateAngle_fabs=Pi/3;
+            }else if(gt(angle,0.1)){
                 rateAngle_fabs=Pi/4;
             }else{
                 rateAngle_fabs=Pi/8;
