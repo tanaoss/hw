@@ -471,7 +471,7 @@ double calAngle(pair<double, double> a, pair<double, double> b) {
 }
 
 double calAngle(pair<double, double> a) {
-
+    if(eq(calVectorSize(a), 0)) return 0;
     double angle = acos(a.first / calVectorSize(a));
     return lt(a.second, 0.0) ? 2 * Pi- angle: angle;
 }
@@ -3467,6 +3467,7 @@ Ins contr_one_rob(Robot& robot){
         Ins ins_t;
         ins_t.forward=0;
         ins_t.rotate=0;
+        robot.virtual_pos = robot.pos;
         return ins_t;
     }
     // if(robot.id==1){
@@ -4181,7 +4182,8 @@ void do_back(int id, pair<double, double> pos) {
             <<"\nback time:"<<time_back<<"\n";
     }
 
-    if(lt(time, time_back - 0.04)) {
+    
+    if(lt(time, time_back - 0.04) && gt(pay.speed, -linear_velocity[(robots[id].get_type != 0)])) {
         if(robots[id].get_type)
             ins[id].forward = 2.5;
         else
@@ -4249,13 +4251,7 @@ bool check_nead_slow_down(const Robot &ro, const Robot &ro_static, double mindis
     int cnt = 0;
     // int node2 = choose_close_node(is_take, ro_static.pos);
     if(tar == -1) {
-        for(int i = 0; i < studios.size(); ++i) {
-            if(!eq(dis_to_studios[i][is_take][node1], 10000)){
-                tar = i;
-                break;
-            }
-        }
-        if(tar == -1) return true;
+        return true;
     }
     // if(collision_cerr_flag) {
     //     cerr<<"###########\n"<<"mindis:"<<mindis<<"\n";
@@ -4288,13 +4284,16 @@ bool check_node_safe(int node_id, double mindis, const Robot &ro) {
     int tar = ro.target_id;
     int is_take = (ro.get_type != 0);
     int node1 = ro.close_node;
+    double dis, dis_pre;
 
     if(ro.target_id == -1) return true;
 
     while(next_node[tar][is_take][node1] != node1) {
         node1 = next_node[tar][is_take][node1];
-        if(le(calcuDis(exist_id[is_take][node1], ro.pos), mindis))
+        dis = calcuDis(exist_id[is_take][node1], ro.pos);
+        if(le(dis, mindis))
             return false;
+        // if(gt(dis, dis_pre)) return true;
         // if(collision_cerr_flag) {
         //     cerr<<"node"<<node1<<" ddd:"<< calcuDis(exist_id[is_take][node1], ro_static.pos) <<"\n";
         // }
@@ -4390,7 +4389,7 @@ int choose_best_to(Robot &ro, pair<double, double> pos) {
     //点在机器人中
     if(le(calcuDis(exist_id[is_take][to_max], ro.pos), ro.radius + 0.001)) {
         node_id = to_max;
-        dangerous = 1;
+        dangerous = 10;
         for(int i = 0; i < graph_edge[is_take][node_id].size(); ++i) {
             to = graph_edge[is_take][node_id][i].id;
             danger = dangerous_point[is_take].count(to);
