@@ -2749,7 +2749,7 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot& rob,Ins ins_in, int f
     cnt++;
     
     double seta=rob.direction;
-    double w=rob.angular_velocity==0?0.00001:rob.angular_velocity;
+    double w=rob.angular_velocity;
     double a=return_ac(pay.angular_acceleration,rob.angular_velocity,w_next);
     double changeAngle=get_at_v_limt(t,pay.angular_acceleration,rob.angular_velocity,w_next,pay.sign)*pay.sign;
     double v=Calculate_the_projection_speed(rob);
@@ -2845,7 +2845,7 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot& rob,int cnt,int tar,i
     // }
     cnt++;
     double seta=rob.direction;
-    double w=rob.angular_velocity==0?0.00001:rob.angular_velocity;
+    double w=rob.angular_velocity;
     double a=return_ac(pay.angular_acceleration,rob.angular_velocity,w_next);
     double changeAngle=get_at_v_limt(t,pay.angular_acceleration,rob.angular_velocity,w_next,pay.sign)*pay.sign;
     // if(state.FrameID==1){
@@ -5774,7 +5774,7 @@ bool can_trajectory_virpos_0(Robot rob,double v,int cnt){
             return false;
         }
         double seta=rob.direction;
-        double w=rob.angular_velocity==0?0.00001:rob.angular_velocity;
+        double w=rob.angular_velocity;
         double a=return_ac(pay.angular_acceleration,rob.angular_velocity,w_next);
         double changeAngle=get_at_v_limt(t,pay.angular_acceleration,rob.angular_velocity,w_next,pay.sign)*pay.sign;
         double v=Calculate_the_projection_speed(rob);
