@@ -55,20 +55,14 @@ int main()
      while (cin >> state.FrameID)
     {
         // if(state.FrameID>start_time && state.FrameID<end_time &&cerr_flag_j){
-        //     cerr<<" time "<<state.FrameID<<endl;
+            // cerr<<" time "<<state.FrameID<<endl;
         // }
         // cerr<<" time "<<state.FrameID<<endl;
 
         readStatusUntilOK() ;
-        // cerr<<"11\n";
         cout<<state.FrameID<<endl;
         if(count == 0)new_first_action();
         else new_robot_action();
-        // cerr<<"kk\n";
-        // if(state.FrameID == 4064) {
-        //     cerr<<robots[1].target_id<<endl;
-        // }
-
 
         control();
 
