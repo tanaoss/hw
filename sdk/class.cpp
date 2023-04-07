@@ -3711,7 +3711,7 @@ void collision_solve(int frame){
 
 
     // if(state.FrameID >= 5712 && state.FrameID <= 5712 && 999==999)
-        // collision_cerr_flag = true;
+        collision_cerr_flag = true;
 
 
     for(i = 0; i < 4; ++i)
@@ -3864,6 +3864,26 @@ void collision_solve(int frame){
             }
         }
 
+        if(ro[choose_id].target_id != -1 && ro[x].target_id != -1) {
+            int tar1 = ro[choose_id].target_id;
+            int tar2 = ro[x].target_id;
+            int is_take1 = (ro[choose_id].get_type != 0);
+            int is_take2 = (ro[x].get_type != 0);
+            int node1 = ro[choose_id].close_node;
+            int node2 = ro[x].close_node;
+            if(gt(dis_to_studios[tar2][is_take2][node2] - dis_to_studios[tar1][is_take1][node1], 20)) {
+                if(collision_cerr_flag) {
+                    cerr<<"change choose x\n";
+                    cerr<<dis_to_studios[tar1][is_take1][node1]<<"* x:"<<dis_to_studios[tar2][is_take2][node2]<<"\n";
+                }
+                vis[choose_id] = 0;
+                tmp = x;
+                x = choose_id;
+                choose_id = tmp;
+                vis[choose_id] = 1;
+            }
+        }
+
 
         ans = -1;
         dis = 10000;
@@ -3993,7 +4013,7 @@ void collision_solve(int frame){
                     // }
                     // else {
                         vis[x] = 1;
-                        ins[ro[x].id].forward = min(2.0, ins[ro[x].id].forward);
+                        ins[ro[x].id].forward = min(1.5, ins[ro[x].id].forward);
                         if(collision_cerr_flag) {
                             cerr<<"x 减速\n";
                             cerr<<"ins:"<<ins[ro[x].id].forward<<" "<<ins[ro[x].id].rotate<<"\n";
@@ -4376,6 +4396,7 @@ int choose_best_to(Robot &ro, pair<double, double> pos) {
             if(collision_cerr_flag) {
                     cerr<<"to_tmp:"<<to<<" dis:"<<calcuDis(pos, exist_id[is_take][to])<<" danger:"<<danger<<endl;
                     cerr<<"dis-rob:"<<calcuDis(exist_id[is_take][to], ro.pos)<<endl;
+                    cerr<<"dis-old:"<<dis_old<<"\n";
                     cerr<<ro.radius<<endl;
                     printPair(exist_id[is_take][to]);
             }
