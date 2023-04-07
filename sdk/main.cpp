@@ -58,6 +58,7 @@ int main()
         //     cerr<<" time "<<state.FrameID<<endl;
         // }
         // cerr<<" time "<<state.FrameID<<endl;
+        
         readStatusUntilOK() ;
         
         cout<<state.FrameID<<endl;
