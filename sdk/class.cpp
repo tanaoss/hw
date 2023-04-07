@@ -1346,9 +1346,9 @@ pair<pair<int,int>,double> new_pick_point(int robot_id,int state_type,int change
     int material_studio_id;
     int flag =0;
     int time = 0;
-    if(state.FrameID>14000){
-        flag=1;
-    }
+    // if(state.FrameID>14000){
+    //     flag=1;
+    // }
     // if(state_type == 1){
     //     // for(int i =0;i<studios.size();i++){
     //     //     if(studios[i].type<=3){
@@ -5528,6 +5528,11 @@ void init_data(){
         }
     }
     get_point_type();
+    for(int i=0;i<studios.size();i++){
+        int id=studios[i].node_id;
+        if(studios[i].has_suspicious_spots==1)
+            exist_id[0][id]=studios[i].pos;
+    }
 
 }
 void printMap(int f){
@@ -5876,7 +5881,7 @@ set<int> getEqID(int istake,int id1) {
 void setVirPos(Robot& robot){
     int tarID=robot.target_id;
     int istake=robot.get_type==0?0:1;
-
+    robot.cnt_tar=get_best_pos(robot);
     int now_id=robot.close_node;
     if(robot.cnt_tar==-1){
         robot.cnt_tar=robot.close_node;
