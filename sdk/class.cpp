@@ -3262,7 +3262,7 @@ Ins contr_one_rob_0(Robot& robot){
         //     robot.need_adjust_statues=true;
         // }
     // }
-print_cerr_flag_ta=true;
+print_cerr_flag_ta=false;
    if(print_cerr_flag_ta&&robot.id==print_rob_id&&state.FrameID>=3000&&state.FrameID<=5000){
     cerr<<" FrameID "<< state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
     cerr<<"forward: "<<ins_t.forward<<endl;
@@ -5438,7 +5438,7 @@ void adjust_virtual_pos_total(Robot& rob){
     }
     else if(state.FrameID!=1&&((rob.target_id_pre!=-1)&&(rob.target_id_pre!=rob.target_id))){
         rob.need_adjust_statues=true;
-        if(rob.id==0)cerr<<"target变化导致重新调整"<<endl;
+        // if(rob.id==0)cerr<<"target变化导致重新调整"<<endl;
         rob.adjust_pos=true;
         rob.adjust_w=true;
         rob.need_slow=true;
