@@ -4392,14 +4392,13 @@ int choose_best_to(Robot &ro, pair<double, double> pos) {
             if(graph_edge[is_take].count(to) == 0 || graph_edge[is_take][to].size() <= 1) continue;
             danger = dangerous_nums[is_take][to];
             tmp = calcuDis(pos, exist_id[is_take][to]);
-            if(gt(tmp, dis_old) && (danger < dangerous || gt(tmp, dis) && danger <= dangerous)) {
-                
-                if(collision_cerr_flag) {
-                    cerr<<"to_tmp:"<<to<<" dis:"<<calcuDis(pos, exist_id[is_take][to])<<endl;
+            if(collision_cerr_flag) {
+                    cerr<<"to_tmp:"<<to<<" dis:"<<calcuDis(pos, exist_id[is_take][to])<<" danger:"<<danger<<endl;
                     cerr<<"dis-rob:"<<calcuDis(exist_id[is_take][to], ro.pos)<<endl;
                     cerr<<ro.radius<<endl;
                     printPair(exist_id[is_take][to]);
-                }
+            }
+            if(gt(tmp, dis_old) && (danger < dangerous || gt(tmp, dis) && danger <= dangerous)) {
                 dis = tmp;
                 to_max = to;
                 dangerous = danger;
