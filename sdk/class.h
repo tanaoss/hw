@@ -496,4 +496,4 @@ void adjust_illegal_pos(Robot& robot);
 bool check_will_collison_wall(Robot& robot);
 void  select_the_standard_id(Robot& robot);
 void check_suspicious_spots(int studio_id);
-;
+bool empty_pos(const Robot& rob);

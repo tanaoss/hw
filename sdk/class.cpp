@@ -3427,8 +3427,8 @@ if(state.FrameID>13000)print_cerr_flag_ta=true;
         //     robot.need_adjust_statues=true;
         // }
     // }
-// print_cerr_flag_ta=true;
-   if(state.FrameID>=13466&&state.FrameID<=16600&&robot.id==1){
+print_cerr_flag_ta=false;
+   if(print_cerr_flag_ta&&state.FrameID>=13466&&state.FrameID<=16600&&robot.id==1){
     cerr<<"robot.id "<<robot.id<<endl;
     cerr<<" FrameID "<< state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
     cerr<<"forward: "<<ins_t.forward<<endl;
@@ -5645,10 +5645,18 @@ void adjust_virtual_pos_total(Robot& rob){
         //     cerr<<illegal_point[istake][rob.node_id]<<endl;
         //     cerr<<rob.node_id<<endl;
         // }
-      
+        int next_tar=next_node[rob.target_id][istake][rob.close_node];
+        if(empty_pos(rob)&&next_tar!=-1){
+            rob.virtual_pos=exist_id[istake][next_tar];
+            rob.virtual_id=next_tar;
+            rob.cnt_tar=next_tar;
+            // cerr<<"使用空白点代替了重置状态"<<endl;
+            // cerr<<"time"<<state.FrameID<<endl;
+            // cerr<<"机器人编号"<<rob.id<<endl;
+        }else{
             rob.is_new_tar_ing=true;
             rob.need_adjust_statues=true;
-        
+        }        
     }
     if(rob.need_collison){
             rob.need_adjust_statues=false;
@@ -5662,11 +5670,17 @@ void adjust_virtual_pos_total(Robot& rob){
     else if(state.FrameID!=1&&((rob.target_id_pre!=-1)&&(rob.target_id_pre!=rob.target_id))){
         rob.need_adjust_statues=true;
         // if(rob.id==0)cerr<<"target变化导致重新调整"<<endl;
-        rob.adjust_pos=true;
-        rob.adjust_w=true;
-        rob.need_slow=true;
-        rob.target_id_pre=rob.target_id;
-        init_rob_status(rob);
+        if(lt(return_v(rob),1)&&empty_pos(rob)){
+            rob.virtual_pos=exist_id[istake][next_tar];
+            rob.virtual_id=next_tar;
+            rob.cnt_tar=next_tar;
+        }else{
+            rob.adjust_pos=true;
+            rob.adjust_w=true;
+            rob.need_slow=true;
+            rob.target_id_pre=rob.target_id;
+            init_rob_status(rob);
+        }
         // if(rob.id==2)cerr<<0<<"\n";
     }else if(rob.need_adjust_statues){
         PayLoad pay=calPayload(rob,rob.virtual_pos);
@@ -6371,4 +6385,20 @@ void  select_the_standard_id(Robot& robot){
         cerr<<robot.node_id<<" --- "<<chose_id<<endl;
     }
     robot.node_id=chose_id;
+}
+bool empty_pos(const Robot& robot){
+    int id=robot.get_type==0?robot.close_node:robot.node_id;
+    int i=id/100,j=id%100;
+    double minDis=100;
+    int istake=robot.get_type==0?0:1;
+    int chose_id=id;
+    for(int i1=i-1;i1<=i+1;i1++){
+        for(int j1=j-1;j1<=j+1;j1++){
+            int tmpId=i1*100+j1;
+            if(illegal_point[istake][tmpId]||dangerous_point[istake][tmpId]){
+                return false;
+            }
+        }
+    }
+    return true;
 }
