@@ -3267,16 +3267,16 @@ Ins contr_one_rob_0(Robot& robot){
     if(robot.target_id==-1){
         ins_t.forward=0;
         ins_t.rotate=Pi;
-        cerr<<"-1返回"<<endl;
+        // cerr<<"-1返回"<<endl;
         return ins_t;
     }
     
     adjust_virtual_pos_total(robot);
 
 
-    if( state.FrameID>13372&&robot.id==1){
-        cerr<<robot.need_adjust_statues<<" rob "<<robot.id<<endl;
-    }
+    // if( state.FrameID>13372&&robot.id==1){
+    //     cerr<<robot.need_adjust_statues<<" rob "<<robot.id<<endl;
+    // }
 
     PayLoad payload=calPayload(robot,robot.virtual_pos);
     auto p1=get_w_now(robot,payload);
@@ -3427,7 +3427,7 @@ if(state.FrameID>13000)print_cerr_flag_ta=true;
         //     robot.need_adjust_statues=true;
         // }
     // }
-print_cerr_flag_ta=true;
+// print_cerr_flag_ta=true;
    if(state.FrameID>=13466&&state.FrameID<=16600&&robot.id==1){
     cerr<<"robot.id "<<robot.id<<endl;
     cerr<<" FrameID "<< state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
