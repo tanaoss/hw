@@ -3143,7 +3143,8 @@ Ins contr_one_rob_1(Robot& robot){
                 cerr<<"dis: "<<payload.distance<<"\n";
             }
             ins_t.rotate=p1.first;
-            if(lt(payload.distance,0.1)||(!dangerous_point[istake][robot.node_id])){
+            if(lt(payload.distance,0.1)||(!illegal_point[istake][robot.node_id]
+            &&!dangerous_point[istake][robot.node_id])){
                 robot.cnt_tar=ret_next(robot,robot.cnt_tar);
             if(robot.id==print_rob_id&&print_cerr_flag_ta){
                 cerr<<"完成姿势1，下一个目标\n";
@@ -3326,7 +3327,8 @@ if(state.FrameID>13000)print_cerr_flag_ta=true;
                 cerr<<" 偏差角 "<<payload.angle<<" "<<payload.sign<<"\n";
             }
             ins_t.rotate=p1.first;
-            if(lt(payload.distance,0.1)||(!dangerous_point[istake][robot.node_id])){
+             if(lt(payload.distance,0.1)||(!illegal_point[istake][robot.node_id]
+            &&!dangerous_point[istake][robot.node_id])){
                 robot.cnt_tar=ret_next(robot,robot.cnt_tar);
             if(robot.id==print_rob_id&&print_cerr_flag_ta1){
                 cerr<<"完成姿势1，下一个目标\n";
@@ -6349,7 +6351,7 @@ void get_point_type(){
             for(int i1=i-1;i1<=i+1;i1++){
                 for(int j1=j-1;j1<=j+1;j1++){
                     int tmpID=i1*100+j;
-                    if(i1<0||j1>99)continue;
+                     if(i1<0||j1>99||j1<0||i1>99)continue;
                     if(!illegal_point[0][id]&&exist_id[0].count(id)&&exist_id[0].count(tmpID)==0){
                         dangerous_point[0][id]=true;
                     }
@@ -6444,4 +6446,33 @@ bool  need_to_step_back(const Robot& rob){
     Vec v3(rob.xy_pos);
     if(lt(cos_t(v3,v2),0)&& gt(cos_t(v3,v1),0))return true;
     return false;
+}
+int get_best_pos(const Robot& robot){
+    int id=robot.cnt_tar;
+    int istake=robot.get_type==0?0:1;
+
+    if(!illegal_point[istake][id] &&!dangerous_point[istake][id]){
+        return id;
+    }
+    int i=id/100,j=id%100;
+    double minDis=100;
+    int now_id=robot.close_node;
+    int chose_id=id;
+    int tar=robot.target_id;
+    double cmpDis= dis_to_studios[tar][istake][now_id]+1.5;
+    int choseId=id;
+    for(int i1=i-1;i1<=i+1;i1++){
+        for(int j1=j-1;j1<=j+1;j1++){
+            if(i1<0||j1<0||i1>99||j1>99)continue;
+            int tmpID=i1*100;
+            if(!illegal_point[istake][id] &&!dangerous_point[istake][id]&&
+            check_can_arrival(istake,id,tmpID)&& lt(dis_to_studios[tar][istake][tmpID],cmpDis)
+            &&check_can_arrival(istake,now_id,tmpID)
+            ){
+                choseId= tmpID;
+                cmpDis=dis_to_studios[tar][istake][tmpID];
+            }
+        }
+    }
+    return choseId;
 }
