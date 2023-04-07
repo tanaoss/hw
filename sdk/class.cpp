@@ -3946,22 +3946,6 @@ void collision_solve(int frame){
                 else {
                     cerr<<"chose solution10:"<<ins[ro[choose_id].id].forward<<"**"<<ins[ro[choose_id].id].rotate<<"\n";
                 }
-
-                // if(state.FrameID == 3487){
-                //     cerr<<"-----------\n";
-                //     for(int t = 0; t<tra.size(); ++t){
-                //         if(state.FrameID+t>3600) break;
-                //         cerr<<state.FrameID+t;
-                //         cerr<<"pos:("<<tra[t].first<<", "<<tra[t].second<<")--("<<trajectory[x][t].first<<", "<<trajectory[x][t].second<<") dis:"<<calcuDis(trajectory[x][t], tra[t])<<"\n";
-                //     }
-                //     cerr<<"-----------\n";
-                // }
-                                
-                // updateIns(ro[choose_id].id, 7);
-                // int t = 1;
-                // cerr<<"pos:("<<tra[t].first<<", "<<tra[t].second<<")--("<<trajectory[x][t].first<<", "<<trajectory[x][t].second<<") dis:"<<calcuDis(trajectory[x][t], tra[t])<<"\n";
-                // cerr<<state.FrameID;
-                // cerr<<"pos:("<<ro[choose_id].pos.first<<", "<<ro[choose_id].pos.second<<")--("<<ro[x].pos.first<<", "<<ro[x].pos.second<<") dis:"<<calcuDis(ro[choose_id].pos, ro[x].pos)<<"\n";
             }
         }
         else {
@@ -3983,7 +3967,7 @@ void collision_solve(int frame){
                 }
                 double speed = calVectorProduct(ro[choose_id].xy_pos, subVector(ro[choose_id].pos, ro[x].pos));
                 if(collision_cerr_flag) {
-                    cerr<<"dis:"<<get_dis(ro[choose_id], ro[x])<<"\n";
+                    // cerr<<"dis:"<<get_dis(ro[choose_id], ro[x])<<"\n";
                     cerr<<"speed:"<<speed<<"\n";
                 }
                 if(ro[choose_id].target_id != ro[x].target_id && check_nead_slow_down(ro[x], ro[choose_id], mindis + 0.2, coll_time[choose_id][x]) && check_speed(ro[x], ro[choose_id], mindis)) {
@@ -3996,7 +3980,7 @@ void collision_solve(int frame){
                     //     }
                     // }
                     // else {
-                        
+                        vis[x] = 1;
                         ins[ro[x].id].forward = min(2.0, ins[ro[x].id].forward);
                         if(collision_cerr_flag) {
                             cerr<<"x 减速\n";
@@ -4007,6 +3991,7 @@ void collision_solve(int frame){
             }
             else if(check_nead_slow_down(ro[x], ro[choose_id], mindis  + 0.1, coll_time[choose_id][x])) {
                 // do_back(ro[x].id, ro[choose_id].pos);
+                vis[x] = 1;
                 ins[ro[x].id].forward = 0;
                 if(collision_cerr_flag){
                     cerr<<"choose not back\n";
@@ -4021,11 +4006,7 @@ void collision_solve(int frame){
                 //     speed_limit[choose_id] = 0;
             }
             else {
-                vis[choose_id] = 0;
-                coll_time[choose_id][x] = coll_time[x][choose_id] = 9000;
-                i--;
-                x = pre_x;
-                continue;
+                vis[x] = 1;
             }
             
             
