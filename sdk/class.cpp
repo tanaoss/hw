@@ -5711,8 +5711,8 @@ void Translation_graph_has(){
                 if((le(tmpDis,0.71)&&tmp.first==1)||(le(tmpDis,0.4)&&tmp.first!=0)){
                     double dis= (abs(i-(studios[t].node_id/100))+abs(j-(studios[t].node_id%100))==2)?pow(2,0.5):1;
                     studio_edge[1][t].push_back(Graph_node(tmpId,dis,studios[t].node_id));
-                       if((tmpId==5561&&studios[t].node_id==5460)||(studios[t].node_id==5561&&tmpId==5460))
-                    cerr<<"edge err --+---------"<<endl;
+                    //    if((tmpId==5561&&studios[t].node_id==5460)||(studios[t].node_id==5561&&tmpId==5460))
+                    // cerr<<"edge err --+---------"<<endl;
                  }
             }
         }
@@ -5772,8 +5772,8 @@ void getEdgeRalative(){
                 if(isInCorner&&isSlope&&(exist_id[1].count(SlopeCheckId1)||exist_id[1].count(SlopeCheckId2))){
 
                 }else if(isSlope&&exist_id[1].count(tmpId)&&it.first!=tmpId&&check_slope(tmpId,it.first)){
-                                if((tmpId==5561&&it.first==5460)||(it.first==5561&&tmpId==5460))
-                    cerr<<"edge err -----------"<<endl;
+                    //             if((tmpId==5561&&it.first==5460)||(it.first==5561&&tmpId==5460))
+                    // cerr<<"edge err -----------"<<endl;
                     double dis= (abs(i-idi)+abs(j-idj)==2)?pow(2,0.5):1;
                     graph_edge[1][it.first].push_back(Graph_node(tmpId,dis,it.first));
                 }else if(!isSlope&&exist_id[1].count(tmpId)&&(exist_id_type[1][tmpId]==1||exist_id_type[1][it.first]==1)){
