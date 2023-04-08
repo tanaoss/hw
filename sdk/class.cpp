@@ -4223,6 +4223,7 @@ void collision_solve(int frame){
         // }
 
         vis[choose_id] = 1;
+        vis[x] = 1;
 
         
         vector<int>::iterator it = find(coll[choose_id].begin(), coll[choose_id].end(), x);
@@ -4457,7 +4458,7 @@ int get_avoid_node(const Robot &ro_back, const Robot &ro_go, double mindis) {
     unordered_map<int, int> vis_node;
     unordered_map<int, int> pre_node;
     unordered_map<int, double> angle_node;
-    bool cerr_flag = true;
+    
 
     is_take = (ro_back.get_type != 0);
     q.push(Graph_node{node, 0, node});
@@ -4477,12 +4478,12 @@ int get_avoid_node(const Robot &ro_back, const Robot &ro_go, double mindis) {
         if (check_node_safe(from, is_take, mindis, ro_go) && gt(calcuDis(exist_id[is_take][to], ro_back.pos), ro_back.radius))
         {
             to = from;
+            if (collision_cerr_flag) {
+                cerr << "safeto:" << to << "\n";
+            }
             while (pre_node[to] != to)
             {
                 if (pre_node[to] == node){
-                    if(cerr_flag) {
-                        cerr<<"safeto:"<<to<<"\n";
-                    }
                     return to;
                 }     
                 to = pre_node[to];
@@ -4554,6 +4555,8 @@ bool do_avoid(const Robot &ro_stop, const Robot &ro_go, double mindis) {
     time_back = get_rotation_stop_time(ro_stop, pay_back);
 
     if(collision_cerr_flag) {
+        cerr<<"to:"<<to<<"\n";
+        printPair(exist_id[is_take][to]);
         cerr<<"forward angle:"<<pay.angle<<"*"<<pay.sign
             <<"\ntime:"<<time
             <<"\nback angle:"<<pay_back.angle<<"*"<<pay_back.sign
@@ -4561,10 +4564,14 @@ bool do_avoid(const Robot &ro_stop, const Robot &ro_go, double mindis) {
     }
 
     if(lt(time, time_back - 0.04)) {
-        if(ro_stop.get_type)
-            ins[id].forward = 2.5;
-        else
-            ins[id].forward = 4;
+        if(lt(pay.angle, Pi / 2)) {
+            if(ro_stop.get_type)
+                ins[id].forward = 2.5;
+            else
+                ins[id].forward = 4;
+        }
+        else ins[id].forward = 0;
+        
         ins[id].rotate = get_w_now(ro_stop, pay).first;
     }
     else {
@@ -4573,6 +4580,10 @@ bool do_avoid(const Robot &ro_stop, const Robot &ro_go, double mindis) {
         if(le(payloads[id].speed, linear_velocity[(ro_stop.get_type != 0)])) {
             ins[id].rotate = get_w_now(ro_stop, pay).first;
         }
+    }
+
+    if (check_node_safe(ro_stop.close_node, ro_stop.get_type != 0, mindis, ro_go)) {
+        ins[ro_go.id].forward = min(1.5, ins[ro_go.id].forward);
     }
     return true;
 }
