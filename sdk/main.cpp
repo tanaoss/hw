@@ -13,7 +13,9 @@ extern int start_time;
 extern int end_time;
 
 
-void mock_fram_skip(){
+
+
+void mock_fram_skip_after(){
     int money;
     string line;
     cin >> money;
@@ -38,11 +40,11 @@ void mock_fram_skip(){
         }
     }
     cin >> line;
-    if (line[0] == 'O' && line[1] == 'K')
-    {
-        cout<<state.FrameID<<endl;
-        out_put();
-    }
+    // if (line[0] == 'O' && line[1] == 'K')
+    // {
+    //     cout<<state.FrameID<<endl;
+    //     out_put();
+    // }
 }
 
 int main()
@@ -103,10 +105,25 @@ int main()
         //     continue;
         // }
 
+        // if(state.FrameID == 96 
+        //     || state.FrameID == 98
+        //     || state.FrameID == 100
+        //     || state.FrameID == 2726
+        //     || state.FrameID == 2760
+        //     || state.FrameID == 2852
+        //     || state.FrameID == 8423) {
+        //         mock_fram_skip_after();
+        // }
+
+        // else readStatusUntilOK() ;
+
         readStatusUntilOK() ;
         cout<<state.FrameID<<endl;
         if(count == 0)new_first_action();
         else new_robot_action();
+
+
+        
 
         control();
 
