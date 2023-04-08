@@ -73,6 +73,7 @@ vector<pair<double,double>>arri_Set;
 double Compute_redundancy=0;
 Ins ins_set[8];
 unordered_map<int,vector<Graph_node>> graph_edge[2];//点id的边集
+unordered_map<int,vector<Graph_node>> studio_edge[2];//studios edge
 unordered_map<int,pair<double,double>> exist_id[2];//确定存在的id，便于建立边关系
 unordered_map<int,int> exist_id_type[2];//确定存在的点的关系
 unordered_map<int,int> stu_transID;//建立工作台id与转换后id的关系
@@ -5366,24 +5367,26 @@ void Translation_graph_no(){
                 int id=100*i+j;
                 auto pos=make_pair<double,double>(0.5*j,0.5*i+0.5);
                 exist_id[0][id]=pos;
-                for(int t=0;t<studios.size();t++){
-                    double tmpDis=calcuDis(studios[t].pos,pos);
-                    int id1=studios[t].node_id;
-                    int i1=id1/100,j1=id1%100;
-                    bool isSlope=  (fabs(i1-i)+fabs(j1-j)==2)?true:false;
-                    bool con1= isSlope?check_slope(id,id1):true;
-                    if((isSlope&&le(tmpDis,0.71) ||le(tmpDis,0.5))&&id!=studios[t].node_id&&con1){
-                    //     if((id==5359&&studios[t].node_id==5458)||(studios[t].node_id==5359&&id==5458))
-                    // cerr<<"edge err -----------"<<endl;
-                        double dis= (abs(i-(studios[t].node_id/100))+abs(j-(studios[t].node_id%100))==2)?pow(2,0.5):1;
-                        graph_edge[0][id].push_back(Graph_node(studios[t].node_id,dis,id));
-                        graph_edge[0][studios[t].node_id].push_back(Graph_node(id,dis,studios[t].node_id));
-                        // if(t==0)cerr<<graph_edge[0][studios[t].node_id].size()<<"\n";
-                    }
-                }
-        
             }
         }
+    }
+    for(int t=0;t<studios.size();t++){
+        int id1=studios[t].node_id;
+        int i1=id1/100,j1=id1%100;
+        for(int i=i1-1;i<=i1+1;i++){
+            for(int j=j1-1;j<=j1+1;j++){
+                if(i<0||j<0||i>99||j>99)continue;
+                if(i==i1&&j==j1)continue;
+                int tmpId=i*100+j;
+                bool isSlope=  (fabs(i1-i)+fabs(j1-j)==2)?true:false;
+                bool con1= isSlope?check_slope(tmpId,id1):true;
+                if((!isSlope||con1)&&exist_id[0].count(tmpId)){
+                    double dis= (abs(i-(studios[t].node_id/100))+abs(j-(studios[t].node_id%100))==2)?pow(2,0.5):1;
+                    studio_edge[0][t].push_back(Graph_node(tmpId,dis,studios[t].node_id));
+                 }
+            }
+        }
+       
     }
 }
 void Translation_graph_has(){
@@ -5394,20 +5397,24 @@ void Translation_graph_has(){
             int id=100*i+j;
             if(tmp.first!=0){
                 exist_id_type[1][id]=tmp.first;
-                exist_id[1][id]=tmp.second;
-                for(int t=0;t<studios.size();t++){
-                    double tmpDis=calcuDis(studios[t].pos,pos);
-                    int id1=studios[t].node_id;
-                    int i1=id1/100,j1=id1%100;
-                    bool isSlope=  (fabs(i1-i)+fabs(j1-j)==2)?true:false;
-                    bool con1= isSlope?check_slope(id,id1):true;
-                    if(((le(tmpDis,0.71)&&tmp.first==1)||le(tmpDis,0.4))&&id!=studios[t].node_id&&con1){
-                        double dis= (abs(i-(studios[t].node_id/100))+abs(j-(studios[t].node_id%100))==2)?pow(2,0.5):1;
-                        graph_edge[1][id].push_back(Graph_node(studios[t].node_id,dis,id));
-                        graph_edge[1][studios[t].node_id].push_back(Graph_node(id,dis,studios[t].node_id));
-                    }
-                }
-           
+                exist_id[1][id]=tmp.second; 
+            }
+        }
+    }
+    for(int t=0;t<studios.size();t++){
+        int id1=studios[t].node_id;
+        int i1=id1/100,j1=id1%100;
+        for(int i=i1-1;i<=i1+1;i++){
+            for(int j=j1-1;j<=j1+1;j++){
+                if(i<0||j<0||i>99||j>99)continue;
+                if(i==i1&&j==j1)continue;
+                int tmpId=i*100+j;
+                bool isSlope=  (fabs(i1-i)+fabs(j1-j)==2)?true:false;
+                bool con1= isSlope?check_slope(tmpId,id1):true;
+                if((!isSlope||con1)&&exist_id[1].count(tmpId)){
+                    double dis= (abs(i-(studios[t].node_id/100))+abs(j-(studios[t].node_id%100))==2)?pow(2,0.5):1;
+                    studio_edge[1][t].push_back(Graph_node(tmpId,dis,studios[t].node_id));
+                 }
             }
         }
     }    
@@ -5524,10 +5531,21 @@ void Dijkstra(int studio_id, int is_take) {
         dis_to_studios[studio_id][is_take][i] = 10000;
     }
 
-    q.push(Graph_node(s, 0, s, 0, 0));
+    // q.push(Graph_node(s, 0, s, 0, 0));
     dis_to_studios[studio_id][is_take][s] = 0;
     next_node[studio_id][is_take][s] = s;
+    vis_node[s] = 1;
     // danger_node[s] = 0;
+
+    num = studio_edge[is_take][studio_id].size();
+    for(i = 0; i < num; ++i) {
+        to = studio_edge[is_take][studio_id][i].id;
+        dis = studio_edge[is_take][studio_id][i].dis;
+        q.push(Graph_node{to, dis, s, 0});
+        next_node[studio_id][is_take][to] = s;
+        dis_to_studios[studio_id][is_take][to] = dis;
+        angle_node[to] = 0;
+    }
     
     while(!q.empty()) {
         Graph_node now_node = q.top();
@@ -5630,39 +5648,39 @@ int trans_pos_to_nodeID(int robot_id) {
 // }
 
 
-// void print_dijkstra(int studio_id, int is_take, int is_path) {
-//     for(int i = 0; i < 100; ++i) {
-//         for(int j = 0; j< 100; ++j) {
-//             if(is_path) {
-//                 if(next_node[studio_id][is_take][(99-i) * 100 +j] == -1)
-//                     cerr<<"- ";
-//                 else if(next_node[studio_id][is_take][(99-i) * 100 +j] == (99-i) * 100 +j + 1)
-//                     cerr<<"→ ";
-//                 else if(next_node[studio_id][is_take][(99-i) * 100 +j] == (99-i) * 100 +j -1)
-//                     cerr<<"← ";
-//                 else if(next_node[studio_id][is_take][(99-i) * 100 +j] == (99-(i+1)) * 100 +j)
-//                     cerr<<"↓ ";
-//                 else if(next_node[studio_id][is_take][(99-i) * 100 +j] == (99-(i-1)) * 100 +j)
-//                     cerr<<"↑ ";
-//                 else if(next_node[studio_id][is_take][(99-i) * 100 +j] == (99-(i+1)) * 100 +j-1)
-//                     cerr<<"↙️ ";
-//                 else if(next_node[studio_id][is_take][(99-i) * 100 +j] == (99-(i+1)) * 100 +j+1) 
-//                     cerr<<"↘️ ";
-//                 else if(next_node[studio_id][is_take][(99-i) * 100 +j] == (99-(i-1)) * 100 +j+1) 
-//                     cerr<<"↗️ ";
-//                 else if(next_node[studio_id][is_take][(99-i) * 100 +j] == (99-(i-1)) * 100 +j-1) 
-//                     cerr<<"↖️ ";
-//                 else if(next_node[studio_id][is_take][(99-i) * 100 +j] == (99-i) * 100 +j)
-//                     cerr<<"* ";
-//                 else cerr<<(99-i) * 100 +j<<"-"<<next_node[studio_id][is_take][(99-i) * 100 +j]<<" ";
+void print_dijkstra(int studio_id, int is_take, int is_path) {
+    for(int i = 0; i < 100; ++i) {
+        for(int j = 0; j< 100; ++j) {
+            if(is_path) {
+                if(next_node[studio_id][is_take][(99-i) * 100 +j] == -1)
+                    cerr<<"- ";
+                else if(next_node[studio_id][is_take][(99-i) * 100 +j] == (99-i) * 100 +j + 1)
+                    cerr<<"→ ";
+                else if(next_node[studio_id][is_take][(99-i) * 100 +j] == (99-i) * 100 +j -1)
+                    cerr<<"← ";
+                else if(next_node[studio_id][is_take][(99-i) * 100 +j] == (99-(i+1)) * 100 +j)
+                    cerr<<"↓ ";
+                else if(next_node[studio_id][is_take][(99-i) * 100 +j] == (99-(i-1)) * 100 +j)
+                    cerr<<"↑ ";
+                else if(next_node[studio_id][is_take][(99-i) * 100 +j] == (99-(i+1)) * 100 +j-1)
+                    cerr<<"↙️ ";
+                else if(next_node[studio_id][is_take][(99-i) * 100 +j] == (99-(i+1)) * 100 +j+1) 
+                    cerr<<"↘️ ";
+                else if(next_node[studio_id][is_take][(99-i) * 100 +j] == (99-(i-1)) * 100 +j+1) 
+                    cerr<<"↗️ ";
+                else if(next_node[studio_id][is_take][(99-i) * 100 +j] == (99-(i-1)) * 100 +j-1) 
+                    cerr<<"↖️ ";
+                else if(next_node[studio_id][is_take][(99-i) * 100 +j] == (99-i) * 100 +j)
+                    cerr<<"* ";
+                else cerr<<(99-i) * 100 +j<<"-"<<next_node[studio_id][is_take][(99-i) * 100 +j]<<" ";
                     
-//             }
-//             else 
-//                 cerr<<setw(10)<<dis_to_studios[studio_id][is_take][(99-i) * 100 +j]<<" ";
-//         }
-//         cerr<<"\n";
-//     }
-// }
+            }
+            else 
+                cerr<<setw(10)<<dis_to_studios[studio_id][is_take][(99-i) * 100 +j]<<" ";
+        }
+        cerr<<"\n";
+    }
+}
 
 bool is_corner(int id){
     int i=id/100;
