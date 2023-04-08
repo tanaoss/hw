@@ -3253,13 +3253,7 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,Ins ins_in, int fo
         Ins ins=contr_one_rob(rob);
         // cerr<<"kkk";
         PayLoad pay=calPayload(rob,rob.virtual_pos);
-        //倒退中
-        if(forward_change && ins_in.forward == -2 && le(pay.speed, 0)) {
-            //更新virtual_pos
-            pay=calPayload(rob, trans_nodeID_to_pos(next_node[rob.target_id][(rob.get_type != 0)][rob.node_id]));
-            ins.rotate = pay.sign * Pi;
-        }
-
+        
         Flag_sumulate=0;
         double w_next=ins.rotate;
         double v_next=ins.forward;
@@ -4252,6 +4246,7 @@ void collision_solve(int frame){
         }
 
         if(ro[choose_id].target_id != -1 && ro[x].target_id != -1) {
+            //离目标台更远的躲避
             int tar1 = ro[choose_id].target_id;
             int tar2 = ro[x].target_id;
             int is_take1 = (ro[choose_id].get_type != 0);
