@@ -117,6 +117,20 @@ void initrobotInfo() {
     }
     ins_set[3].forward = 0;
     ins_set[4].forward = -2;
+
+
+    // int tar1 = 1;
+    // int tar2 = 7;
+    // int is_take1 = 0;
+    // int is_take2 = 1;
+    // int node1 = choose_close_node(1, make_pair(28.27 , 21.19));
+    // int node2 = choose_close_node(1, make_pair(28.53, 22.73));
+    // cerr << "nodeid: " << choose_close_node(1, make_pair(28.53, 22.73)) << "\n";
+    // cerr << dis_to_studios[tar1][is_take1][node1] << "* x:" << dis_to_studios[tar2][is_take2][node2] << "\n";
+    // if (gt(dis_to_studios[tar2][is_take2][node2] - dis_to_studios[tar1][is_take1][node1], 20))
+    // {
+    //     cerr << "change choose x\n";
+    // }
 }
 void init_studio_parameter(){
     int studio_id;
@@ -1305,7 +1319,7 @@ void check_suspicious_spots(int studio_id){
             dist2 = dis_to_studios[studio_id][1][x*100+y];
             if(eq(dist2,10000))continue;
             if(lt(dist1,1.5) &&gt(dist2,8)){
-                cerr<<"studio : "<<studio_id<<"dist1 = "<<dist1<<"dist2 = "<<dist2<<" x offset : "<<(x-i)<<" y offset : "<<(y-j)<<endl;
+                // cerr<<"studio : "<<studio_id<<"dist1 = "<<dist1<<"dist2 = "<<dist2<<" x offset : "<<(x-i)<<" y offset : "<<(y-j)<<endl;
                 studios[studio_id].suspicious_spots.push_back(x*100+y);
                 studios[studio_id].has_suspicious_spots = 1;
             }
@@ -4416,7 +4430,7 @@ double get_dis(const Robot &ro1, const Robot &ro2) {
 
 int choose_close_node(int is_take, pair<double, double> pos) {
     int close_node = -1;
-    double dis, tmp;
+    double dis, tmp, dis_to_tar;
     int node_id = trans_pos_to_nodeID(pos);
     dis = 10000;
     // cerr<<node_id<<":";
