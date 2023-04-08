@@ -277,6 +277,44 @@ void init_studio_parameter(){
             }
         }
     }
+    for(int i=4;i<=7;i++){
+        int count = 0;
+        int j;
+        // cerr<<"type : "<<i<<" size "<<studios_type[i].size()<<endl;
+        for(j=0;j<studios_type[i].size();j++){
+            count = 0;
+            // cerr<<"num : "<<studio_material[studios[studios_type[i][j]].type-4][0]<<endl;
+            for(int k=1;k<=studio_material[studios[studios_type[i][j]].type-4][0];k++){
+                // cerr<<studios[studios[studios_type[i][j]].material_studios[k-1][0]].type<<endl;
+                // cerr<<"size = "<<studios[studios_type[i][j]].material_studios[k-1].size()<<endl;
+                if(studios[studios_type[i][j]].material_studios[k-1].size()==0){
+                    // cerr<<"dd"<<endl;
+                    studios[studios_type[i][j]].can_produce = false;
+                    break;
+                }
+                if(studios[studios_type[i][j]].type==7){
+                    for(int m = 0;m<studios[studios_type[i][j]].material_studios[k-1].size();m++){
+                        if(studios[studios[studios_type[i][j]].material_studios[k-1][m]].can_produce==true){
+                            count++;
+                            break;
+                        }
+                    }
+                }
+                else {
+                    count++;
+                }
+            }
+            // cerr<<count<<endl;
+            if(count == studio_material[studios[studios_type[i][j]].type-4][0]){
+                studios[studios_type[i][j]].can_produce = true;
+            }
+            else{
+                studios[studios_type[i][j]].can_produce = false;
+            }
+            // cerr<<" studio "<<studios_type[i][j]<<" type "<<i<<"can produce "<<studios[studios_type[i][j]].can_produce<<endl;
+        }
+        
+    }
 
 }
 
@@ -1507,7 +1545,7 @@ pair<pair<int,int>,double> new_pick_point(int robot_id,int state_type,int change
                             cerr<<"mmm"<<studios[i].material_studios[j-1].size()<<endl;
                         }
                         for(int k=0;k<studios[i].material_studios[j-1].size();k++){
-                            cerr<<""<<endl;
+                            // cerr<<""<<endl;
                             material_studio_id = studios[i].material_studios[j-1][k];
                             if(state.FrameID>start_time&&state.FrameID<end_time&&cerr_flag_j){
                                 cerr << "studio : " << i << " material : " << material_studio_id << " r_id = " << studios[material_studio_id].r_id << " pstatus " << studios[material_studio_id].pStatus << "\n";
@@ -6048,7 +6086,7 @@ void print_dijkstra(int studio_id, int is_take, int is_path) {
             else 
                 cerr<<setw(10)<<dis_to_studios[studio_id][is_take][(99-i) * 100 +j]<<" ";
         }
-        cerr<<"\n";
+        // cerr<<"\n";
     }
 }
 
