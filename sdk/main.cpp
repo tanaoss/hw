@@ -34,10 +34,10 @@ int main()
     }
     
     // cerr<<studios[10].node_id<<endl;
-    // print_dijkstra(1, 0, 1);
-    // for(int i = 0; i < 4; ++i) {
-    //     Dijkstra(i, 0, 1);
-    // }
+    // print_dijkstra(7, 1, 1);
+    // cerr<<"\n";
+    // print_dijkstra(7, 1, 0);
+    
     // cerr<<studios[12].node_id<<endl;
     // printPath(1, 0, 12, 1);
     // floyd();
@@ -58,6 +58,14 @@ int main()
             // cerr<<" time "<<state.FrameID<<endl;
         // }
         // cerr<<" time "<<state.FrameID<<endl;
+        // if(state.FrameID == 95 
+        //     || state.FrameID == 97
+        //     || state.FrameID == 2725
+        //     || state.FrameID == 2759
+        //     || state.FrameID == 2851
+        //     || state.FrameID == 8422) {
+        //     mock_fram_skip();
+        // }
 
         readStatusUntilOK() ;
         cout<<state.FrameID<<endl;
@@ -77,6 +85,37 @@ int main()
     }
     return 0;
    
+}
+
+void mock_fram_skip(){
+    int money;
+    string line;
+    cin >> money;
+    cin.ignore();
+    int K;
+    cin >> K;
+    cin.ignore();
+    while (K--)
+    {
+        vector<double> tmp(6, 0);
+        for (int i = 0; i < tmp.size(); i++)
+        {
+            cin >> tmp[i];
+        }
+    }
+    for (int i = 0; i < 4; i++)
+    {
+        vector<double> tmp(10, 0);
+        for (int i = 0; i < tmp.size(); i++)
+        {
+            cin >> tmp[i];
+        }
+    }
+    cin >> line;
+    if (line[0] == 'O' && line[1] == 'K')
+    {
+        out_put();
+    }
 }
 
 // ./Robot -f -m maps/4.txt -c ./sdk "./main" 2>1.txt
