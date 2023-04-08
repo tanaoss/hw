@@ -56,10 +56,9 @@ int graph[100][100];
 int sum_matrix[2][100][100];
 int product_time[8];
 int last_message[4][4];
-int last_message[4][4];
+
 // int graphs[2][100][100];
 // int target_sequence[2][500][500];
-int wail[101][101];
 int wail[101][101];
 // double dis_area[2][500][500];
 // double studio_dis[2][50][50];
@@ -76,7 +75,6 @@ vector<pair<double,double>>arri_Set;
 double Compute_redundancy=0;
 Ins ins_set[8];
 unordered_map<int,vector<Graph_node>> graph_edge[2];//点id的边集
-unordered_map<int,vector<Graph_node>> studio_edge[2];//studios edge
 unordered_map<int,vector<Graph_node>> studio_edge[2];//studios edge
 unordered_map<int,pair<double,double>> exist_id[2];//确定存在的id，便于建立边关系
 unordered_map<int,int> exist_id_type[2];//确定存在的点的关系
