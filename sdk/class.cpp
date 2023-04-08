@@ -3454,11 +3454,11 @@ Ins contr_one_rob_1(Robot& robot){
         return ins_t;
     }
     bool print_cerr_flag_ta1=false;
-    if( state.FrameID>600&&state.FrameID<820){
-        // cerr<<robot.need_adjust_statues<<" rob "<<robot.id<<endl;
-        print_cerr_flag_ta1=true;
-        print_rob_id=1;
-    }
+    // if( state.FrameID>600&&state.FrameID<820){
+    //     // cerr<<robot.need_adjust_statues<<" rob "<<robot.id<<endl;
+    //     print_cerr_flag_ta1=true;
+    //     print_rob_id=1;
+    // }
     adjust_virtual_pos_total(robot);
     PayLoad payload=calPayload(robot,robot.virtual_pos);
     auto p1=get_w_now(robot,payload);
@@ -4686,7 +4686,7 @@ bool check_nead_slow_down(const Robot &ro, const Robot &ro_static, double mindis
     //     cerr<<"###########\n"<<"mindis:"<<mindis<<"\n";
     //     cerr<<ro.id<<"\n";
     // }
-    while(next_node[tar][is_take][node1] != node1) {
+    while(next_node[tar][is_take][node1] != -1) {
         node1 = next_node[tar][is_take][node1];
         cnt++;
         if(lt(calcuDis(exist_id[is_take][node1], ro_static.pos), mindis))
