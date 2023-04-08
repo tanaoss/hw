@@ -2969,8 +2969,8 @@ bool checkNearBar(const pair<double,double> &a, double radius){
         dis = sqrt(radius2 - dis1 * dis1);
         y1 = a.second - dis;
         y2 = a.second + dis;
-        y_min = (int)(y1 / 0.5);
-        y_max = (int)(y2 / 0.5);
+        y_min = max(0, (int)(y1 / 0.5));
+        y_max = min(100, (int)(y2 / 0.5));
 
         for(j = y_min; j <= y_max; ++j) {
             if(graph[j][i] == -2)
@@ -3919,7 +3919,7 @@ void collision_solve(int frame){
 
 
     // if(state.FrameID >= 5712 && state.FrameID <= 5712 && 999==999)
-        collision_cerr_flag = false;
+        // collision_cerr_flag = true;
 
 
     for(i = 0; i < 4; ++i)
@@ -4213,7 +4213,9 @@ void collision_solve(int frame){
                     // cerr<<"dis:"<<get_dis(ro[choose_id], ro[x])<<"\n";
                     cerr<<"speed:"<<speed<<"\n";
                 }
-                if(ro[choose_id].target_id != ro[x].target_id && check_nead_slow_down(ro[x], ro[choose_id], mindis + 0.2, coll_time[choose_id][x]) && check_speed(ro[x], ro[choose_id], mindis)) {
+                if(ro[choose_id].target_id != ro[x].target_id
+                     && check_nead_slow_down(ro[x], ro[choose_id], mindis + 0.2, coll_time[choose_id][x]) 
+                     && check_speed(ro[x], ro[choose_id], mindis)) {
                     vis[x] = 1;
                     // if(le(fabs(get_dis(ro[choose_id], ro[x])), 4) && gt(speed, -1)){
                     //     do_back(ro[x].id, ro[choose_id].pos);
@@ -4359,6 +4361,54 @@ void collision_solve(int frame){
 //     return false;
 // }
 
+int check_avoid(const Robot &ro_back, const Robot &ro_go, double mindis) {
+    int node = ro_back.close_node;
+    priority_queue<Graph_node, vector<Graph_node>, cmp_Graph_node> q;
+    int from, pre_id, num, i, to, is_take;
+    double dis, new_dis, angle_sum;
+    int s, danger_sum;
+    unordered_map<int, int> vis_node;
+    unordered_map<int, int> pre_node;
+    unordered_map<int, double> angle_node;
+    bool cerr_flag = false;
+    q.push(Graph_node{node, 0, node});
+    while(!q.empty()) {
+        Graph_node now_node = q.top();
+        q.pop();
+        if(vis_node[now_node.id]) continue;
+        from = now_node.id;
+        dis = now_node.dis;
+        pre_id = now_node.pre_id;
+        vis_node[now_node.id] = 1;
+        pre_node[from] = pre_id;
+
+        if (check_node_safe(from, mindis, ro_go))
+        {
+            to = from;
+            while (pre_node[to] != to)
+            {
+                if (pre_node[to] == node)
+                    return to;
+                to = pre_node[to];
+            }
+        }
+
+        num = graph_edge[is_take][from].size();
+        if(cerr_flag) {
+            cerr<<"node_id:"<<from<<" dis:"<<dis<<" pre_id:"<<pre_id<<"danger_sum:"<<now_node.dangerous_sum<<"\n";
+            cerr<<"edge-num:"<<num<<"\n";
+        }
+        for(i = 0; i < num; ++i) {
+            to = graph_edge[is_take][from][i].id;
+            if(vis_node.count(to) || to == pre_id) continue;
+            if(le(calcuDis(exist_id[is_take][to], ro_go.pos), mindis)) continue;
+            angle_sum = now_node.angle_sum + calAngleToDis(pre_id, from, to);
+            new_dis = dis + graph_edge[is_take][from][i].dis;
+            q.push(Graph_node{to, new_dis, from, angle_sum});
+        }
+    }
+    return -1;
+}
 
 void updateIns(int id, int i) {
     if(i<3) {
@@ -4392,8 +4442,9 @@ double get_rotation_stop_time(const Robot &ro, PayLoad pay) {
 }
 
 
-void do_back(int id, pair<double, double> pos) {
+bool do_back(int id, pair<double, double> pos) {
     int to = choose_best_to(robots[id], pos);
+    if(to == -1) return false;
     pair<double, double> to_pos = exist_id[(robots[id].get_type != 0)][to];
     PayLoad pay_back = calPayload_back(robots[id], to_pos);
     PayLoad pay = calPayload(robots[id], to_pos);
@@ -4427,7 +4478,7 @@ void do_back(int id, pair<double, double> pos) {
             ins[id].rotate = get_w_now(robots[id], pay).first;
         }
     }
-
+    return true;
 }
 
 PayLoad calPayload_back(Robot robot, pair<double, double> virtual_pos) {
@@ -4516,23 +4567,25 @@ bool check_nead_slow_down(const Robot &ro, const Robot &ro_static, double mindis
     return false;
 }
 
-// bool check_node_safe(int node_id, double mindis, const Robot &ro) {
-//     int tar = ro.target_id;
-//     int is_take = (ro.get_type != 0);
-//     int node1 = ro.close_node;
+bool check_node_safe(int node_id, double mindis, const Robot &ro) {
+    int tar = ro.target_id;
+    int is_take = (ro.get_type != 0);
+    int node1 = ro.close_node;
 
-//     if(ro.target_id == -1) return true;
+    if(ro.target_id == -1) return true;
 
-//     while(next_node[tar][is_take][node1] != node1) {
-//         node1 = next_node[tar][is_take][node1];
-//         if(le(calcuDis(exist_id[is_take][node1], ro.pos), mindis))
-//             return false;
-//         // if(collision_cerr_flag) {
-//         //     cerr<<"node"<<node1<<" ddd:"<< calcuDis(exist_id[is_take][node1], ro_static.pos) <<"\n";
-//         // }
-//     }
-//     return true;
-// }
+    while(next_node[tar][is_take][node1] != node1) {
+        node1 = next_node[tar][is_take][node1];
+        if(le(calcuDis(exist_id[is_take][node1], ro.pos), mindis))
+            return false;
+        // if(collision_cerr_flag) {
+        //     cerr<<"node"<<node1<<" ddd:"<< calcuDis(exist_id[is_take][node1], ro_static.pos) <<"\n";
+        // }
+    }
+    return true;
+}
+
+
 
 
 double get_dis(const Robot &ro1, const Robot &ro2) {
@@ -4623,7 +4676,7 @@ int choose_best_to(Robot &ro, pair<double, double> pos) {
             dangerous = danger;
         }
     }
-    if(to_max == -1) return ro.close_node;
+    if(to_max == -1) return -1;
     //点在机器人中
     if(le(calcuDis(exist_id[is_take][to_max], ro.pos), ro.radius + 0.001)) {
         node_id = to_max;
