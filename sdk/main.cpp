@@ -70,7 +70,7 @@ int main()
     }
     
     // cerr<<studios[10].node_id<<endl;
-    // print_dijkstra(0, 0, 1);
+    // print_dijkstra(5, 0, 0);
     // cerr<<"\n";
     // print_dijkstra(7, 1, 0);
     
@@ -90,9 +90,9 @@ int main()
     // print_dijkstra(0,1,1);
      while (cin >> state.FrameID)
     {
-        // if(state.FrameID>start_time && state.FrameID<end_time &&cerr_flag_j){
-            // cerr<<" time "<<state.FrameID<<endl;
-        // }
+        if(state.FrameID>start_time && state.FrameID<end_time &&cerr_flag_j){
+            cerr<<" time "<<state.FrameID<<endl;
+        }
         // cerr<<" time "<<state.FrameID<<endl;
         // if(state.FrameID == 95 
         //     || state.FrameID == 97
@@ -119,14 +119,15 @@ int main()
 
         readStatusUntilOK() ;
         cout<<state.FrameID<<endl;
+        // if(state.FrameID == 6653)cerr<<"12"<<endl;
         if(count == 0)new_first_action();
         else new_robot_action();
-
+        // if(state.FrameID == 6653)cerr<<"34"<<endl;
 
         
 
         control();
-
+        // if(state.FrameID == 6653)cerr<<"56"<<endl;
         count++;
 
         // if(state.FrameID >= 6502 && state.FrameID < 6506) {
