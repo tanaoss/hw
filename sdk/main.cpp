@@ -70,7 +70,7 @@ int main()
     }
     
     // cerr<<studios[10].node_id<<endl;
-    // print_dijkstra(7, 1, 1);
+    // print_dijkstra(12, 1, 1);
     // cerr<<"\n";
     // print_dijkstra(7, 1, 0);
     
@@ -142,4 +142,4 @@ int main()
 
 
 
-// ./Robot -f -m maps/4.txt -c ./sdk "./main" 2>1.txt
+// ./Robot -f -m maps/3.txt -c ./sdk "./main" 2>1.txt

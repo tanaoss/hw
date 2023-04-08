@@ -57,7 +57,7 @@ int sum_matrix[2][100][100];
 int product_time[8];
 // int graphs[2][100][100];
 // int target_sequence[2][500][500];
-// int wail[101][101];
+int wail[101][101];
 // double dis_area[2][500][500];
 // double studio_dis[2][50][50];
 // double init_robot_dis[4][50];
@@ -289,11 +289,11 @@ bool readMapUntilOK() {
     int i;
     int row = 0;
     int num = 0;
-    // for(int k = 0;k<101;k++){
-    //     for(int j = 0; j < 101; j++){
-    //         wail[k][j] = 0;
-    //     }
-    // }
+    for(int k = 0;k<101;k++){
+        for(int j = 0; j < 101; j++){
+            wail[k][j] = 0;
+        }
+    }
     while (cin.getline(line,sizeof(line))) {
         if (line[0] == 'O' && line[1] == 'K') {
             return true;
@@ -334,10 +334,10 @@ bool readMapUntilOK() {
             {
                 graph[99-row][i] = -2;
                 train.type = -2;
-                // wail[99-row][i] = -2;
-                // wail[99-row][i+1] = -2;
-                // wail[99-(row+1)][i] = -2;
-                // wail[99-(row+1)][i+1] = -2;
+                wail[99-row][i] = -2;
+                wail[99-row][i+1] = -2;
+                wail[99-(row+1)][i] = -2;
+                wail[99-(row+1)][i+1] = -2;
             }
             else
                 graph[99-row][i] = 0;
@@ -3899,7 +3899,7 @@ void collision_solve(int frame){
 
 
 
-    // if(state.FrameID >= 5712 && state.FrameID <= 5712 && 999==999)
+    // if(state.FrameID >= 10113 && state.FrameID <= 10200 && 999==999)
         // collision_cerr_flag = true;
 
 
@@ -4568,10 +4568,12 @@ int choose_close_node(int is_take, pair<double, double> pos) {
 }
 
 
+
+
 int choose_best_to(Robot &ro, pair<double, double> pos) {
     int is_take = (ro.get_type != 0);
     int node_id = ro.close_node;
-    int to, to_max;
+    int to, to_max = -1;
     double dis, tmp, dis_old;
     int tmp_size, dangerous = 10, danger;
 
@@ -4579,27 +4581,30 @@ int choose_best_to(Robot &ro, pair<double, double> pos) {
     //     return calPayload(ro, trans_nodeID_to_pos(next_node[tar][is_take][ro.node_id]));
     dis = 0;
     dis_old = calcuDis(ro.pos, pos);
-    for(int i = (node_id / 100)-1; i < (node_id / 100) + 2; ++i) {
-        for(int j = (node_id % 100) -1; j < (node_id % 100) +2; ++j) {
-            if(check_node_illegal(i, j)) continue;
-            to = i * 100 + j;
-            if(graph_edge[is_take].count(to) == 0 || graph_edge[is_take][to].size() <= 1) continue;
-            danger = dangerous_nums[is_take][to];
-            tmp = calcuDis(pos, exist_id[is_take][to]);
-            if(collision_cerr_flag) {
-                    cerr<<"to_tmp:"<<to<<" dis:"<<calcuDis(pos, exist_id[is_take][to])<<" danger:"<<danger<<endl;
-                    cerr<<"dis-rob:"<<calcuDis(exist_id[is_take][to], ro.pos)<<endl;
-                    cerr<<"dis-old:"<<dis_old<<"\n";
-                    cerr<<ro.radius<<endl;
-                    printPair(exist_id[is_take][to]);
-            }
-            if(gt(tmp, dis_old) && (danger < dangerous || gt(tmp, dis) && danger <= dangerous)) {
-                dis = tmp;
-                to_max = to;
-                dangerous = danger;
-            }
+
+    for (int i = 0; i < graph_edge[is_take][node_id].size(); ++i)
+    {
+        to = graph_edge[is_take][node_id][i].id;
+        if (graph_edge[is_take].count(to) == 0 || graph_edge[is_take][to].size() <= 1)
+            continue;
+        danger = dangerous_nums[is_take][to];
+        tmp = calcuDis(pos, exist_id[is_take][to]);
+        if (collision_cerr_flag)
+        {
+            cerr << "to_tmp:" << to << " dis:" << calcuDis(pos, exist_id[is_take][to]) << " danger:" << danger << endl;
+            cerr << "dis-rob:" << calcuDis(exist_id[is_take][to], ro.pos) << endl;
+            cerr << "dis-old:" << dis_old << "\n";
+            cerr << ro.radius << endl;
+            printPair(exist_id[is_take][to]);
+        }
+        if (gt(tmp, dis_old) && (danger < dangerous || gt(tmp, dis) && danger <= dangerous))
+        {
+            dis = tmp;
+            to_max = to;
+            dangerous = danger;
         }
     }
+    if(to_max == -1) return ro.close_node;
     //点在机器人中
     if(le(calcuDis(exist_id[is_take][to_max], ro.pos), ro.radius + 0.001)) {
         node_id = to_max;
@@ -4746,7 +4751,7 @@ bool check_fall_into_scope(double k1,double b1,double b2,double k2,double b3,dou
     if(gt((k1*pos.first+b1),pos.second)){
         if (lt((k1 * pos.first + b2), pos.second)){
             if (gt((k2 * pos.first + b3), pos.second)){
-                if (gt((k2 * pos.first + b4), pos.second)){
+                if (lt((k2 * pos.first + b4), pos.second)){
                     return true;
                 }
             }
@@ -4754,23 +4759,71 @@ bool check_fall_into_scope(double k1,double b1,double b2,double k2,double b3,dou
     }
     return false;
 }
-bool check_barrier(int start,int end,int carry){
+bool check_barrier(pair<double,double> start,pair<double,double> end,int carry){
     double r, k, b, offset,k1,b1,b2,k2,b3,b4;
+    pair<double,double>zs,zx,ys,yx;
+    double offset_x;
+    double offset_y;
     if(carry==1)r = 0.45;
     else r = 0.53;
-    if (!eq((panes[end].pos.first - panes[start].pos.first),0 )){
-        k =(double) (panes[end].pos.second - panes[start].pos.second) / (panes[end].pos.first - panes[start].pos.first);
+    if (!eq((end.first - start.first),0 )){
+        k =(double) (end.second - start.second) / (end.first - start.first);
     }
-    else if (gt((panes[end].pos.second - panes[start].pos.second),0)){
+    else if (gt((end.second - start.second),0)){
         k = 100;
     }
-    else if (lt((panes[end].pos.second - panes[start].pos.second), 0)){
+    else if (lt((end.second - start.second), 0)){
         k = -100;
     }
     else k = 0;
-    b = (panes[start].pos.second - k * panes[start].pos.first);
+    b = (start.second - k * start.first);
     k1 = k;
-    offset =(double)r/(cos(Pi-atan(k)));
+    offset_x =fabs((double)r*(cos(atan(k))));
+    offset_y =fabs((double)r*(cos(atan(k))));
+    if(lt(start.first,end.first) && lt(start.second,end.second)){
+        zs.first = start.first-offset_x;
+        zx.first = start.first+offset_x;
+        ys.first = end.first-offset_x;
+        yx.first = end.first+offset_x;
+        zs.second = start.second+offset_y;
+        zx.second = start.second-offset_y;
+        ys.second = end.second+offset_y;
+        yx.second = end.second-offset_y;
+    }
+    else if(gt(start.second,end.second)){
+        zs.first = start.first-offset_x;
+        zx.first = start.first+offset_x;
+        ys.first = end.first-offset_x;
+        yx.first = end.first+offset_x;
+        zs.second = end.second+offset_y;
+        zx.second = end.second-offset_y;
+        ys.second = start.second+offset_y;
+        yx.second = start.second-offset_y;
+    }
+    else if(gt(start.first,end.first) && lt(start.second,end.second)){
+        zs.first = end.first-offset_x;
+        zx.first = end.first+offset_x;
+        ys.first = start.first-offset_x;
+        yx.first = start.first+offset_x;
+        zs.second = start.second+offset_y;
+        zx.second = start.second-offset_y;
+        ys.second = end.second+offset_y;
+        yx.second = end.second-offset_y;
+    }
+    else{
+        zs.first = end.first-offset_x;
+        zx.first = end.first+offset_x;
+        ys.first = start.first-offset_x;
+        yx.first = start.first+offset_x;
+        zs.second = end.second+offset_y;
+        zx.second = end.second-offset_y;
+        ys.second = start.second+offset_y;
+        yx.second = start.second-offset_y;
+    }
+    printPair(zs);
+    printPair(zx);
+    printPair(ys);
+    printPair(yx);
     if(gt(offset,0)){
         b1 = b + offset;
         b2 = b - offset;
@@ -4780,23 +4833,44 @@ bool check_barrier(int start,int end,int carry){
         b2 = b + offset;
     }
     k2 = (double)(-1/k1);
-    if (gt(panes[end].pos.second, panes[start].pos.second)){
-        b1 = panes[end].pos.second - k2 * (panes[end].pos.first);
-        b2 = panes[start].pos.second - k2 * (panes[start].pos.first);
-    }
-    else{
-        b2 = panes[end].pos.second - k2 * (panes[end].pos.first);
-        b1 = panes[start].pos.second - k2 * (panes[start].pos.first);
-    }
-    // for(int i = 0; i<101; i++){
-    //     for(int j=0; j<101; j++){
-    //         if (check_fall_into_scope(k1,b1,b2,k2,b3,b4,pair<double,double>(i*0.5,j*0.5))){
-    //             if(wail[i][j]==-2){
-    //                 return false;
-    //             }
-    //         }
-    //     }
+    b3 = zs.second - k2*zs.first;
+    b4 = ys.second - k2*ys.first;
+    // if (gt(end.second, start.second)){
+    //     b3 = end.second - k2 * (end.first);
+    //     b4 = start.second - k2 * (start.first);
     // }
+    // else{
+    //     b3 = end.second - k2 * (end.first);
+    //     b4 = start.second - k2 * (start.first);
+    // }
+    if (state.FrameID == 10113)
+    {
+        cerr << "~~~~~~~~" << endl;
+        cerr << " offset = "<<offset<<" cos = "<<cos(Pi-atan(k))<<endl;
+        cerr << " y = " << k1 << "*x"
+             << "+" << b1 << endl;
+        cerr << " y = " << k1 << "*x"
+             << "+" << b2 << endl;
+        cerr << " y = " << k2 << "*x"
+             << "+" << b3 << endl;
+        cerr << " y = " << k2 << "*x"
+             << "+" << b4 << endl;
+    }
+    for(int i = 0; i<101; i++){
+        for(int j=0; j<101; j++){
+            if(check_fall_into_scope(k1,b1,b2,k2,b3,b4,pair<double,double>(j*0.5,i*0.5))){
+                if(state.FrameID == 10113){
+                    cerr<<"i = "<<i;
+                    cerr<<"j = "<<j<<endl;
+                }
+                if(wail[i][j]==-2){
+                    if(state.FrameID == 10113) cerr<<"~~~~~~~~"<<endl;
+                    return false;
+                }
+            }
+        }
+    }
+    if(state.FrameID == 10113) cerr<<"~~~~~~~~"<<endl;
     return true;
 
 }
