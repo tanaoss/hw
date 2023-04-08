@@ -3460,11 +3460,11 @@ Ins contr_one_rob_1(Robot& robot){
         return ins_t;
     }
     bool print_cerr_flag_ta1=false;
-    // if( state.FrameID>1010&&state.FrameID<1289){
-    //     // cerr<<robot.need_adjust_statues<<" rob "<<robot.id<<endl;
-    //     print_cerr_flag_ta1=true;
-    //     print_rob_id=2;
-    // }
+    if( state.FrameID>9639&&state.FrameID<9739){
+        // cerr<<robot.need_adjust_statues<<" rob "<<robot.id<<endl;
+        print_cerr_flag_ta1=true;
+        print_rob_id=1;
+    }
     adjust_virtual_pos_total(robot);
     PayLoad payload=calPayload(robot,robot.virtual_pos);
     auto p1=get_w_now(robot,payload);
@@ -3602,7 +3602,10 @@ Ins contr_one_rob_1(Robot& robot){
     cerr<<"angle "<<payload.angle<<endl;
     cerr<<"dis "<<payload.distance<<endl;
     cerr<<"rob node_id"<<robot.node_id<<endl;
-    cerr<<robot.isVir<<endl;
+    cerr<<"has next "<<has_next(robot)<<endl;
+    cerr<<"target_id "<< studios[robot.target_id].node_id<<endl;
+    cerr<<"vir "<< robot.virtual_id<<endl;
+    cerr<<"cnt_tar "<<robot.cnt_tar<<endl;
     printPair(robot.pos);
     printPair(robot.virtual_pos);
     cerr<<getPosID(robot.virtual_pos)<<"\n";
@@ -3840,7 +3843,7 @@ Ins contr_one_rob_0(Robot& robot){
     printPair(robot.virtual_pos);
     cerr<<"合法？："<<robot.is_illegal <<endl;
     cerr<<p1.second<<endl;
-    cerr<<"可以到达？"<<check_can_arrival(istake,robot.close_node,robot.cnt_tar)<<" "<<robot.virtual_id<<endl;
+    cerr<<"可以到达？"<<check_can_arrival(istake,robot.close_node,robot.cnt_tar,has_next(robot))<<" "<<robot.virtual_id<<endl;
     cerr<<" robot.cnt_tar "<<robot.cnt_tar<<endl;
     cerr<<robot.is_new_tar_ing<<endl;
     cerr<<ins_t.forward<<endl;
@@ -5726,7 +5729,7 @@ void Translation_graph_has(){
                 if(i==i1&&j==j1)continue;
                 int tmpId=i*100+j;
                 bool isSlope=  (fabs(i1-i)+fabs(j1-j)==2)?true:false;
-                bool con1= isSlope?check_slope(tmpId,id1):true;
+                bool con1= isSlope?check_slope_studios(tmpId,id1):true;
                 if((!isSlope||con1)&&exist_id[1].count(tmpId)){
                     double dis= (abs(i-(studios[t].node_id/100))+abs(j-(studios[t].node_id%100))==2)?pow(2,0.5):1;
                     studio_edge[1][t].push_back(Graph_node(tmpId,dis,studios[t].node_id));
@@ -6214,7 +6217,7 @@ void adjust_virtual_pos_total(Robot& rob){
     print_cerr_flag_ta=false;
     int istake=rob.get_type==0?0:1;
     if(!rob.is_new_tar_ing&&!rob.need_adjust_statues&&
-    (!check_can_arrival(istake,rob.close_node,rob.cnt_tar))){
+    (!check_can_arrival(istake,rob.close_node,rob.cnt_tar,has_next(rob)))){
         // if(rob.id==0){
         //     cerr<<"重设状态"<<endl;
         //     cerr<<illegal_point[istake][rob.node_id]<<endl;
@@ -6312,31 +6315,9 @@ void adjust_virtual_pos_total(Robot& rob){
     // print_cerr_flag_ta=true;
     adjust_virtual_pos(rob);
 }
-bool check_can_arrival_z(int id1,int id2){
-    int i1=min(id1/100,id2/100),i2=max(id1/100,id2/100);
-    int j1=min(id1-id1/100*100,id2-id2/100*100),j2=max(id1-id1/100*100,id2-id2/100*100);
-    // if(!eq(i1-i2,0)&&!eq(j1-j2,0)){
-    //     i1=max(i1-1,0);
-    //     i2=min(i2+1,99);
-    //     j1=max(j1-1,0);
-    //     j2=min(j2+1,99);
-    // }
-    if(i1<0||j1<0||i2<0||j2<0){
-        // cerr<<" 错误\n";
-        return false;
-    }
-    for(int j=j1;j<=j2;j++){
-        int tmp=sum_matrix[0][i2][j]-(i1>0?sum_matrix[0][i1-1][j]:0);
-        if(tmp<(i2-i1+1)){
-            
-            return false;
-        }
-    }
 
-    return true;    
-}
-bool check_can_arrival(int istake,int id1,int id2){
-
+bool check_can_arrival(int istake,int id1,int id2,bool ctr){
+    if(!ctr)return check_slope_studios(id1,id2);
     if(illegal_point[istake][id1]||illegal_point[istake][id2]){
         return false;
     }
@@ -6426,7 +6407,7 @@ void setVirPos(Robot& robot){
         int tmpId=i;
  
         // if(i<0)cerr<<"i<0错误"<<endl;
-        if(check_can_arrival(istake,now_id,tmpId)&&cnt_num>0){
+        if(check_can_arrival(istake,now_id,tmpId,has_next(robot))&&cnt_num>0){
          
             con2=true;
             robot.cnt_tar=tmpId;
@@ -6654,7 +6635,7 @@ bool can_trajectory_virpos(Robot rob,double v,int cnt){
         int istake=rob.get_type==0?0:1;
         int posID_tmp=getPosID(rob.pos);
         if(illegal_point[istake][posID_tmp])return false;
-        if(check_can_arrival(istake,now_id,tarID)
+        if(check_can_arrival(istake,now_id,tarID,has_next(rob))
         &&(check_tar_line(rob,0.3))){
             if(print_cerr_flag_ta&&rob.id==0&&state.FrameID>=200&&state.FrameID<=400&&contr_print_flag){
             cerr<<"采样速度 "<<v<<" 时间 "<<state.FrameID+ i<<" 原因 :  到达目标\n";
@@ -6663,7 +6644,7 @@ bool can_trajectory_virpos(Robot rob,double v,int cnt){
         }
    
         if(tmpPair.second){
-            if(check_can_arrival(istake,now_id,tarID)){
+            if(check_can_arrival(istake,now_id,tarID,has_next(rob))){
                 // if(print_cerr_flag_ta&&rob.id==0){
                 //     cerr<<now_id<<" "<<tarID<<"\n";
                 //     cerr<<"检查到的对齐点: \n";
@@ -6726,7 +6707,7 @@ bool can_trajectory_virpos(Robot rob,double v,int cnt){
     int tarID=getPosID(rob.virtual_pos);
     int now_id=getPosID(rob.pos);
     int istake=rob.get_type==0?0:1;
-    if(check_can_arrival(istake,now_id,tarID)){
+    if(check_can_arrival(istake,now_id,tarID,has_next(rob))){
         // if(rob.id==0){
         // cerr<<"未检查到对齐\n";
         // }
@@ -6993,7 +6974,7 @@ bool  need_to_step_back(const Robot& rob){
     if(lt(cos_t(v3,v2),0)&& gt(cos_t(v3,v1),0))return true;
     return false;
 }
-int get_best_pos(const Robot& robot){
+int get_best_pos(Robot& robot){
     int id=robot.cnt_tar;
     int istake=robot.get_type==0?0:1;
 
@@ -7012,8 +6993,8 @@ int get_best_pos(const Robot& robot){
             if(i1<0||j1<0||i1>99||j1>99)continue;
             int tmpID=i1*100;
             if(!illegal_point[istake][id] &&!dangerous_point[istake][id]&&
-            check_can_arrival(istake,id,tmpID)&& lt(dis_to_studios[tar][istake][tmpID],cmpDis)
-            &&check_can_arrival(istake,now_id,tmpID)
+            check_can_arrival(istake,id,tmpID,has_next(robot))&& lt(dis_to_studios[tar][istake][tmpID],cmpDis)
+            &&check_can_arrival(istake,now_id,tmpID,has_next(robot))
             ){
                 choseId= tmpID;
                 cmpDis=dis_to_studios[tar][istake][tmpID];
