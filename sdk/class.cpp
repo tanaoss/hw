@@ -285,7 +285,6 @@ void init_studio_parameter(){
             count = 0;
             // cerr<<"num : "<<studio_material[studios[studios_type[i][j]].type-4][0]<<endl;
             for(int k=1;k<=studio_material[studios[studios_type[i][j]].type-4][0];k++){
-                // cerr<<studios[studios[studios_type[i][j]].material_studios[k-1][0]].type<<endl;
                 // cerr<<"size = "<<studios[studios_type[i][j]].material_studios[k-1].size()<<endl;
                 if(studios[studios_type[i][j]].material_studios[k-1].size()==0){
                     // cerr<<"dd"<<endl;
@@ -304,7 +303,7 @@ void init_studio_parameter(){
                     count++;
                 }
             }
-            // cerr<<count<<endl;
+            cerr<<count<<endl;
             if(count == studio_material[studios[studios_type[i][j]].type-4][0]){
                 studios[studios_type[i][j]].can_produce = true;
             }
@@ -1248,6 +1247,7 @@ int check_lack(int studio_id){
 }
 int check_lack_to_studio(int studio_id){
     int count_lack=0,count_have=0;
+    if(studios[studio_id].can_produce == false)return 0;
     if(studios[studio_id].type>3&&studios[studio_id].type<7){
         for(int i=0;i< studios_type[7].size();i++){
             if(studios[studios_type[7][i]].bitSatus!=0){
