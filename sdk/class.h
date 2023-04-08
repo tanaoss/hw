@@ -453,14 +453,14 @@ PayLoad calPayload_back(Robot robot, pair<double, double> virtual_pos);
 int choose_best_to(Robot &ro, pair<double, double> pos);
 double get_dis(const Robot &ro1, const Robot &ro2);
 int choose_close_node(int is_take, pair<double, double> pos);
-bool do_back(int id, pair<double, double> pos);
 bool check_speed(Robot ro_a, Robot ro_b, double mindis);
 bool check_node_illegal(int x, int y);
 bool check_nead_slow_down(const Robot &ro, const Robot &ro_static, double mindis, int coll_frame);
 double get_rotation_stop_time(const Robot &ro, PayLoad pay);
 double get_stop_time(double x, double v0, int sign, double acceleration);
-bool check_node_safe(int node_id, double mindis, const Robot &ro);
-int check_avoid(const Robot &ro_back, const Robot &ro_go, double mindis);
+int get_avoid_node(const Robot &ro_back, const Robot &ro_go, double mindis);
+bool check_node_safe(int node_id, int is_take, double mindis, const Robot &ro);
+bool do_avoid(const Robot &ro_stop, const Robot &ro_go, double mindis);
 
 
 bool empty_pos(const Robot& rob);
