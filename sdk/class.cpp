@@ -3919,7 +3919,7 @@ void collision_solve(int frame){
 
 
     // if(state.FrameID >= 5712 && state.FrameID <= 5712 && 999==999)
-        // collision_cerr_flag = true;
+        collision_cerr_flag = true;
 
 
     for(i = 0; i < 4; ++i)
@@ -4060,9 +4060,7 @@ void collision_solve(int frame){
         }
 
 
-        if(collision_cerr_flag) {
-            cerr<<ro[choose_id].id<<"avoid"<< ro[x].id<<"\n";
-        }
+        
 
         if(ro[choose_id].real_get_type == ro[x].real_get_type) {
             //交换目标
@@ -4091,8 +4089,12 @@ void collision_solve(int frame){
                 vis[choose_id] = 1;
             }
         }
+        
+        if(collision_cerr_flag) {
+            cerr<<ro[choose_id].id<<"avoid"<< ro[x].id<<"\n";
+        }
 
-
+        
         ans = -1;
         dis = 10000;
         min_size = 27;
@@ -4148,7 +4150,7 @@ void collision_solve(int frame){
             trajectory[choose_id] = tra;
             if(collision_cerr_flag) cerr<<"ans"<<ans<<"\n";
             if(vis[x] && lt(ins[ro[x].id].forward, 0)) {
-                do_back(ro[choose_id].id, ro[x].pos);
+                do_back(ro[choose_id].id, ro[x].id, ro[x].pos);
             }
             else updateIns(ro[choose_id].id, ans);
             coll_time[x][choose_id] = 9000;
@@ -4200,7 +4202,7 @@ void collision_solve(int frame){
             // if(state.FrameID > 13000) cerr<<"hhh\n";
             if(check_nead_slow_down(ro[choose_id], ro[x], mindis + 0.1, coll_time[choose_id][x])) {
 
-                do_back(ro[choose_id].id, ro[x].pos);
+                do_back(ro[choose_id].id, ro[x].id, ro[x].pos);
                 // if(flag_avoid[choose_id] && eq(ins[ro[choose_id].id].forward, -2)) {
                 //     ins[ro[choose_id].id].forward = max(ins[ro[choose_id].id].forward, speed_limit[choose_id]);
                 // }
@@ -4361,7 +4363,7 @@ void collision_solve(int frame){
 //     return false;
 // }
 
-int check_avoid(const Robot &ro_back, const Robot &ro_go, double mindis) {
+int get_avoid_node(const Robot &ro_back, const Robot &ro_go, double mindis) {
     int node = ro_back.close_node;
     priority_queue<Graph_node, vector<Graph_node>, cmp_Graph_node> q;
     int from, pre_id, num, i, to, is_take;
@@ -4370,8 +4372,11 @@ int check_avoid(const Robot &ro_back, const Robot &ro_go, double mindis) {
     unordered_map<int, int> vis_node;
     unordered_map<int, int> pre_node;
     unordered_map<int, double> angle_node;
-    bool cerr_flag = false;
+    bool cerr_flag = true;
+
+    is_take = (ro_back.get_type != 0);
     q.push(Graph_node{node, 0, node});
+
     while(!q.empty()) {
         Graph_node now_node = q.top();
         q.pop();
@@ -4381,21 +4386,26 @@ int check_avoid(const Robot &ro_back, const Robot &ro_go, double mindis) {
         pre_id = now_node.pre_id;
         vis_node[now_node.id] = 1;
         pre_node[from] = pre_id;
-
-        if (check_node_safe(from, mindis, ro_go))
+        if(cerr_flag) {
+            cerr<<"node_id:"<<from<<" dis:"<<dis<<" pre_id:"<<pre_id<< "angle_sum:"<<now_node.angle_sum<<"\n";
+        }
+        if (check_node_safe(from, is_take, mindis, ro_go))
         {
             to = from;
             while (pre_node[to] != to)
             {
-                if (pre_node[to] == node)
+                if (pre_node[to] == node){
+                    if(cerr_flag) {
+                        cerr<<"safeto:"<<to<<"\n";
+                    }
                     return to;
+                }     
                 to = pre_node[to];
             }
         }
 
         num = graph_edge[is_take][from].size();
         if(cerr_flag) {
-            cerr<<"node_id:"<<from<<" dis:"<<dis<<" pre_id:"<<pre_id<<"danger_sum:"<<now_node.dangerous_sum<<"\n";
             cerr<<"edge-num:"<<num<<"\n";
         }
         for(i = 0; i < num; ++i) {
@@ -4441,45 +4451,91 @@ double get_rotation_stop_time(const Robot &ro, PayLoad pay) {
     return get_stop_time(pay.angle, ro.angular_velocity, sign, pay.angular_acceleration);
 }
 
+// bool do_avoid(const Robot &ro_stop, const Robot &ro_go, double mindis) {
+//     int to = get_avoid_node(ro_stop, ro_go, mindis);
 
-bool do_back(int id, pair<double, double> pos) {
-    int to = choose_best_to(robots[id], pos);
-    if(to == -1) return false;
-    pair<double, double> to_pos = exist_id[(robots[id].get_type != 0)][to];
-    PayLoad pay_back = calPayload_back(robots[id], to_pos);
-    PayLoad pay = calPayload(robots[id], to_pos);
-    double time, time_back;
+//     if(to == -1) return false;
+//     pair<double, double> to_pos = exist_id[(ro_stop.get_type != 0)][to];
+//     PayLoad pay_back = calPayload_back(ro_stop, to_pos);
+//     PayLoad pay = calPayload(ro_stop, to_pos);
+//     double time, time_back;
     
-    robots[id].cnt_tar = robots[id].node_id;
+//     robots[id].cnt_tar = robots[id].node_id;
 
     
 
-    time = get_rotation_stop_time(robots[id], pay);
-    time_back = get_rotation_stop_time(robots[id], pay_back);
+//     time = get_rotation_stop_time(robots[id], pay);
+//     time_back = get_rotation_stop_time(robots[id], pay_back);
 
-    if(collision_cerr_flag) {
-        cerr<<"forward angle:"<<pay.angle<<"*"<<pay.sign
-            <<"\ntime:"<<time
-            <<"\nback angle:"<<pay_back.angle<<"*"<<pay_back.sign
-            <<"\nback time:"<<time_back<<"\n";
-    }
+//     if(collision_cerr_flag) {
+//         cerr<<"forward angle:"<<pay.angle<<"*"<<pay.sign
+//             <<"\ntime:"<<time
+//             <<"\nback angle:"<<pay_back.angle<<"*"<<pay_back.sign
+//             <<"\nback time:"<<time_back<<"\n";
+//     }
 
-    if(lt(time, time_back - 0.04)) {
-        if(robots[id].get_type)
-            ins[id].forward = 2.5;
-        else
-            ins[id].forward = 4;
-        ins[id].rotate = get_w_now(robots[id], pay).first;
-    }
-    else {
-        pay = pay_back;
-        ins[id].forward = -2;
-        if(le(payloads[id].speed, linear_velocity[(robots[id].get_type != 0)])) {
-            ins[id].rotate = get_w_now(robots[id], pay).first;
-        }
-    }
-    return true;
-}
+//     if(lt(time, time_back - 0.04)) {
+//         if(robots[id].get_type)
+//             ins[id].forward = 2.5;
+//         else
+//             ins[id].forward = 4;
+//         ins[id].rotate = get_w_now(robots[id], pay).first;
+//     }
+//     else {
+//         pay = pay_back;
+//         ins[id].forward = -2;
+//         if(le(payloads[id].speed, linear_velocity[(robots[id].get_type != 0)])) {
+//             ins[id].rotate = get_w_now(robots[id], pay).first;
+//         }
+//     }
+//     return true;
+// }
+
+
+// bool do_back(int id, int id2, pair<double, double> pos) {
+//     int to = choose_best_to(robots[id], pos);
+
+//     if(state.FrameID >= 10400 && state.FrameID <= 12000) {
+//         to = get_avoid_node(robots[id], robots[id2], robots[id].radius + robots[id2].radius);
+//         cerr<<"!!!:"<<to<<endl;
+//     }
+
+//     if(to == -1) return false;
+//     pair<double, double> to_pos = exist_id[(robots[id].get_type != 0)][to];
+//     PayLoad pay_back = calPayload_back(robots[id], to_pos);
+//     PayLoad pay = calPayload(robots[id], to_pos);
+//     double time, time_back;
+    
+//     robots[id].cnt_tar = robots[id].node_id;
+
+    
+
+//     time = get_rotation_stop_time(robots[id], pay);
+//     time_back = get_rotation_stop_time(robots[id], pay_back);
+
+//     if(collision_cerr_flag) {
+//         cerr<<"forward angle:"<<pay.angle<<"*"<<pay.sign
+//             <<"\ntime:"<<time
+//             <<"\nback angle:"<<pay_back.angle<<"*"<<pay_back.sign
+//             <<"\nback time:"<<time_back<<"\n";
+//     }
+
+//     if(lt(time, time_back - 0.04)) {
+//         if(robots[id].get_type)
+//             ins[id].forward = 2.5;
+//         else
+//             ins[id].forward = 4;
+//         ins[id].rotate = get_w_now(robots[id], pay).first;
+//     }
+//     else {
+//         pay = pay_back;
+//         ins[id].forward = -2;
+//         if(le(payloads[id].speed, linear_velocity[(robots[id].get_type != 0)])) {
+//             ins[id].rotate = get_w_now(robots[id], pay).first;
+//         }
+//     }
+//     return true;
+// }
 
 PayLoad calPayload_back(Robot robot, pair<double, double> virtual_pos) {
     double distance = calcuDis(robot.pos, virtual_pos);
@@ -4567,16 +4623,19 @@ bool check_nead_slow_down(const Robot &ro, const Robot &ro_static, double mindis
     return false;
 }
 
-bool check_node_safe(int node_id, double mindis, const Robot &ro) {
+bool check_node_safe(int node_id, int is_take_r, double mindis, const Robot &ro) {
     int tar = ro.target_id;
     int is_take = (ro.get_type != 0);
     int node1 = ro.close_node;
 
     if(ro.target_id == -1) return true;
 
+    if(le(calcuDis(exist_id[is_take_r][node_id], ro.pos), mindis))
+            return false;
+
     while(next_node[tar][is_take][node1] != node1) {
         node1 = next_node[tar][is_take][node1];
-        if(le(calcuDis(exist_id[is_take][node1], ro.pos), mindis))
+        if(le(calcuDis(exist_id[is_take_r][node_id], exist_id[is_take][node1]), mindis))
             return false;
         // if(collision_cerr_flag) {
         //     cerr<<"node"<<node1<<" ddd:"<< calcuDis(exist_id[is_take][node1], ro_static.pos) <<"\n";
