@@ -975,10 +975,10 @@ void control(){
 
     // Collision_detection(payLoad);
 
-    // if(state.FrameID >= 5600 && state.FrameID < 5610) {
+    // if(state.FrameID >= 6502 && state.FrameID < 6506) {
     //     cerr<<state.FrameID<<"\n";
     //     // cerr<<payloads[2].angle<<payloads[2].sign<<"\n";
-    //     cerr<<"ins:"<<ins[2].forward<<"  "<<ins[2].rotate<<"\n";
+    //     cerr<<"ins:"<<ins[1].forward<<"  "<<ins[1].rotate<<"\n";
     // }
     // if(state.FrameID>=854&&state.FrameID<=858){
     //     cerr<<state.FrameID<<" ins befoer "<<ins[0].forward<<"\n";
@@ -3278,12 +3278,16 @@ vector<pair<double,double>>Calculate_the_trajectory(Robot rob,Ins ins_in, int fo
         }
         if(lt(tmpDis,rob_dis)){
             new_cllo_time=cnt*0.02;
+            if(state.FrameID==11459&&(rob.id==1||rob.id==2))
+            cerr<<"---rob collossi----"<<endl;
             return {};
         }
             // 撞障碍物，返回空
         if(checkNearBar(rob.pos, rob.radius)){
             // printPair(rob.pos);
             // cerr<<"撞障碍物\n";
+              if(state.FrameID==11448&&(rob.id==1||rob.id==2))
+            cerr<<"----bar collossi----"<<endl;
             return {};
         }
         double seta=rob.direction;
@@ -3651,10 +3655,10 @@ Ins contr_one_rob_0(Robot& robot){
     //     }
 
 
-    // if( state.FrameID>3200&&state.FrameID<3600){
+    // if( state.FrameID>6501&&state.FrameID<6527){
     //     // cerr<<robot.need_adjust_statues<<" rob "<<robot.id<<endl;
     //     print_cerr_flag_ta1=true;
-    //     print_rob_id=0;
+    //     print_rob_id=1;
     // }
 
     PayLoad payload=calPayload(robot,robot.virtual_pos);
@@ -4319,8 +4323,8 @@ void collision_solve(int frame){
 
         // if(state.FrameID > 13000) cerr<<"kkk\n";
         if(ans != -1 && gt(payloads[ro[choose_id].id].speed, 1) && (!eq(ins[ro[choose_id].id].forward, 0) || ro[choose_id].target_id == -1 
-                        || le(calcuDis(ro[choose_id].pos, studios[ro[choose_id].target_id].pos), 1))
-                        && (ans != 3|| !check_nead_slow_down(ro[x], ro[choose_id], mindis, coll_time[choose_id][x]))) {
+                        || gt(calcuDis(ro[choose_id].pos, studios[ro[choose_id].target_id].pos), 1))
+                        && (ans != 3|| !check_nead_slow_down(ro[x], ro[choose_id], mindis, coll_time[choose_id][x], trajectory[x]))) {
             // if(state.FrameID > 13000) cerr<<"jjj\n";
             if(collision_cerr_flag) {
                 cerr<<payloads[ro[choose_id].id].angle<<"-"<<payloads[ro[choose_id].id].sign<<"\n";
@@ -4329,7 +4333,7 @@ void collision_solve(int frame){
             trajectory[choose_id] = tra;
             if(collision_cerr_flag) cerr<<"ans"<<ans<<"\n";
             if(vis[x] && lt(ins[ro[x].id].forward, 0)) {
-                do_avoid(ro[choose_id], ro[x], mindis);
+                do_avoid(ro[choose_id], ro[x], mindis, trajectory[x]);
             }
             else updateIns(ro[choose_id].id, ans);
             coll_time[x][choose_id] = 9000;
@@ -4371,11 +4375,28 @@ void collision_solve(int frame){
             }
         }
         else {
-            if(!do_avoid(ro[choose_id], ro[x], mindis)) {
-                if(collision_cerr_flag) cerr<<"choose can not avoid\n";
-                flag = do_avoid(ro[x], ro[choose_id], mindis);
-                if(!flag) cerr<<state.FrameID<<" "<<ro[choose_id].id<<"&"<<ro[x].id<<" no way to avoid\n";
+            if(check_nead_slow_down(ro[choose_id], ro[x], mindis, coll_time[choose_id][x], trajectory[choose_id])) {
+                if(collision_cerr_flag) {
+                    cerr<<"choose avoid\n";
+                }
+                if (!do_avoid(ro[choose_id], ro[x], mindis, trajectory[x]))
+                {
+                    if (collision_cerr_flag)
+                        cerr << "choose can not avoid\n";
+                    flag = do_avoid(ro[x], ro[choose_id], mindis, trajectory[choose_id]);
+                    if (!flag)
+                        cerr << state.FrameID << " " << ro[choose_id].id << "&" << ro[x].id << " no way to avoid\n";
+                }
             }
+            else {
+                if(collision_cerr_flag) {
+                    cerr<<"x avoid\n";
+                }
+                flag = do_avoid(ro[x], ro[choose_id], mindis, trajectory[choose_id]);
+                if (!flag)
+                    cerr << state.FrameID << " " << ro[choose_id].id << "&" << ro[x].id << " no way to avoid\n";
+            }
+            
         }
         if(collision_cerr_flag) {
             cerr<<"choose ins:"<<ins[ro[choose_id].id].forward<<" "<<ins[ro[choose_id].id].rotate<<"\n";
@@ -4449,7 +4470,7 @@ void collision_solve(int frame){
 //     return false;
 // }
 
-int get_avoid_node(const Robot &ro_back, const Robot &ro_go, double mindis) {
+int get_avoid_node(const Robot &ro_back, const Robot &ro_go, double mindis, const vector<pair<double,double>> &trajectory) {
     int node = ro_back.close_node;
     priority_queue<Graph_node, vector<Graph_node>, cmp_Graph_node> q;
     int from, pre_id, num, i, to, is_take;
@@ -4458,6 +4479,9 @@ int get_avoid_node(const Robot &ro_back, const Robot &ro_go, double mindis) {
     unordered_map<int, int> vis_node;
     unordered_map<int, int> pre_node;
     unordered_map<int, double> angle_node;
+    bool cerr_flag = false;
+
+    if(state.FrameID == 7590) cerr_flag = true;
     
 
     is_take = (ro_back.get_type != 0);
@@ -4472,10 +4496,10 @@ int get_avoid_node(const Robot &ro_back, const Robot &ro_go, double mindis) {
         pre_id = now_node.pre_id;
         vis_node[now_node.id] = 1;
         pre_node[from] = pre_id;
-        // if(cerr_flag) {
-        //     cerr<<"node_id:"<<from<<" dis:"<<dis<<" pre_id:"<<pre_id<< "angle_sum:"<<now_node.angle_sum<<"\n";
-        // }
-        if (check_node_safe(from, is_take, mindis, ro_go) && gt(calcuDis(exist_id[is_take][to], ro_back.pos), ro_back.radius))
+        if(cerr_flag) {
+            cerr<<"node_id:"<<from<<" dis:"<<dis<<" pre_id:"<<pre_id<< "angle_sum:"<<now_node.angle_sum<<"\n";
+        }
+        if (check_node_safe(exist_id[is_take][from], mindis, ro_go, trajectory) && gt(calcuDis(exist_id[is_take][to], ro_back.pos), ro_back.radius))
         {
             to = from;
             if (collision_cerr_flag) {
@@ -4491,11 +4515,14 @@ int get_avoid_node(const Robot &ro_back, const Robot &ro_go, double mindis) {
         }
 
         num = graph_edge[is_take][from].size();
-        // if(cerr_flag) {
-        //     cerr<<"edge-num:"<<num<<"\n";
-        // }
+        if(cerr_flag) {
+            cerr<<"edge-num:"<<num<<"\n";
+        }
         for(i = 0; i < num; ++i) {
             to = graph_edge[is_take][from][i].id;
+            if(cerr_flag) {
+                cerr<<"to:"<<to<<" dis:"<<calcuDis(exist_id[is_take][to], ro_go.pos)<<" min:"<<mindis<<endl;
+            }
             if(vis_node.count(to) || to == pre_id) continue;
             if(le(calcuDis(exist_id[is_take][to], ro_go.pos), mindis)) continue;
             angle_sum = now_node.angle_sum + calAngleToDis(pre_id, from, to);
@@ -4537,8 +4564,8 @@ double get_rotation_stop_time(const Robot &ro, PayLoad pay) {
     return get_stop_time(pay.angle, ro.angular_velocity, sign, pay.angular_acceleration);
 }
 
-bool do_avoid(const Robot &ro_stop, const Robot &ro_go, double mindis) {
-    int to = get_avoid_node(ro_stop, ro_go, mindis);
+bool do_avoid(const Robot &ro_stop, const Robot &ro_go, double mindis, const vector<pair<double,double>> &trajectory) {
+    int to = get_avoid_node(ro_stop, ro_go, mindis, trajectory);
     if(to == -1) return false;
 
     pair<double, double> to_pos = exist_id[(ro_stop.get_type != 0)][to];
@@ -4582,9 +4609,14 @@ bool do_avoid(const Robot &ro_stop, const Robot &ro_go, double mindis) {
         }
     }
 
-    if (check_node_safe(ro_stop.close_node, ro_stop.get_type != 0, mindis, ro_go)) {
+    if (!check_node_safe(exist_id[(ro_stop.get_type != 0)][ro_stop.close_node], mindis, ro_go, trajectory)) {
+        if(collision_cerr_flag) cerr<<"减速\n";
         ins[ro_go.id].forward = min(1.5, ins[ro_go.id].forward);
     }
+    // else if(collision_cerr_flag) {
+    //     printPair(exist_id[(ro_stop.get_type != 0)][ro_stop.close_node]);
+    //     printPair(ro_stop.pos);
+    // }
     return true;
 }
 
@@ -4678,36 +4710,38 @@ bool check_node_illegal(int x, int y) {
     return false;
 }
 
-bool check_nead_slow_down(const Robot &ro, const Robot &ro_static, double mindis, int coll_frame) {
+//ro will collision ro_static.pos
+bool check_nead_slow_down(const Robot &ro, const Robot &ro_static, double mindis, int coll_frame, const vector<pair<double,double>> &trajectory) {
     int tar = ro.target_id;
     int is_take = (ro.get_type != 0);
     int node1 = ro.close_node;
+    int num = trajectory.size();
     int cnt = 0;
+    int index = 0;
     // int node2 = choose_close_node(is_take, ro_static.pos);
-    if(tar == -1) {
-        for(int i = 0; i < studios.size(); ++i) {
-            if(!eq(dis_to_studios[i][is_take][node1], 10000)){
-                tar = i;
-                break;
-            }
-        }
-        if(tar == -1) return true;
-    }
     // if(collision_cerr_flag) {
     //     cerr<<"###########\n"<<"mindis:"<<mindis<<"\n";
     //     cerr<<ro.id<<"\n";
     // }
-    while(next_node[tar][is_take][node1] != -1) {
+    while(tar != -1 && next_node[tar][is_take][node1] != -1) {
         node1 = next_node[tar][is_take][node1];
         cnt++;
         if(lt(calcuDis(exist_id[is_take][node1], ro_static.pos), mindis))
+            return true;
+        
+        if(index < num && le(calcuDis(ro_static.pos, trajectory[index++]), mindis))
             return true;
         // if(collision_cerr_flag) {
         //     cerr<<"node"<<node1<<" ddd:"<< calcuDis(exist_id[is_take][node1], ro_static.pos) <<"\n";
         // }
     }
 
-    if(cnt < coll_frame && is_take == 0 && studios[tar].pStatus == 0 && studios[tar].r_time > coll_frame) {
+    while(index < num) {
+        if(index < num && le(calcuDis(ro_static.pos, trajectory[index++]), mindis))
+            return true;
+    }
+
+    if(cnt < coll_frame && is_take == 0 && tar != -1 && studios[tar].pStatus == 0 && studios[tar].r_time > coll_frame) {
         return true;
     }
 
@@ -4720,24 +4754,49 @@ bool check_nead_slow_down(const Robot &ro, const Robot &ro_static, double mindis
     return false;
 }
 
-bool check_node_safe(int node_id, int is_take_r, double mindis, const Robot &ro) {
+bool check_node_safe(pair<double,double> pos, double mindis, const Robot &ro, const vector<pair<double,double>> &trajectory) {
     int tar = ro.target_id;
     int is_take = (ro.get_type != 0);
     int node1 = ro.close_node;
+    int cnt, num;
+    double dis, pre_dis;
+    num = trajectory.size();
+    cnt = 0;
 
     if(ro.target_id == -1) return true;
 
-    if(le(calcuDis(exist_id[is_take_r][node_id], ro.pos), mindis))
+    dis = calcuDis(pos, ro.pos);
+    if(le(dis, mindis))
             return false;
 
     while(next_node[tar][is_take][node1] != -1) {
+        pre_dis = dis;
         node1 = next_node[tar][is_take][node1];
-        if(le(calcuDis(exist_id[is_take_r][node_id], exist_id[is_take][node1]), mindis))
+        dis = calcuDis(pos, exist_id[is_take][node1]);
+        if(le(dis, mindis))
             return false;
         // if(collision_cerr_flag) {
-        //     cerr<<"node"<<node1<<" ddd:"<< calcuDis(exist_id[is_take][node1], ro_static.pos) <<"\n";
+        //     cerr<<"node"<<node1<<" ddd:"<< dis <<"\n";
+        //     cerr<<"next:"<<next_node[tar][is_take][node1]<<endl;
         // }
+        if(gt(dis, pre_dis)) {
+            // if(collision_cerr_flag) {
+            //     cerr<<"pre_dis"<<pre_dis<<" dis:"<< dis <<"\n";
+            // }
+            break;
+        }
+        
+        if(cnt < num && le(calcuDis(pos, trajectory[cnt++]), mindis))
+            return false;
+        
     }
+    while(cnt < num) {
+        if(cnt < num && le(calcuDis(pos, trajectory[cnt++]), mindis))
+            return false;
+    }
+
+    // cerr<<"11111"<<endl;
+
     return true;
 }
 
@@ -4798,60 +4857,60 @@ int choose_close_node(int is_take, pair<double, double> pos) {
 
 
 
-int choose_best_to(Robot &ro, pair<double, double> pos) {
-    int is_take = (ro.get_type != 0);
-    int node_id = ro.close_node;
-    int to, to_max = -1;
-    double dis, tmp, dis_old;
-    int tmp_size, dangerous = 10, danger;
+// int choose_best_to(Robot &ro, pair<double, double> pos) {
+//     int is_take = (ro.get_type != 0);
+//     int node_id = ro.close_node;
+//     int to, to_max = -1;
+//     double dis, tmp, dis_old;
+//     int tmp_size, dangerous = 10, danger;
 
-    // if(next_node[tar][is_take][ro.node_id] != -1) 
-    //     return calPayload(ro, trans_nodeID_to_pos(next_node[tar][is_take][ro.node_id]));
-    dis = 0;
-    dis_old = calcuDis(ro.pos, pos);
+//     // if(next_node[tar][is_take][ro.node_id] != -1) 
+//     //     return calPayload(ro, trans_nodeID_to_pos(next_node[tar][is_take][ro.node_id]));
+//     dis = 0;
+//     dis_old = calcuDis(ro.pos, pos);
 
-    for (int i = 0; i < graph_edge[is_take][node_id].size(); ++i)
-    {
-        to = graph_edge[is_take][node_id][i].id;
-        if (graph_edge[is_take].count(to) == 0 || graph_edge[is_take][to].size() <= 1)
-            continue;
-        danger = dangerous_nums[is_take][to];
-        tmp = calcuDis(pos, exist_id[is_take][to]);
-        if (collision_cerr_flag)
-        {
-            cerr << "to_tmp:" << to << " dis:" << calcuDis(pos, exist_id[is_take][to]) << " danger:" << danger << endl;
-            cerr << "dis-rob:" << calcuDis(exist_id[is_take][to], ro.pos) << endl;
-            cerr << "dis-old:" << dis_old << "\n";
-            cerr << ro.radius << endl;
-            printPair(exist_id[is_take][to]);
-        }
-        if (gt(tmp, dis_old) && (danger < dangerous || gt(tmp, dis) && danger <= dangerous))
-        {
-            dis = tmp;
-            to_max = to;
-            dangerous = danger;
-        }
-    }
-    if(to_max == -1) return -1;
-    //点在机器人中
-    if(le(calcuDis(exist_id[is_take][to_max], ro.pos), ro.radius + 0.001)) {
-        node_id = to_max;
-        dangerous = 1;
-        for(int i = 0; i < graph_edge[is_take][node_id].size(); ++i) {
-            to = graph_edge[is_take][node_id][i].id;
-            danger = dangerous_point[is_take].count(to);
-            tmp = calcuDis(pos, exist_id[is_take][to]);
-            if(gt(tmp, dis) && danger <= dangerous) {
-                if(collision_cerr_flag) cerr<<"&to_tmp:"<<to<<" dis:"<<calcuDis(pos, exist_id[is_take][to])<<endl;
-                dis = tmp;
-                to_max = to;
-                dangerous = danger;
-            }
-        }
-    }
-    if(collision_cerr_flag) cerr<<"to:"<<to_max<<"\n";
-    return to_max;
-}
+//     for (int i = 0; i < graph_edge[is_take][node_id].size(); ++i)
+//     {
+//         to = graph_edge[is_take][node_id][i].id;
+//         if (graph_edge[is_take].count(to) == 0 || graph_edge[is_take][to].size() <= 1)
+//             continue;
+//         danger = dangerous_nums[is_take][to];
+//         tmp = calcuDis(pos, exist_id[is_take][to]);
+//         if (collision_cerr_flag)
+//         {
+//             cerr << "to_tmp:" << to << " dis:" << calcuDis(pos, exist_id[is_take][to]) << " danger:" << danger << endl;
+//             cerr << "dis-rob:" << calcuDis(exist_id[is_take][to], ro.pos) << endl;
+//             cerr << "dis-old:" << dis_old << "\n";
+//             cerr << ro.radius << endl;
+//             printPair(exist_id[is_take][to]);
+//         }
+//         if (gt(tmp, dis_old) && (danger < dangerous || gt(tmp, dis) && danger <= dangerous))
+//         {
+//             dis = tmp;
+//             to_max = to;
+//             dangerous = danger;
+//         }
+//     }
+//     if(to_max == -1) return -1;
+//     //点在机器人中
+//     if(le(calcuDis(exist_id[is_take][to_max], ro.pos), ro.radius + 0.001)) {
+//         node_id = to_max;
+//         dangerous = 1;
+//         for(int i = 0; i < graph_edge[is_take][node_id].size(); ++i) {
+//             to = graph_edge[is_take][node_id][i].id;
+//             danger = dangerous_point[is_take].count(to);
+//             tmp = calcuDis(pos, exist_id[is_take][to]);
+//             if(gt(tmp, dis) && danger <= dangerous) {
+//                 if(collision_cerr_flag) cerr<<"&to_tmp:"<<to<<" dis:"<<calcuDis(pos, exist_id[is_take][to])<<endl;
+//                 dis = tmp;
+//                 to_max = to;
+//                 dangerous = danger;
+//             }
+//         }
+//     }
+//     if(collision_cerr_flag) cerr<<"to:"<<to_max<<"\n";
+//     return to_max;
+// }
 
 
 
@@ -6834,17 +6893,19 @@ void get_point_type(){
                     if(i1<0||j1<0||i1>99 ||j1>99|| (i==i1&&j==j1) )continue;
                     int tmpID=i1*100+j1;
                 
-                    if(need_ad1&&illegal_point[0][id]&&exist_id[0].count(tmpID)
+                    if(need_ad1&&illegal_point[0][id]&&exist_id[0].count(tmpID)&&!illegal_point[0][tmpID]
                     ){
                         con1=true;
                         exist_id[0][id]=exist_id[0][tmpID];
+                        // if(id==4244)cerr<<4244<<"->"<<tmpID<<endl;
+                        // printPair()
                         if(exist_id[1].count(tmpID)){
                             exist_id[0][id]=exist_id[1][tmpID];
                             need_ad1=false;
                         }
                 
                     }
-                    if(need_ad2&&illegal_point[1][id]&&exist_id[1].count(tmpID)){
+                    if(need_ad2&&illegal_point[1][id]&&exist_id[1].count(tmpID)&&!illegal_point[1][tmpID]){
                         exist_id[1][id]=exist_id[1][tmpID];
                     }
                 }
