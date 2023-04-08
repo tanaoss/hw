@@ -213,6 +213,7 @@ struct Studio
     int node_id;
     int pane_id;
     int has_suspicious_spots;
+    bool can_produce;
     vector<int> material_studios[8];
     vector<int> suspicious_spots;
     bool corner;

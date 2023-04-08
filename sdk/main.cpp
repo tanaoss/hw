@@ -70,7 +70,7 @@ int main()
     }
     
     // cerr<<studios[10].node_id<<endl;
-    // print_dijkstra(12, 0, 1);
+    // print_dijkstra(5, 0, 0);
     // cerr<<"\n";
     // print_dijkstra(7, 1, 0);
     
