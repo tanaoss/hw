@@ -82,7 +82,7 @@ unordered_map<int,bool> can_arrival[2];//判断任意两个小格之间是否可
 unordered_map<int,bool> illegal_point[2];//判断是否是非法点
 unordered_map<int,bool> dangerous_point[2];//判断是否是危险点
 unordered_map<int,int> dangerous_nums[2];//判断是否是危险点
-int graph_trans[100][100];
+// int graph_trans[100][100];
 bool print_cerr_flag_ta;
 vector<int> next_node[50][2];//next_node[studio_id][2][node_id]:node_id去往studio_id工作台的下一个点
 vector<double> dis_to_studios[50][2];//dis_studios[studio_id][2][node_id]:node_id去往studio_id工作台的距离
@@ -1474,9 +1474,9 @@ pair<pair<int,int>,double> new_pick_point(int robot_id,int state_type,int change
     int material_studio_id;
     int flag =0;
     int time = 0;
-    // if(state.FrameID>14000){
-    //     flag=1;
-    // }
+    if(state.FrameID>13000){
+        flag=1;
+    }
     // if(state_type == 1){
     //     // for(int i =0;i<studios.size();i++){
     //     //     if(studios[i].type<=3){
@@ -1883,7 +1883,7 @@ void new_robot_judge(){
                     studios[robots[i].loc_id].pStatus = 0;
                     robots[i].get_type = studios[robots[i].loc_id].type;
                     robots[i].target_id = robots[i].target_id_send;
-                    if(state.FrameID>14000){
+                    if(state.FrameID>13000){
                         if((dis_to_studios[robots[i].target_id][1][robots[i].node_id]/4/0.02)>(15000-state.FrameID)){
                             ins[i].buy = -1;
                             robots[i].target_id = -1;
@@ -3454,11 +3454,11 @@ Ins contr_one_rob_1(Robot& robot){
         return ins_t;
     }
     bool print_cerr_flag_ta1=false;
-    // if( state.FrameID>600&&state.FrameID<820){
-    //     // cerr<<robot.need_adjust_statues<<" rob "<<robot.id<<endl;
-    //     print_cerr_flag_ta1=true;
-    //     print_rob_id=1;
-    // }
+    if( state.FrameID>1182&&state.FrameID<1482){
+        // cerr<<robot.need_adjust_statues<<" rob "<<robot.id<<endl;
+        print_cerr_flag_ta1=true;
+        print_rob_id=0;
+    }
     adjust_virtual_pos_total(robot);
     PayLoad payload=calPayload(robot,robot.virtual_pos);
     auto p1=get_w_now(robot,payload);
@@ -5622,11 +5622,11 @@ void cal_matrix(vector<vector<double>>&c,double angle1_w,double angle2){
 // }
 
 void init_trans(){
-    for(int i=0;i<100;i++){
-        for(int j=0;j<100;j++){
-           graph_trans[i][j]=( graph[i][j]==-2?-2:0);
-        }
-    }
+    // for(int i=0;i<100;i++){
+    //     for(int j=0;j<100;j++){
+    //        graph_trans[i][j]=( graph[i][j]==-2?-2:0);
+    //     }
+    // }
 }//将原来的地图中不是-2的部分全部更改为0
 double Angle_conversion(double angle){
     return fabs(angle)/Pi;
@@ -5634,7 +5634,7 @@ double Angle_conversion(double angle){
 bool check_4(int i,int j){
     if(i<0||j<0||i>99||j>99)return false;
     if(i+1>99||j-1<0)return false;
-    return graph_trans[i][j]!=-2&&graph_trans[i][j-1]!=-2&&graph_trans[i+1][j-1]!=-2&&graph_trans[i+1][j]!=-2;
+    return graph[i][j]!=-2&&graph[i][j-1]!=-2&&graph[i+1][j-1]!=-2&&graph[i+1][j]!=-2;
 }//检查坐标i,j是否是一个四个格子的合法点
 pair<int,pair<double,double>> check_8(int i,int j){
     if(check_4(i,j)&&check_4(i,j+1)&&check_4(i-1,j)&&check_4(i-1,j+1)){
@@ -5659,26 +5659,14 @@ void Translation_graph_no(){
                 int id=100*i+j;
                 auto pos=make_pair<double,double>(0.5*j,0.5*i+0.5);
                 exist_id[0][id]=pos;
-            }
-        }
-    }
-    for(int t=0;t<studios.size();t++){
-        int id1=studios[t].node_id;
-        int i1=id1/100,j1=id1%100;
-        // cerr<<"12"<<endl;
-        for(int i=i1-1;i<=i1+1;i++){
-            for(int j=j1-1;j<=j1+1;j++){
-                if(i<0||j<0||i>99||j>99)continue;
-                if(i==i1&&j==j1)continue;
-                int tmpId=i*100+j;
-                bool isSlope=  (fabs(i1-i)+fabs(j1-j)==2)?true:false;
-                bool con1= isSlope?check_slope_studios(tmpId,id1):true;
-                // if(t==12) cerr<<id1<<" "<<tmpId<<"-"<<isSlope<<"-"<<con1<<"-"<<exist_id[0].count(tmpId)<<" "<<((!isSlope||con1)&&exist_id[0].count(tmpId))<<endl;
-                if((!isSlope||con1)&&exist_id[0].count(tmpId)){
-                    // if(t==12)cerr<<tmpId<<endl;
-                    double dis= (abs(i-(studios[t].node_id/100))+abs(j-(studios[t].node_id%100))==2)?pow(2,0.5):1;
-                    studio_edge[0][t].push_back(Graph_node(tmpId,dis,studios[t].node_id));
-                 }
+                for(int t=0;t<studios.size();t++){
+                    double tmpDis=calcuDis(studios[t].pos,pos);
+                    if(le(tmpDis,0.5)&&id!=studios[t].node_id){
+                        double dis= (abs(i-(studios[t].node_id/100))+abs(j-(studios[t].node_id%100))==2)?pow(2,0.5):1;
+                        studio_edge[0][t].push_back(Graph_node(id,dis,studios[t].node_id));
+                        // if(t==0)cerr<<graph_edge[0][studios[t].node_id].size()<<"\n";
+                    }
+                }
             }
         }
     }
@@ -5691,29 +5679,15 @@ void Translation_graph_has(){
             int id=100*i+j;
             if(tmp.first!=0){
                 exist_id_type[1][id]=tmp.first;
-                exist_id[1][id]=tmp.second; 
-
-            }
-        }
-    }
-    for(int t=0;t<studios.size();t++){
-        int id1=studios[t].node_id;
-        int i1=id1/100,j1=id1%100;
-        for(int i=i1-1;i<=i1+1;i++){
-            for(int j=j1-1;j<=j1+1;j++){
-                if(i<0||j<0||i>99||j>99)continue;
-                if(i==i1&&j==j1)continue;
-                int tmpId=i*100+j;
-                bool isSlope=  (fabs(i1-i)+fabs(j1-j)==2)?true:false;
-                bool con1= isSlope?check_slope_studios(tmpId,id1):true;
-                auto tmp=check_8(i,j);
-                double tmpDis=calcuDis(studios[t].pos,exist_id[1][tmpId]);
-                if((le(tmpDis,0.71)&&tmp.first==1)||(le(tmpDis,0.4)&&tmp.first!=0)){
-                    double dis= (abs(i-(studios[t].node_id/100))+abs(j-(studios[t].node_id%100))==2)?pow(2,0.5):1;
-                    studio_edge[1][t].push_back(Graph_node(tmpId,dis,studios[t].node_id));
-                    //    if((tmpId==5561&&studios[t].node_id==5460)||(studios[t].node_id==5561&&tmpId==5460))
-                    // cerr<<"edge err --+---------"<<endl;
-                 }
+                exist_id[1][id]=tmp.second;
+                for(int t=0;t<studios.size();t++){
+                    double tmpDis=calcuDis(studios[t].pos,pos);
+                    if(((le(tmpDis,0.71)&&tmp.first==1)||le(tmpDis,0.4))&&id!=studios[t].node_id){
+                        double dis= (abs(i-(studios[t].node_id/100))+abs(j-(studios[t].node_id%100))==2)?pow(2,0.5):1;
+                        studio_edge[1][t].push_back(Graph_node(id,dis,studios[t].node_id));
+                    }
+                }
+    
             }
         }
     }    
@@ -5771,12 +5745,7 @@ void getEdgeRalative(){
                 //带货物时，考虑是否在墙角。
                 if(isInCorner&&isSlope&&(exist_id[1].count(SlopeCheckId1)||exist_id[1].count(SlopeCheckId2))){
 
-                }else if(isSlope&&exist_id[1].count(tmpId)&&it.first!=tmpId&&check_slope(tmpId,it.first)){
-                    //             if((tmpId==5561&&it.first==5460)||(it.first==5561&&tmpId==5460))
-                    // cerr<<"edge err -----------"<<endl;
-                    double dis= (abs(i-idi)+abs(j-idj)==2)?pow(2,0.5):1;
-                    graph_edge[1][it.first].push_back(Graph_node(tmpId,dis,it.first));
-                }else if(!isSlope&&exist_id[1].count(tmpId)&&(exist_id_type[1][tmpId]==1||exist_id_type[1][it.first]==1)){
+                }else if(exist_id[1].count(tmpId)&&it.first!=tmpId&&check_slope(tmpId,it.first)){
                     double dis= (abs(i-idi)+abs(j-idj)==2)?pow(2,0.5):1;
                     graph_edge[1][it.first].push_back(Graph_node(tmpId,dis,it.first));
                 }
@@ -5989,10 +5958,10 @@ void print_dijkstra(int studio_id, int is_take, int is_path) {
 bool is_corner(int id){
     int i=id/100;
     int j=id-i*100;
-    bool leg1= (j==0||graph_trans[i][j-1]==-2)?true:false;
-    bool leg2= (i==99||graph_trans[i+1][j]==-2)?true:false;
-    bool leg3= (j==99||graph_trans[i][j+1]==-2)?true:false;
-    bool leg4= (i==0||graph_trans[i-1][j]==-2)?true:false;
+    bool leg1= (j==0||graph[i][j-1]==-2)?true:false;
+    bool leg2= (i==99||graph[i+1][j]==-2)?true:false;
+    bool leg3= (j==99||graph[i][j+1]==-2)?true:false;
+    bool leg4= (i==0||graph[i-1][j]==-2)?true:false;
     return (leg1&&leg2) || (leg2&&leg3) || (leg3&&leg4) || (leg4&&leg1);
 }//判断工作台是不是在墙角
 void init_data(){
@@ -7000,7 +6969,7 @@ bool check_slope_studios(int id1,int id2){
     int j1=min(id1%100,id2%100),j2=max(id1%100,id2%100);
     for(int i=i1;i<=i2;i++){
         for(int j=j1;j<=j2;j++){
-            if(graph_trans[i][j]==-2)return false;
+            if(graph[i][j]==-2)return false;
         }
     }
     return true;
