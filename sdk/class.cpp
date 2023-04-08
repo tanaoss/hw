@@ -349,6 +349,121 @@ bool readMapUntilOK() {
     }
     return false;
 }
+
+void mock_fram_skip() {
+    string line;
+    cin>>state.money;
+    cin.ignore();
+    int K;
+    int studio_id=0;
+    int rob_id=0;
+    cin>>K;
+    cin.ignore();
+    for(int i=0;i<4;i++){
+        for(int j=0;j<8;j++){
+            material[i][j].clear();
+        }
+    }
+    for(int i=0;i<8;++i) {
+        product[i].clear();
+        produce_product[i]=0;
+        lack_material[i]=0;
+        priority[i]=0;
+    }
+    for(int i=0;i<4;i++){
+        max_wait_time[i]=0;
+    }
+    while (K--)
+    {
+        vector<double> tmp(6,0);
+        for(int i=0;i<tmp.size();i++){
+            cin>>tmp[i];
+        }
+        studios[studio_id].set(studio_id,tmp[0],pair<double,double>(tmp[1],tmp[2]),tmp[3],tmp[4],tmp[5]);
+        if(studios[studio_id].pStatus == 1 ){
+            product[studios[studio_id].type].push_back(studio_id);
+            if (studios[studio_id].type >= 4 && studios[studio_id].type<=6){
+                produce_product[studios[studio_id].type]++;
+            }
+        }
+        if (studios[studio_id].type >= 4 && studios[studio_id].type<=7){
+            
+            if (studios[studio_id].bitSatus != 0 ){
+                for(int i = 1; i <= studio_material[studios[studio_id].type-4][0]; i++){
+                    if ((studios[studio_id].bitSatus & (int)pow(2, studio_material[studios[studio_id].type-4][i]))==0){
+                        lack_material[studio_material[studios[studio_id].type - 4][i]]++;
+                    }
+                }
+            }
+        }
+        if (studios[studio_id].type > 3)
+        {
+            if(studios[studio_id].type < 8){
+                
+                    for(int i = 0;i < 4;i++){
+                        if(studios[studio_id].type == i+4){
+                            for(int j = 0;j<studio_material[i][0];j++){
+                                if((studios[studio_id].bitSatus & (int)pow(2,studio_material[i][j+1])) == 0){
+                                    // if(studios_rid[studio_id][studio_material[i][j+1]] == -1)material[studio_material[i][j+1]].push_back(studio_id);
+                                    for(int k = 0;k<4;k++){
+                                        if(!eq(dis_to_studios[studio_id][0][robots[k].node_id],10000))
+                                            material[k][studio_material[i][j+1]].push_back(studio_id);
+                                    }
+                                }
+                            }
+                        }
+                    }
+            
+            }
+            if(studios[studio_id].type == 8){
+                for(int k = 0;k<4;k++){
+                    if(!eq(dis_to_studios[studio_id][0][robots[k].node_id],10000))
+                        material[k][7].push_back(studio_id);
+                }
+                                    
+                // material[7].push_back(studio_id);
+            }
+            if(studios[studio_id].type == 9){
+                for(int h = 1;h <=7;h++){
+                    for(int k = 0;k<4;k++){
+                        if(!eq(dis_to_studios[studio_id][0][robots[k].node_id],10000))
+                            material[k][h].push_back(studio_id);
+                    }
+                    // material[h].push_back(studio_id);
+                }
+            }
+        }
+        studio_id++;
+    }
+    for(int i=1;i<7;i++){
+        if(produce_product[i]<lack_material[i]){
+            priority[i] = lack_material[i]-produce_product[i];
+        }
+    }
+    for(int i=0;i<4;i++){
+        vector<double> tmp(10,0);
+        for(int i=0;i<tmp.size();i++){
+            cin>>tmp[i];
+        }
+        robots[rob_id].collision_val_pre=robots[rob_id].collision_val;
+        robots[rob_id].set(rob_id,tmp[0],tmp[1],tmp[2],tmp[3],tmp[4],pair<double,double>(tmp[5],tmp[6]),tmp[7],
+        pair<double,double>(tmp[8],tmp[9]));
+        robots[rob_id].node_id = trans_pos_to_nodeID(rob_id);
+        robots[rob_id].close_node = choose_close_node(robots[rob_id].get_type!=0, robots[rob_id].pos);
+        robots[rob_id].radius = (robots[rob_id].get_type == 0? 0.45: 0.53);
+        
+
+        // if(gt(robots[rob_id].collision_val_pre, robots[rob_id].collision_val) && robots[rob_id].get_type != 0)
+        //     cerr<<"time-collision:"<< state.FrameID <<"collision" <<rob_id<< endl<<"\n";
+        rob_id++;
+    }
+    cin>>line;
+    if (line[0] == 'O' && line[1] == 'K') {
+        cout<<state.FrameID<<endl;
+        out_put();
+    }
+}
+
 bool readStatusUntilOK() {
     string line;
     cin>>state.money;
@@ -3354,8 +3469,10 @@ Ins contr_one_rob_0(Robot& robot){
     //     }
 
 
-    // if( state.FrameID>13372&&robot.id==1){
-    //     cerr<<robot.need_adjust_statues<<" rob "<<robot.id<<endl;
+    // if( state.FrameID>3100&&state.FrameID<=3500&&robot.id==0){
+    //     // cerr<<robot.need_adjust_statues<<" rob "<<robot.id<<endl;
+    //     print_cerr_flag_ta1=true;
+    //     print_rob_id=0;
     // }
 
     PayLoad payload=calPayload(robot,robot.virtual_pos);
@@ -3953,25 +4070,25 @@ void collision_solve(int frame){
             }
         }
 
-        // if(ro[choose_id].target_id != -1 && ro[x].target_id != -1) {
-        //     int tar1 = ro[choose_id].target_id;
-        //     int tar2 = ro[x].target_id;
-        //     int is_take1 = (ro[choose_id].get_type != 0);
-        //     int is_take2 = (ro[x].get_type != 0);
-        //     int node1 = ro[choose_id].close_node;
-        //     int node2 = ro[x].close_node;
-        //     if(gt(dis_to_studios[tar2][is_take2][node2] - dis_to_studios[tar1][is_take1][node1], 20)) {
-        //         if(collision_cerr_flag) {
-        //             cerr<<"change choose x\n";
-        //             cerr<<dis_to_studios[tar1][is_take1][node1]<<"* x:"<<dis_to_studios[tar2][is_take2][node2]<<"\n";
-        //         }
-        //         vis[choose_id] = 0;
-        //         tmp = x;
-        //         x = choose_id;
-        //         choose_id = tmp;
-        //         vis[choose_id] = 1;
-        //     }
-        // }
+        if(ro[choose_id].target_id != -1 && ro[x].target_id != -1) {
+            int tar1 = ro[choose_id].target_id;
+            int tar2 = ro[x].target_id;
+            int is_take1 = (ro[choose_id].get_type != 0);
+            int is_take2 = (ro[x].get_type != 0);
+            int node1 = ro[choose_id].close_node;
+            int node2 = ro[x].close_node;
+            if(gt(dis_to_studios[tar2][is_take2][node2] - dis_to_studios[tar1][is_take1][node1], 20)) {
+                if(collision_cerr_flag) {
+                    cerr<<"change choose x\n";
+                    cerr<<dis_to_studios[tar1][is_take1][node1]<<"* x:"<<dis_to_studios[tar2][is_take2][node2]<<"\n";
+                }
+                vis[choose_id] = 0;
+                tmp = x;
+                x = choose_id;
+                choose_id = tmp;
+                vis[choose_id] = 1;
+            }
+        }
 
 
         ans = -1;
@@ -5570,6 +5687,7 @@ void init_data(){
     Translation_graph_has();
     getEdgeRalative();
     // trans_studio_rob_toID();
+    // cerr<<exist_id[0].count(5358)<<"-"<<exist_id[0].count(5458)<<"-"<<exist_id[0].count(5359)<<"-"<<exist_id[0].count(5459)<<endl;
     for(int j=0;j<100;j++){
         for(int i=0;i<100;i++){
             int id=i*100+j;
@@ -5577,12 +5695,16 @@ void init_data(){
             sum_matrix[1][i][j]=(i-1>=0?sum_matrix[1][i-1][j]:0)+ (exist_id[1].count(id));
         }
     }
+    // cerr<<exist_id[0].count(5358)<<"-"<<exist_id[0].count(5458)<<"-"<<exist_id[0].count(5359)<<"-"<<exist_id[0].count(5459)<<endl;
     get_point_type();
+    // cerr<<exist_id[0].count(5358)<<"-"<<exist_id[0].count(5458)<<"-"<<exist_id[0].count(5359)<<"-"<<exist_id[0].count(5459)<<endl;
     for(int i=0;i<studios.size();i++){
         int id=studios[i].node_id;
         if(studios[i].has_suspicious_spots==1)
             exist_id[0][id]=studios[i].pos;
     }
+    // cerr<<exist_id[0].count(5358)<<"-"<<exist_id[0].count(5458)<<"-"<<exist_id[0].count(5359)<<"-"<<exist_id[0].count(5459)<<endl;
+    // cerr<<sum_matrix[0][54][58]<<"-"<<sum_matrix[0][52][58]<<" "<<sum_matrix[0][54][59]<<"-"<<sum_matrix[0][52][59]<<endl;
 
 }
 // void printMap(int f){
@@ -5659,7 +5781,7 @@ void init_data(){
 // }
 bool check_slope(int id1,int id2){
     int y1=id1/100,y2=id2/100;
-    int x1=id1-y1*100,x2=id2-y2*100;
+    int x1=id1%100,x2=id2%100;
     bool isSlope= (fabs(x1-x2)+fabs(y1-y2)==2)?true:false;
     if(!isSlope)return true;
     id1=y2*100+x1;
