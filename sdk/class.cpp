@@ -3460,7 +3460,7 @@ Ins contr_one_rob_1(Robot& robot){
         return ins_t;
     }
     bool print_cerr_flag_ta1=false;
-    if( state.FrameID>9639&&state.FrameID<9739){
+    if( state.FrameID>600&&state.FrameID<820){
         // cerr<<robot.need_adjust_statues<<" rob "<<robot.id<<endl;
         print_cerr_flag_ta1=true;
         print_rob_id=1;
@@ -3606,11 +3606,13 @@ Ins contr_one_rob_1(Robot& robot){
     cerr<<"target_id "<< studios[robot.target_id].node_id<<endl;
     cerr<<"vir "<< robot.virtual_id<<endl;
     cerr<<"cnt_tar "<<robot.cnt_tar<<endl;
+    cerr<<"next cnt_tar "<<next_node[robot.target_id][1][robot.cnt_tar]<<endl;
+    cerr<<"can arrive "<<check_can_arrival(istake,robot.cnt_tar,next_node[robot.target_id][1][robot.cnt_tar],1)<<endl;
     printPair(robot.pos);
     printPair(robot.virtual_pos);
     cerr<<getPosID(robot.virtual_pos)<<"\n";
-    printPair(exist_id[0][ret_next(robot,robot.cnt_tar)]);
-    cerr<<getPosID(exist_id[0][ret_next(robot,robot.cnt_tar)])<<"\n";
+    printPair(exist_id[1][ret_next(robot,robot.cnt_tar)]);
+    cerr<<getPosID(exist_id[1][ret_next(robot,robot.cnt_tar)])<<"\n";
     cerr<<p1.second<<"\n";
    }
      
@@ -5717,6 +5719,7 @@ void Translation_graph_has(){
             if(tmp.first!=0){
                 exist_id_type[1][id]=tmp.first;
                 exist_id[1][id]=tmp.second; 
+
             }
         }
     }
@@ -5730,9 +5733,13 @@ void Translation_graph_has(){
                 int tmpId=i*100+j;
                 bool isSlope=  (fabs(i1-i)+fabs(j1-j)==2)?true:false;
                 bool con1= isSlope?check_slope_studios(tmpId,id1):true;
-                if((!isSlope||con1)&&exist_id[1].count(tmpId)){
+                auto tmp=check_8(i,j);
+                double tmpDis=calcuDis(studios[t].pos,exist_id[1][tmpId]);
+                if((le(tmpDis,0.71)&&tmp.first==1)||(le(tmpDis,0.4)&&tmp.first!=0)){
                     double dis= (abs(i-(studios[t].node_id/100))+abs(j-(studios[t].node_id%100))==2)?pow(2,0.5):1;
                     studio_edge[1][t].push_back(Graph_node(tmpId,dis,studios[t].node_id));
+                       if((tmpId==5561&&studios[t].node_id==5460)||(studios[t].node_id==5561&&tmpId==5460))
+                    cerr<<"edge err --+---------"<<endl;
                  }
             }
         }
@@ -5791,7 +5798,12 @@ void getEdgeRalative(){
                 //带货物时，考虑是否在墙角。
                 if(isInCorner&&isSlope&&(exist_id[1].count(SlopeCheckId1)||exist_id[1].count(SlopeCheckId2))){
 
-                }else if(exist_id[1].count(tmpId)&&it.first!=tmpId&&check_slope(tmpId,it.first)){
+                }else if(isSlope&&exist_id[1].count(tmpId)&&it.first!=tmpId&&check_slope(tmpId,it.first)){
+                                if((tmpId==5561&&it.first==5460)||(it.first==5561&&tmpId==5460))
+                    cerr<<"edge err -----------"<<endl;
+                    double dis= (abs(i-idi)+abs(j-idj)==2)?pow(2,0.5):1;
+                    graph_edge[1][it.first].push_back(Graph_node(tmpId,dis,it.first));
+                }else if(!isSlope&&exist_id[1].count(tmpId)&&(exist_id_type[1][tmpId]==1||exist_id_type[1][it.first]==1)){
                     double dis= (abs(i-idi)+abs(j-idj)==2)?pow(2,0.5):1;
                     graph_edge[1][it.first].push_back(Graph_node(tmpId,dis,it.first));
                 }
