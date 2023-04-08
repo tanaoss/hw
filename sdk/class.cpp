@@ -3349,13 +3349,15 @@ Ins contr_one_rob_0(Robot& robot){
     adjust_virtual_pos_total(robot);
 
 
-    // if( state.FrameID>13372&&robot.id==1){
-    //     cerr<<robot.need_adjust_statues<<" rob "<<robot.id<<endl;
+    // if( state.FrameID>3100&&state.FrameID<=3500&&robot.id==0){
+    //     // cerr<<robot.need_adjust_statues<<" rob "<<robot.id<<endl;
+    //     print_cerr_flag_ta1=true;
+    //     print_rob_id=0;
     // }
 
     PayLoad payload=calPayload(robot,robot.virtual_pos);
     auto p1=get_w_now(robot,payload);
-if(state.FrameID>13000)print_cerr_flag_ta=true;
+// if(state.FrameID>13000)print_cerr_flag_ta=true;
 // cerr<<print_cerr_flag_ta<<endl;
     if(gt(return_v(robot),0.8)&&robot.need_slow&&robot.need_adjust_statues){
         ins_t.forward=0;
@@ -3512,29 +3514,30 @@ if(state.FrameID>13000)print_cerr_flag_ta=true;
         // }
     // }
 // print_cerr_flag_ta=true;
-//    if(state.FrameID>=13466&&state.FrameID<=16600&&robot.id==1){
-//     cerr<<"robot.id "<<robot.id<<endl;
-//     cerr<<" FrameID "<< state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
-//     cerr<<"forward: "<<ins_t.forward<<endl;
-//     cerr<<"angle "<<payload.angle<<endl;
-//     cerr<<"dis "<<payload.distance<<endl;
-//     cerr<<robot.isVir<<endl;
-//     cerr<<"rob node_id"<<robot.close_node<<endl;
-//     cerr<<" robot.cnt_tar "<<robot.cnt_tar<<endl;
-//     cerr<<" robot.virtual_id "<<robot.virtual_id<<endl;
-//     cerr<<"next tar "<<next_tar<<" "<<dangerous_nums[istake][next_tar]<<endl;
-//     cerr<<dangerous_nums[0][robot .node_id]<<endl;
-//     cerr<<dangerous_nums[0][robot.cnt_tar]<<endl;
-//     cerr<<dangerous_nums[0][next_tar]<<endl;
-//     printPair(robot.pos);
-//     printPair(robot.virtual_pos);
-//     cerr<<"合法？："<<robot.is_illegal <<endl;
-//     cerr<<p1.second<<endl;
-//     cerr<<"可以到达？"<<check_can_arrival(istake,robot.close_node,robot.cnt_tar)<<" "<<robot.virtual_id<<endl;
-//     cerr<<" robot.cnt_tar "<<robot.cnt_tar<<endl;
-//     cerr<<robot.is_new_tar_ing<<endl;
-//     cerr<<ins_t.forward<<endl;
-//    }
+   if(robot.id==print_rob_id&&print_cerr_flag_ta1){
+    cerr<<"robot.id "<<robot.id<<endl;
+    cerr<<" FrameID "<< state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
+    cerr<<"forward: "<<ins_t.forward<<endl;
+    cerr<<"angle "<<payload.angle<<endl;
+    cerr<<"dis "<<payload.distance<<endl;
+    cerr<<robot.isVir<<endl;
+    cerr<<"rob node_id"<<robot.close_node<<endl;
+    cerr<<" robot.cnt_tar "<<robot.cnt_tar<<endl;
+    cerr<<" robot.virtual_id "<<robot.virtual_id<<endl;
+    cerr<<"next tar "<<next_tar<<" "<<dangerous_nums[istake][next_tar]<<endl;
+    printPair(robot.pos);
+    printPair(robot.virtual_pos);
+    printPair(trans_nodeID_to_pos(robot.cnt_tar));
+    cerr<<"合法？："<<!robot.is_illegal <<endl;
+    cerr<<"tar illegal?"<<illegal_point[0][robot.cnt_tar]<<endl;
+    cerr<<"tar_get_id: "<<endl;
+    printPair(studios[robot.target_id].pos);
+    cerr<<p1.second<<endl;
+    cerr<<"可以到达？"<<check_can_arrival(istake,robot.close_node,robot.cnt_tar)<<" "<<robot.virtual_id<<endl;
+    cerr<<" robot.cnt_tar "<<robot.cnt_tar<<endl;
+    cerr<<robot.is_new_tar_ing<<endl;
+    cerr<<ins_t.forward<<endl;
+   }
      
     return ins_t;
 }
@@ -5555,6 +5558,7 @@ void init_data(){
     Translation_graph_has();
     getEdgeRalative();
     // trans_studio_rob_toID();
+    // cerr<<exist_id[0].count(5358)<<"-"<<exist_id[0].count(5458)<<"-"<<exist_id[0].count(5359)<<"-"<<exist_id[0].count(5459)<<endl;
     for(int j=0;j<100;j++){
         for(int i=0;i<100;i++){
             int id=i*100+j;
@@ -5562,12 +5566,16 @@ void init_data(){
             sum_matrix[1][i][j]=(i-1>=0?sum_matrix[1][i-1][j]:0)+ (exist_id[1].count(id));
         }
     }
+    // cerr<<exist_id[0].count(5358)<<"-"<<exist_id[0].count(5458)<<"-"<<exist_id[0].count(5359)<<"-"<<exist_id[0].count(5459)<<endl;
     get_point_type();
+    // cerr<<exist_id[0].count(5358)<<"-"<<exist_id[0].count(5458)<<"-"<<exist_id[0].count(5359)<<"-"<<exist_id[0].count(5459)<<endl;
     for(int i=0;i<studios.size();i++){
         int id=studios[i].node_id;
         if(studios[i].has_suspicious_spots==1)
             exist_id[0][id]=studios[i].pos;
     }
+    // cerr<<exist_id[0].count(5358)<<"-"<<exist_id[0].count(5458)<<"-"<<exist_id[0].count(5359)<<"-"<<exist_id[0].count(5459)<<endl;
+    // cerr<<sum_matrix[0][54][58]<<"-"<<sum_matrix[0][52][58]<<" "<<sum_matrix[0][54][59]<<"-"<<sum_matrix[0][52][59]<<endl;
 
 }
 void printMap(int f){
@@ -5644,7 +5652,7 @@ void printEdge(int id){
 }
 bool check_slope(int id1,int id2){
     int y1=id1/100,y2=id2/100;
-    int x1=id1-y1*100,x2=id2-y2*100;
+    int x1=id1%100,x2=id2%100;
     bool isSlope= (fabs(x1-x2)+fabs(y1-y2)==2)?true:false;
     if(!isSlope)return true;
     id1=y2*100+x1;
