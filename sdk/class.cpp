@@ -4725,7 +4725,7 @@ bool check_nead_slow_down(const Robot &ro, const Robot &ro_static, double mindis
     //     cerr<<"###########\n"<<"mindis:"<<mindis<<"\n";
     //     cerr<<ro.id<<"\n";
     // }
-    while(next_node[tar][is_take][node1] != node1) {
+    while(next_node[tar][is_take][node1] != -1) {
         node1 = next_node[tar][is_take][node1];
         cnt++;
         if(lt(calcuDis(exist_id[is_take][node1], ro_static.pos), mindis))
@@ -4755,7 +4755,7 @@ bool check_node_safe(int node_id, double mindis, const Robot &ro) {
 
     if(ro.target_id == -1) return true;
 
-    while(next_node[tar][is_take][node1] != node1) {
+    while(next_node[tar][is_take][node1] != -1) {
         node1 = next_node[tar][is_take][node1];
         if(le(calcuDis(exist_id[is_take][node1], ro.pos), mindis))
             return false;
@@ -5852,7 +5852,7 @@ void Dijkstra(int studio_id, int is_take) {
 
     // q.push(Graph_node(s, 0, s, 0, 0));
     dis_to_studios[studio_id][is_take][s] = 0;
-    next_node[studio_id][is_take][s] = s;
+    next_node[studio_id][is_take][s] = -1;
     vis_node[s] = 1;
     // danger_node[s] = 0;
 
