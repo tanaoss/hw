@@ -93,7 +93,7 @@ int main()
         // if(state.FrameID>start_time && state.FrameID<end_time &&cerr_flag_j){
             // cerr<<" time "<<state.FrameID<<endl;
         // }
-        cerr<<" time "<<state.FrameID<<endl;
+        // cerr<<" time "<<state.FrameID<<endl;
         // if(state.FrameID == 95 
         //     || state.FrameID == 97
         //     || state.FrameID == 99
