@@ -142,4 +142,4 @@ int main()
 
 
 
-// ./Robot -f -m maps/4.txt -c ./sdk "./main" 2>1.txt
+// ./Robot -f -m maps/3.txt -c ./sdk "./main" 2>1.txt
