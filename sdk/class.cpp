@@ -3284,26 +3284,31 @@ Ins contr_one_rob_1(Robot& robot){
         ins_t.rotate=Pi;
         return ins_t;
     }
-
+    bool print_cerr_flag_ta1=false;
+    // if( state.FrameID>1010&&state.FrameID<1289){
+    //     // cerr<<robot.need_adjust_statues<<" rob "<<robot.id<<endl;
+    //     print_cerr_flag_ta1=true;
+    //     print_rob_id=2;
+    // }
     adjust_virtual_pos_total(robot);
     PayLoad payload=calPayload(robot,robot.virtual_pos);
     auto p1=get_w_now(robot,payload);
     if(gt(return_v(robot),0.8)&&robot.need_slow&&robot.need_adjust_statues){
         ins_t.forward=0;
         ins_t.rotate=p1.first;
-        if(robot.id==print_rob_id&&print_cerr_flag_ta){
+        if(robot.id==print_rob_id&&print_cerr_flag_ta1){
                 cerr<<"正在减速\n";
                 cerr<<"当前速度 "<<return_v(robot)<<"\n";
         }
         return ins_t;
     }
     if(robot.need_adjust_statues){
-        if(robot.id==print_rob_id&&print_cerr_flag_ta){
+        if(robot.id==print_rob_id&&print_cerr_flag_ta1){
             cerr<<"进入位置调整检测\n";
             cerr<<robot.adjust_pos<<" "<<robot.adjust_pos<<" "<<p1.second<<"\n";
         }
         if(robot.adjust_pos){
-            if(robot.id==print_rob_id&&print_cerr_flag_ta){
+            if(robot.id==print_rob_id&&print_cerr_flag_ta1){
                 cerr<<"姿势1 ing\n";
                 cerr<<"摆动速度："<<p1.first<<"\n";
                 cerr<<" 目标";
@@ -3313,10 +3318,9 @@ Ins contr_one_rob_1(Robot& robot){
                 cerr<<"dis: "<<payload.distance<<"\n";
             }
             ins_t.rotate=p1.first;
-            if(lt(payload.distance,0.1)||(!illegal_point[istake][robot.node_id]
-            &&!dangerous_point[istake][robot.node_id])){
+            if(lt(payload.distance,0.1)){
                 robot.cnt_tar=ret_next(robot,robot.cnt_tar);
-            if(robot.id==print_rob_id&&print_cerr_flag_ta){
+            if(robot.id==print_rob_id&&print_cerr_flag_ta1){
                 cerr<<"完成姿势1，下一个目标\n";
                 printPair(exist_id[robot.get_type==0?0:1][robot.cnt_tar]);
                 cerr<<robot.need_adjust_statues<<"\n";
@@ -3330,17 +3334,20 @@ Ins contr_one_rob_1(Robot& robot){
                     else
                         ins_t.forward=0;
                 }else{
+                    
                     PayLoad tmpPay=calPayload_back(robot,robot.virtual_pos);
                     auto tmpP1=get_w_now(robot,tmpPay);
                     if(tmpP1.second)
-                        ins_t.forward=-0.6;
+                    {  ins_t.forward=-0.6;
+                      cerr<<"time "<<state.FrameID<<" back "<<robot.id<<endl;
+                    }
                     else
                         ins_t.forward=0;
                 }
             }
             return ins_t;
         }else if(robot.need_adjust_statues&&(!robot.adjust_pos)&&(!p1.second)){
-             if(robot.id==0&&print_cerr_flag_ta){
+             if(robot.id==0&&print_cerr_flag_ta1){
                 cerr<<"姿势2，ing\n";
                 cerr<<"摆动速度："<<p1.first<<"\n";
                 cerr<<" 目标";
@@ -3354,7 +3361,7 @@ Ins contr_one_rob_1(Robot& robot){
             robot.adjust_w=false;
             ins_t.forward=0.5;
             ins_t.rotate=p1.first;              
-            if(robot.id==0&&print_cerr_flag_ta)
+            if(robot.id==0&&print_cerr_flag_ta1)
             cerr<<"状态调整完毕\n";
             return ins_t;
         }else{
@@ -3412,7 +3419,7 @@ Ins contr_one_rob_1(Robot& robot){
     //     robot.need_adjust_statues=true;
     // }
  
-   if(print_cerr_flag_ta&&robot.id==0&&state.FrameID>=200&&state.FrameID<=400&&contr_print_flag){
+   if(print_cerr_flag_ta1&&robot.id==print_rob_id&&contr_print_flag){
     cerr<<" FrameID "<< state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
     cerr<<"forward: "<<ins_t.forward<<endl;
     cerr<<"angle "<<payload.angle<<endl;
@@ -3461,7 +3468,7 @@ Ins contr_one_rob_0(Robot& robot){
     }
     
     adjust_virtual_pos_total(robot);
-    // if( state.FrameID>3221&&state.FrameID<3360&&robot.id==0&&contr_print_flag){
+    // if( state.FrameID>14401&&state.FrameID<15000&&robot.id==0&&contr_print_flag){
     //         //cerr<<"pirnt status over"<<endl;
     //         print_rob_id=0;
     //         print_cerr_flag_ta1=true;
@@ -3527,7 +3534,9 @@ Ins contr_one_rob_0(Robot& robot){
                     PayLoad tmpPay=calPayload_back(robot,robot.virtual_pos);
                     auto tmpP1=get_w_now(robot,tmpPay);
                     if(tmpP1.second)
-                        ins_t.forward=-0.6;
+                    {  ins_t.forward=-0.6;
+                      cerr<<"time "<<state.FrameID<<" back "<<robot.id<<endl;
+                    }
                     else
                         ins_t.forward=0;
                 }
@@ -3605,7 +3614,7 @@ Ins contr_one_rob_0(Robot& robot){
         robot.cnt_tar=next_tar;
         
     }
-    if(gt(payload.angle,1.2)&&lt(payload.distance,5)){
+    if(gt(payload.angle,1.2)&&lt(payload.distance,5)&&gt(return_v(robot),0.5)){
         if(gt(fabs(ins_t.forward),fabs(change)+0.2))
             ins_t.forward+=change;
     }
@@ -5926,12 +5935,10 @@ void adjust_virtual_pos_total(Robot& rob){
             rob.is_new_tar_ing=false; 
             setVirPos(rob);
     }
-    else if(state.FrameID!=1&&((rob.target_id_pre!=-1)&&(rob.target_id_pre!=rob.target_id))){
-        rob.need_adjust_statues=true;
+    else if(state.FrameID!=1&&(rob.real_get_type!=rob.get_type)){
         // if(rob.id==0)cerr<<"target变化导致重新调整"<<endl;
         int next_tar=next_node[rob.target_id][istake][rob.close_node];
-        if(lt(return_v(rob),1)&&empty_pos(rob)){
-            
+        if(empty_pos(rob)){
             // cerr<<"使用空白点代替了工作台重置状态"<<endl;
             // cerr<<"time"<<state.FrameID<<endl;
             // cerr<<"机器人编号"<<rob.id<<endl;
@@ -5941,6 +5948,7 @@ void adjust_virtual_pos_total(Robot& rob){
             rob.cnt_tar=next_tar;
             rob.target_id_pre=rob.target_id;
         }else{
+            rob.need_adjust_statues=true;
             rob.adjust_pos=true;
             rob.adjust_w=true;
             rob.need_slow=true;
