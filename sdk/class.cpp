@@ -4670,47 +4670,47 @@ bool check_node_illegal(int x, int y) {
     return false;
 }
 
-// bool check_nead_slow_down(const Robot &ro, const Robot &ro_static, double mindis, int coll_frame) {
-//     int tar = ro.target_id;
-//     int is_take = (ro.get_type != 0);
-//     int node1 = ro.close_node;
-//     int cnt = 0;
-//     // int node2 = choose_close_node(is_take, ro_static.pos);
-//     if(tar == -1) {
-//         for(int i = 0; i < studios.size(); ++i) {
-//             if(!eq(dis_to_studios[i][is_take][node1], 10000)){
-//                 tar = i;
-//                 break;
-//             }
-//         }
-//         if(tar == -1) return true;
-//     }
-//     // if(collision_cerr_flag) {
-//     //     cerr<<"###########\n"<<"mindis:"<<mindis<<"\n";
-//     //     cerr<<ro.id<<"\n";
-//     // }
-//     while(next_node[tar][is_take][node1] != node1) {
-//         node1 = next_node[tar][is_take][node1];
-//         cnt++;
-//         if(lt(calcuDis(exist_id[is_take][node1], ro_static.pos), mindis))
-//             return true;
-//         // if(collision_cerr_flag) {
-//         //     cerr<<"node"<<node1<<" ddd:"<< calcuDis(exist_id[is_take][node1], ro_static.pos) <<"\n";
-//         // }
-//     }
+bool check_nead_slow_down(const Robot &ro, const Robot &ro_static, double mindis, int coll_frame) {
+    int tar = ro.target_id;
+    int is_take = (ro.get_type != 0);
+    int node1 = ro.close_node;
+    int cnt = 0;
+    // int node2 = choose_close_node(is_take, ro_static.pos);
+    if(tar == -1) {
+        for(int i = 0; i < studios.size(); ++i) {
+            if(!eq(dis_to_studios[i][is_take][node1], 10000)){
+                tar = i;
+                break;
+            }
+        }
+        if(tar == -1) return true;
+    }
+    // if(collision_cerr_flag) {
+    //     cerr<<"###########\n"<<"mindis:"<<mindis<<"\n";
+    //     cerr<<ro.id<<"\n";
+    // }
+    while(next_node[tar][is_take][node1] != node1) {
+        node1 = next_node[tar][is_take][node1];
+        cnt++;
+        if(lt(calcuDis(exist_id[is_take][node1], ro_static.pos), mindis))
+            return true;
+        // if(collision_cerr_flag) {
+        //     cerr<<"node"<<node1<<" ddd:"<< calcuDis(exist_id[is_take][node1], ro_static.pos) <<"\n";
+        // }
+    }
 
-//     if(cnt < coll_frame && is_take == 0 && studios[tar].pStatus == 0 && studios[tar].r_time > coll_frame) {
-//         return true;
-//     }
+    if(cnt < coll_frame && is_take == 0 && studios[tar].pStatus == 0 && studios[tar].r_time > coll_frame) {
+        return true;
+    }
 
-//     // if(collision_cerr_flag) {
-//     //     // cerr<<"node2:"<<node2<<"\n";
-//     //     cerr<<"studio state:"<<studios[tar].pStatus<<" "<<studios[tar].r_time<<"\n";
-//     //     cerr<<"###########\n";
-//     // }
+    // if(collision_cerr_flag) {
+    //     // cerr<<"node2:"<<node2<<"\n";
+    //     cerr<<"studio state:"<<studios[tar].pStatus<<" "<<studios[tar].r_time<<"\n";
+    //     cerr<<"###########\n";
+    // }
 
-//     return false;
-// }
+    return false;
+}
 
 bool check_node_safe(int node_id, int is_take_r, double mindis, const Robot &ro) {
     int tar = ro.target_id;
