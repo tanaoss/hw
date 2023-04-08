@@ -379,9 +379,9 @@ double get_at_v_canSet(double t,double a,double v,double v1,int sign_v1);
 double get_at_v_z(double t,double a,double v,int sign_v1);
 bool is_near_tar(int id);
 double anger_to_length(int robot_id,int studio_id);
-vector<pair<double, double>> Calculate_the_trajectory(Robot& rob, int cnt, int tar,  int ctrF=1);
+vector<pair<double, double>> Calculate_the_trajectory(Robot rob, int cnt, int tar,  int ctrF=1);
 PayLoad calPayload_trajectory(Robot rob,int studioID);
-vector<pair<double,double>>Calculate_the_trajectory(Robot& rob,Ins ins, int forward_change, int rotate_change,const vector<pair<double,double>>& tra,int cnt,int tar,double rob_dis,double pre_dis=100);
+vector<pair<double,double>>Calculate_the_trajectory(Robot rob,Ins ins, int forward_change, int rotate_change,const vector<pair<double,double>>& tra,int cnt,int tar,double rob_dis,double pre_dis=100);
 double get_at_stop(double t,double a,double v,int sign_v1);
 Ins contr_one_rob(Robot& robot);
 vector<double>  get_T_limits(Robot& rob);
@@ -453,13 +453,16 @@ PayLoad calPayload_back(Robot robot, pair<double, double> virtual_pos);
 int choose_best_to(Robot &ro, pair<double, double> pos);
 double get_dis(const Robot &ro1, const Robot &ro2);
 int choose_close_node(int is_take, pair<double, double> pos);
-void do_back(int id, pair<double, double> pos);
 bool check_speed(Robot ro_a, Robot ro_b, double mindis);
 bool check_node_illegal(int x, int y);
 bool check_nead_slow_down(const Robot &ro, const Robot &ro_static, double mindis, int coll_frame);
 double get_rotation_stop_time(const Robot &ro, PayLoad pay);
 double get_stop_time(double x, double v0, int sign, double acceleration);
-bool check_node_safe(int node_id, double mindis, const Robot &ro);
+int get_avoid_node(const Robot &ro_back, const Robot &ro_go, double mindis);
+bool check_node_safe(int node_id, int is_take, double mindis, const Robot &ro);
+bool do_avoid(const Robot &ro_stop, const Robot &ro_go, double mindis);
+
+
 bool empty_pos(const Robot& rob);
 
 
@@ -467,7 +470,7 @@ vector<int> get_future_node(int robot_id);
 bool is_need_slow(Robot& robot,pair<double,double> pos,pair<double,double> pos1);
 void adjust_virtual_pos(Robot& robot);
 void adjust_virtual_pos_total(Robot& robot);
-bool check_can_arrival(int istake,int id1,int id2);
+bool check_can_arrival(int istake,int id1,int id2,bool ctr);
 set<int> getEqID(int istake,int id1);
 bool checkEnough(int robot_id, int target_id, int frame);
 void new_robot_action();
@@ -498,4 +501,6 @@ bool check_will_collison_wall(Robot& robot);
 void  select_the_standard_id(Robot& robot);
 void check_suspicious_spots(int studio_id);
 bool  need_to_step_back(const Robot& rob);
-int get_best_pos(const Robot& rob);
+int get_best_pos(Robot& rob);
+bool check_slope_studios(int id1,int id2);
+bool check_barrier(pair<double,double> start,pair<double,double> end,int carry);
