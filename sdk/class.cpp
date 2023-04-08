@@ -63,8 +63,8 @@ int product_time[8];
 // double init_robot_dis[4][50];
 double new_cllo_time = 0;
 int cerr_flag_j=0;
-int start_time=14514;
-int end_time =14516;
+int start_time=-1;
+int end_time =3;
 pair<double ,double> Root;
 pair<double ,double> Collision_point;
 
@@ -117,6 +117,20 @@ void initrobotInfo() {
     }
     ins_set[3].forward = 0;
     ins_set[4].forward = -2;
+
+
+    // int tar1 = 1;
+    // int tar2 = 7;
+    // int is_take1 = 0;
+    // int is_take2 = 1;
+    // int node1 = choose_close_node(1, make_pair(28.27 , 21.19));
+    // int node2 = choose_close_node(1, make_pair(28.53, 22.73));
+    // cerr << "nodeid: " << choose_close_node(1, make_pair(28.53, 22.73)) << "\n";
+    // cerr << dis_to_studios[tar1][is_take1][node1] << "* x:" << dis_to_studios[tar2][is_take2][node2] << "\n";
+    // if (gt(dis_to_studios[tar2][is_take2][node2] - dis_to_studios[tar1][is_take1][node1], 20))
+    // {
+    //     cerr << "change choose x\n";
+    // }
 }
 void init_studio_parameter(){
     int studio_id;
@@ -1256,7 +1270,7 @@ bool check_robots_wait_closest(int robot_id, double dist_robot,int studio_id){
                 dist = dis_to_studios[robots[i].target_id][1][robots[i].node_id];
                 dist += dis_to_studios[studio_id][0][studios[robots[i].target_id].node_id];
             }
-            if(gt(dist,dist_robot))count++;
+            if(lt(dist,dist_robot))count++;
         }
     }
     if(count>0){
@@ -1305,7 +1319,7 @@ void check_suspicious_spots(int studio_id){
             dist2 = dis_to_studios[studio_id][1][x*100+y];
             if(eq(dist2,10000))continue;
             if(lt(dist1,1.5) &&gt(dist2,8)){
-                cerr<<"studio : "<<studio_id<<"dist1 = "<<dist1<<"dist2 = "<<dist2<<" x offset : "<<(x-i)<<" y offset : "<<(y-j)<<endl;
+                // cerr<<"studio : "<<studio_id<<"dist1 = "<<dist1<<"dist2 = "<<dist2<<" x offset : "<<(x-i)<<" y offset : "<<(y-j)<<endl;
                 studios[studio_id].suspicious_spots.push_back(x*100+y);
                 studios[studio_id].has_suspicious_spots = 1;
             }
@@ -1368,7 +1382,7 @@ pair<pair<int,int>,double> new_pick_point(int robot_id,int state_type,int change
                         for(int k=0;k<studios[i].material_studios[j-1].size();k++){
                             material_studio_id = studios[i].material_studios[j-1][k];
                             if(state.FrameID>start_time&&state.FrameID<end_time&&cerr_flag_j){
-                                cerr<<"studio : "<<i<<" material : "<< material_studio_id <<"\n";
+                                cerr<<"studio : "<<i<<" material : "<< material_studio_id <<" r_id = "<<studios[material_studio_id].r_id<<"\n";
                             }
                             if((studios[material_studio_id].pStatus == 1||(studios[material_studio_id].r_time>0)) && studios[material_studio_id].r_id < 50 ){         
                                 income = (price[studios[material_studio_id].type][1]-price[studios[material_studio_id].type][0])* calc_time_factor(material_studio_id,i);
@@ -1391,7 +1405,7 @@ pair<pair<int,int>,double> new_pick_point(int robot_id,int state_type,int change
                                         dist2 = dist-dis_to_studios[material_studio_id][0][robots[studios[material_studio_id].r_id ].node_id];
                                         if(lt(dist2/6/0.02,product_time[studios[material_studio_id].type])){
                                             if(state.FrameID>start_time&&state.FrameID<end_time&&cerr_flag_j){
-                                                cerr<<"ccc "<<endl;
+                                                // cerr<<"ccc "<<endl;
                                             }
                                             continue;
                                         }
@@ -1401,7 +1415,7 @@ pair<pair<int,int>,double> new_pick_point(int robot_id,int state_type,int change
                                     }
                                 }
                                 if(state.FrameID>start_time&&state.FrameID<end_time&&cerr_flag_j){
-                                    cerr<<"ccc "<<endl;
+                                    // cerr<<"ccc "<<endl;
                                 }
                                 if(!check_no_send(material_studio_id))continue;
                                 if(state.FrameID>start_time&&state.FrameID<end_time&&cerr_flag_j){
@@ -1414,6 +1428,9 @@ pair<pair<int,int>,double> new_pick_point(int robot_id,int state_type,int change
                                     //     continue;
                                     // }
                                     if(lt(dist/6/0.02,studios[material_studio_id].r_time)){
+                                        if(state.FrameID>start_time&&state.FrameID<end_time&&cerr_flag_j){
+                                            cerr<<"123 "<<endl;
+                                        }
                                         dist2 = (studios[material_studio_id].r_time-(dist/6/0.02))*0.02*6;
                                         if(!check_robots_wait_closest(robot_id,dist2+5,material_studio_id))continue;
                                         dist += dist2;
@@ -1460,14 +1477,14 @@ pair<pair<int,int>,double> new_pick_point(int robot_id,int state_type,int change
         }
         if(studio_buy == -1 && change_target_flag==0){
             if(state.FrameID>start_time&&state.FrameID<end_time&&cerr_flag_j){
-                cerr<<"eee "<<endl;
+                // cerr<<"eee "<<endl;
             }
             for(int i =0;i<studios.size();i++){
                 if(studios[i].type>3){
                     for(int j = 1;j<=studio_material[studios[i].type-4][0];j++){
-                        if(state.FrameID>start_time&&state.FrameID<end_time&&cerr_flag_j){
-                            cerr<<"studio : "<<i<<"material_type : "<<studio_material[studios[i].type-4][j]<<" material rid : "<<studios_rid[i][studio_material[studios[i].type-4][j]]<<endl;
-                        }
+                        // if(state.FrameID>start_time&&state.FrameID<end_time&&cerr_flag_j){
+                        //     cerr<<"studio : "<<i<<"material_type : "<<studio_material[studios[i].type-4][j]<<" material rid : "<<studios_rid[i][studio_material[studios[i].type-4][j]]<<endl;
+                        // }
                         if(((studios[i].bitSatus & (int)pow(2,studio_material[studios[i].type-4][j])) == 0||(check_material_full(i)&&studios[i].r_time == -1))){
                             for(int k=0;k<studios[i].material_studios[j-1].size();k++){
                                 material_studio_id = studios[i].material_studios[j-1][k];
@@ -1506,24 +1523,24 @@ pair<pair<int,int>,double> new_pick_point(int robot_id,int state_type,int change
                                         if(time>(15000-state.FrameID))continue;
                                     }
                                     if((studios_rid[i][studio_material[studios[i].type-4][j]]!=-1)){
-                                        if(state.FrameID>start_time&&state.FrameID<end_time&&cerr_flag_j){
-                                            cerr<<"aaa "<<endl;
-                                        }
+                                        // if(state.FrameID>start_time&&state.FrameID<end_time&&cerr_flag_j){
+                                        //     cerr<<"aaa "<<endl;
+                                        // }
                                         if(!check_material_consumption(i,dist))continue;
-                                        if(state.FrameID>start_time&&state.FrameID<end_time&&cerr_flag_j){
-                                            cerr<<"bbb "<<endl;
-                                        }
+                                        // if(state.FrameID>start_time&&state.FrameID<end_time&&cerr_flag_j){
+                                        //     cerr<<"bbb "<<endl;
+                                        // }
                                         if(check_double_choose(robot_id,i,material_studio_id))continue;
-                                        if(state.FrameID>start_time&&state.FrameID<end_time&&cerr_flag_j){
-                                            cerr<<"ccc "<<endl;
-                                        }
+                                        // if(state.FrameID>start_time&&state.FrameID<end_time&&cerr_flag_j){
+                                        //     cerr<<"ccc "<<endl;
+                                        // }
                                     }
                                     income_ratio = (income/dist);
-                                    if(state.FrameID>=start_time &&state.FrameID< end_time &&cerr_flag_j){
-                                        cerr<<"走的目标-1\n";
-                                        cerr<<"to buy dist = "<< dis_to_studios[material_studio_id][0][robots[robot_id].node_id]<<" to send dist = "<<dis_to_studios[i][1][studios[material_studio_id].node_id]<<"\n";
-                                        cerr<< "robot : "<<robot_id<<" buy : "<<material_studio_id<<" type : "<<studios[material_studio_id].type<<" send : "<<i<<" type : "<< studios[i].type<<" income_ratio : "<<income_ratio<<" income = "<<income<<" dist = "<<dist<<"\n";
-                                    }
+                                    // if(state.FrameID>=start_time &&state.FrameID< end_time &&cerr_flag_j){
+                                    //     cerr<<"走的目标-1\n";
+                                    //     cerr<<"to buy dist = "<< dis_to_studios[material_studio_id][0][robots[robot_id].node_id]<<" to send dist = "<<dis_to_studios[i][1][studios[material_studio_id].node_id]<<"\n";
+                                    //     cerr<< "robot : "<<robot_id<<" buy : "<<material_studio_id<<" type : "<<studios[material_studio_id].type<<" send : "<<i<<" type : "<< studios[i].type<<" income_ratio : "<<income_ratio<<" income = "<<income<<" dist = "<<dist<<"\n";
+                                    // }
                                     if(gt(income_ratio,max)){
                                         max = income_ratio;
                                         studio_buy = material_studio_id;
@@ -4431,7 +4448,7 @@ double get_dis(const Robot &ro1, const Robot &ro2) {
 
 int choose_close_node(int is_take, pair<double, double> pos) {
     int close_node = -1;
-    double dis, tmp;
+    double dis, tmp, dis_to_tar;
     int node_id = trans_pos_to_nodeID(pos);
     dis = 10000;
     // cerr<<node_id<<":";
@@ -6557,6 +6574,13 @@ int get_best_pos(const Robot& robot){
                 cmpDis=dis_to_studios[tar][istake][tmpID];
             }
         }
+    }
+    if(chose_id!=robot.cnt_tar&&robot.id==1){
+        cerr<<"time "<<state.FrameID<<endl;
+        cerr<<"机器人："<<robot.id<<"更新了最优点：";
+        printPair(trans_nodeID_to_pos(robot.close_node));
+        cerr<<"机器人："<<robot.id<<"原来的目标：";
+        printPair(trans_nodeID_to_pos(robot.cnt_tar));
     }
     return choseId;
 }
