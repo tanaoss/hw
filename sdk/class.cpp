@@ -3510,11 +3510,11 @@ Ins contr_one_rob_1(Robot& robot){
         return ins_t;
     }
     bool print_cerr_flag_ta1=false;
-    if( state.FrameID>1182&&state.FrameID<1482){
-        // cerr<<robot.need_adjust_statues<<" rob "<<robot.id<<endl;
-        print_cerr_flag_ta1=true;
-        print_rob_id=0;
-    }
+    // if( state.FrameID>1182&&state.FrameID<1482){
+    //     // cerr<<robot.need_adjust_statues<<" rob "<<robot.id<<endl;
+    //     print_cerr_flag_ta1=true;
+    //     print_rob_id=0;
+    // }
     adjust_virtual_pos_total(robot);
     PayLoad payload=calPayload(robot,robot.virtual_pos);
     auto p1=get_w_now(robot,payload);
@@ -3604,7 +3604,7 @@ Ins contr_one_rob_1(Robot& robot){
     if(lt(payload.distance,1)){
         ins_t.forward=2;
     }else if(lt(payload.distance,0.5)){
-        if(ret_next(robot,robot.cnt_tar)==-1 ){
+        if(ret_next(robot,robot.cnt_tar)==-1&& studios[robot.target_id].r_time>=50){
             ins_t.forward=0.5;
         }else{
             ins_t.forward=2;
@@ -3821,7 +3821,11 @@ Ins contr_one_rob_0(Robot& robot){
     double change=0.2*(state.FrameID/2==0?-1:1);
     ins_t.forward=lt(payload.distance,1.5)?3:6;
     if(lt(payload.distance,1)){
-        ins_t.forward=3;
+        if(studios[robot.target_id].r_time>=50)
+            ins_t.forward=3;
+        else if(studios[robot.target_id].r_time<50){
+            ins_t.forward=1;
+        }
     }else if(lt(payload.distance,0.5)){
         if(ret_next(robot,robot.cnt_tar)==-1 ){
             ins_t.forward=0.5;
@@ -6328,7 +6332,7 @@ void adjust_virtual_pos_total(Robot& rob){
 }
 
 bool check_can_arrival(int istake,int id1,int id2,bool ctr){
-    if(!ctr)return check_slope_studios(id1,id2);
+    // if(!ctr)return check_slope_studios(id1,id2);
     if(illegal_point[istake][id1]||illegal_point[istake][id2]){
         return false;
     }
@@ -6860,7 +6864,7 @@ void get_point_type(){
                     if(i1<0||j1<0||i1>99 ||j1>99|| (i==i1&&j==j1) )continue;
                     int tmpID=i1*100+j1;
                 
-                    if(need_ad1&&illegal_point[0][id]&&exist_id[0].count(tmpID)
+                    if(need_ad1&&illegal_point[0][id]&&exist_id[0].count(tmpID)&&!illegal_point[0][tmpID]
                     ){
                         con1=true;
                         exist_id[0][id]=exist_id[0][tmpID];
@@ -6870,7 +6874,7 @@ void get_point_type(){
                         }
                 
                     }
-                    if(need_ad2&&illegal_point[1][id]&&exist_id[1].count(tmpID)){
+                    if(need_ad2&&illegal_point[1][id]&&exist_id[1].count(tmpID)&&!illegal_point[1][tmpID]){
                         exist_id[1][id]=exist_id[1][tmpID];
                     }
                 }
