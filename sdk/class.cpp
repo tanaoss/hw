@@ -76,7 +76,7 @@ unordered_map<int,vector<Graph_node>> graph_edge[2];//点id的边集
 unordered_map<int,pair<double,double>> exist_id[2];//确定存在的id，便于建立边关系
 unordered_map<int,int> exist_id_type[2];//确定存在的点的关系
 unordered_map<int,int> stu_transID;//建立工作台id与转换后id的关系
-unordered_map<int,int> rob_transID;//建立机器人id与转换后id的关系
+
 unordered_map<int,bool> can_arrival[2];//判断任意两个小格之间是否可以直达;
 unordered_map<int,bool> illegal_point[2];//判断是否是非法点
 unordered_map<int,bool> dangerous_point[2];//判断是否是危险点
@@ -312,8 +312,6 @@ bool readMapUntilOK() {
                 pair<double,double>xy_pos_robot(0,0);
                 // cout<<x<<" "<<y<<"\n";
                 Robot  robot(count_robot,0,0,0,1,1,xy_pos_robot,0,pos_robot,-1, (99-row)*100+i);
-                rob_transID[(99-row)*100+i] = count_robot;
-                stu_transID[(99-row)*100+i] = -1;
                 robot.pane_id = train.id;
                 robots.push_back(robot);
                 count_robot++;
@@ -3349,8 +3347,10 @@ Ins contr_one_rob_0(Robot& robot){
     adjust_virtual_pos_total(robot);
 
 
-    // if( state.FrameID>13372&&robot.id==1){
-    //     cerr<<robot.need_adjust_statues<<" rob "<<robot.id<<endl;
+    // if( state.FrameID>3200&&state.FrameID<3600){
+    //     // cerr<<robot.need_adjust_statues<<" rob "<<robot.id<<endl;
+    //     print_cerr_flag_ta1=true;
+    //     print_rob_id=0;
     // }
 
     PayLoad payload=calPayload(robot,robot.virtual_pos);
@@ -3512,29 +3512,29 @@ if(state.FrameID>13000)print_cerr_flag_ta=true;
         // }
     // }
 // print_cerr_flag_ta=true;
-//    if(state.FrameID>=13466&&state.FrameID<=16600&&robot.id==1){
-//     cerr<<"robot.id "<<robot.id<<endl;
-//     cerr<<" FrameID "<< state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
-//     cerr<<"forward: "<<ins_t.forward<<endl;
-//     cerr<<"angle "<<payload.angle<<endl;
-//     cerr<<"dis "<<payload.distance<<endl;
-//     cerr<<robot.isVir<<endl;
-//     cerr<<"rob node_id"<<robot.close_node<<endl;
-//     cerr<<" robot.cnt_tar "<<robot.cnt_tar<<endl;
-//     cerr<<" robot.virtual_id "<<robot.virtual_id<<endl;
-//     cerr<<"next tar "<<next_tar<<" "<<dangerous_nums[istake][next_tar]<<endl;
-//     cerr<<dangerous_nums[0][robot .node_id]<<endl;
-//     cerr<<dangerous_nums[0][robot.cnt_tar]<<endl;
-//     cerr<<dangerous_nums[0][next_tar]<<endl;
-//     printPair(robot.pos);
-//     printPair(robot.virtual_pos);
-//     cerr<<"合法？："<<robot.is_illegal <<endl;
-//     cerr<<p1.second<<endl;
-//     cerr<<"可以到达？"<<check_can_arrival(istake,robot.close_node,robot.cnt_tar)<<" "<<robot.virtual_id<<endl;
-//     cerr<<" robot.cnt_tar "<<robot.cnt_tar<<endl;
-//     cerr<<robot.is_new_tar_ing<<endl;
-//     cerr<<ins_t.forward<<endl;
-//    }
+   if(robot.id==print_rob_id&&print_cerr_flag_ta1){
+    cerr<<"robot.id "<<robot.id<<endl;
+    cerr<<" FrameID "<< state.FrameID<<" "<<robot.virtual_pos.first<<"-"<<robot.virtual_pos.second<<endl;
+    cerr<<"forward: "<<ins_t.forward<<endl;
+    cerr<<"angle "<<payload.angle<<endl;
+    cerr<<"dis "<<payload.distance<<endl;
+    cerr<<robot.isVir<<endl;
+    cerr<<"rob node_id"<<robot.close_node<<endl;
+    cerr<<" robot.cnt_tar "<<robot.cnt_tar<<endl;
+    cerr<<" robot.virtual_id "<<robot.virtual_id<<endl;
+    cerr<<"next tar "<<next_tar<<" "<<dangerous_nums[istake][next_tar]<<endl;
+    cerr<<dangerous_nums[0][robot .node_id]<<endl;
+    cerr<<dangerous_nums[0][robot.cnt_tar]<<endl;
+    cerr<<dangerous_nums[0][next_tar]<<endl;
+    printPair(robot.pos);
+    printPair(robot.virtual_pos);
+    cerr<<"合法？："<<robot.is_illegal <<endl;
+    cerr<<p1.second<<endl;
+    cerr<<"可以到达？"<<check_can_arrival(istake,robot.close_node,robot.cnt_tar)<<" "<<robot.virtual_id<<endl;
+    cerr<<" robot.cnt_tar "<<robot.cnt_tar<<endl;
+    cerr<<robot.is_new_tar_ing<<endl;
+    cerr<<ins_t.forward<<endl;
+   }
      
     return ins_t;
 }
@@ -5244,21 +5244,20 @@ void Translation_graph_no(){
                 exist_id[0][id]=pos;
                 for(int t=0;t<studios.size();t++){
                     double tmpDis=calcuDis(studios[t].pos,pos);
-                    if(le(tmpDis,0.5)&&id!=studios[t].node_id){
+                    int id1=studios[t].node_id;
+                    int i1=id1/100,j1=id1%100;
+                    bool isSlope=  (fabs(i1-i)+fabs(j1-j)==2)?true:false;
+                    bool con1= isSlope?check_slope(id,id1):true;
+                    if((isSlope&&le(tmpDis,0.71) ||le(tmpDis,0.5))&&id!=studios[t].node_id&&con1){
+                    //     if((id==5359&&studios[t].node_id==5458)||(studios[t].node_id==5359&&id==5458))
+                    // cerr<<"edge err -----------"<<endl;
                         double dis= (abs(i-(studios[t].node_id/100))+abs(j-(studios[t].node_id%100))==2)?pow(2,0.5):1;
                         graph_edge[0][id].push_back(Graph_node(studios[t].node_id,dis,id));
                         graph_edge[0][studios[t].node_id].push_back(Graph_node(id,dis,studios[t].node_id));
                         // if(t==0)cerr<<graph_edge[0][studios[t].node_id].size()<<"\n";
                     }
                 }
-                for(int t=0;t<4;t++){
-                    double tmpDis=calcuDis(robots[t].pos,pos);
-                    if(le(tmpDis,0.4)&&id!=robots[t].node_id){
-                        double dis= (abs(i-(robots[t].node_id/100))+abs(j-(robots[t].node_id%100))==2)?pow(2,0.5):1;
-                        graph_edge[0][id].push_back(Graph_node(robots[t].node_id,dis,id));
-                        graph_edge[0][robots[t].node_id].push_back(Graph_node(id,dis,robots[t].node_id));
-                    }
-                }
+        
             }
         }
     }
@@ -5274,20 +5273,17 @@ void Translation_graph_has(){
                 exist_id[1][id]=tmp.second;
                 for(int t=0;t<studios.size();t++){
                     double tmpDis=calcuDis(studios[t].pos,pos);
-                    if(((le(tmpDis,0.71)&&tmp.first==1)||le(tmpDis,0.4))&&id!=studios[t].node_id){
+                    int id1=studios[t].node_id;
+                    int i1=id1/100,j1=id1%100;
+                    bool isSlope=  (fabs(i1-i)+fabs(j1-j)==2)?true:false;
+                    bool con1= isSlope?check_slope(id,id1):true;
+                    if(((le(tmpDis,0.71)&&tmp.first==1)||le(tmpDis,0.4))&&id!=studios[t].node_id&&con1){
                         double dis= (abs(i-(studios[t].node_id/100))+abs(j-(studios[t].node_id%100))==2)?pow(2,0.5):1;
                         graph_edge[1][id].push_back(Graph_node(studios[t].node_id,dis,id));
                         graph_edge[1][studios[t].node_id].push_back(Graph_node(id,dis,studios[t].node_id));
                     }
                 }
-                for(int t=0;t<4;t++){
-                    double tmpDis=calcuDis(robots[t].pos,pos);
-                    if(((le(tmpDis,0.71)&&tmp.first==1)||le(tmpDis,0.4))&&id!=robots[t].node_id){
-                        double dis= (abs(i-(robots[t].node_id/100))+abs(j-(robots[t].node_id%100))==2)?pow(2,0.5):1;
-                        graph_edge[1][id].push_back(Graph_node(robots[t].node_id,dis,id));
-                        graph_edge[1][robots[t].node_id].push_back(Graph_node(id,dis,robots[t].node_id));
-                    }
-                }
+           
             }
         }
     }    
@@ -5298,6 +5294,7 @@ void getEdgeRalative(){
         int idj=it.first-idi*100;
         for(int i=idi-1;i<=idi+1;i++){
             for(int j=idj-1;j<=idj+1;j++){
+                if(i<0||j<0||i>99||j>99)continue;
                 if(i==idi&&j==idj)continue;
                 int tmpId=i*100+j;
                 int ckeck_id=idi*100+j;
@@ -5317,6 +5314,8 @@ void getEdgeRalative(){
                 int SlopeCheckId2=i*100+idj;
                 //不带货物时，不考虑是否在墙角。
                 if(exist_id[0].count(tmpId)&&check_slope(tmpId,it.first) &&it.first!=tmpId){
+                    // if((tmpId==5359&&it.first==5458)||(it.first==5359&&tmpId==5458))
+                    // cerr<<"edge err -----------"<<endl;
                     double dis= (abs(i-idi)+abs(j-idj)==2)?pow(2,0.5):1;
                     graph_edge[0][it.first].push_back(Graph_node(tmpId,dis,it.first));
                 }
@@ -5328,6 +5327,7 @@ void getEdgeRalative(){
         int idj=it.first-idi*100;
         for(int i=idi-1;i<=idi+1;i++){
             for(int j=idj-1;j<=idj+1;j++){
+                if(i<0||j<0||i>99||j>99)continue;
                 if(i==idi&&j==idj)continue;
                 int tmpId=i*100+j;
                 if(is_corner(it.first)||is_corner(tmpId)){
@@ -5562,6 +5562,8 @@ void init_data(){
             sum_matrix[1][i][j]=(i-1>=0?sum_matrix[1][i-1][j]:0)+ (exist_id[1].count(id));
         }
     }
+    // cerr<<exist_id[0].count(5358)<<"-"<<exist_id[0].count(5458)<<"-"<<exist_id[0].count(5459)<<"-"<<exist_id[0].count(5359)<<endl;
+    // cerr<<check_slope(5359,5458)<<endl;
     get_point_type();
     for(int i=0;i<studios.size();i++){
         int id=studios[i].node_id;
@@ -6396,7 +6398,7 @@ void get_point_type(){
                 dangerous_nums[0][id]+=(illegal_point[0][id-1]?1:0)+(illegal_point[0][id+1]?1:0);
                 dangerous_nums[1][id]+=(illegal_point[1][id-1]?1:0)+(illegal_point[1][id+1]?1:0);
             }
-            if(id==6379)cerr<<dangerous_nums[0][id]<<endl;
+            // if(id==6379)cerr<<dangerous_nums[0][id]<<endl;
             int con1=false,con2=false;
             for(int i1=i-1;i1<=i+1;i1++){
                 bool need_ad1=true;
