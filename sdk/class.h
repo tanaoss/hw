@@ -293,6 +293,7 @@ struct cmp_Graph_node
     }
 };
 
+void mock_fram_skip();
 
 struct Line { pair<double, double>  P; pair<double, double> v; };      // 直线（点向式）
 bool eq(double a, double b);// ==
