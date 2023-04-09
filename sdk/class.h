@@ -505,3 +505,4 @@ bool  need_to_step_back(const Robot& rob);
 int get_best_pos(Robot& rob);
 bool check_slope_studios(int id1,int id2);
 bool check_barrier(pair<double,double> start,pair<double,double> end,int carry);
+int return_best_virid(Robot& rob);

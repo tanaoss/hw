@@ -7082,3 +7082,26 @@ bool check_slope_studios(int id1,int id2){
     }
     return true;
 }
+int return_best_virid(Robot& rob){
+    int istake=rob.get_type==0?0:1;
+    if(! illegal_point[istake][rob.virtual_id])return rob.virtual_id;
+    int now_id=rob.close_node;
+    int i=rob.virtual_id/100,j=rob.virtual_id%100;
+    int bestId=rob.virtual_id;
+    double cmpDis=dis_to_studios[rob.target_id][istake][rob.virtual_id];
+    for(int i1=i-1;i1<=i+1;i1++){
+        for(int j1=j1-1;j1<=j+1;j++){
+            if(i1<0||j1<0||i1>99||j1>99){
+                continue;
+            }
+            int tmpID=i1*100+j1;
+            if(!illegal_point[istake][tmpID]){
+                if(lt(dis_to_studios[rob.target_id][istake][tmpID],cmpDis)){
+                    cmpDis=dis_to_studios[rob.target_id][istake][tmpID];
+                    bestId=tmpID;
+                }
+            }
+        }
+    }
+    return bestId;
+}
