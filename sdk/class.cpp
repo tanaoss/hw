@@ -1859,8 +1859,15 @@ bool check_robots_change_closest(int robot_id, pair<pair<int,int>,double>temp){
 
 void charge_target(int robot_id){
     int i =robot_id;
+    int flag = 0;
     pair<pair<int,int>,double>temp;
     if(robots[i].real_get_type==0){
+        if (studios[robots[i].target_id].r_id >= 50)
+            studios[robots[i].target_id].r_id -= 50;
+        else
+            studios[robots[i].target_id].r_id = -1;
+        if(studios[robots[i].target_id_send].type!=8&&studios[robots[i].target_id_send].type!=9)studios_rid[robots[i].target_id_send][studios[robots[i].target_id_buy].type] = -1;
+        robot_get_type[studios[robots[i].target_id].type]--;
         temp=new_pick_point(i,2,1);
         if(temp.first.first != -1){
             double income = (price[studios[robots[i].target_id_buy].type][1]-price[studios[robots[i].target_id_buy].type][0])* calc_time_factor(temp.first.first,temp.first.second);
@@ -1869,16 +1876,22 @@ void charge_target(int robot_id){
             double income_ratio =  income/(dis_to_studios[robots[i].target_id_buy][0][robots[i].close_node]+dis_to_studios[robots[i].target_id_send][1][studios[robots[i].target_id_buy].node_id]);
             if(lt(income_ratio+15,temp.second)&&temp.first.second != robots[i].target_id_buy){
                 // cerr<<" robot : "<<i<<" change_target_id "<<"from "<<robots[i].target_id_buy<<" - "<<robots[i].target_id_send<<" to "<<temp.first.first<<" - "<<temp.first.second<<" income = "<<income_ratio<<" after change income = "<<temp.second<<"\n";
-                if(check_robots_change_closest(robot_id,temp)){
-                    if (studios[robots[i].target_id].r_id >= 50)
-                        studios[robots[i].target_id].r_id -= 50;
-                    else
-                        studios[robots[i].target_id].r_id = -1;
-                    if(studios[robots[i].target_id_send].type!=8&&studios[robots[i].target_id_send].type!=9)studios_rid[robots[i].target_id_send][studios[robots[i].target_id_buy].type] = -1;
-                    robot_get_type[studios[robots[i].target_id].type]--;
+                if(check_robots_change_closest(i,temp)){
+                    flag = 1;
                     change_status(i,temp);
                     robots[i].cnt_tar=robots[i].node_id;
                 }
+            }
+        }
+        if(flag == 0){
+            if (studios[robots[i].target_id].r_id != -1 && studios[robots[i].target_id].r_id != i)
+                studios[robots[i].target_id].r_id += 50;
+            else
+                studios[robots[i].target_id].r_id = i;
+            robot_get_type[studios[robots[i].target_id].type]++;
+            // cerr<<" studio_rid : "<<robots[robot_id].target_id_send<<" - "<<studios[robots[robot_id].target_id_buy].type<<"\n";
+            if(studios[robots[i].target_id_send].type!=8&&studios[robots[i].target_id_send].type!=9 &&studios_rid[robots[i].target_id_send][studios[robots[i].target_id_buy].type]==-1){
+                studios_rid[robots[i].target_id_send][studios[robots[i].target_id_buy].type] = i;
             }
         }
     }
