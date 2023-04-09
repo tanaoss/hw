@@ -4588,7 +4588,7 @@ int get_avoid_node(const Robot &ro_back, const Robot &ro_go, double mindis, cons
     unordered_map<int, double> angle_node;
     bool cerr_flag = false;
 
-    if(state.FrameID == 7590) cerr_flag = true;
+    if(state.FrameID == 5779 && collision_cerr_flag) cerr_flag = true;
     
 
     is_take = (ro_back.get_type != 0);
@@ -4874,7 +4874,7 @@ bool check_node_safe(pair<double,double> pos, double mindis, const Robot &ro, co
 
     dis = calcuDis(pos, ro.pos);
     if(le(dis, mindis))
-            return false;
+        return false;
 
     while(next_node[tar][is_take][node1] != -1) {
         pre_dis = dis;
