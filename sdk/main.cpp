@@ -70,7 +70,7 @@ int main()
     }
     
     // cerr<<studios[10].node_id<<endl;
-    // print_dijkstra(5, 0, 0);
+    // print_dijkstra(12, 0, 1);
     // cerr<<"\n";
     // print_dijkstra(7, 1, 0);
     
@@ -130,9 +130,9 @@ int main()
         // if(state.FrameID == 6653)cerr<<"56"<<endl;
         count++;
 
-        // if(state.FrameID >= 13200 && state.FrameID < 13300) {
+        // if(state.FrameID >= 6502 && state.FrameID < 6506) {
         //     cerr<<" time "<<state.FrameID<<endl;
-        //     for(int i = 0; i < 1; ++i) {
+        //     for(int i = 1; i < 2; ++i) {
         //         cerr<<i<<"-target:"<<robots[i].target_id<<" type:"<<studios[robots[i].target_id].type<<endl;
         //     }
         // }
