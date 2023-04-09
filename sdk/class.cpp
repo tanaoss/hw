@@ -4601,7 +4601,7 @@ int get_avoid_node(const Robot &ro_back, const Robot &ro_go, double mindis, cons
     unordered_map<int, double> angle_node;
     bool cerr_flag = false;
 
-    if(state.FrameID == 7590) cerr_flag = true;
+    if(state.FrameID == 5779 && collision_cerr_flag) cerr_flag = true;
     
 
     is_take = (ro_back.get_type != 0);
@@ -4887,7 +4887,7 @@ bool check_node_safe(pair<double,double> pos, double mindis, const Robot &ro, co
 
     dis = calcuDis(pos, ro.pos);
     if(le(dis, mindis))
-            return false;
+        return false;
 
     while(next_node[tar][is_take][node1] != -1) {
         pre_dis = dis;
@@ -7155,4 +7155,27 @@ bool check_slope_studios(int id1,int id2){
         }
     }
     return true;
+}
+int return_best_virid(Robot& rob){
+    int istake=rob.get_type==0?0:1;
+    if(! illegal_point[istake][rob.virtual_id])return rob.virtual_id;
+    int now_id=rob.close_node;
+    int i=rob.virtual_id/100,j=rob.virtual_id%100;
+    int bestId=rob.virtual_id;
+    double cmpDis=dis_to_studios[rob.target_id][istake][rob.virtual_id];
+    for(int i1=i-1;i1<=i+1;i1++){
+        for(int j1=j1-1;j1<=j+1;j++){
+            if(i1<0||j1<0||i1>99||j1>99){
+                continue;
+            }
+            int tmpID=i1*100+j1;
+            if(!illegal_point[istake][tmpID]){
+                if(lt(dis_to_studios[rob.target_id][istake][tmpID],cmpDis)){
+                    cmpDis=dis_to_studios[rob.target_id][istake][tmpID];
+                    bestId=tmpID;
+                }
+            }
+        }
+    }
+    return bestId;
 }
