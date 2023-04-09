@@ -383,6 +383,7 @@ double anger_to_length(int robot_id,int studio_id);
 vector<pair<double, double>> Calculate_the_trajectory(Robot rob, int cnt, int tar,  int ctrF=1);
 PayLoad calPayload_trajectory(Robot rob,int studioID);
 vector<pair<double,double>>Calculate_the_trajectory(Robot rob,Ins ins, int forward_change, int rotate_change,const vector<pair<double,double>>& tra,int cnt,int tar,double rob_dis,double pre_dis=100);
+vector<pair<double,double>>Calculate_the_trajectory_special(Robot rob,Ins ins, int tar);
 double get_at_stop(double t,double a,double v,int sign_v1);
 Ins contr_one_rob(Robot& robot);
 vector<double>  get_T_limits(Robot& rob);

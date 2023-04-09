@@ -1877,6 +1877,9 @@ void charge_target(int robot_id){
             if(lt(income_ratio+15,temp.second)&&temp.first.second != robots[i].target_id_buy){
                 // cerr<<" robot : "<<i<<" change_target_id "<<"from "<<robots[i].target_id_buy<<" - "<<robots[i].target_id_send<<" to "<<temp.first.first<<" - "<<temp.first.second<<" income = "<<income_ratio<<" after change income = "<<temp.second<<"\n";
                 if(check_robots_change_closest(i,temp)){
+                    // if(state.FrameID>8000&&state.FrameID<8083&&i==1){
+                    //     cerr<<"aaaa"<<temp.first.first<<' '<<temp.first.second<<' '<<temp.second<<endl;
+                    // }
                     flag = 1;
                     change_status(i,temp);
                     robots[i].cnt_tar=robots[i].node_id;
@@ -3353,6 +3356,61 @@ bool checkNearBar(const pair<double,double> &a, double radius){
 //     }
 //     return res;
 // }
+vector<pair<double,double>>Calculate_the_trajectory_special(Robot rob,Ins ins, int tar){
+    double t=0.02;
+    vector<pair<double,double>> res;
+    res.push_back(rob.pos);
+    for(int i=0;(i<=tar);i++){
+        PayLoad pay=calPayload(rob,rob.virtual_pos);
+        double w_next=ins.rotate;
+        double v_next=ins.forward;
+        double seta=rob.direction;
+        double w=rob.angular_velocity;
+        double a=return_ac(pay.angular_acceleration,rob.angular_velocity,w_next);
+        double changeAngle=get_at_v_limt(t,pay.angular_acceleration,rob.angular_velocity,w_next,pay.sign)*pay.sign;
+        double v=Calculate_the_projection_speed(rob);
+        double a_v=return_ac(pay.acceleration,v,v_next);
+        rob.pos.first=rob.pos.first+v*cos(seta+changeAngle/2)*t;
+        rob.pos.second=rob.pos.second+v*sin(seta+changeAngle/2)*t;
+        int sign1=ge((rob.angular_velocity+a*t)*w_next,0)?1:-1;
+        int sign2=ge((rob.angular_velocity+a*t),0)?1:-1;
+        double limit_w=0.0;
+        if(lt(a,0)){
+            limit_w=lt(rob.angular_velocity+a*t,w_next)?w_next:rob.angular_velocity+a*t;
+        }else{
+            limit_w=gt(rob.angular_velocity+a*t,w_next)?w_next:rob.angular_velocity+a*t;
+        }
+        rob.angular_velocity=limit_w;
+    
+        // if(state.FrameID==1)cerr<<cnt-1<<" "<<changeAngle<<" "<<rob.direction<<"\n";
+        // rob.xy_pos=return_change_v(w,changeAngle*pay.sign,rob.xy_pos);
+        int signv_1=ge((v+a_v*t)*v_next,0)?1:-1;
+        int signv_2=ge((v+a_v*t),0)?1:-1;
+        double limit_v=gt(fabs(v+a_v*t),fabs(6))?6*sign2:v+a_v*t;
+        if(lt(a_v,0)){
+            limit_v=lt(v+a_v*t,v_next)?v_next:v+a_v*t;
+        }else{
+            limit_v=gt(v+a_v*t,v_next)?v_next:v+a_v*t;
+        }
+        v=limit_v;
+        double xy_angle=get_Angle_xy(rob);
+        rob.xy_pos.first=v*cos(xy_angle);
+        rob.xy_pos.second=v*sin(xy_angle);
+        double xy_angle_next=get_Angle_xy(rob);
+        double cal_angle=xy_angle_next-xy_angle;
+        vector<vector<double>>mat(4,vector<double>(4,0));
+        cal_matrix(mat,changeAngle,cal_angle);
+        rob.direction+=changeAngle;
+        rob.direction=rob.direction>Pi?rob.direction-2*Pi:rob.direction; 
+        // if(rob.direction>Pi)changeAngle=2*Pi-changeAngle;
+        double t1=rob.xy_pos.first,t2=rob.xy_pos.second;
+        rob.xy_pos.first=(t1*mat[0][0]+t2*mat[0][1]);
+        rob.xy_pos.second=(t1*mat[1][0]+t2*mat[1][1]);
+        res.push_back(rob.pos);
+    }
+    
+    return res;    
+}
 vector<pair<double,double>>Calculate_the_trajectory(Robot rob,Ins ins_in, int forward_change, int rotate_change,const vector<pair<double,double>>&  tra,int cnt,int tar,double rob_dis,double pre_dis){
     //Calculate_the_trajectory_2
     // if(state.FrameID==4330&&state.FrameID==4330&&rob.id==0){
@@ -4385,7 +4443,7 @@ void collision_solve(int frame){
                     cerr<<"change choose x\n";
                     cerr<<dis_to_studios[tar1][is_take1][node1]<<"* x:"<<dis_to_studios[tar2][is_take2][node2]<<"\n";
                 }
-                vis[choose_id] = 0;
+                vis[choose_id] = 1;
                 tmp = x;
                 x = choose_id;
                 choose_id = tmp;
