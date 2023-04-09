@@ -705,9 +705,9 @@ PayLoad calPayload(Robot robot, pair<double, double> virtual_pos) {
     double acceleration = robot.get_type == 0? acceleration_no: acceleration_has;
     double speed = calVectorSize(robot.xy_pos) * (ge(calVectorProduct(robot.xy_pos, transformVector(robot.direction)), 0.0)? 1: -1);
 
-    if(robot.target_id == -1) {
-        return PayLoad((robot.get_type == 0? 0.45: 0.53), 0, 0, 0, 0, speed, 0);
-    }
+    // if(robot.target_id == -1) {
+    //     return PayLoad((robot.get_type == 0? 0.45: 0.53), 0, 0, 0, 0, speed, 0);
+    // }
 
     // 计算机器人与目标点构成的向量与x轴正方向夹角
     pair<double, double> robotToStudio = subVector(virtual_pos, robot.pos);
@@ -4385,7 +4385,7 @@ void collision_solve(int frame){
                     cerr<<"change choose x\n";
                     cerr<<dis_to_studios[tar1][is_take1][node1]<<"* x:"<<dis_to_studios[tar2][is_take2][node2]<<"\n";
                 }
-                vis[choose_id] = 0;
+                vis[choose_id] = 1;
                 tmp = x;
                 x = choose_id;
                 choose_id = tmp;
@@ -6447,7 +6447,7 @@ void adjust_virtual_pos_total(Robot& rob){
         setVirPos(rob);
     }
     // print_cerr_flag_ta=true;
-    adjust_virtual_pos(rob);
+    // adjust_virtual_pos(rob);
 }
 
 bool check_can_arrival(int istake,int id1,int id2,bool ctr){
